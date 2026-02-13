@@ -46,6 +46,7 @@ const RealtimeActionsSlice = createSlice({
 
     TransactionAssignedByTreasury: null,
     TreasurySpotRatesFeed: null,
+    CurrencyCrossesRatesFeed: null,
     CounterPartySpotRates: null,
     CategorySpotRates: null,
     CategoryForwardRates: null,
@@ -134,8 +135,13 @@ const RealtimeActionsSlice = createSlice({
       state.CounterPartySpotRates = payload;
     },
     setTreasurySpotRatesFeed: (state, { payload }) => {
-      if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
-        state.TreasurySpotRatesFeed = payload;
+      // if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
+      state.TreasurySpotRatesFeed = payload;
+      // }
+    },
+    setCurrencyCrossesRatesFeed: (state, { payload }) => {
+      if (!isEqual(state.CurrencyCrossesRatesFeed, payload)) {
+        state.CurrencyCrossesRatesFeed = payload;
       }
     },
     setDealBoxData(state, { payload }) {
@@ -301,6 +307,7 @@ export const {
   clearCategoryForwardClearRates,
   clearCategorySpotClearRates,
   setTresmarkCrossPremiumRates,
+  setCurrencyCrossesRatesFeed,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

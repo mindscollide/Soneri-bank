@@ -15,6 +15,7 @@ import {
 } from "../../store/actions/WatchlistAction";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setDealerValue } from "../../store/slicers/watchListSlicer/WatchListSlicer";
 // import LiveRates from "../../shareComponents/commonComponents/liveRates";
 
 const LiveRates = lazy(() =>
@@ -51,11 +52,16 @@ const Dealer = () => {
   const handleChangeDealer = (event) => {
     console.log(event, "handleChangeDealer");
     let Data = { DealerId: event.value };
+    let obj = {
+      value: event.value,
+      label: event.label,
+    };
+    dispatch(setDealerValue(obj));
     setSelectedDealer(event);
     dispatch(GetBankSpotForDealerApi({ navigate, Data }));
-    dispatch(GetCurrencyCrossesApi({ navigate, Data }));
-    // dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
-    // dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+    dispatch(GetCurrencyCrossesApi({ navigate }));
+    dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+    dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
   };
 
   useEffect(() => {
@@ -76,11 +82,16 @@ const Dealer = () => {
           if (mappedDealers.length > 0) {
             let Data = { DealerId: mappedDealers[0].value };
             dispatch(GetBankSpotForDealerApi({ navigate, Data }));
-            dispatch(GetCurrencyCrossesApi({ navigate, Data }));
-            // dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
-            // dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+            dispatch(GetCurrencyCrossesApi({ navigate }));
+            dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+            dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
             setSelectedDealer(mappedDealers[0]);
             setDealerOptions(mappedDealers);
+            let obj = {
+              value: mappedDealers[0].value,
+              label: mappedDealers[0].label,
+            };
+            dispatch(setDealerValue(obj));
           }
         }
       } catch (error) {

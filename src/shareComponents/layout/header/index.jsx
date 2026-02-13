@@ -35,7 +35,7 @@ const MainHeader = () => {
                 </Nav.Link>
 
                 <Nav.Link
-                  // as={Link}
+                  as={Link}
                   className={
                     location.pathname
                       .toLowerCase()
@@ -61,7 +61,7 @@ const MainHeader = () => {
                   Management
                 </Nav.Link>
                 <Nav.Link
-                  // as={Link}
+                  as={Link}
                   className={
                     location.pathname
                       .toLowerCase()

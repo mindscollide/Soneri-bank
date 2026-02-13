@@ -104,13 +104,13 @@ export const buildDiscountingTable = (
               align: "center",
               width: 80,
             },
-            {
-              title: "Tenor Days",
-              dataIndex: "discountDays",
-              key: "discountingDays",
-              align: "center",
-              width: 50,
-            },
+            // {
+            //   title: "Tenor Days",
+            //   dataIndex: "discountDays",
+            //   key: "discountingDays",
+            //   align: "center",
+            //   width: 50,
+            // },
           ],
         },
         ...applicableInstruments.map((inst) => ({

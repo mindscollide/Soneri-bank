@@ -1,14 +1,17 @@
 import styles from "./currencyCrosses.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useSelector } from "react-redux";
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
+import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 
 // // ✅ Pure selectors (no object creation here)
 const selectGetAllInstrumentForTreasury = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
 // const selectTreasurySpotRatesFeed = (state) =>
 //   state.RealtimeActionsSlice.TreasurySpotRatesFeed;
+
+const currencyCrossesRatesFeed = (state) =>
+  state.RealtimeActionsSlice.CurrencyCrossesRatesFeed;
 const SelectGetCurrencyCrosses = (state) =>
   state.WatchListReducer.GetCurrencyCrosses?.currencyCrossList;
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
@@ -18,7 +21,7 @@ const CurrencyCrosses = memo(() => {
     selectGetAllInstrumentForTreasury,
     shallowEqual
   );
-  // const fullFeed = useSelector(selectTreasurySpotRatesFeed);
+  const fullFeed = useSelector(currencyCrossesRatesFeed);
   const marketStatus = useSelector(selectMarketStatus);
   const GetCurrencyCrosses = useSelector(
     SelectGetCurrencyCrosses,
@@ -30,30 +33,30 @@ const CurrencyCrosses = memo(() => {
     "SelectGetCurrencyCrossesSelectGetCurrencyCrosses"
   );
 
-  // // ✅ Memoized essential feed values
-  // const feedEssentials = useMemo(() => {
-  //   if (!fullFeed) return null;
+  // ✅ Memoized essential feed values
+  const feedEssentials = useMemo(() => {
+    if (!fullFeed) return null;
 
-  //   return {
-  //     crossBid: fullFeed.instrumentCrossRate?.bid,
-  //     crossAsk: fullFeed.instrumentCrossRate?.ask,
-  //     crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
-  //     crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
-  //     crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
-  //     spotBid: fullFeed.instrumentParitySpot?.bid,
-  //     spotAsk: fullFeed.instrumentParitySpot?.ask,
-  //     spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
-  //   };
-  // }, [
-  //   fullFeed?.instrumentCrossRate?.bid,
-  //   fullFeed?.instrumentCrossRate?.ask,
-  //   fullFeed?.instrumentCrossRate?.updateDateTime,
-  //   fullFeed?.instrumentCrossRate?.instrumentID,
-  //   fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
-  //   fullFeed?.instrumentParitySpot?.bid,
-  //   fullFeed?.instrumentParitySpot?.ask,
-  //   fullFeed?.instrumentParitySpot?.instrumentID,
-  // ]);
+    return {
+      crossBid: fullFeed.instrumentCrossRate?.bid,
+      crossAsk: fullFeed.instrumentCrossRate?.ask,
+      crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
+      crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
+      crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
+      spotBid: fullFeed.instrumentParitySpot?.bid,
+      spotAsk: fullFeed.instrumentParitySpot?.ask,
+      spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
+    };
+  }, [
+    fullFeed?.instrumentCrossRate?.bid,
+    fullFeed?.instrumentCrossRate?.ask,
+    fullFeed?.instrumentCrossRate?.updateDateTime,
+    fullFeed?.instrumentCrossRate?.instrumentID,
+    fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
+    fullFeed?.instrumentParitySpot?.bid,
+    fullFeed?.instrumentParitySpot?.ask,
+    fullFeed?.instrumentParitySpot?.instrumentID,
+  ]);
 
   // // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
@@ -259,9 +262,7 @@ const CurrencyCrosses = memo(() => {
     <GlobalTable
       columns={columns}
       dataSource={processedData}
-      prefixCls={
-        processedData.length > 0 ? "LiveRatesTable" : "LiveRatesTable_Empty"
-      }
+      prefixCls={processedData.length > 0 ? "LiveRatesTable" : "LiveRatesTable"}
       pagination={false}
       scroll={{ x: "max-content", y: 500 }}
     />

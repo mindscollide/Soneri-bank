@@ -398,14 +398,14 @@ export const GetDiscountingRatesForCounterPartyApi = createAsyncThunk(
 
 export const GetBankSpotForTreasuryApi = createAsyncThunk(
   "watchlist/GetBankSpotForTreasury",
-  async ({ navigate, Data }, { dispatch, rejectWithValue }) => {
+  async ({ navigate }, { dispatch, rejectWithValue }) => {
     try {
       let GetBankSpotForTreasuryData = createPostAPI(
         watchListApi,
         GetBankSpotForTreasury.RequestMethod
       );
 
-      const response = await GetBankSpotForTreasuryData(Data);
+      const response = await GetBankSpotForTreasuryData();
       const { responseCode } = response.data;
 
       if (responseCode === 200) {
@@ -2301,13 +2301,13 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
 
 export const GetCurrencyCrossesApi = createAsyncThunk(
   "watchlist/GetCurrencyCrosses",
-  async ({ navigate, Data }, { rejectWithValue, dispatch }) => {
+  async ({ navigate }, { rejectWithValue, dispatch }) => {
     try {
       const GetCurrencyCrossesData = createPostAPI(
         watchListApi,
         GetCurrencyCrosses.RequestMethod
       );
-      const response = await GetCurrencyCrossesData(Data);
+      const response = await GetCurrencyCrossesData();
       console.log(response, "result");
       const { responseCode } = response.data;
       console.log(responseCode, "result");

@@ -1,9 +1,9 @@
 import styles from "./bankSpotAndUSDParity.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useSelector } from "react-redux";
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
-import { IndexCell } from "../../elements/inputField/IndexCell";
+import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 
 // // ✅ Pure selectors (no object creation here)
 const selectGetAllInstrumentForTreasury = (state) =>
@@ -11,9 +11,9 @@ const selectGetAllInstrumentForTreasury = (state) =>
 const selectTreasurySpotRatesFeed = (state) =>
   state.RealtimeActionsSlice.TreasurySpotRatesFeed;
 const selectWorldCrosses = (state) =>
-  state.WatchListReducer.GetBankSpotForDealer?.worldCrosses || [];
+  state.WatchListReducer.GetBankSpotForTreasury?.worldCrosses || [];
 const selectWorldCurrencies = (state) =>
-  state.WatchListReducer.GetBankSpotForDealer?.worldCurrencies || [];
+  state.WatchListReducer.GetBankSpotForTreasury?.worldCurrencies || [];
 const SelectGetCurrencyCrosses = (state) =>
   state.WatchListReducer.GetCurrencyCrosses;
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
@@ -33,10 +33,7 @@ const BankSpotAndUSDParity = memo(() => {
     shallowEqual
   );
 
-  console.log(
-    { crossInstruments, marketStatus, worldCrosses, worldCurrencies },
-    "fullFeedfullFeedfullFeed"
-  );
+  console.log({ fullFeed }, "fullFeedfullFeedfullFeed");
 
   // ✅ Memoized essential feed values
   const feedEssentials = useMemo(() => {

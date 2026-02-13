@@ -33,6 +33,7 @@ import {
   setCounterPartyForwardRates,
   setCounterPartyNonFeDiscounting,
   setCounterPartySpotRates,
+  setCurrencyCrossesRatesFeed,
   setFxTradingCards,
   setMarketTimingsUpdated,
   setTenorsCreated,
@@ -73,8 +74,12 @@ const Dashboard = () => {
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
-  const categoryValue = useSelector(
-    (state) => state.WatchListReducer.categoryValue
+  // const categoryValue = useSelector(
+  //   (state) => state.WatchListReducer.categoryValue
+  // );
+
+  const dealerValue = useSelector(
+    (state) => state.WatchListReducer.dealerValue
   );
 
   const IsManagement = import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true";
@@ -148,6 +153,23 @@ const Dashboard = () => {
         case "RATES_CLEAR":
           dispatch(setClearRates(payload));
           break;
+        // ✅ Spot/Forward rates — wrap in transition
+        case "DISPATCHER_DEALER_SPOT_RATES":
+          // startTransition(() => {
+          //   dispatch(setTreasurySpotRatesFeed(payload));
+          // });
+          break;
+        case "TREASURY_CURRENCY_CROSS_FEED":
+          startTransition(() => {
+            dispatch(setCurrencyCrossesRatesFeed(payload));
+          });
+          break;
+        case "TREASURY_SPOT_RATES_FEED":
+          startTransition(() => {
+            dispatch(setTreasurySpotRatesFeed(payload));
+          });
+          break;
+
         default:
           console.warn("No specific handler for this message type", payload);
       }
@@ -173,50 +195,55 @@ const Dashboard = () => {
     isConnected,
   } = useMqttClient(mqttConfig);
 
-  // useEffect(() => {
-  //   if (isTreasury || isDealer) {
-  //     if (!categoryValue) return;
+  useEffect(() => {
+    if (isTreasury || isDealer) {
+      subscribeToTopics([
+        `SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY`,
+        `SBL_REAL_TIME_FEED_TREASURY`,
+      ]);
 
-  //     const newTopic = `BOP_TREASURY_CATEGORY_RATES_${categoryValue.value}`;
+      if (!dealerValue.value) return;
 
-  //     // Subscribe to the new topic
-  //     subscribeToTopics([newTopic]);
-  //     console.log("Subscribed to:", newTopic);
+      console.log(dealerValue, "dealerValuedealerValuedealerValue");
+      const newTopic = `SBL_TREASURY_DEALER_RATES_${dealerValue.value}`;
 
-  //     // Store this topic as previous for next run
-  //     if (prevTopicRef.current !== newTopic) {
-  //       prevTopicRef.current = newTopic;
-  //     }
-  //   }
+      // Subscribe to the new topic
+      subscribeToTopics([newTopic]);
+      console.log("Subscribed to:", newTopic);
 
-  //   // Cleanup to unsubscribe the previous topic
-  //   return () => {
-  //     if (prevTopicRef.current) {
-  //       unsubscribeFromTopics([prevTopicRef.current]);
-  //       console.log("Unsubscribed from:", prevTopicRef.current);
-  //     }
-  //   };
-  // }, [categoryValue]);
-  // useEffect(() => {
-  //   if (!isConnected) return;
+      // Store this topic as previous for next run
+      if (prevTopicRef.current !== newTopic) {
+        prevTopicRef.current = newTopic;
+      }
+    }
 
-  //   const isTreasuryPath = location.pathname.includes("treasury");
+    // Cleanup to unsubscribe the previous topic
+    // return () => {
+    //   if (prevTopicRef.current) {
+    //     unsubscribeFromTopics([prevTopicRef.current]);
+    //     console.log("Unsubscribed from:", prevTopicRef.current);
+    //   }
+    // };
+  }, [dealerValue.value]);
 
-  //   //make isTreasuryCommented
-  //   if (isTreasury || isDealer) {
-  //     if (marketStatus) {
-  //       // Subscribe only when status is true AND path is treasury
-  //       subscribeToTopics(["BOP_REAL_TIME_FEED_TREASURY"]);
-  //       console.log("Subscribed to BOP_REAL_TIME_FEED_TREASURY");
-  //     } else {
-  //       // Unsubscribe when status is false OR path is not treasury
-  //       // unsubscribeFromTopics(["BOP_REAL_TIME_FEED_TREASURY"]);
-  //       console.log("Unsubscribed from BOP_REAL_TIME_FEED_TREASURY");
-  //     }
-  //   }
-  // }, [location.pathname, isConnected, marketStatus]);
+  useEffect(() => {
+    if (!isConnected) return;
 
-  // // Handle unsubscription only when leaving treasury path
+    //make isTreasuryCommented
+    if (isTreasury || isDealer) {
+      if (marketStatus) {
+        // Subscribe only when status is true AND path is treasury
+        subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
+        console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
+      } else {
+        // Unsubscribe when status is false OR path is not treasury
+        // unsubscribeFromTopics(["BOP_REAL_TIME_FEED_TREASURY"]);
+        console.log("Unsubscribed from SBL_REAL_TIME_FEED_TREASURY_DEALER");
+      }
+    }
+  }, [location.pathname, isConnected, marketStatus]);
+
+  // Handle unsubscription only when leaving treasury path
   // useEffect(() => {
   //   const handlePathChange = () => {
   //     const wasTreasury = prevPathRef.current?.includes("treasury");
@@ -224,7 +251,7 @@ const Dashboard = () => {
 
   //     // Unsubscribe only if we're leaving treasury path
   //     if (wasTreasury && !isNowTreasury) {
-  //       unsubscribeFromTopics(["BOP_REAL_TIME_FEED_TREASURY"]);
+  //       unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY_DEALER"]);
   //       console.log("Unsubscribed from BOP_REAL_TIME_FEED_TREASURY");
   //     }
 

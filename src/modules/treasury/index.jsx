@@ -1,20 +1,46 @@
-import React from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import GlobalTabs from "../../shareComponents/elements/tabs";
-import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
+// import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
 import Discounting from "../../shareComponents/commonComponents/discounting";
 import Forwards from "../../shareComponents/commonComponents/forwards";
-import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
 import News from "../../shareComponents/commonComponents/news";
 import RateSheet from "../../shareComponents/commonComponents/rateSheet";
-
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  getAllTenorsAction,
+  getAllTreasuryInstrumentsApi,
+  GetBankSpotForTreasuryApi,
+  GetCurrencyCrossesApi,
+} from "../../store/actions/WatchlistAction";
+const LiveRates = lazy(() => import("./liveRates/index"));
 const Treasury = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const tabs = [
-    { label: `Live Rates`, key: 0, children: <LiveRates /> },
+    {
+      label: `Live Rates`,
+      key: 0,
+      children: (
+        <Suspense fallback={<>...Loadings</>}>
+          <LiveRates />
+        </Suspense>
+      ),
+    },
     { label: `Fowards`, key: 1, children: <Forwards /> },
     { label: `Discounting`, key: 2, children: <Discounting /> },
     { label: `News`, key: 3, children: <News /> },
     { label: `Rate Sheet`, key: 4, children: <RateSheet /> },
   ];
+  useEffect(() => {
+    dispatch(getAllTreasuryInstrumentsApi({ navigate }));
+    dispatch(getAllTenorsAction({ navigate }));
+
+    dispatch(GetBankSpotForTreasuryApi({ navigate }));
+    dispatch(GetCurrencyCrossesApi({ navigate }));
+    // dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+    // dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+  }, []);
   // const dealerDropdown = (
   //   <SelectDropdown
   //     isSearchable={true}

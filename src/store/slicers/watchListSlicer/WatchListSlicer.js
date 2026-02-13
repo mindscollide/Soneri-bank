@@ -117,6 +117,10 @@ const WatchListSlice = createSlice({
       value: 0,
       label: "",
     },
+    dealerValue: {
+      value: 0,
+      label: "",
+    },
     GetVoltMeterStatusRealtime: null,
     getLastPublishRatesSheet: null,
     PublishCurrentUSDRateSheet: null,
@@ -152,6 +156,9 @@ const WatchListSlice = createSlice({
     },
     setCategoryValue: (state, action) => {
       state.categoryValue = action.payload;
+    },
+    setDealerValue: (state, action) => {
+      state.dealerValue = action.payload;
     },
     updateForwardItem: (state, action) => {
       const { tenorID, view, value } = action.payload;
@@ -732,6 +739,7 @@ export const {
   clearDealerResponseMessage,
   setForwardsForTreasuryBranch,
   setCategoryValue,
+  setDealerValue,
   updateForwardItem,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;

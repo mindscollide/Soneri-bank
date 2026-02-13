@@ -1652,66 +1652,6 @@ tr.OutStanding_Table-cell-scrollbar {
   padding: 5px 12px;
 }
 
-/* For Live Rates */
-/* .Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(1) > th {
-  color: #fff;
-  text-align: center;
-  font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
-  color: var(--color-black) !important;
-  padding: 5px 10px !important;
-  border-right: 1px solid #837c66 !important;
-}
-
-.Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(2) > th {
-  background: #000;
-  color: #fff;
-  text-align: center;
-  padding: 5px 10px !important;
-  border: none !important;
-  font-family: "Helvetica-Bold", sans-serif;
-  font-size: 14px;
-}
-.Dealer_Forwards_Treasury
-  .ant-table-thead
-  > tr:nth-child(1)
-  > th.ant-table-cell-scrollbar {
-  display: none !important;
-}
-
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(1) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-Yorange-gray);
-  color: var(--color-black);
-  font-family: "Helvetica-Bold", sans-serif !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(2) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-yellow);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(3) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-gray2);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(4) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-white);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-} */
-
 .Tresuary_Discounting-wrapper::-webkit-scrollbar {
   width: 0.3rem !important;
   border-radius: 20px !important;
@@ -1956,4 +1896,110 @@ tr.OutStanding_Table-cell-scrollbar {
   border-radius: 20px !important;
   background: #ccc !important;
   margin-left: -15px !important;
+}
+
+.LiveRatesTable-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.LiveRatesTable-wrapper
+  .LiveRatesTable-tbody
+  > tr.LiveRatesTable-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+/* Discounting Table CSS */
+/* FIRST COLUMN (fixed style) */
+.Dealer_FE_Discounting .ant-table-thead > tr:nth-child(1) > th {
+  color: #fff;
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  border-right: 1px solid #837c66 !important;
+}
+
+.Dealer_FE_Discounting .ant-table-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+}
+.Dealer_FE_Discounting .ant-table-tbody > tr > td:first-child {
+  font-size: 14px;
+  text-align: center;
+  padding: 5px 10px !important;
+  background: #e9e2dc;
+  color: var(--color-black);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  border-bottom: 1px solid #837c66;
+}
+
+/* ALTERNATE COLUMNS AFTER FIRST */
+.Dealer_FE_Discounting
+  .ant-table-tbody
+  > tr
+  > td:not(:first-child):nth-child(even) {
+  background: #ffd567;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.Dealer_FE_Discounting
+  .ant-table-tbody
+  > tr
+  > td:not(:first-child):nth-child(odd) {
+  background: var(--color-gray2);
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Common styles for all other columns */
+.Dealer_FE_Discounting .ant-table-tbody > tr > td:not(:first-child) {
+  text-align: center;
+  padding: 5px 10px !important;
+  color: var(--color-black);
+  font-family: Helvetica !important;
+  border-bottom: 1px solid #837c66;
+}
+
+/* USD Parity */
+
+.Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(5) {
+  text-align: center;
+  padding: 5px 10px !important;
+  background: var(--color-Yorange-gray);
+  color: var(--color-black);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  border-bottom: 1px solid #837c66;
+}
+.Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(6) {
+  text-align: center;
+  padding: 5px 10px !important;
+  background: var(--color-yellow);
+  color: var(--color-black);
+  font-family: Helvetica !important;
+  border-bottom: 1px solid #837c66;
+}
+.Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(7) {
+  text-align: center;
+  padding: 5px 10px !important;
+  background: var(--color-gray2);
+  color: var(--color-black);
+  font-family: Helvetica !important;
+  border-bottom: 1px solid #837c66;
+}
+.Dealer_FE_Discounting.ant-table-tbody > tr > td:nth-child(8) {
+  text-align: center;
+  padding: 5px 10px !important;
+  background: var(--color-white);
+  color: var(--color-black);
+  font-family: Helvetica !important;
+  border-bottom: 1px solid #837c66;
 }
