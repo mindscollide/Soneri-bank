@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="54.334px" height="55.667px" viewBox="9.5 8.833 54.334 55.667" enable-background="new 9.5 8.833 54.334 55.667"
+	 xml:space="preserve">
+<g transform="rotate(0 50 50)">
+	<path fill="#5B5B5B" d="M37,13.5L37,13.5c1.445,0,2.609,1.948,2.609,4.35l0,0c0,2.408-1.164,4.355-2.609,4.355l0,0
+		c-1.441,0-2.61-1.948-2.61-4.355l0,0C34.39,15.448,35.559,13.5,37,13.5z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.9166666666666666s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(30 50 50)">
+	<path fill="#5B5B5B" d="M32.241,21.743L32.241,21.743c1.444-0.004,2.611,1.945,2.61,4.353l0,0
+		c-0.003,2.403-1.164,4.348-2.609,4.346l0,0c-1.443,0.004-2.61-1.945-2.609-4.352l0,0C29.63,23.69,30.797,21.742,32.241,21.743z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.8333333333333334s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(60 50 50)">
+	<path fill="#5B5B5B" d="M32.244,31.255L32.244,31.255c1.442,0.003,2.609,1.951,2.609,4.359l0,0
+		c0.001,2.395-1.169,4.349-2.612,4.345l0,0c-1.439,0.002-2.612-1.947-2.609-4.347l0,0C29.631,33.205,30.796,31.26,32.244,31.255z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.75s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(90 50 50)">
+	<path fill="#5B5B5B" d="M37,39.5L37,39.5c1.445,0,2.609,1.951,2.609,4.351l0,0c0,2.406-1.164,4.349-2.609,4.349l0,0
+		c-1.441,0-2.61-1.942-2.61-4.349l0,0C34.39,41.451,35.559,39.5,37,39.5z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.6666666666666666s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(120 50 50)">
+	<path fill="#5B5B5B" d="M45.239,44.255L45.239,44.255c1.449,0.004,2.614,1.949,2.613,4.358l0,0
+		c-0.003,2.403-1.165,4.346-2.609,4.347l0,0c-1.444,0.004-2.613-1.95-2.607-4.348l0,0C42.629,46.206,43.797,44.258,45.239,44.255z	"
+		>
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.5833333333333334s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(150 50 50)">
+	<path fill="#5B5B5B" d="M54.761,44.255L54.761,44.255c1.442,0.003,2.609,1.951,2.603,4.356l0,0
+		c0.006,2.398-1.164,4.352-2.607,4.348l0,0c-1.444,0-2.606-1.943-2.609-4.347l0,0C52.147,46.205,53.312,44.26,54.761,44.255z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.5s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(180 50 50)">
+	<path fill="#5B5B5B" d="M63,39.501L63,39.501c1.441,0,2.61,1.95,2.61,4.35l0,0c0,2.406-1.168,4.349-2.61,4.349l0,0
+		c-1.445,0-2.609-1.942-2.609-4.349l0,0C60.391,41.451,61.555,39.501,63,39.501z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.4166666666666667s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(210 50 50)">
+	<path fill="#5B5B5B" d="M67.756,31.255L67.756,31.255c1.448,0.005,2.613,1.95,2.613,4.357l0,0c0.002,2.401-1.17,4.349-2.609,4.347
+		l0,0c-1.443,0.003-2.613-1.95-2.612-4.345l0,0C65.147,33.206,66.314,31.258,67.756,31.255z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.3333333333333333s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(240 50 50)">
+	<path fill="#5B5B5B" d="M67.758,21.743L67.758,21.743c1.444-0.002,2.612,1.947,2.608,4.348l0,0
+		c0.001,2.406-1.166,4.356-2.609,4.351l0,0c-1.445,0.001-2.607-1.943-2.609-4.346l0,0C65.147,23.688,66.314,21.739,67.758,21.743z	"
+		>
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.25s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(270 50 50)">
+	<path fill="#5B5B5B" d="M63,13.5L63,13.5c1.441,0,2.61,1.948,2.61,4.35l0,0c0,2.408-1.169,4.355-2.61,4.355l0,0
+		c-1.445,0-2.609-1.948-2.609-4.355l0,0C60.391,15.448,61.555,13.5,63,13.5z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.16666666666666666s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(300 50 50)">
+	<path fill="#5B5B5B" d="M54.759,8.743L54.759,8.743c1.443-0.004,2.61,1.945,2.61,4.353l0,0c0.002,2.401-1.169,4.351-2.609,4.347
+		l0,0c-1.442,0.005-2.61-1.945-2.614-4.348l0,0C52.147,10.69,53.314,8.742,54.759,8.743z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="-0.08333333333333333s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+<g transform="rotate(330 50 50)">
+	<path fill="#5B5B5B" d="M45.241,8.743L45.241,8.743c1.445-0.001,2.611,1.947,2.614,4.351l0,0c-0.004,2.404-1.172,4.353-2.614,4.349
+		l0,0c-1.44,0.004-2.612-1.946-2.609-4.347l0,0C42.631,10.689,43.799,8.739,45.241,8.743z	">
+<animate  fill="remove" restart="always" calcMode="linear" additive="replace" accumulate="none" repeatCount="indefinite" begin="0s" dur="1s" keyTimes="0;1" values="1;0" attributeName="opacity">
+			</animate>
+	</path>
+</g>
+</svg>

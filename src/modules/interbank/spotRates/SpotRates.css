@@ -1,0 +1,11 @@
+.color-primary {
+  color: #f26522 !important;
+}
+.bg-trRow {
+  background: #ebe8e6 !important;
+}
+.form-check-label {
+  color: var(--color-dark) !important;
+  font-size: 14px;
+  font-weight: 500;
+}

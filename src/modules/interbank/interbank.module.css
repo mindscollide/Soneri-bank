@@ -1,0 +1,8 @@
+.interbankwrapper {
+  position: relative;
+  background: #ffffff;
+  border-radius: calc(0.5vw + 0.3rem);
+  padding: 12px 8px;
+  min-height: 82vh;
+  z-index: 2;
+}

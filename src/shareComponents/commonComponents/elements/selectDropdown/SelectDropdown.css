@@ -1,0 +1,243 @@
+/* Start Dealer Tenor Dropdown  */
+.DealerDropDown__indicator-separator {
+  display: none !important;
+}
+.DealerDropDown__placeholder {
+  color: #000 !important;
+}
+.DealerDropDown__option {
+  background-color: #d6d9e2 !important;
+  color: #002650 !important;
+  outline: none !important;
+}
+
+.DealerDropDown__option--is-focused {
+  background-color: #096fed !important;
+  color: #fff !important;
+  outline: none !important;
+}
+.DealerDropDown__control {
+  border-radius: 1px !important;
+  border: none !important;
+  color: #002650 !important;
+  outline: none !important;
+  min-width: 240px !important;
+  box-shadow: none !important;
+}
+.DealerDropDown__control--is-focused {
+  outline: none !important;
+  border-color: transparent !important;
+}
+
+.DealerDropDown__menu {
+  background-color: #d6d9e2 !important;
+}
+
+/* Start Category Dropdown  */
+
+.Category-Dropdown__indicator-separator {
+  display: none !important;
+}
+.Category-Dropdown__placeholder {
+  color: #000 !important;
+}
+.Category-Dropdown__option {
+  background-color: #d6d9e2 !important;
+  color: #002650 !important;
+  outline: none !important;
+}
+
+.Category-Dropdown__option--is-focused {
+  background-color: #096fed !important;
+  color: #fff !important;
+  outline: none !important;
+}
+.Category-Dropdown__control {
+  border-radius: 1px !important;
+  border: none !important;
+  color: #fff !important;
+  background-color: #4d4946 !important;
+  outline: none !important;
+  min-width: 140px !important;
+}
+.Category-Dropdown__control--is-focused {
+  outline: none !important;
+  border-color: transparent !important;
+}
+
+.Category-Dropdown__single-value {
+  color: #fff !important;
+}
+.Category-Dropdown__menu {
+  background-color: #d6d9e2 !important;
+}
+
+/* End Category Dropdown */
+
+/* Start Blotter Export Modal Dropdown */
+.BlotterSearchDropdown__indicator-separator {
+  display: none !important;
+}
+.BlotterSearchDropdown__indicator__placeholder {
+  color: #fff !important;
+}
+.BlotterSearchDropdown__indicator__option {
+  background-color: #d6d9e2 !important;
+  color: #002650 !important;
+  outline: none !important;
+}
+
+.BlotterSearchDropdown__indicator__option--is-focused {
+  background-color: #096fed !important;
+  color: #fff !important;
+  outline: none !important;
+}
+.BlotterSearchDropdown__indicator__control {
+  border-radius: 1px !important;
+  border: none !important;
+  color: #fff !important;
+  background-color: #4d4946 !important;
+  outline: none !important;
+  min-width: 140px !important;
+}
+
+.BlotterSearchDropdown__indicator__menu {
+  background-color: #d6d9e2 !important;
+}
+.BlotterSearchDropdown__indicator__single-value {
+  color: #fff !important;
+}
+.BlotterSearchDropdown__indicator__indicator {
+  color: #fff !important;
+}
+.BlotterSearchDropdown__indicator__input {
+  color: #fff !important;
+}
+/*  */
+
+/* Global Select Dropdonw Modal For trasanctions  */
+
+/* Control container (already applied) */
+.TransactionModal__control {
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 0 !important; /* Remove any inner control padding */
+}
+
+/* Value container (where the selected value appears) */
+.TransactionModal__value-container {
+  padding: 0 10px !important;
+  height: 28px !important;
+  font-weight: 800 !important;
+  /* display: flex; */
+  /* align-items: center; */
+}
+
+/* Input field inside the select (for typing/searching) */
+.TransactionModal__input {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Placeholder text (if shown) */
+.TransactionModal__placeholder {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 12px; /* optional: match the tighter layout */
+  line-height: 1;
+}
+
+/* Single selected value */
+.TransactionModal__single-value {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Indicators (dropdown arrow, clear button) */
+.TransactionModal__indicators {
+  height: 24px;
+}
+
+.TransactionModal__indicator {
+  padding: 0 6px !important;
+}
+
+.TransactionModal__option {
+  padding: 8px 15px !important;
+  font-size: 12px !important;
+  border-bottom: 1px solid #81828f;
+}
+.TransactionModal__menu-list {
+  background-color: var(--color-light-gray2);
+}
+.TransactionModal__option--is-focused,
+.TransactionModal__option--is-selected {
+  background-color: var(--color-blue) !important;
+  color: white !important;
+}
+
+/* page size style */
+.pageSizeDropdown {
+  width: 100% !important;
+}
+
+.pageSizeDropdown__menu {
+  z-index: 999999 !important;
+  /* max-height: 30vh; */
+  /*height: auto;
+  overflow: visible; */
+}
+.pageSizeDropdown__menu-portal {
+  z-index: 999999 !important;
+}
+.pageSizeDropdown__placeholder {
+  font-family: "Roboto", sans-serif !important;
+}
+.pageSizeDropdown__menu {
+  max-height: 30vh !important; /* Your desired height */
+}
+
+.pageSizeDropdown__menu-list {
+  max-height: 30vh !important; /* Slightly less than container height */
+}
+
+/* page size style */
+.companyListPageSizeDropdown {
+  width: 100% !important;
+}
+
+.companyListPageSizeDropdown__menu.css-1nmdiq5-menu {
+  z-index: 999999 !important;
+}
+.companyListPageSizeDropdown__menu-portal {
+  z-index: 999999 !important;
+}
+.companyListPageSizeDropdown__placeholder {
+  font-family: "Roboto", sans-serif !important;
+}
+.companyListPageSizeDropdown__menu {
+  max-height: 30vh !important; /* Your desired height */
+}
+
+.companyListPageSizeDropdown__menu-list {
+  max-height: 30vh !important; /* Slightly less than container height */
+}
+
+.companyListPageSizeDropdown__control css-13cymwt-control {
+  min-height: 30px;
+}
+/* .companyListPageSizeDropdown__indicator {
+  padding: 0px !important;
+} */
+.companyListPageSizeDropdown__dropdown-indicator {
+  padding: 0px !important;
+}
+
+.companyListPageSizeDropdown__control {
+  min-height: 30px !important;
+}
+.selectTransactionNatureList__menu-portal {
+  z-index: 999999 !important;
+}

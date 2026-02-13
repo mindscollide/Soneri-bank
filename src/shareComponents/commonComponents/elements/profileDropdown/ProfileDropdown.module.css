@@ -1,0 +1,35 @@
+.ProfileDropdown {
+  /* background-color: #fff !important; */
+  background-color: #ffc530 !important;
+  color: #4d4946 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  /* gap: 10px; */
+  padding: 18px !important;
+  font-size: 0.8rem !important;
+  /* min-width: 100px !important; */
+}
+.ProfileDropdown:is(:hover, :focus, :focus-visible, :active) {
+  color: #4d4946 !important;
+  background-color: #ffc530 !important;
+  color: #4d4946 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  /* gap: 10px; */
+  padding: 18px !important;
+  font-size: 0.8rem !important;
+}
+.ProfileDropdown::after {
+  display: none !important;
+}
+.ProfileDropdown_menu {
+  max-width: 20px !important;
+}

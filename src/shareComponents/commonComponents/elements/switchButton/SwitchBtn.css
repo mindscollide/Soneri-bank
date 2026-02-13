@@ -1,0 +1,48 @@
+.switchBtn .ant-switch-handle {
+  top: 2px;
+  inset-inline-start: 5px;
+  width: 15px;
+  height: 15px;
+}
+.switchBtn {
+  border: 1px solid #86b7fe;
+}
+button.ant-switch.switchBtn.css-dev-only-do-not-override-1c0na6j {
+  background-color: #fff !important;
+}
+
+button.ant-switch.switchBtn.css-dev-only-do-not-override-1c0na6j.ant-switch-checked {
+  background-color: #1677ff !important;
+}
+
+:where(.css-dev-only-do-not-override-1c0na6j).ant-switch
+  .ant-switch-handle::before {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  background-color: #bfbfbf;
+  border-radius: 9px;
+  box-shadow: 0 2px 4px 0 rgba(191, 191, 191, 1);
+  transition: all 0.2s ease-in-out;
+  content: "";
+}
+:where(.css-dev-only-do-not-override-1c0na6j).ant-switch.ant-switch-checked
+  .ant-switch-handle::before {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  background-color: #fff;
+  border-radius: 9px;
+  box-shadow: 0 2px 4px 0 rgba(191, 191, 191, 1);
+  transition: all 0.2s ease-in-out;
+  content: "";
+}
+.switchBtn_TextValue {
+  font-size: 14px !important;
+  font-weight: 500;
+  /* font-family: "Helvetica", sans-serif !important; */
+}

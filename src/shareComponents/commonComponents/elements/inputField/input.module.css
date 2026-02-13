@@ -1,0 +1,409 @@
+/* Start Dealer Bit  Input Field  */
+.DealerBitInput {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  text-align: center;
+  font-weight: 600;
+}
+.DealerBitInput:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.DealerBitInput:disabled {
+  background-color: #e9ecef;
+}
+/* End  Dealer Bit  Input Field */
+
+/* Start Dealer Table Bit Input Field */
+.DealerTableBitInput {
+  width: 70px;
+  font-size: 1rem;
+  text-align: left;
+  border-radius: 2px;
+  border: 1px solid #000;
+  text-align: center;
+}
+.DealerTableBitInput:disabled {
+  background-color: rgba(239, 239, 239, 0.3) !important;
+  border-color: rgba(118, 118, 118, 0.3);
+}
+/* End Dealer Table Bit Input Field */
+
+/* Start Dealer Table Ask Input Field */
+.DealerTableAskInput {
+  width: 70px;
+  font-size: 1rem;
+  text-align: left;
+  border-radius: 2px;
+  border: 1px solid #000;
+}
+/* End Dealer Table Ask Input Field */
+
+/* Start Dealer Discounting Current Rate Input Field */
+.DealerDiscountingCurrentRateInput {
+  width: 70px;
+  font-size: 1rem;
+  text-align: left;
+  border-radius: 2px;
+  border: 1px solid #000;
+}
+/* End Dealer Discounting Current Rate Input Field */
+
+/* Start Dealer Discounting Previous Rate Input Field */
+.DealerDiscountingPreviousRateInput {
+  width: 70px;
+  font-size: 1rem;
+  text-align: left;
+  border-radius: 2px;
+  border: 1px solid #000;
+}
+/* End Dealer Discounting Previous Rate Input Field */
+
+/* Start Date Picker  Input Field  */
+.DatePickerField {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.1em;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  /* font-weight: 600; */
+  z-index: 2;
+}
+.DatePickerField:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.DatePickerField-MIS {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.1em;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  /* font-weight: 600; */
+  z-index: 2;
+}
+.DatePickerField-MIS:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+/* Refresh Interval Value */
+.RefreshInterval {
+  display: block;
+  width: 50px !important;
+  height: 35px;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.1em;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  margin-right: 5px;
+  text-align: center;
+  font-family: "Helvetica-Bold" !important;
+}
+.RefreshInterval:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Start Calculator textfield  Input Field  */
+.CalculatorTextfield {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  border-top-left-radius: 0.375rem !important;
+  border-bottom-left-radius: 0.375rem !important;
+
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  text-align: left;
+  font-weight: 600;
+}
+.CalculatorTextfield:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.CalculatorTextfield-withTagInputfield {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  text-align: left;
+  font-weight: 600;
+}
+.CalculatorTextfield-withTagInputfield:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.CalculatorTextfield-withTagInputfield:disabled {
+  border: 1px solid #d9d9d9;
+  background-color: #efefef4d;
+  border-radius: 6px;
+  color: #545454;
+}
+.CalculatorTextfield:disabled {
+  border: 1px solid #d9d9d9;
+  background-color: #efefef4d;
+  border-radius: 6px;
+  color: #545454;
+}
+/* End  Dealer Bit  Input Field */
+
+/* IBuySell Modal TextField Height Start*/
+
+.IBuyISellModalTextFileds {
+  height: 30px !important;
+  width: 100% !important;
+}
+/* IBuySell Modal TextField Height End*/
+
+.IBuyISellModalTextFileds {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* Start Date Picker for NOP Modal  Input Field  */
+.DatePickerField-NOP {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.1em;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  /* font-weight: 600; */
+}
+.DatePickerField-NOP:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  z-index: 999 !important;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* End Date Picker for NOP Modal  Input Field  */
+
+.BookaForwardCorporateInputFields {
+  border: 1px solid #e1e1e1 !important;
+  font-weight: 700 !important;
+  height: 30px !important;
+  border-top-right-radius: 0px !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+.BookaForwardCorporateInputFieldsTenorNonFEmodal {
+  border: 1px solid #e1e1e1 !important;
+  font-weight: 700 !important;
+  height: 30px !important;
+  width: 100% !important;
+  border-top-right-radius: 0px !important;
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 0px !important;
+}
+.chatSenderInput {
+  padding: 4px;
+  font-size: 13px;
+  width: 100%;
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid #e1e1e1;
+}
+
+.amountValue {
+  max-width: 70px;
+
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* DealBox Input Fields Bid */
+
+/* Start Dealer Bit Input Field  */
+.DealBoxBitInput {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: calc(1.275rem + 0.3vw) !important;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #12a812 !important;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  text-align: center;
+  font-weight: 600;
+}
+
+.DealBoxBitInput:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.DealBoxBitInput:disabled {
+  background-color: #e9ecef;
+}
+/* End Dealer Bit Input Field  */
+
+/* Start Dealer Offer Input Field  */
+.DealBoxOfferInput {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: calc(1.275rem + 0.3vw) !important;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(var(--bs-danger-rgb)) !important;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.DealBoxOfferInput:is(:focus, :focus-visible) {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.DealBoxOfferInput:disabled {
+  background-color: #e9ecef;
+}
+/* End Dealer Offer Input Field  */
+
+/* Discounting Quote Modal */
+
+.DiscountingQuoteInput {
+  display: block;
+  width: 150px;
+  padding: 0.375rem 0.75rem;
+  font-size: calc(1.275rem + 0.3vw) !important;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #002650;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  text-align: center;
+  font-weight: 600;
+}
+.DiscountingQuoteInput:disabled {
+  background: var(--color-light) !important;
+  color: var(--color-blue) !important;
+}

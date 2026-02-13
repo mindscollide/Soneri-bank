@@ -1,0 +1,1011 @@
+/* Start Publish Button Dealer Bit Button */
+/* .publishBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+  font-family: "Poppins", sans-serif !important;
+  padding: 0px 10px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.publishBtn_active {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  font-family: "Poppins", sans-serif !important;
+  padding: 0px 10px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+/* .publishBtn:disabled {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  color: #fff !important;
+  pointer-events: none;
+  filter: grayscale(1);
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #feac78 !important;
+  font-family: "Poppins", sans-serif !important;
+  padding: 0px 10px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+/* .publishBtn:hover {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+} */
+/* End Publish Button Dealer Bit Button */
+
+.publishBtn {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+  min-width: 120px;
+}
+.publishBtn:disabled {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  color: #fff !important;
+  pointer-events: none;
+  filter: grayscale(1);
+  -webkit-transition: all 0.3s ease-in !important;
+  /* border-color: #feac78 !important; */
+  font-family: "Poppins", sans-serif !important;
+  padding: 0px 10px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.publishBtn:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: 120px;
+}
+
+/* Start Clear Rates Publish Button Dealer Bit Button */
+.clearRates {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+  min-width: 120px;
+}
+.clearRates:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: 120px;
+}
+/* End Clear Rates Publish Button Dealer Bit Button */
+
+/* View Deal Button  */
+.viewDealBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: #f7f8ff !important;
+  border-color: #f7f8ff !important;
+  color: #000 !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+}
+/* Start Plus Button Dealer Bit Button */
+.PlusButton {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #0a58ca !important;
+  border-color: #0a58ca !important;
+  height: 37px;
+  min-width: 120px;
+  border-top-left-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+.PlusButton:hover {
+  background: #ffc530 !important;
+  border-color: #ffc530 !important;
+}
+/* End Plus Button Dealer Bit Button */
+
+/* Start Create Tenor Button */
+.createTenorBtn {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: transparent !important;
+  border-color: #000 !important;
+  color: #000 !important;
+  padding: 0 10px !important;
+  min-height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+}
+.createTenorBtn:is(:hover) {
+  background: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  outline: none !important;
+}
+/* End Create Tenor Button */
+
+/* Start Publish Forwards Button */
+.publishForwardsBtn {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #0a58ca !important;
+  border-color: #0a58ca !important;
+}
+/* .publishForwardsBtn_active {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+} */
+.publishForwardsBtn:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: #ffc530 !important;
+  border-color: #ffc530 !important;
+  color: #000 !important;
+}
+.publishForwardsBtn:disabled {
+  background-color: var(---color-light-gray) !important;
+  border-color: var(---color-light-gray) !important;
+  cursor: default !important ;
+}
+.publishForwardsBtn:disabled:is(
+    :hover,
+    :focus,
+    :focus-visible,
+    :visited,
+    :active
+  ) {
+  background-color: var(---color-light-gray) !important;
+  border-color: var(---color-light-gray) !important;
+}
+/* End Publish Forwards Button */
+
+/* Start Publish Discounting Button */
+.publishDiscounting {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+}
+.publishDiscounting_active {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+.publishDiscounting:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+/* End Publish Discounting Button */
+
+/* Calculator Style Button */
+/* Start Publish Button Dealer Bit Button */
+.calcBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+  /* margin-right: 0.5rem !important; */
+  height: 35px;
+  width: 138px;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+.calcBtn_active {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  /* margin-right: 0.5rem !important; */
+  height: 35px;
+  width: 138px;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+.calcBtn:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  outline: none;
+}
+.rfqBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+  /* margin-right: 0.5rem !important; */
+  height: 35px;
+  min-width: 100px;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+.rfqBtn:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  outline: none;
+}
+.rfqBtn_disabled {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+  /* margin-right: 0.5rem !important; */
+  cursor: default !important;
+  height: 35px;
+  min-width: 100px;
+  font-weight: 700;
+  font-family: "POPPINS";
+  filter: grayscale(1);
+  color: #fff !important;
+}
+
+/* button for calculator start */
+.calculatorButton {
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: #f7f8ff !important;
+  border-color: #f7f8ff !important;
+  color: #000 !important;
+  padding: 6px 12px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+}
+.calculatorButton:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  outline: none;
+}
+
+/* button for calculator end */
+
+/* Search and Reset Button */
+.searchBtn,
+.searchBtn:active {
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease-in;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  -ms-transition: all 0.3s ease-in;
+  position: relative;
+  font-family: "Poppins", sans-serif !important;
+  background: #feac78;
+  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%);
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%);
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%);
+  border-color: #feac78;
+  padding: 0.25rem 0.5rem !important;
+  box-shadow: none !important;
+}
+
+.searchBtn:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: #096fed !important;
+  border-color: #096fed !important;
+  outline: none;
+}
+
+.resetBtn,
+.resetBtn:active {
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease-in;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  -ms-transition: all 0.3s ease-in;
+  position: relative;
+  font-family: "Poppins", sans-serif !important;
+  background: #096fed !important;
+  border-color: #096fed !important;
+  padding: 0.25rem 0.5rem !important;
+  box-shadow: none !important;
+}
+
+.resetBtn:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: #feac78 !important;
+  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  outline: none;
+}
+
+/* Nop Modal Buttons in Treasury Start */
+.NopModalBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+  /* margin-right: 0.5rem !important; */
+  height: 32px;
+  width: 138px;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+
+.NopModalBtn:hover {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+
+.NopdownloadButton {
+  border-radius: 0px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  /* margin-right: 0.5rem !important; */
+  height: 32px;
+  width: auto;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+
+.NopdownloadButton:hover {
+  background: #096fed !important;
+  border-color: #096fed !important;
+}
+/* Nop Modal Buttons in Treasury End */
+
+.NOP-button,
+.NOP-button:active {
+  font-size: 24px !important;
+  font-weight: 500 !important;
+  line-height: 0.9 !important;
+  font-family: "Poppins", sans-serif !important;
+  background: #096fed !important;
+  border-color: #096fed !important;
+  border-radius: 4px;
+  transition: all 0.3s ease-in;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  -ms-transition: all 0.3s ease-in;
+  position: relative;
+  margin-right: 0.5rem !important;
+  box-shadow: none !important;
+  padding: 0.375rem 0.75rem;
+}
+
+.NOP-button:hover {
+  background: #feac78 !important;
+  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+
+.Export-button,
+.Export-button:active {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 0.9 !important;
+  font-family: "Poppins", sans-serif !important;
+  background: #096fed !important;
+  border-color: #096fed !important;
+  border-radius: 4px;
+  transition: all 0.3s ease-in;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  -ms-transition: all 0.3s ease-in;
+  position: relative;
+  box-shadow: none !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+.Export-button:hover {
+  background: #feac78 !important;
+  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+
+.Export-button_MIS,
+.Export-button_MIS:active {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 0.9 !important;
+  font-family: "Poppins", sans-serif !important;
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #000;
+  border-radius: 4px;
+  transition: all 0.3s ease-in;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+  -ms-transition: all 0.3s ease-in;
+  position: relative;
+  box-shadow: none !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+.Export-button_MIS:hover {
+  background: #000000 !important;
+  color: white;
+  /* background: -moz-linear-gradient(top, #feac78 0%, #000000 100%) !important;
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important; */
+  border-color: #000000 !important;
+}
+.createTenorModalFooterBtn {
+  border: 1px solid #0d6efd !important;
+  background: #fff !important;
+  border-radius: 4px !important;
+  color: #0d6efd !important;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  padding: 0.375rem 0.75rem;
+}
+.createTenorModalFooterBtn:is(
+    :hover,
+    :focus,
+    :focus-visible,
+    :visited,
+    :active
+  ) {
+  background: #0d6efd !important;
+  color: #fff !important;
+  outline: none;
+}
+.cancelTenorModalFooterBtn {
+  border: 1px solid #dc3545 !important;
+  background: #fff !important;
+  border-radius: 4px !important;
+  color: #dc3545 !important;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Poppins", sans-serif;
+  padding: 0.375rem 0.75rem;
+}
+.cancelTenorModalFooterBtn:is(
+    :hover,
+    :focus,
+    :focus-visible,
+    :visited,
+    :active
+  ) {
+  color: #fff !important;
+  background: #dc3545 !important;
+  outline: none;
+}
+
+/* start mail modal add button */
+.addMailModalBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+  /* margin-right: 0.5rem !important; */
+  height: 37px;
+  width: 108px;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+
+.addMailModalBtn:hover {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+/* End mail modal add button */
+.authLoginBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%);
+  border-color: #e97225 !important;
+  padding: 0.5rem 1.5rem !important;
+  height: auto !important;
+  font-weight: 700;
+  font-family: "POPPINS";
+  margin: 0 auto;
+}
+
+.authLoginBtn:hover {
+  background: linear-gradient(to bottom, #096fed 0%, #096fed 100%) !important;
+  border-color: #096fed !important;
+}
+.changePasswordBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  max-width: 160px;
+  margin: 0 auto;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%);
+  border-color: #e97225 !important;
+  padding: 0.5rem 1.5rem !important;
+  height: auto !important;
+  font-weight: 700;
+  font-family: "POPPINS";
+}
+.changePasswordBtn:hover {
+  background: linear-gradient(to bottom, #096fed 0%, #096fed 100%) !important;
+  border-color: #096fed !important;
+}
+.changePasswordBtn:disabled {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  max-width: 160px;
+  margin: 0 auto;
+  font-weight: 500 !important;
+  padding: 0.5rem 1.5rem !important;
+  height: auto !important;
+  font-weight: 700;
+  font-family: "POPPINS";
+  color: #fff !important;
+  pointer-events: none;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%);
+  border-color: #6c757d;
+  opacity: 0.65;
+}
+
+.SelectAllButton {
+  background: none !important;
+  background-color: none !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  border-radius: 4px !important;
+}
+
+.SelectAllButton:is(:hover, :after, :focus-visible, :focus) {
+  background: #000000 !important;
+  color: #ffff !important;
+  border: 1px solid #000000 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border-radius: 4px !important;
+}
+
+.blotterCheckerButton {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  /* -webkit-transition: all 0.3s ease-in !important; */
+  color: #fff !important;
+  background-color: #157347 !important;
+  border-color: #146c43 !important;
+}
+
+.blotterCheckerButton:is(:hover, :active, :focus, :focus-visible) {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  /* -webkit-transition: all 0.3s ease-in !important; */
+  color: #fff !important;
+  background-color: #157347 !important;
+  border-color: #146c43 !important;
+}
+
+.FowwardBranchBookaForwardBtn {
+  background: #06b0da !important;
+  border-color: #06b0da !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  -moz-transition: all 0.3s ease-in !important;
+  -o-transition: all 0.3s ease-in !important;
+  -ms-transition: all 0.3s ease-in !important;
+  position: relative !important;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.FowwardBranchBookaForwardBtn:is(:hover, :focus, :focus-visible) {
+  background: #82756b !important;
+  border-color: #82756b !important;
+  color: #ffffff !important;
+}
+.FowwardBranchBookaForwardBtn:disabled {
+  background: #06b0da !important;
+  filter: grayscale(1);
+  border: none;
+  cursor: default !important;
+}
+
+.FEDiscounting {
+  background: #feac78 !important;
+  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#feac78', endColorstr='#e97225',GradientType=0 ) !important;
+  border-color: #feac78 !important;
+  cursor: pointer !important;
+  font-family: "Poppins", sans-serif !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  -moz-transition: all 0.3s ease-in !important;
+  -o-transition: all 0.3s ease-in !important;
+  -ms-transition: all 0.3s ease-in !important;
+  position: relative !important;
+}
+
+.FEDiscounting:is(:hover) {
+  background: #096fed !important;
+  border-color: #096fed !important;
+  cursor: pointer !important;
+}
+.FEDiscounting:disabled {
+  background: #feac78 !important;
+  filter: grayscale(1);
+  border: none;
+  cursor: default !important;
+  color: white;
+}
+.ConfirmButtonBookaForward {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.tabsButton_active,
+.tabsButton_active:is(
+    :hover,
+    :focus,
+    :focus-visible,
+    :active,
+    :active,
+    :visited
+  ) {
+  border-radius: 2px !important;
+  padding: 2px 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  border-color: transparent !important;
+  background: var(--color-blue) !important;
+  color: #ffffff !important;
+}
+.tabsButton,
+.tabsButton:is(:hover, :focus, :focus-visible, :visited) {
+  border-radius: 2px !important;
+  padding: 2px 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  border-color: transparent !important;
+  background: var(--color-light-gray) !important;
+  color: #ffffff !important;
+}
+
+/* Start Save Button Setting Modal */
+.saveSettingBtn {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background-color: #096fed !important;
+  border-color: #096fed !important;
+}
+
+.saveSettingBtn:is(:hover, :focus, :focus-visible, :visited, :active) {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+/* End Save Button Setting Modaln */
+
+/* Start Accept Button View Deal Box */
+.SubmitButtonFowardDealBox {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+
+  /* border-color: #feac78 !important; */
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  font-size: 1.25rem !important;
+  height: 44px;
+}
+.SubmitButtonFowardDealBox:is(:hover) {
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+}
+.SubmitBtnDealBox {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+  /* background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important; */
+  /* border-color: #feac78 !important; */
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  font-size: 1.25rem !important;
+  height: 44px;
+}
+.SubmitBtnDealBox:is(:hover) {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+.AcceptBtnDealBox {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+  /* border-color: #feac78 !important; */
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  font-size: 1.25rem !important;
+  height: 44px;
+}
+.AcceptBtnDealBox:is(:hover) {
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #feac78 !important;
+}
+/* Stop Accept Button View Deal Box */
+
+/* Start Reject Button View Deal Box */
+.RejectBtnDealBox {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
+  font-size: 1.25rem !important;
+  height: 44px;
+}
+.RejectBtnDealBox:is(:hover) {
+  background: #f85e35 !important;
+  border-color: #f85e35 !important;
+}
+/* Stop Reject Button View Deal Box */
+.ActionButton .ant-btn.ant-btn-icon-only {
+  max-width: 20px !important;
+  max-height: 20px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ActionButton_danger {
+  background-color: var(--color-red);
+}
+
+.ActionButton i {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+.cancelReasonModalSubmitBtn {
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: #fff;
+  border-color: #dc3545;
+  font-size: 14px !important;
+  color: #dc3545;
+  padding: 6px 25px;
+}
+.cancelReasonModalSubmitBtn:is(:hover) {
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #fff !important;
+}
+/* Stop Reject Button View Deal Box */
+.cancelReasonModalCancelBtn {
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: #fff;
+  border-color: #0d6efd;
+  font-size: 14px !important;
+  color: #0d6efd;
+  padding: 0 25px;
+}
+.cancelReasonModalCancelBtn:is(:hover) {
+  background: #0d6efd !important;
+  border-color: #0d6efd !important;
+  color: #fff !important;
+}
+
+/*  Start Button ConfirmationModalYesDealBox */
+.ConfirmationModalYesDealBox {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  min-width: 85px !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+
+  font-size: 0.8rem !important;
+  height: 44px;
+}
+.ConfirmationModalYesDealBox:is(:hover) {
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+}
+
+/*  End Button ConfirmationModalYesDealBox */
+
+/*  Start Button ConfirmationModalNoDealBox */
+.ConfirmationModalNoDealBox {
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  min-width: 85px !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  font-family: "Poppins", sans-serif;
+  -webkit-transition: all 0.3s ease-in !important;
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
+
+  font-size: 0.8rem !important;
+  height: 44px;
+}
+.ConfirmationModalNoDealBox:is(:hover) {
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+/*  End Button ConfirmationModalYesDealBox */
+
+.TryAgainButton {
+  background: #feac78 !important;
+  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
+  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#feac78', endColorstr='#e97225',GradientType=0 ) !important;
+  border-color: #feac78 !important;
+  cursor: pointer !important;
+  font-family: "Poppins", sans-serif !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  -moz-transition: all 0.3s ease-in !important;
+  -o-transition: all 0.3s ease-in !important;
+  -ms-transition: all 0.3s ease-in !important;
+  position: relative !important;
+}

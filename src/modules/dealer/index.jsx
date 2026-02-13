@@ -1,0 +1,111 @@
+import React, { lazy, Suspense, useEffect, useState } from "react";
+import GlobalTabs from "../../shareComponents/elements/tabs";
+// import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
+import Discounting from "../../shareComponents/commonComponents/discounting";
+import Forwards from "../../shareComponents/commonComponents/forwards";
+import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
+import {
+  GetAllDealersSpreadApi,
+  getAllTenorsAction,
+  getAllTreasuryInstrumentsApi,
+  GetBankForwardForTreasuryDealerApi,
+  GetBankSpotForDealerApi,
+  GetCurrencyCrossesApi,
+  GetDiscountingRatesForDealerApi,
+} from "../../store/actions/WatchlistAction";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+// import LiveRates from "../../shareComponents/commonComponents/liveRates";
+
+const LiveRates = lazy(() =>
+  import("../../shareComponents/commonComponents/liveRates/index")
+);
+
+const Dealer = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const GetAllDealersSpread = useSelector(
+    (state) => state.WatchListReducer.GetAllDealersSpread
+  );
+  console.log(
+    { GetAllDealersSpread },
+    "GetAllDealersSpreadGetAllDealersSpread"
+  );
+  const [dealerOptions, setDealerOptions] = useState([]);
+  const [selectedDealer, setSelectedDealer] = useState(null);
+
+  const tabs = [
+    {
+      label: `Live Rates`,
+      key: 0,
+      children: (
+        <Suspense fallback={<>...Loadings</>}>
+          <LiveRates />
+        </Suspense>
+      ),
+    },
+    { label: `Fowards`, key: 1, children: <Forwards /> },
+    { label: `Discounting`, key: 2, children: <Discounting /> },
+  ];
+
+  const handleChangeDealer = (event) => {
+    console.log(event, "handleChangeDealer");
+    let Data = { DealerId: event.value };
+    setSelectedDealer(event);
+    dispatch(GetBankSpotForDealerApi({ navigate, Data }));
+    dispatch(GetCurrencyCrossesApi({ navigate, Data }));
+    // dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+    // dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+  };
+
+  useEffect(() => {
+    dispatch(GetAllDealersSpreadApi({ navigate }));
+    dispatch(getAllTreasuryInstrumentsApi({ navigate }));
+    dispatch(getAllTenorsAction({ navigate }));
+  }, []);
+
+  useEffect(() => {
+    if (GetAllDealersSpread && GetAllDealersSpread !== null) {
+      try {
+        const { dealersSpread } = GetAllDealersSpread;
+        if (dealersSpread && Array.isArray(dealersSpread)) {
+          const mappedDealers = dealersSpread.map((dealer) => ({
+            value: dealer.userID,
+            label: dealer.userName,
+          }));
+          if (mappedDealers.length > 0) {
+            let Data = { DealerId: mappedDealers[0].value };
+            dispatch(GetBankSpotForDealerApi({ navigate, Data }));
+            dispatch(GetCurrencyCrossesApi({ navigate, Data }));
+            // dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+            // dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+            setSelectedDealer(mappedDealers[0]);
+            setDealerOptions(mappedDealers);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [GetAllDealersSpread]);
+  console.log(dealerOptions, "dealerOptions");
+  return (
+    <div className="mt-2">
+      <GlobalTabs
+        items={tabs}
+        tabBarExtraContent={
+          <SelectDropdown
+            options={dealerOptions}
+            isSearchable={true}
+            value={selectedDealer}
+            style={{ width: 150, background: "#0326b3", color: "#ffffff" }}
+            classNamePrefix="treasuryInterbankSelectDealer"
+            onChange={handleChangeDealer}
+          />
+        }
+      />
+    </div>
+  );
+};
+
+export default Dealer;
