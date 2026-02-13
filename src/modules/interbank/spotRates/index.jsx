@@ -400,7 +400,7 @@ const SpotRates = () => {
                 <div className="d-flex align-items-center">
                   <div className="form-check form-switch me-3">
                     <SwitchButton
-                      labelValue={"ON / OFF  "}
+                      labelValue={"OFF / ON  "}
                       checked={isMarketOn}
                       onChange={handleChangeMarketStatus}
                     />
