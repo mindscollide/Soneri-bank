@@ -169,6 +169,11 @@ const Dashboard = () => {
             dispatch(setTreasurySpotRatesFeed(payload));
           });
           break;
+        case "TREASURY_FORWARD_RATES_FEED":
+          startTransition(() => {
+            dispatch(setTreasuryForwardRates(payload));
+          });
+          break;
 
         default:
           console.warn("No specific handler for this message type", payload);

@@ -1,220 +1,37 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "./forwards.module.css";
-
 import { throttle } from "lodash";
-
 import { useDispatch } from "react-redux";
-import { buildForwardsTable } from "../utils/generateColumnsData";
 import {
   clearCategoryForwardClearRates,
   setCategoryFowardsTenorsChanges,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
-import { IndexCell } from "../elements/inputField/IndexCell";
-import GlobalTable from "../elements/table/GlobalTable";
+import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
+import { buildForwardsTable } from "../../../shareComponents/commonComponents/utils/generateColumnsData";
 
 const Forwards = () => {
   const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
-  // const dataSource = [
-  //   {
-  //     tenorID: 67,
-  //     tenorName: "half month",
-  //     tenorDays: 16,
-  //     bid_USD: 0,
-  //     ask_USD: 0,
-  //     InstrumentID_USD: 21,
-  //     InstrumentName_USD: "USD",
-  //     bid_EUR: 0,
-  //     ask_EUR: 0,
-  //     InstrumentID_EUR: 22,
-  //     InstrumentName_EUR: "EUR",
-  //     bid_GBP: 0,
-  //     ask_GBP: 0,
-  //     InstrumentID_GBP: 23,
-  //     InstrumentName_GBP: "GBP",
-  //     bid_JPY: 0,
-  //     ask_JPY: 0,
-  //     InstrumentID_JPY: 24,
-  //     InstrumentName_JPY: "JPY",
-  //     bid_CNY: 0,
-  //     ask_CNY: 0,
-  //     InstrumentID_CNY: 25,
-  //     InstrumentName_CNY: "CNY",
-  //     bid_CHF: 0,
-  //     ask_CHF: 0,
-  //     InstrumentID_CHF: 40,
-  //     InstrumentName_CHF: "CHF",
-  //   },
-  // ];
-
-  // const [columnsData, setColumnsData] = useState([]);
-
-  // const columnsData = [
-  //   {
-  //     title: "",
-  //     key: "tenorName",
-  //     width: 60,
-  //     children: [
-  //       {
-  //         title: "Tenor",
-  //         dataIndex: "tenorName",
-  //         key: "tenorName",
-  //         width: 120,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "USD",
-  //     key: "group_USD",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_USD",
-  //         key: "bid_USD",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_USD",
-  //         key: "ask_USD",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "EUR",
-  //     key: "group_EUR",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_EUR",
-  //         key: "bid_EUR",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_EUR",
-  //         key: "ask_EUR",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "GBP",
-  //     key: "group_GBP",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_GBP",
-  //         key: "bid_GBP",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_GBP",
-  //         key: "ask_GBP",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "JPY",
-  //     key: "group_JPY",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_JPY",
-  //         key: "bid_JPY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_JPY",
-  //         key: "ask_JPY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "CNY",
-  //     key: "group_CNY",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_CNY",
-  //         key: "bid_CNY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_CNY",
-  //         key: "ask_CNY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "CHF",
-  //     key: "group_CHF",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_CHF",
-  //         key: "bid_CHF",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_CHF",
-  //         key: "ask_CHF",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  // ];
   // const GetCategoryWiseForwardRatesData = useSelector(
   //   (state) => state.categoryReducer.GetCategoryWiseForwardRates
   // );
+  const TreasuryForwardRates = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryForwardRates
+  );
   // const GetCategoryWiseForwardRatesData = null;
   // console.log(
   //   GetCategoryWiseForwardRatesData,
   //   "GetCategoryWiseForwardRatesDataGetCategoryWiseForwardRatesData"
   // );
-  const GetBankForwardForTreasuryDealer = useSelector(
-    (state) => state.WatchListReducer.GetBankForwardForTreasuryDealer
+  const GetBankForwardForTreasury = useSelector(
+    (state) => state.WatchListReducer.GetBankForwardForTreasury
   );
-  console.log(
-    GetBankForwardForTreasuryDealer,
-    "GetBankForwardForTreasuryDealerGetBankForwardForTreasuryDealer"
-  );
+
+  console.log(GetBankForwardForTreasury, "GetBankForwardForTreasury");
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
@@ -251,8 +68,7 @@ const Forwards = () => {
         };
 
         const { forwardRates = [] } =
-          GetBankForwardForTreasuryDealer !== null &&
-          GetBankForwardForTreasuryDealer;
+          GetBankForwardForTreasury !== null && GetBankForwardForTreasury;
         const { rowData, columnsData } = buildForwardsTable(
           3,
           forwardRates,
@@ -271,9 +87,62 @@ const Forwards = () => {
   }, [
     allInstrumentForTreasuryData,
     getAllTenorsRecords,
-    GetBankForwardForTreasuryDealer,
+    GetBankForwardForTreasury,
   ]);
+  const updateForwardRates = useMemo(
+    () =>
+      throttle(
+        (treasuryForwardRates, setDataSource) => {
+          const { forwardRates = [] } = treasuryForwardRates;
+          if (forwardRates.length === 0) return;
 
+          setDataSource((prevData) =>
+            prevData.map((row) => {
+              let updatedRow = { ...row };
+
+              forwardRates.forEach((d) => {
+                Object.keys(row).forEach((key) => {
+                  if (
+                    key.startsWith("InstrumentID_") &&
+                    row[key] === d.instrumentID &&
+                    row.tenorID === d.tenorID // fallback
+                  ) {
+                    const currency = key.split("_")[1];
+                    updatedRow[`bid_${currency}`] = d.bidWithSpread;
+                    updatedRow[`ask_${currency}`] = d.askWithSpread;
+                  }
+                });
+              });
+
+              return updatedRow;
+            })
+          );
+        },
+        2,
+        { leading: true, trailing: true }
+      ),
+    [] // sirf ek baar banega
+  );
+  useEffect(() => {
+    if (TreasuryForwardRates) {
+      updateForwardRates(TreasuryForwardRates, setDataSource);
+    }
+  }, [TreasuryForwardRates, updateForwardRates, marketStatus]);
+  useEffect(() => {
+    if (marketStatus !== null && marketStatus === false) {
+      setDataSource((prevData) =>
+        prevData.map((row) => {
+          const updatedRow = { ...row };
+          Object.keys(row).forEach((key) => {
+            if (key.startsWith("bid_") || key.startsWith("ask_")) {
+              updatedRow[key] = 0;
+            }
+          });
+          return updatedRow;
+        })
+      );
+    }
+  }, [marketStatus]);
   // useEffect(() => {
   //   if (
   //     categoryFowardsTenorsChanges !== null &&
@@ -326,35 +195,35 @@ const Forwards = () => {
   //   allInstrumentForTreasuryData,
   // ]);
 
-  const throttledCategoryForwardUpdate = useMemo(
-    () =>
-      throttle((forwardRatesUpdate) => {
-        const { instrumentForwardsData } = forwardRatesUpdate;
+  // const throttledCategoryForwardUpdate = useMemo(
+  //   () =>
+  //     throttle((forwardRatesUpdate) => {
+  //       const { instrumentForwardsData } = forwardRatesUpdate;
 
-        setDataSource((prevData) =>
-          prevData.map((row) => {
-            let updatedRow = { ...row };
+  //       setDataSource((prevData) =>
+  //         prevData.map((row) => {
+  //           let updatedRow = { ...row };
 
-            instrumentForwardsData.forEach((d) => {
-              Object.keys(row).forEach((key) => {
-                if (
-                  key.startsWith("InstrumentID_") &&
-                  row[key] === d.instrumentID &&
-                  row.tenorID === d.tenorID
-                ) {
-                  const currency = key.split("_")[1]; // e.g., USD
-                  updatedRow[`bid_${currency}`] = d.bidWithSpread;
-                  updatedRow[`ask_${currency}`] = d.askWithSpread;
-                }
-              });
-            });
+  //           instrumentForwardsData.forEach((d) => {
+  //             Object.keys(row).forEach((key) => {
+  //               if (
+  //                 key.startsWith("InstrumentID_") &&
+  //                 row[key] === d.instrumentID &&
+  //                 row.tenorID === d.tenorID
+  //               ) {
+  //                 const currency = key.split("_")[1]; // e.g., USD
+  //                 updatedRow[`bid_${currency}`] = d.bidWithSpread;
+  //                 updatedRow[`ask_${currency}`] = d.askWithSpread;
+  //               }
+  //             });
+  //           });
 
-            return updatedRow;
-          })
-        );
-      }, 20),
-    []
-  );
+  //           return updatedRow;
+  //         })
+  //       );
+  //     }, 20),
+  //   []
+  // );
 
   // useEffect(() => {
   //   if (CategoryForwardRates) {
@@ -362,21 +231,21 @@ const Forwards = () => {
   //   }
   // }, [CategoryForwardRates, throttledCategoryForwardUpdate]);
 
-  useEffect(() => {
-    if (marketStatus !== null && marketStatus === false) {
-      setDataSource((prevData) =>
-        prevData.map((row) => {
-          const updatedRow = { ...row };
-          Object.keys(row).forEach((key) => {
-            if (key.startsWith("bid_") || key.startsWith("ask_")) {
-              updatedRow[key] = 0;
-            }
-          });
-          return updatedRow;
-        })
-      );
-    }
-  }, [marketStatus]);
+  // useEffect(() => {
+  //   if (marketStatus !== null && marketStatus === false) {
+  //     setDataSource((prevData) =>
+  //       prevData.map((row) => {
+  //         const updatedRow = { ...row };
+  //         Object.keys(row).forEach((key) => {
+  //           if (key.startsWith("bid_") || key.startsWith("ask_")) {
+  //             updatedRow[key] = 0;
+  //           }
+  //         });
+  //         return updatedRow;
+  //       })
+  //     );
+  //   }
+  // }, [marketStatus]);
 
   // For clear Forward Rates
   // useEffect(() => {
@@ -434,6 +303,7 @@ const Forwards = () => {
           className="Dealer_Forwards_Treasury"
           dataSource={dataSource}
           pagination={false}
+          rowHoverBg={"#000"}
         />
       </div>
     </>
