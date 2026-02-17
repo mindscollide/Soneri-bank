@@ -1,19 +1,18 @@
 import React from "react";
-import DealerFeDiscounting from "./DealerNonFEDiscounting";
-import DealerNonFeDiscounting from "./DealerNonFEDiscounting";
-import DealerFeDiscountingTable from "./DealerFEDiscounting";
+import TreasuryFeDiscountingTable from "./TreasuryFEDiscounting";
+import TreasuryNonFeDiscountingTable from "./TreasuryNonFEDiscounting";
 
-const DealerDiscounting = () => {
+const TreasuryDiscounting = () => {
   return (
     <>
       <div>
-        <DealerFeDiscountingTable />
+        <TreasuryFeDiscountingTable />
       </div>
       <div>
-        <DealerNonFeDiscounting />
+        <TreasuryNonFeDiscountingTable />
       </div>
     </>
   );
 };
 
-export default DealerDiscounting;
+export default TreasuryDiscounting;

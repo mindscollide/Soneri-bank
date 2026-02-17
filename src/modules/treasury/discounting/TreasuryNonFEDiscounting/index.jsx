@@ -1,19 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { buildDiscountingTable } from "../../utils/generateColumnsData";
-import { IndexCell } from "../../elements/inputField/IndexCell";
+import styles from "./treasuryNonFEDiscountingTable.module.css";
+import { useEffect, useMemo, useState } from "react";
+import { buildDiscountingTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
+import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { throttle } from "lodash";
-import GlobalTable from "../../elements/table/GlobalTable";
-import { Col, Row } from "react-bootstrap";
-import styles from "./dealerNonFEDiscountingTable.module.css";
+import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 
-const DealerNonFeDiscountingTable = () => {
+const TreasuryNonFeDiscountingTable = () => {
   const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
-  const GetDiscountingRatesForDealer = useSelector(
-    (state) => state.WatchListReducer.GetDiscountingRatesForDealer
+  const GetDiscountingRatesForTreasury = useSelector(
+    (state) => state.WatchListReducer.GetDiscountingRatesForTreasury
   );
 
   const getAllTenorsRecords = useSelector(
@@ -22,7 +21,7 @@ const DealerNonFeDiscountingTable = () => {
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
-  console.log(GetDiscountingRatesForDealer, "GetDiscountingRatesForDealer");
+  console.log(GetDiscountingRatesForTreasury, "GetDiscountingRatesForTreasury");
 
   //   const CategoryFeDiscounting = useSelector(
   //     (state) => state.RealtimeActionsSlice.CategoryFeDiscounting
@@ -44,7 +43,8 @@ const DealerNonFeDiscountingTable = () => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
       try {
         const { nonFEDiscountingRates = [] } =
-          GetDiscountingRatesForDealer !== null && GetDiscountingRatesForDealer;
+          GetDiscountingRatesForTreasury !== null &&
+          GetDiscountingRatesForTreasury;
         let getAllInstrument = {
           instruments: allInstrumentForTreasuryData.nonFEDiscountingInstruments,
         };
@@ -69,7 +69,7 @@ const DealerNonFeDiscountingTable = () => {
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
-    GetDiscountingRatesForDealer,
+    GetDiscountingRatesForTreasury,
   ]);
 
   const throttledUpdate = useMemo(
@@ -186,4 +186,4 @@ const DealerNonFeDiscountingTable = () => {
   );
 };
 
-export default DealerNonFeDiscountingTable;
+export default TreasuryNonFeDiscountingTable;

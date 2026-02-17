@@ -1,0 +1,22 @@
+.mainNewsContainer {
+  margin: 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+.mainHeaderRow {
+  background: #f6f4ef;
+  border: 1px solid #dee2e6;
+  margin: 0;
+}
+.newsHeadingStyles {
+  font-weight: 700 !important;
+  font-size: 1.5rem !important;
+}
+.newsViewAll {
+  font-size: 13px !important;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  color: var(--color-blue);
+}

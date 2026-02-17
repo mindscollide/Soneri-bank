@@ -1,20 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { buildDiscountingTable } from "../../utils/generateColumnsData";
-import { IndexCell } from "../../elements/inputField/IndexCell";
+import styles from "./TreasuryFEDiscountingTable.module.css";
+import { useEffect, useMemo, useState } from "react";
+import { buildDiscountingTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
+import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { throttle } from "lodash";
-import GlobalTable from "../../elements/table/GlobalTable";
-import { Col, Row } from "react-bootstrap";
-import styles from "./dealerFEDiscountingTable.module.css";
+import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 
-const DealerFeDiscountingTable = () => {
+const TreasuryFeDiscountingTable = () => {
   const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
-  const GetDiscountingRatesForDealer = useSelector(
-    (state) => state.WatchListReducer.GetDiscountingRatesForDealer
+  const GetDiscountingRatesForTreasury = useSelector(
+    (state) => state.WatchListReducer.GetDiscountingRatesForTreasury
   );
+
+  console.log(GetDiscountingRatesForTreasury, "GetDiscountingRatesForTreasury");
 
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
@@ -43,7 +44,8 @@ const DealerFeDiscountingTable = () => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
       try {
         const { feDiscountingRates = [] } =
-          GetDiscountingRatesForDealer !== null && GetDiscountingRatesForDealer;
+          GetDiscountingRatesForTreasury !== null &&
+          GetDiscountingRatesForTreasury;
         let getAllInstrument = {
           instruments: allInstrumentForTreasuryData.discountingInstruments,
         };
@@ -68,7 +70,7 @@ const DealerFeDiscountingTable = () => {
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
-    GetDiscountingRatesForDealer,
+    GetDiscountingRatesForTreasury,
   ]);
 
   const throttledUpdate = useMemo(
@@ -185,4 +187,4 @@ const DealerFeDiscountingTable = () => {
   );
 };
 
-export default DealerFeDiscountingTable;
+export default TreasuryFeDiscountingTable;

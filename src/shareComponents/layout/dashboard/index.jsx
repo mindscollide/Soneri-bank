@@ -9,7 +9,6 @@ import React, {
 import MainHeader from "../header";
 import "./dashboard.css";
 import Dealer from "../../../modules/dealer";
-import Interbank from "../../../modules/interbank";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -34,10 +33,12 @@ import {
   setCounterPartyNonFeDiscounting,
   setCounterPartySpotRates,
   setCurrencyCrossesRatesFeed,
+  setDealerSpotRatesFeed,
   setFxTradingCards,
   setMarketTimingsUpdated,
   setTenorsCreated,
   setTradeRightsStatusUpdated,
+  setTreasuryDealerForwardRates,
   setTreasuryFeDiscounting,
   setTreasuryForwardRates,
   setTreasuryFowardsTenorsChanges,
@@ -102,7 +103,7 @@ const Dashboard = () => {
       // const type = data?.message; // ✅ FIX
       // const payload = data;
 
-      console.log({ data, payload, type }, "handleMqttMessage");
+      // console.log({ data, payload, type }, "handleMqttMessage");
 
       switch (type) {
         case "MARKET_STATUS_UPDATED":
@@ -155,9 +156,9 @@ const Dashboard = () => {
           break;
         // ✅ Spot/Forward rates — wrap in transition
         case "DISPATCHER_DEALER_SPOT_RATES":
-          // startTransition(() => {
-          //   dispatch(setTreasurySpotRatesFeed(payload));
-          // });
+          startTransition(() => {
+            dispatch(setDealerSpotRatesFeed(payload));
+          });
           break;
         case "TREASURY_CURRENCY_CROSS_FEED":
           startTransition(() => {
@@ -173,6 +174,26 @@ const Dashboard = () => {
           startTransition(() => {
             dispatch(setTreasuryForwardRates(payload));
           });
+          break;
+        case "TREASURY_DEALER_FORWARD_RATES_FEED":
+          // Dealer Forward will handle there
+          startTransition(() => {
+            dispatch(setTreasuryDealerForwardRates(payload));
+          });
+
+          break;
+
+        case "TREASURY_DEALER_NONFEDISCOUNTING_RATES_FEED":
+          // Dealer Non - Fe Discounting will handle there
+          break;
+
+        case "TREASURY_DEALER_FEDISCOUNTING_RATES_FEED":
+          // Dealer Fe Discounting will handle there
+          break;
+        case "TREASURY_FEDISCOUNTING_RATES_FEED":
+          break;
+
+        case "TREASURY_NONFEDISCOUNTING_RATES_FEED":
           break;
 
         default:
@@ -200,49 +221,136 @@ const Dashboard = () => {
     isConnected,
   } = useMqttClient(mqttConfig);
 
+  // useEffect(() => {
+  //   if (isTreasury || isDealer) {
+  //     if (!dealerValue.value) return;
+
+  //     if (location.pathname.toLowerCase().includes("dealer".toLowerCase())) {
+  //       // unsubscribe the toic of treasury
+  //     } else if (
+  //       location.pathname.toLowerCase().includes("treasury".toLowerCase())
+  //     ) {
+  //       // Unsubscribe the Topics of Dealer
+  //     }
+  //     console.log(dealerValue, "dealerValuedealerValuedealerValue");
+  //     const newTopic = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerValue.value}`;
+
+  //     // Subscribe to the new topic
+  //     subscribeToTopics([newTopic]);
+  //     console.log("Subscribed to:", newTopic);
+
+  //     // Store this topic as previous for next run
+  //     if (prevTopicRef.current !== newTopic) {
+  //       prevTopicRef.current = newTopic;
+  //     }
+  //   }
+
+  //   // Cleanup to unsubscribe the previous topic
+  //   return () => {
+  //     if (prevTopicRef.current) {
+  //       unsubscribeFromTopics([prevTopicRef.current]);
+  //       console.log("Unsubscribed from:", prevTopicRef.current);
+  //     }
+  //   };
+  // }, [dealerValue.value]);
+
+  // useEffect(() => {
+  //   const isDealerPath = location.pathname.toLowerCase().includes("dealer");
+
+  //   const dealerId = dealerValue?.value;
+
+  //   // If ANY required condition fails → unsubscribe
+  //   if (!isTreasury || !isDealerPath || !dealerId || dealerId === 0) {
+  //     if (prevTopicRef.current) {
+  //       unsubscribeFromTopics([prevTopicRef.current]);
+  //       console.log("Unsubscribed (condition failed):", prevTopicRef.current);
+  //       prevTopicRef.current = null;
+  //     }
+  //     return;
+  //   }
+
+  //   const newTopic = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
+
+  //   // Switch topic if changed
+  //   if (prevTopicRef.current !== newTopic) {
+  //     if (prevTopicRef.current) {
+  //       unsubscribeFromTopics([prevTopicRef.current]);
+  //       console.log("Unsubscribed (switch):", prevTopicRef.current);
+  //     }
+
+  //     subscribeToTopics([newTopic]);
+  //     console.log("Subscribed:", newTopic);
+
+  //     prevTopicRef.current = newTopic;
+  //   }
+
+  //   return () => {
+  //     if (prevTopicRef.current) {
+  //       unsubscribeFromTopics([prevTopicRef.current]);
+  //       console.log("Cleanup unsubscribe:", prevTopicRef.current);
+  //       prevTopicRef.current = null;
+  //     }
+  //   };
+  // }, [dealerValue?.value, location.pathname, isTreasury]);
+
   useEffect(() => {
-    if (isTreasury || isDealer) {
-      subscribeToTopics([
-        `SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY`,
-        `SBL_REAL_TIME_FEED_TREASURY`,
-      ]);
+    const isDealerPath = location.pathname.toLowerCase().includes("dealer");
 
-      if (!dealerValue.value) return;
+    const dealerId = dealerValue?.value;
 
-      console.log(dealerValue, "dealerValuedealerValuedealerValue");
-      const newTopic = `SBL_TREASURY_DEALER_RATES_${dealerValue.value}`;
-
-      // Subscribe to the new topic
-      subscribeToTopics([newTopic]);
-      console.log("Subscribed to:", newTopic);
-
-      // Store this topic as previous for next run
-      if (prevTopicRef.current !== newTopic) {
-        prevTopicRef.current = newTopic;
+    // ❌ If ANY required condition fails → unsubscribe all
+    if (!isTreasury || !isDealerPath || !dealerId || dealerId === 0) {
+      if (prevTopicRef.current?.length) {
+        unsubscribeFromTopics(prevTopicRef.current);
+        console.log("Unsubscribed (condition failed):", prevTopicRef.current);
+        prevTopicRef.current = [];
       }
+      return;
     }
 
-    // Cleanup to unsubscribe the previous topic
-    // return () => {
-    //   if (prevTopicRef.current) {
-    //     unsubscribeFromTopics([prevTopicRef.current]);
-    //     console.log("Unsubscribed from:", prevTopicRef.current);
-    //   }
-    // };
-  }, [dealerValue.value]);
+    // ✅ Two topics
+    // const topic1 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
+    const topic2 = `SBL_TREASURY_DEALER_RATES_${dealerId}`;
+
+    const newTopics = [topic2];
+
+    // If topics changed → switch
+    const isSame =
+      JSON.stringify(prevTopicRef.current) === JSON.stringify(newTopics);
+
+    if (!isSame) {
+      if (prevTopicRef.current?.length) {
+        unsubscribeFromTopics(prevTopicRef.current);
+        console.log("Unsubscribed (switch):", prevTopicRef.current);
+      }
+
+      subscribeToTopics(newTopics);
+      console.log("Subscribed:", newTopics);
+
+      prevTopicRef.current = newTopics;
+    }
+
+    return () => {
+      if (prevTopicRef.current?.length) {
+        unsubscribeFromTopics(prevTopicRef.current);
+        console.log("Cleanup unsubscribe:", prevTopicRef.current);
+        prevTopicRef.current = [];
+      }
+    };
+  }, [dealerValue?.value, location.pathname, isTreasury]);
 
   useEffect(() => {
     if (!isConnected) return;
 
     //make isTreasuryCommented
-    if (isTreasury || isDealer) {
+    if (location.pathname.toLowerCase().includes("treasury".toLowerCase())) {
       if (marketStatus) {
         // Subscribe only when status is true AND path is treasury
         subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
         console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
       } else {
         // Unsubscribe when status is false OR path is not treasury
-        // unsubscribeFromTopics(["BOP_REAL_TIME_FEED_TREASURY"]);
+        unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
         console.log("Unsubscribed from SBL_REAL_TIME_FEED_TREASURY_DEALER");
       }
     }
@@ -266,7 +374,11 @@ const Dashboard = () => {
   //   handlePathChange();
   // }, [location.pathname]);
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     connectToMqtt({ subscribeID, userID });
     dispatch(getMarketStatusApi({ navigate }));
 

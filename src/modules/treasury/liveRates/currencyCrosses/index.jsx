@@ -262,7 +262,9 @@ const CurrencyCrosses = memo(() => {
     <GlobalTable
       columns={columns}
       dataSource={processedData}
-      prefixCls={processedData.length > 0 ? "LiveRatesTable" : "LiveRatesTable"}
+      prefixCls={
+        processedData.length > 0 ? "LiveRatesTable" : "LiveRatesTable_Empty"
+      }
       pagination={false}
       scroll={{ x: "max-content", y: 500 }}
     />

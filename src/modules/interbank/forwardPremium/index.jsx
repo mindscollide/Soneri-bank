@@ -265,11 +265,12 @@ const ForwardsPremium = () => {
                 {SelectDropdown && (
                   <Suspense fallback={<div>Loading dropdown...</div>}>
                     <SelectDropdown
+                      isSearchable={true}
                       value={tenorValue}
                       menuPosition="bottom"
                       onChange={handleChangeTenors}
                       options={getAllTenorsList}
-                      classNamePrefix={"DealerDropDown"}
+                      classNamePrefix={"SelectTenorDropDown"}
                     />
                   </Suspense>
                 )}

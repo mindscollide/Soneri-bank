@@ -1,7 +1,7 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useRef } from "react";
 import GlobalTabs from "../../shareComponents/elements/tabs";
 // import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
-import Discounting from "../../shareComponents/commonComponents/discounting";
+// import Discounting from "../../shareComponents/commonComponents/discounting";
 import News from "../../shareComponents/commonComponents/news";
 import RateSheet from "../../shareComponents/commonComponents/rateSheet";
 import { useDispatch } from "react-redux";
@@ -12,9 +12,11 @@ import {
   GetBankForwardForTreasuryApi,
   GetBankSpotForTreasuryApi,
   GetCurrencyCrossesApi,
+  GetDiscountingRatesForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
 const LiveRates = lazy(() => import("./liveRates/index"));
 const Forwards = lazy(() => import("./forwards/index"));
+const TreasuryDiscounting = lazy(() => import("./discounting/index"));
 const Treasury = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,18 +39,30 @@ const Treasury = () => {
         </Suspense>
       ),
     },
-    { label: `Discounting`, key: 2, children: <Discounting /> },
+    {
+      label: `Discounting`,
+      key: 2,
+      children: (
+        <Suspense fallback={<>...Loadings</>}>
+          <TreasuryDiscounting />
+        </Suspense>
+      ),
+    },
+
     { label: `News`, key: 3, children: <News /> },
     { label: `Rate Sheet`, key: 4, children: <RateSheet /> },
   ];
+  const hasFetched = useRef(false);
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(getAllTenorsAction({ navigate }));
 
     dispatch(GetBankSpotForTreasuryApi({ navigate }));
     dispatch(GetCurrencyCrossesApi({ navigate }));
     dispatch(GetBankForwardForTreasuryApi({ navigate }));
-    // dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+    dispatch(GetDiscountingRatesForTreasuryApi({ navigate }));
   }, []);
   // const dealerDropdown = (
   //   <SelectDropdown

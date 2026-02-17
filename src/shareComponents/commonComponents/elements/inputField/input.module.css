@@ -407,3 +407,22 @@
   background: var(--color-light) !important;
   color: var(--color-blue) !important;
 }
+
+.bidAskInput {
+  border-radius: 4px;
+  font-family: "Helvetica-Bold", sans-serif;
+  outline: none;
+  min-height: calc ↳ calc(19.5px + 8px + 2px) ↳ 29.5px (1.5em + 0.5rem + 2px);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ced4da;
+  font-size: 13px;
+}
+.bidAskInput:focus {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}

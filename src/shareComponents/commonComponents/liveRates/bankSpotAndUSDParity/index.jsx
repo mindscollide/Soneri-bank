@@ -8,8 +8,8 @@ import { IndexCell } from "../../elements/inputField/IndexCell";
 // // ✅ Pure selectors (no object creation here)
 const selectGetAllInstrumentForTreasury = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
-const selectTreasurySpotRatesFeed = (state) =>
-  state.RealtimeActionsSlice.TreasurySpotRatesFeed;
+const selectDealerSpotRatesFeed = (state) =>
+  state.RealtimeActionsSlice.DealerSpotRatesFeed;
 const selectWorldCrosses = (state) =>
   state.WatchListReducer.GetBankSpotForDealer?.worldCrosses || [];
 const selectWorldCurrencies = (state) =>
@@ -23,7 +23,7 @@ const BankSpotAndUSDParity = memo(() => {
     selectGetAllInstrumentForTreasury,
     shallowEqual
   );
-  const fullFeed = useSelector(selectTreasurySpotRatesFeed);
+  const fullFeed = useSelector(selectDealerSpotRatesFeed);
   const marketStatus = useSelector(selectMarketStatus);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);

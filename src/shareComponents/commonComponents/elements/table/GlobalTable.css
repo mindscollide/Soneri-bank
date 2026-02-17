@@ -401,19 +401,24 @@ tr.Treasury_Forwards-row.Treasury_Forwards-row-level-0.striped-design:first-chil
   margin-left: -15px !important;
 }
 .ForwardsForTreasuryAndBranchTable-thead tr:nth-child(1) th {
-  background-color: transparent !important;
+  background-color: #f6f4ef !important;
   text-align: center !important;
-  color: #f26522;
+  color: #000;
   font-weight: 700;
   font-size: 14px;
+  border-right: 1px solid #837c66;
+}
+.ForwardsForTreasuryAndBranchTable-thead tr:nth-child(1) th:last-child {
+  background-color: transparent !important;
+  border-right: none !important;
 }
 .ForwardsForTreasuryAndBranchTable-thead tr:nth-child(1) th:nth-child(1) {
   background-color: transparent !important;
-  text-align: center !important;
+  /* text-align: center !important;
   color: #f26522;
   font-weight: 700;
   font-size: 14px;
-  border-left: 0px !important;
+  border-left: 0px !important; */
 }
 .ForwardsForTreasuryAndBranchTable-thead tr:nth-child(2) th {
   background-color: #000 !important;
@@ -1908,10 +1913,41 @@ tr.OutStanding_Table-cell-scrollbar {
   background: none !important;
 }
 
+/* LiveRates_empty */
+.LiveRatesTable_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.LiveRatesTable_Empty {
+  border-radius: 0px !important;
+}
+.LiveRatesTable_Empty .LiveRatesTable_Empty-thead > tr:nth-child(1) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  /* border-right: 1px solid #837c66 !important; */
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.LiveRatesTable_Empty .LiveRatesTable_Empty-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+}
+.LiveRatesTable_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
+  display: none;
+}
+
 /* Discounting Table CSS */
 /* FIRST COLUMN (fixed style) */
-.Dealer_FE_Discounting .ant-table-thead > tr:nth-child(1) > th {
-  color: #fff;
+/* .Dealer_FE_Discounting .ant-table-thead > tr:nth-child(1) > th {
   text-align: center;
   font-family: "Helvetica-Bold", sans-serif !important;
   background: var(--color-light) !important;
@@ -1939,7 +1975,7 @@ tr.OutStanding_Table-cell-scrollbar {
   border-bottom: 1px solid #837c66;
 }
 
-/* ALTERNATE COLUMNS AFTER FIRST */
+ALTERNATE COLUMNS AFTER FIRST
 .Dealer_FE_Discounting
   .ant-table-tbody
   > tr
@@ -1960,7 +1996,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-weight: 500;
 }
 
-/* Common styles for all other columns */
+Common styles for all other columns
 .Dealer_FE_Discounting .ant-table-tbody > tr > td:not(:first-child) {
   text-align: center;
   padding: 5px 10px !important;
@@ -1969,7 +2005,7 @@ tr.OutStanding_Table-cell-scrollbar {
   border-bottom: 1px solid #837c66;
 }
 
-/* USD Parity */
+USD Parity
 
 .Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(5) {
   text-align: center;
@@ -2002,4 +2038,62 @@ tr.OutStanding_Table-cell-scrollbar {
   color: var(--color-black);
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
+} */
+/* .Dealer_FE_Discounting{
+
+} */
+
+/* ================= HEADER ROW 1 ================= */
+
+/* ================= HEADER ROW 1 ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-thead > tr:nth-child(1) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important; /* light header bg */
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  border-right: 1px solid #837c66 !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-thead > tr:nth-child(2) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: #000 !important; /* black header */
+  color: #fff !important;
+  padding: 5px 10px !important;
+  border-right: 1px solid #837c66 !important;
+}
+
+/* ================= BODY ROWS ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody > tr:nth-child(odd) {
+  background-color: #ffd966; /* yellow row */
+}
+
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody > tr:nth-child(even) {
+  background-color: #d9d9d9; /* grey row */
+}
+
+/* ================= BODY CELLS ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody td {
+  text-align: center;
+  font-family: "Helvetica", sans-serif !important;
+  border-right: 1px solid #837c66 !important;
+  padding: 5px 10px !important;
+}
+
+/* ================= REMOVE EXTRA BORDER AT TABLE END ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody td:last-child,
+.Dealer_FE_Discounting .Dealer_FE_Discounting-thead th:last-child {
+  border-right: none !important;
+}
+
+/* Optional: Add subtle border-bottom to separate rows */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody > tr td {
+  border-bottom: 1px solid #837c66 !important;
+}
+
+/* Table wrapper scroll if needed */
+.Dealer_FE_Discounting-wrapper {
+  overflow-x: auto;
 }

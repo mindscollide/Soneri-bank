@@ -1,8 +1,7 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import GlobalTabs from "../../shareComponents/elements/tabs";
 // import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
-import Discounting from "../../shareComponents/commonComponents/discounting";
-import Forwards from "../../shareComponents/commonComponents/forwards";
+// import Discounting from "../../shareComponents/commonComponents/discounting";
 import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
 import {
   GetAllDealersSpreadApi,
@@ -21,8 +20,18 @@ import { setDealerValue } from "../../store/slicers/watchListSlicer/WatchListSli
 const LiveRates = lazy(() =>
   import("../../shareComponents/commonComponents/liveRates/index")
 );
+const Forwards = lazy(() =>
+  import("../../shareComponents/commonComponents/forwards/index")
+);
+const Discounting = lazy(() =>
+  import("../../shareComponents/commonComponents/discounting/index")
+);
+const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+const isTreasury = import.meta.env.VITE_APP_INCLUDE_TREASURY === "true";
+const isDealer = import.meta.env.VITE_APP_INCLUDE_DEALER === "true";
 
 const Dealer = () => {
+  console.log({ isDealer, isTreasury }, "Role");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const GetAllDealersSpread = useSelector(
@@ -45,8 +54,38 @@ const Dealer = () => {
         </Suspense>
       ),
     },
-    { label: `Fowards`, key: 1, children: <Forwards /> },
-    { label: `Discounting`, key: 2, children: <Discounting /> },
+    {
+      label: `Forwards`,
+      key: 1,
+      children: (
+        <Suspense fallback={<>...Loadings</>}>
+          <Forwards />
+        </Suspense>
+      ),
+    },
+    {
+      label: `Discounting`,
+      key: 2,
+      children: (
+        <Suspense fallback={<>...Loadings</>}>
+          <Discounting />
+        </Suspense>
+      ),
+    },
+
+    ...(isDealer
+      ? [
+          {
+            label: `News`,
+            key: 3,
+            children: (
+              <Suspense fallback={<>...Loadings</>}>
+                <News />
+              </Suspense>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const handleChangeDealer = (event) => {
@@ -105,14 +144,16 @@ const Dealer = () => {
       <GlobalTabs
         items={tabs}
         tabBarExtraContent={
-          <SelectDropdown
-            options={dealerOptions}
-            isSearchable={true}
-            value={selectedDealer}
-            style={{ width: 150, background: "#0326b3", color: "#ffffff" }}
-            classNamePrefix="treasuryInterbankSelectDealer"
-            onChange={handleChangeDealer}
-          />
+          !isDealer && (
+            <SelectDropdown
+              options={dealerOptions}
+              isSearchable={true}
+              value={selectedDealer}
+              style={{ width: 150, background: "#0326b3", color: "#ffffff" }}
+              classNamePrefix="treasuryInterbankSelectDealer"
+              onChange={handleChangeDealer}
+            />
+          )
         }
       />
     </div>
