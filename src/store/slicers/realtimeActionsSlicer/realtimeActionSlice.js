@@ -141,7 +141,7 @@ const RealtimeActionsSlice = createSlice({
     },
     setTreasurySpotRatesFeed: (state, { payload }) => {
       // if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
-      state.TreasurySpotRatesFeed = payload;
+        state.TreasurySpotRatesFeed = { ...payload };
       // }
     },
     setDealerSpotRatesFeed: (state, { payload }) => {

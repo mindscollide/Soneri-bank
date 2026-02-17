@@ -28,10 +28,7 @@ const CurrencyCrosses = memo(() => {
     shallowEqual
   );
 
-  console.log(
-    { GetCurrencyCrosses, crossInstruments },
-    "SelectGetCurrencyCrossesSelectGetCurrencyCrosses"
-  );
+
 
   // ✅ Memoized essential feed values
   const feedEssentials = useMemo(() => {

@@ -10,6 +10,7 @@ const GlobalTabs = ({ items, tabBarExtraContent }) => {
       centered
       items={items}
       tabBarExtraContent={tabBarExtraContent}
+      destroyOnHidden={true}
     />
   );
 };

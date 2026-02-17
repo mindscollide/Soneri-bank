@@ -191,6 +191,9 @@ const Dashboard = () => {
           // Dealer Fe Discounting will handle there
           break;
         case "TREASURY_FEDISCOUNTING_RATES_FEED":
+          startTransition(() => {
+            dispatch(setTreasuryFeDiscounting(payload));
+          });
           break;
 
         case "TREASURY_NONFEDISCOUNTING_RATES_FEED":
@@ -347,7 +350,7 @@ const Dashboard = () => {
       if (marketStatus) {
         // Subscribe only when status is true AND path is treasury
         subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
-        console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
+        // console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
       } else {
         // Unsubscribe when status is false OR path is not treasury
         unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY"]);

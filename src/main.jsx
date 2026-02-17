@@ -8,11 +8,11 @@ import { NotificationProvider } from "./context/NotificationProvider.jsx";
 import { store } from "./store/store.js"; // adjust path if needed
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
       <NotificationProvider>
         <App />
       </NotificationProvider>
     </Provider>
-  </StrictMode>
+  // </StrictMode>
 );

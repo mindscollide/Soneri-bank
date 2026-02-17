@@ -24,19 +24,10 @@ const BankSpotAndUSDParity = memo(() => {
     shallowEqual
   );
   const fullFeed = useSelector(selectDealerSpotRatesFeed);
+
   const marketStatus = useSelector(selectMarketStatus);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
-
-  const GetCurrencyCrosses = useSelector(
-    SelectGetCurrencyCrosses,
-    shallowEqual
-  );
-
-  console.log(
-    { crossInstruments, marketStatus, worldCrosses, worldCurrencies },
-    "fullFeedfullFeedfullFeed"
-  );
 
   // ✅ Memoized essential feed values
   const feedEssentials = useMemo(() => {
@@ -63,18 +54,16 @@ const BankSpotAndUSDParity = memo(() => {
     fullFeed?.instrumentParitySpot?.instrumentID,
   ]);
 
-  // // Local state for processed data
+  // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
 
-  console.log(processedData, "processedDataprocessedData");
-
-  // // Refs for batching updates
+  // Refs for batching updates
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
 
-  // // ✅ Enriched base data
+  // ✅ Enriched base data
   const enrichedData = useMemo(() => {
     if (!crossInstruments || !worldCrosses || !worldCurrencies) return [];
 
@@ -203,6 +192,8 @@ const BankSpotAndUSDParity = memo(() => {
 
       return hasChanges ? updatedData : prevData;
     });
+
+    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
   }, []);
 
   // ✅ Queue update
@@ -237,7 +228,6 @@ const BankSpotAndUSDParity = memo(() => {
       }
     };
   }, []);
-
   // Columns
   const columns = useMemo(
     () => [
@@ -321,8 +311,10 @@ const BankSpotAndUSDParity = memo(() => {
     <GlobalTable
       columns={columns}
       dataSource={processedData}
+      rowKey={(record) =>
+        `${record.instrumentID}-${record.secondaryInstrumentID}`
+      }
       prefixCls={"LiveRatesTable"}
-      //   className={"LiveRatesTable"}
       pagination={false}
       scroll={{ x: "max-content", y: 500 }}
     />

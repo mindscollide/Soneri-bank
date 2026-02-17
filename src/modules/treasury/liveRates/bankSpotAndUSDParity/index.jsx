@@ -14,12 +14,12 @@ const selectWorldCrosses = (state) =>
   state.WatchListReducer.GetBankSpotForTreasury?.worldCrosses || [];
 const selectWorldCurrencies = (state) =>
   state.WatchListReducer.GetBankSpotForTreasury?.worldCurrencies || [];
-const SelectGetCurrencyCrosses = (state) =>
-  state.WatchListReducer.GetCurrencyCrosses;
+
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
 const BankSpotAndUSDParity = memo(() => {
-  const crossInstruments = useSelector(
+   // Redux state with optimized selectors
+   const crossInstruments = useSelector(
     selectGetAllInstrumentForTreasury,
     shallowEqual
   );
@@ -27,13 +27,6 @@ const BankSpotAndUSDParity = memo(() => {
   const marketStatus = useSelector(selectMarketStatus);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
-
-  const GetCurrencyCrosses = useSelector(
-    SelectGetCurrencyCrosses,
-    shallowEqual
-  );
-
-  console.log({ fullFeed }, "fullFeedfullFeedfullFeed");
 
   // ✅ Memoized essential feed values
   const feedEssentials = useMemo(() => {
@@ -60,18 +53,16 @@ const BankSpotAndUSDParity = memo(() => {
     fullFeed?.instrumentParitySpot?.instrumentID,
   ]);
 
-  // // Local state for processed data
+  // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
 
-  console.log(processedData, "processedDataprocessedData");
-
-  // // Refs for batching updates
+  // Refs for batching updates
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
 
-  // // ✅ Enriched base data
+  // ✅ Enriched base data
   const enrichedData = useMemo(() => {
     if (!crossInstruments || !worldCrosses || !worldCurrencies) return [];
 
@@ -200,6 +191,8 @@ const BankSpotAndUSDParity = memo(() => {
 
       return hasChanges ? updatedData : prevData;
     });
+
+    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
   }, []);
 
   // ✅ Queue update
@@ -234,7 +227,6 @@ const BankSpotAndUSDParity = memo(() => {
       }
     };
   }, []);
-
   // Columns
   const columns = useMemo(
     () => [
@@ -319,7 +311,9 @@ const BankSpotAndUSDParity = memo(() => {
       columns={columns}
       dataSource={processedData}
       prefixCls={"LiveRatesTable"}
-      //   className={"LiveRatesTable"}
+      rowKey={(record) =>
+        `${record.instrumentID}-${record.secondaryInstrumentID}`
+      }
       pagination={false}
       scroll={{ x: "max-content", y: 500 }}
     />

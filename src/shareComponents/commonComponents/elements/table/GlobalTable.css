@@ -1709,6 +1709,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: "Helvetica", sans-serif !important;
   font-size: 14px;
   font-weight: 500;
+  min-width: 120px;
 }
 
 .Dealer_Forwards_Treasury
@@ -1719,6 +1720,8 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: "Helvetica", sans-serif !important;
   font-size: 14px;
   font-weight: 500;
+  min-width: 120px;
+
 }
 
 /* Common styles for all other columns */
