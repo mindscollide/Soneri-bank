@@ -47,6 +47,10 @@ const Forwards = () => {
   //   (state) => state.RealtimeActionsSlice.CategoryForwardRates
   // );
 
+  const TreasuryDealerForwardRates = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
+  );
+
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
@@ -57,6 +61,11 @@ const Forwards = () => {
   // const categoryFowardsTenorsChanges = useSelector(
   //   (state) => state.RealtimeActionsSlice.categoryFowardsTenorsChanges
   // );
+
+  console.log(
+    TreasuryDealerForwardRates,
+    "TreasuryDealerForwardRatesTreasuryDealerForwardRates"
+  );
 
   // Define the columns structure for the Ant Design Table
   // Define the data source for the Ant Design Table
@@ -174,11 +183,11 @@ const Forwards = () => {
     []
   );
 
-  // useEffect(() => {
-  //   if (CategoryForwardRates) {
-  //     throttledCategoryForwardUpdate(CategoryForwardRates);
-  //   }
-  // }, [CategoryForwardRates, throttledCategoryForwardUpdate]);
+  useEffect(() => {
+    if (TreasuryDealerForwardRates) {
+      throttledCategoryForwardUpdate(TreasuryDealerForwardRates);
+    }
+  }, [TreasuryDealerForwardRates, throttledCategoryForwardUpdate]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {
