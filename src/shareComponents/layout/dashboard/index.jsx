@@ -310,9 +310,24 @@ const Dashboard = () => {
   useEffect(() => {
     const isDealerPath = location.pathname.toLowerCase().includes("dealer");
 
-    const dealerId = dealerValue?.value;
+    // Condition for Dealer user when Logged in
+    if (isDealerPath && isDealer && isConnected) {
+      console.log("reaced here");
+      const topic1 = `SBL_TREASURY_DEALER_RATES_${Number(
+        localStorage.getItem("userID")
+      )}`;
+      const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${Number(
+        localStorage.getItem("userID")
+      )}`;
+      subscribeToTopics([topic1, topic2]);
+      return;
+    }
+    // 🛑 Wait until dealerValue is ready
+    if (!dealerValue && !isConnected) return;
 
-    // ❌ If ANY required condition fails → unsubscribe all
+    const dealerId = dealerValue.value;
+
+    // ❌ If ANY required condition fails → unsubscribe
     if (!isTreasury || !isDealerPath || !dealerId || dealerId === 0) {
       if (prevTopicRef.current?.length) {
         unsubscribeFromTopics(prevTopicRef.current);
@@ -322,13 +337,10 @@ const Dashboard = () => {
       return;
     }
 
-    // ✅ Two topics
-    // const topic1 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
-    const topic2 = `SBL_TREASURY_DEALER_RATES_${dealerId}`;
+    const topic1 = `SBL_TREASURY_DEALER_RATES_${dealerId}`;
+    const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
+    const newTopics = [topic1, topic2];
 
-    const newTopics = [topic2];
-
-    // If topics changed → switch
     const isSame =
       JSON.stringify(prevTopicRef.current) === JSON.stringify(newTopics);
 
@@ -351,7 +363,7 @@ const Dashboard = () => {
         prevTopicRef.current = [];
       }
     };
-  }, [dealerValue?.value, location.pathname, isTreasury]);
+  }, [dealerValue, location.pathname, isTreasury, isConnected]);
 
   useEffect(() => {
     if (!isConnected) return;

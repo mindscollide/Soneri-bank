@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  AddDealerSpreadApi,
   clearRatesAction,
   createTenorAction,
   GetAllDealersSpreadApi,
@@ -77,6 +78,7 @@ const WatchListSlice = createSlice({
     GetBankForwardForTreasuryDealerLoading: false,
     GetDiscountingRatesForDealerLoading: false,
     GetAllDealersSpreadLoading: false,
+    AddDealerSpreadLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -129,6 +131,7 @@ const WatchListSlice = createSlice({
     GetBankForwardForTreasuryDealer: null,
     GetDiscountingRatesForDealer: null,
     GetAllDealersSpread: null,
+    AddDealerSpread: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -725,6 +728,21 @@ const WatchListSlice = createSlice({
       .addCase(GetAllDealersSpreadApi.rejected, (state, { payload }) => {
         state.GetAllDealersSpreadLoading = false;
         state.GetAllDealersSpread = null;
+        state.error = payload;
+      })
+
+      // ✅ Publish Discounting Rates
+      .addCase(AddDealerSpreadApi.pending, (state) => {
+        state.AddDealerSpreadLoading = true;
+      })
+      .addCase(AddDealerSpreadApi.fulfilled, (state, { payload }) => {
+        state.AddDealerSpreadLoading = false;
+        state.AddDealerSpread = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(AddDealerSpreadApi.rejected, (state, { payload }) => {
+        state.AddDealerSpreadLoading = false;
+        state.AddDealerSpread = null;
         state.error = payload;
       });
   },

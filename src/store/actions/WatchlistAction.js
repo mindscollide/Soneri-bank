@@ -17,6 +17,7 @@ import createPostAPI from "@/utils/axiosInstance";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi, watchListApi } from "../../common/apiend_point";
 import {
+  AddDealerSpread,
   clearRatesRM,
   createTenorRM,
   GetAllDealersSpread,
@@ -2364,6 +2365,71 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
       }
     } catch (error) {
       console.error("Error fetching GetBankSpotForDealer:", error);
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+export const AddDealerSpreadApi = createAsyncThunk(
+  "watchlist/AddDealerSpread",
+  async ({ Data }, { rejectWithValue }) => {
+    try {
+      const AddDealerSpreadData = createPostAPI(
+        watchListApi,
+        AddDealerSpread.RequestMethod
+      );
+      const response = await AddDealerSpreadData(Data);
+      console.log(response, "result");
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (!isExecuted) {
+          return rejectWithValue("Something went wrong");
+        }
+        if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_AddDealerSpread_01".toLowerCase()
+            )
+        ) {
+          return {
+            response: response.data.responseResult,
+            message: "Data Saved Successfully.",
+          };
+        } else if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_AddDealerSpread_02".toLowerCase()
+            )
+        ) {
+          return rejectWithValue("");
+        } else if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_AddDealerSpread_03".toLowerCase()
+            )
+        ) {
+          return rejectWithValue("Someting went wrong");
+        } else if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_AddDealerSpread_04".toLowerCase()
+            )
+        ) {
+          return rejectWithValue("Someting went wrong");
+        } else {
+          return rejectWithValue("Someting went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      console.log("Error publishing FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
   }

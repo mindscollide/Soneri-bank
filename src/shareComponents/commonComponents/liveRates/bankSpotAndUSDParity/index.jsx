@@ -247,18 +247,18 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Bid",
             dataIndex: "worldCrossBid",
             className: "bidCol",
-            width: 80,
+            width: 120,
             render: (text) => {
-              return <IndexCell value={text} />;
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
           },
           {
             title: "Offer",
             dataIndex: "worldCrossOffer",
             className: "offerCol",
-            width: 80,
+            width: 120,
             render: (text) => {
-              return <IndexCell value={text} />;
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
           },
           {
@@ -279,18 +279,18 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Bid",
             dataIndex: "worldCurBid",
             className: "bidCol",
-            width: 80,
+            width: 120,
             render: (text) => {
-              return <IndexCell value={text} />;
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
           },
           {
             title: "Offer",
             dataIndex: "worldCurOffer",
             className: "offerCol",
-            width: 80,
+            width: 120,
             render: (text) => {
-              return <IndexCell value={text} />;
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
           },
           {

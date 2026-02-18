@@ -8,16 +8,18 @@ import ProfileDropdown from "../../commonComponents/elements/profileDropdown/Pro
 import CustomButton from "../../commonComponents/elements/globalButton/button";
 import InputFIeld from "../../commonComponents/elements/inputField/InputField";
 import { NumericFormat } from "react-number-format";
+import PublshDealerSpreads from "../../../modules/dealer/publishDealerSpreads";
 const MainHeader = () => {
   const location = useLocation();
   console.log(location, "locationlocation");
+
   return (
     <Row>
       <Col sm={12} md={12} lg={12}>
         <>
           <Navbar className={styles.mainNavbar} expand="lg">
             <Navbar.Brand>
-              <img src={SoneriLogo} width="195" alt="" sizes="" srcset="" />
+              <img src={SoneriLogo} width="195" alt="" sizes="" srcSet="" />
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Nav className="ms-auto align-items-center justify-content-end">
@@ -78,53 +80,7 @@ const MainHeader = () => {
                   </Nav.Link>
                 </>
               ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
-                <>
-                  <Row>
-                    <Col>
-                      <div className="fs-sm fw-bold color-secondary">
-                        Bid Spread
-                      </div>
-                      <NumericFormat
-                        min={1}
-                        // disabled={true}
-                        // value={lastPublishRates.bidValue}
-                        name="bidValue"
-                        customInput={InputFIeld}
-                        decimalScale={2}
-                        type="text"
-                        allowNegative={false}
-                        placeholder={"0.00"}
-                        applyClass={"bidAskInput"}
-                      />
-                    </Col>
-                    <Col>
-                      <div className="fs-sm fw-bold color-secondary">
-                        Ask Spread
-                      </div>
-                      <NumericFormat
-                        min={1}
-                        type="text"
-                        // value={lastPublishRates.askValue}
-                        decimalScale={2}
-                        // onChange={handleChangeCurrentRate}
-                        customInput={InputFIeld}
-                        name="askValue"
-                        placeholder={"0.00"}
-                        allowNegative={false}
-                        applyClass={"bidAskInput"}
-                      />
-                    </Col>
-                    <Col>
-                      <CustomButton
-                        value={"Publish"}
-                        applyClass="publishBtnDealerHeader"
-                        // disabled={isMarketOn === true ? false : true}
-                        // onClick={handlePublishRates}
-                        // loading={publishNewRatesLoading}
-                      />
-                    </Col>
-                  </Row>
-                </>
+                <PublshDealerSpreads />
               ) : null}
               <ProfileDropdown />
             </Nav>

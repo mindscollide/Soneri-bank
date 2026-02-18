@@ -104,9 +104,19 @@ const Dealer = () => {
   };
 
   useEffect(() => {
-    dispatch(GetAllDealersSpreadApi({ navigate }));
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(getAllTenorsAction({ navigate }));
+    if (isTreasury) {
+      dispatch(GetAllDealersSpreadApi({ navigate }));
+    }
+    if (isDealer) {
+      const dealerId = localStorage.getItem("userID");
+      let Data = { DealerId: Number(dealerId) };
+      dispatch(GetBankSpotForDealerApi({ navigate, Data }));
+      dispatch(GetCurrencyCrossesApi({ navigate }));
+      dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+      dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+    }
   }, []);
 
   useEffect(() => {
@@ -138,6 +148,7 @@ const Dealer = () => {
       }
     }
   }, [GetAllDealersSpread]);
+
   console.log(dealerOptions, "dealerOptions");
   return (
     <div className="mt-2">

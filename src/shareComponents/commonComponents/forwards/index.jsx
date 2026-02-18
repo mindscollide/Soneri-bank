@@ -151,13 +151,13 @@ const Forwards = () => {
   const throttledCategoryForwardUpdate = useMemo(
     () =>
       throttle((forwardRatesUpdate) => {
-        const { instrumentForwardsData } = forwardRatesUpdate;
+        const { forwardRates } = forwardRatesUpdate;
 
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
 
-            instrumentForwardsData.forEach((d) => {
+            forwardRates.forEach((d) => {
               Object.keys(row).forEach((key) => {
                 if (
                   key.startsWith("InstrumentID_") &&

@@ -1698,6 +1698,7 @@ tr.OutStanding_Table-cell-scrollbar {
   color: var(--color-black);
   font-family: "Helvetica-Bold", sans-serif !important;
   border-bottom: 1px solid #837c66;
+  min-width: 120px;
 }
 
 /* ALTERNATE COLUMNS AFTER FIRST */
@@ -1721,7 +1722,6 @@ tr.OutStanding_Table-cell-scrollbar {
   font-size: 14px;
   font-weight: 500;
   min-width: 120px;
-
 }
 
 /* Common styles for all other columns */

@@ -76,12 +76,12 @@ const DealerFeDiscountingTable = () => {
   const throttledUpdate = useMemo(
     () =>
       throttle((discountingUpdate) => {
-        const { instrumentFEDiscountingData } = discountingUpdate;
+        const { feDiscountingRates } = discountingUpdate;
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
 
-            instrumentFEDiscountingData.forEach((d) => {
+            feDiscountingRates.forEach((d) => {
               Object.keys(row).forEach((key) => {
                 if (
                   key.startsWith("InstrumentID_") &&
