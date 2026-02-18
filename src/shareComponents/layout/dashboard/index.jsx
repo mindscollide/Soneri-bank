@@ -38,7 +38,9 @@ import {
   setMarketTimingsUpdated,
   setTenorsCreated,
   setTradeRightsStatusUpdated,
+  setTreasuryDealerFeDiscounting,
   setTreasuryDealerForwardRates,
+  setTreasuryDealerNonFeDiscounting,
   setTreasuryFeDiscounting,
   setTreasuryForwardRates,
   setTreasuryFowardsTenorsChanges,
@@ -180,16 +182,22 @@ const Dashboard = () => {
           startTransition(() => {
             dispatch(setTreasuryDealerForwardRates(payload));
           });
-
-          break;
-
-        case "TREASURY_DEALER_NONFEDISCOUNTING_RATES_FEED":
-          // Dealer Non - Fe Discounting will handle there
           break;
 
         case "TREASURY_DEALER_FEDISCOUNTING_RATES_FEED":
           // Dealer Fe Discounting will handle there
+          startTransition(() => {
+            dispatch(setTreasuryDealerFeDiscounting(payload));
+          });
           break;
+
+        case "TREASURY_DEALER_NONFEDISCOUNTING_RATES_FEED":
+          // Dealer Non - Fe Discounting will handle there
+          startTransition(() => {
+            dispatch(setTreasuryDealerNonFeDiscounting(payload));
+          });
+          break;
+
         case "TREASURY_FEDISCOUNTING_RATES_FEED":
           startTransition(() => {
             dispatch(setTreasuryFeDiscounting(payload));
@@ -197,6 +205,9 @@ const Dashboard = () => {
           break;
 
         case "TREASURY_NONFEDISCOUNTING_RATES_FEED":
+          startTransition(() => {
+            dispatch(setTreasuryNonFeDiscounting(payload));
+          });
           break;
 
         default:

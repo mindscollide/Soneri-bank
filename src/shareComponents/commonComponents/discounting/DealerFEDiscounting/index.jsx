@@ -27,6 +27,10 @@ const DealerFeDiscountingTable = () => {
   //     (state) => state.RealtimeActionsSlice.CategoryFeDiscounting
   //   );
 
+  const TreasuryDealerFeDiscounting = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryDealerFeDiscounting
+  );
+
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
@@ -34,8 +38,6 @@ const DealerFeDiscountingTable = () => {
   //   const ClearRatesData = useSelector(
   //     (state) => state.RealtimeActionsSlice.CategoryDiscountingClearRates
   //   );
-
-  console.log("dataSourcedataSource: ", dataSource);
 
   //   console.log("CategoryFeDiscounting MQTT: ", CategoryFeDiscounting);
 
@@ -75,7 +77,6 @@ const DealerFeDiscountingTable = () => {
     () =>
       throttle((discountingUpdate) => {
         const { instrumentFEDiscountingData } = discountingUpdate;
-        console.log(instrumentFEDiscountingData, "instrumentFEDiscountingData");
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
@@ -100,11 +101,11 @@ const DealerFeDiscountingTable = () => {
     []
   );
 
-  //   useEffect(() => {
-  //     if (CategoryFeDiscounting) {
-  //       throttledUpdate(CategoryFeDiscounting);
-  //     }
-  //   }, [CategoryFeDiscounting, throttledUpdate]);
+  useEffect(() => {
+    if (TreasuryDealerFeDiscounting) {
+      throttledUpdate(TreasuryDealerFeDiscounting);
+    }
+  }, [TreasuryDealerFeDiscounting, throttledUpdate]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {
@@ -173,7 +174,7 @@ const DealerFeDiscountingTable = () => {
   return (
     <div className={styles["mainDiscountingTable"]}>
       <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
-        FE Discounting
+        FE Discountings
       </span>
       <GlobalTable
         columns={columnsData}

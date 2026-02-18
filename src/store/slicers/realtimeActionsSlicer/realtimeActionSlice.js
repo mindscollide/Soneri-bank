@@ -70,6 +70,8 @@ const RealtimeActionsSlice = createSlice({
     tresmarkCrossPremiumRates: null,
     DealerSpotRatesFeed: null,
     TreasuryDealerForwardRates: null,
+    TreasuryDealerFeDiscounting: null,
+    TreasuryDealerNonFeDiscounting: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -141,7 +143,7 @@ const RealtimeActionsSlice = createSlice({
     },
     setTreasurySpotRatesFeed: (state, { payload }) => {
       // if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
-        state.TreasurySpotRatesFeed = { ...payload };
+      state.TreasurySpotRatesFeed = { ...payload };
       // }
     },
     setDealerSpotRatesFeed: (state, { payload }) => {
@@ -256,6 +258,12 @@ const RealtimeActionsSlice = createSlice({
     setTresmarkCrossPremiumRates(state, { payload }) {
       state.tresmarkCrossPremiumRates = payload;
     },
+    setTreasuryDealerFeDiscounting: (state, { payload }) => {
+      state.TreasuryDealerFeDiscounting = payload;
+    },
+    setTreasuryDealerNonFeDiscounting: (state, { payload }) => {
+      state.TreasuryDealerNonFeDiscounting = payload;
+    },
   },
 });
 
@@ -318,6 +326,8 @@ export const {
   setCurrencyCrossesRatesFeed,
   setDealerSpotRatesFeed,
   setTreasuryDealerForwardRates,
+  setTreasuryDealerFeDiscounting,
+  setTreasuryDealerNonFeDiscounting,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

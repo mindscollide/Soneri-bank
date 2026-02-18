@@ -31,7 +31,6 @@ const Forwards = () => {
     (state) => state.WatchListReducer.GetBankForwardForTreasury
   );
 
-  console.log(GetBankForwardForTreasury, "GetBankForwardForTreasury");
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
@@ -39,8 +38,6 @@ const Forwards = () => {
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
-
-  console.log({ getAllTenorsRecords, allInstrumentForTreasuryData }, "AllData");
 
   // const CategoryForwardRates = useSelector(
   //   (state) => state.RealtimeActionsSlice.CategoryForwardRates
@@ -287,11 +284,6 @@ const Forwards = () => {
   //   dispatch(clearCategoryForwardClearRates());
   // }, [ClearRatesData, GetCategoryWiseForwardRatesData, dispatch]);
 
-  console.log(
-    { dataSource, columnsData },
-    "dataSourcedataSourcedataSource for Clear Rates"
-  );
-
   return (
     <>
       <div className={styles["mainForwardTable"]}>
@@ -304,6 +296,7 @@ const Forwards = () => {
           dataSource={dataSource}
           pagination={false}
           rowHoverBg={"#000"}
+          scroll={{ x: "scroll" }}
         />
       </div>
     </>

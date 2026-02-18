@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import styles from "./TreasuryFEDiscountingTable.module.css";
 import { useEffect, useMemo, useState } from "react";
 import { buildDiscountingTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
@@ -7,15 +7,12 @@ import { throttle } from "lodash";
 import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 
 const TreasuryFeDiscountingTable = () => {
-  const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
   const GetDiscountingRatesForTreasury = useSelector(
     (state) => state.WatchListReducer.GetDiscountingRatesForTreasury
   );
-
-  console.log(GetDiscountingRatesForTreasury, "GetDiscountingRatesForTreasury");
 
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
@@ -28,6 +25,10 @@ const TreasuryFeDiscountingTable = () => {
   //     (state) => state.RealtimeActionsSlice.CategoryFeDiscounting
   //   );
 
+  const TreasuryFeDiscounting = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryFeDiscounting
+  );
+
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
@@ -35,8 +36,6 @@ const TreasuryFeDiscountingTable = () => {
   //   const ClearRatesData = useSelector(
   //     (state) => state.RealtimeActionsSlice.CategoryDiscountingClearRates
   //   );
-
-  console.log("dataSourcedataSource: ", dataSource);
 
   //   console.log("CategoryFeDiscounting MQTT: ", CategoryFeDiscounting);
 
@@ -73,16 +72,44 @@ const TreasuryFeDiscountingTable = () => {
     GetDiscountingRatesForTreasury,
   ]);
 
+  // const throttledUpdate = useMemo(
+  //   () =>
+  //     throttle((discountingUpdate) => {
+  //       const { instrumentFEDiscountingData } = discountingUpdate;
+  //       console.log(instrumentFEDiscountingData, "instrumentFEDiscountingData");
+  //       setDataSource((prevData) =>
+  //         prevData.map((row) => {
+  //           let updatedRow = { ...row };
+
+  //           instrumentFEDiscountingData.forEach((d) => {
+  //             Object.keys(row).forEach((key) => {
+  //               if (
+  //                 key.startsWith("InstrumentID_") &&
+  //                 row[key] === d.instrumentID &&
+  //                 row.TenorID === d.tenorID
+  //               ) {
+  //                 const currency = key.split("_")[1];
+  //                 updatedRow[`rate_${currency}`] = d.bidWithSpread;
+  //               }
+  //             });
+  //           });
+
+  //           return updatedRow;
+  //         })
+  //       );
+  //     }, 20),
+  //   []
+  // );
+
   const throttledUpdate = useMemo(
     () =>
       throttle((discountingUpdate) => {
-        const { instrumentFEDiscountingData } = discountingUpdate;
-        console.log(instrumentFEDiscountingData, "instrumentFEDiscountingData");
+        const { feDiscountingRates } = discountingUpdate;
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
 
-            instrumentFEDiscountingData.forEach((d) => {
+            feDiscountingRates.forEach((d) => {
               Object.keys(row).forEach((key) => {
                 if (
                   key.startsWith("InstrumentID_") &&
@@ -102,11 +129,11 @@ const TreasuryFeDiscountingTable = () => {
     []
   );
 
-  //   useEffect(() => {
-  //     if (CategoryFeDiscounting) {
-  //       throttledUpdate(CategoryFeDiscounting);
-  //     }
-  //   }, [CategoryFeDiscounting, throttledUpdate]);
+  useEffect(() => {
+    if (TreasuryFeDiscounting) {
+      throttledUpdate(TreasuryFeDiscounting);
+    }
+  }, [TreasuryFeDiscounting, throttledUpdate]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {

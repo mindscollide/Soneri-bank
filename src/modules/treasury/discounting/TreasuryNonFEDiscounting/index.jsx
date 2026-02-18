@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import styles from "./treasuryNonFEDiscountingTable.module.css";
 import { useEffect, useMemo, useState } from "react";
 import { buildDiscountingTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
@@ -7,7 +7,6 @@ import { throttle } from "lodash";
 import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 
 const TreasuryNonFeDiscountingTable = () => {
-  const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
@@ -21,11 +20,14 @@ const TreasuryNonFeDiscountingTable = () => {
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
-  console.log(GetDiscountingRatesForTreasury, "GetDiscountingRatesForTreasury");
 
   //   const CategoryFeDiscounting = useSelector(
   //     (state) => state.RealtimeActionsSlice.CategoryFeDiscounting
   //   );
+
+  const TreasuryNonFeDiscounting = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryNonFeDiscounting
+  );
 
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
@@ -35,10 +37,7 @@ const TreasuryNonFeDiscountingTable = () => {
   //     (state) => state.RealtimeActionsSlice.CategoryDiscountingClearRates
   //   );
 
-  console.log("dataSourcedataSource: ", dataSource);
-
   //   console.log("CategoryFeDiscounting MQTT: ", CategoryFeDiscounting);
-  console.log(allInstrumentForTreasuryData, "allInstrumentForTreasuryData");
   useEffect(() => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
       try {
@@ -72,16 +71,52 @@ const TreasuryNonFeDiscountingTable = () => {
     GetDiscountingRatesForTreasury,
   ]);
 
+  // code before
+  // const throttledUpdate = useMemo(
+  //   () =>
+  //     throttle((discountingUpdate) => {
+  //       const { instrumentFEDiscountingData } = discountingUpdate;
+  //       console.log(instrumentFEDiscountingData, "instrumentFEDiscountingData");
+  //       setDataSource((prevData) =>
+  //         prevData.map((row) => {
+  //           let updatedRow = { ...row };
+
+  //           instrumentFEDiscountingData.forEach((d) => {
+  //             Object.keys(row).forEach((key) => {
+  //               if (
+  //                 key.startsWith("InstrumentID_") &&
+  //                 row[key] === d.instrumentID &&
+  //                 row.TenorID === d.tenorID
+  //               ) {
+  //                 const currency = key.split("_")[1];
+  //                 updatedRow[`rate_${currency}`] = d.bidWithSpread;
+  //               }
+  //             });
+  //           });
+
+  //           return updatedRow;
+  //         })
+  //       );
+  //     }, 20),
+  //   []
+  // );
+
+  // useEffect(() => {
+  //   if (TreasuryNonFeDiscounting) {
+  //     throttledUpdate(TreasuryNonFeDiscounting);
+  //   }
+  // }, [TreasuryNonFeDiscounting, throttledUpdate]);
+
+  // updated code for SOneri
   const throttledUpdate = useMemo(
     () =>
       throttle((discountingUpdate) => {
-        const { instrumentFEDiscountingData } = discountingUpdate;
-        console.log(instrumentFEDiscountingData, "instrumentFEDiscountingData");
+        const { nonFeDiscountingRates } = discountingUpdate;
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
 
-            instrumentFEDiscountingData.forEach((d) => {
+            nonFeDiscountingRates.forEach((d) => {
               Object.keys(row).forEach((key) => {
                 if (
                   key.startsWith("InstrumentID_") &&
@@ -101,11 +136,11 @@ const TreasuryNonFeDiscountingTable = () => {
     []
   );
 
-  //   useEffect(() => {
-  //     if (CategoryFeDiscounting) {
-  //       throttledUpdate(CategoryFeDiscounting);
-  //     }
-  //   }, [CategoryFeDiscounting, throttledUpdate]);
+  useEffect(() => {
+    if (TreasuryNonFeDiscounting) {
+      throttledUpdate(TreasuryNonFeDiscounting);
+    }
+  }, [TreasuryNonFeDiscounting, throttledUpdate]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {

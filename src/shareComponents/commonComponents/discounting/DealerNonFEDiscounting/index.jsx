@@ -28,6 +28,10 @@ const DealerNonFeDiscountingTable = () => {
   //     (state) => state.RealtimeActionsSlice.CategoryFeDiscounting
   //   );
 
+  const TreasuryDealerNonFeDiscounting = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryDealerNonFeDiscounting
+  );
+
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
@@ -36,10 +40,7 @@ const DealerNonFeDiscountingTable = () => {
   //     (state) => state.RealtimeActionsSlice.CategoryDiscountingClearRates
   //   );
 
-  console.log("dataSourcedataSource: ", dataSource);
-
   //   console.log("CategoryFeDiscounting MQTT: ", CategoryFeDiscounting);
-  console.log(allInstrumentForTreasuryData, "allInstrumentForTreasuryData");
   useEffect(() => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
       try {
@@ -76,7 +77,6 @@ const DealerNonFeDiscountingTable = () => {
     () =>
       throttle((discountingUpdate) => {
         const { instrumentFEDiscountingData } = discountingUpdate;
-        console.log(instrumentFEDiscountingData, "instrumentFEDiscountingData");
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
@@ -101,11 +101,11 @@ const DealerNonFeDiscountingTable = () => {
     []
   );
 
-  //   useEffect(() => {
-  //     if (CategoryFeDiscounting) {
-  //       throttledUpdate(CategoryFeDiscounting);
-  //     }
-  //   }, [CategoryFeDiscounting, throttledUpdate]);
+  useEffect(() => {
+    if (TreasuryDealerNonFeDiscounting) {
+      throttledUpdate(TreasuryDealerNonFeDiscounting);
+    }
+  }, [TreasuryDealerNonFeDiscounting, throttledUpdate]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {
