@@ -36,6 +36,7 @@ import {
   setDealerSpotRatesFeed,
   setFxTradingCards,
   setMarketTimingsUpdated,
+  setSpreadsForSingleUser,
   setTenorsCreated,
   setTradeRightsStatusUpdated,
   setTreasuryDealerFeDiscounting,
@@ -209,7 +210,9 @@ const Dashboard = () => {
             dispatch(setTreasuryNonFeDiscounting(payload));
           });
           break;
-
+        case "CURRENT_RATE_SHEET_RATES_PUBLISHED":
+          startTransition(dispatch(setSpreadsForSingleUser(payload)));
+          break;
         default:
           console.warn("No specific handler for this message type", payload);
       }

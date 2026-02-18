@@ -72,6 +72,7 @@ const RealtimeActionsSlice = createSlice({
     TreasuryDealerForwardRates: null,
     TreasuryDealerFeDiscounting: null,
     TreasuryDealerNonFeDiscounting: null,
+    spreadsForSingleUser: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -264,6 +265,9 @@ const RealtimeActionsSlice = createSlice({
     setTreasuryDealerNonFeDiscounting: (state, { payload }) => {
       state.TreasuryDealerNonFeDiscounting = payload;
     },
+    setSpreadsForSingleUser: (state, { payload }) => {
+      state.spreadsForSingleUser = payload;
+    },
   },
 });
 
@@ -328,6 +332,7 @@ export const {
   setTreasuryDealerForwardRates,
   setTreasuryDealerFeDiscounting,
   setTreasuryDealerNonFeDiscounting,
+  setSpreadsForSingleUser,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

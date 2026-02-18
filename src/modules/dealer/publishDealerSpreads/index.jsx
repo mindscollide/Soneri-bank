@@ -15,7 +15,9 @@ const PublshDealerSpreads = () => {
   const GetSingleDealersSpread = useSelector(
     (state) => state.WatchListReducer.GetSingleDealersSpread
   );
-
+  const spreadsForSingleUser = useSelector(
+    (state) => state.RealtimeActionsSlice.spreadsForSingleUser
+  );
   console.log(
     GetSingleDealersSpread,
     "GetSingleDealersSpreadGetSingleDealersSpread"
@@ -52,6 +54,16 @@ const PublshDealerSpreads = () => {
       setAskSpreads(dealersSpread?.askSpread || "");
     }
   }, [GetSingleDealersSpread]);
+
+  // MQTT When spread is applied
+  useEffect(() => {
+    if (spreadsForSingleUser && spreadsForSingleUser !== null) {
+      const { currentRateSheetRates } = spreadsForSingleUser;
+
+      setBidSpreads(currentRateSheetRates?.currentBid || "");
+      setAskSpreads(currentRateSheetRates?.currentAsk || "");
+    }
+  }, [spreadsForSingleUser]);
   return (
     <>
       <Row>
