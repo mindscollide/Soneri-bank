@@ -344,9 +344,7 @@ const TenoreWiseCurrentAndLastRates = ({
       return {
         ...row,
         tenorDays:
-          matchingTenor?.noOfDays !== undefined
-            ? matchingTenor.noOfDays
-            : row.tenorDays,
+          matchingTenor !== undefined ? matchingTenor.tenorDays : row.tenorDays,
       };
     });
 

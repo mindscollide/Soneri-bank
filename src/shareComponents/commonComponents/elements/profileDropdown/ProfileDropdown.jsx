@@ -24,19 +24,7 @@ const ProfileDropdown = () => {
         <IconElement iconClass={"icon-arrow-down"} />
       </Dropdown.Toggle>
       <Dropdown.Menu className={styles["ProfileDropdown_menu"]}>
-        {/* <Dropdown.Item
-          onClick={handleOpenSettingModal}
-          className="d-flex align-items-center cursor-pointer"
-        >
-          <Nav.Link>
-            <IconElement iconClass={"icon-settings me-1"} />
-            <label>Setting</label>
-          </Nav.Link>
-        </Dropdown.Item> */}
-        <Dropdown.Item
-          onClick={handleClickLogout}
-          className="d-flex align-items-center justify-content-start cursor-pointer"
-        >
+        <Dropdown.Item onClick={handleClickLogout} className="cursor-pointer">
           <IconElement iconClass={"icon-logout me-1"} />
           <label className="cursor-pointer">Logout</label>
         </Dropdown.Item>
