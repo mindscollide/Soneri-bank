@@ -11,6 +11,7 @@ import {
   GetBankSpotForDealerApi,
   GetCurrencyCrossesApi,
   GetDiscountingRatesForDealerApi,
+  GetSingleDealersSpreadApi,
 } from "../../store/actions/WatchlistAction";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -112,6 +113,7 @@ const Dealer = () => {
     if (isDealer) {
       const dealerId = localStorage.getItem("userID");
       let Data = { DealerId: Number(dealerId) };
+      dispatch(GetSingleDealersSpreadApi({ Data }));
       dispatch(GetBankSpotForDealerApi({ navigate, Data }));
       dispatch(GetCurrencyCrossesApi({ navigate }));
       dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));

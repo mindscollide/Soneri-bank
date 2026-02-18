@@ -32,6 +32,7 @@ import {
   GetLastAndCurrentPublishUSDRateSheet,
   getLastAndCurrentUSDRatesRM,
   GetNonFeDiscountingRatesRM,
+  GetSingleDealersSpread,
   getTenorWiseForwardRatesRM,
   marketOnOffRM,
   PublishCurrentUSDRateSheet,
@@ -2419,6 +2420,71 @@ export const AddDealerSpreadApi = createAsyncThunk(
             .toLowerCase()
             .includes(
               "WatchList_WatchListServiceManager_AddDealerSpread_04".toLowerCase()
+            )
+        ) {
+          return rejectWithValue("Someting went wrong");
+        } else {
+          return rejectWithValue("Someting went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      console.log("Error publishing FE discounting data:", error);
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+export const GetSingleDealersSpreadApi = createAsyncThunk(
+  "watchlist/GetSingleDealersSpread",
+  async ({ Data }, { rejectWithValue }) => {
+    try {
+      const GetSingleDealersSpreadData = createPostAPI(
+        watchListApi,
+        GetSingleDealersSpread.RequestMethod
+      );
+      const response = await GetSingleDealersSpreadData(Data);
+      console.log(response, "result");
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (!isExecuted) {
+          return rejectWithValue("Something went wrong");
+        }
+        if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_01".toLowerCase()
+            )
+        ) {
+          return {
+            response: response.data.responseResult,
+            message: "",
+          };
+        } else if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_02".toLowerCase()
+            )
+        ) {
+          return rejectWithValue("");
+        } else if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_03".toLowerCase()
+            )
+        ) {
+          return rejectWithValue("Someting went wrong");
+        } else if (
+          responseMessage
+            .toLowerCase()
+            .includes(
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_04".toLowerCase()
             )
         ) {
           return rejectWithValue("Someting went wrong");

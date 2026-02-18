@@ -157,3 +157,6 @@ export const GetCurrencyCrosses = {
 export const AddDealerSpread = {
   RequestMethod: "ServiceManager.AddDealerSpread",
 };
+export const GetSingleDealersSpread = {
+  RequestMethod: "ServiceManager.GetSingleDealersSpread",
+};

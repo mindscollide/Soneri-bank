@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputFIeld from "../../../shareComponents/commonComponents/elements/inputField/InputField";
 import { Col, Row } from "react-bootstrap";
 import { NumericFormat } from "react-number-format";
 import CustomButton from "../../../shareComponents/commonComponents/elements/globalButton/button";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AddDealerSpreadApi } from "../../../store/actions/WatchlistAction";
 
 const PublshDealerSpreads = () => {
@@ -11,6 +11,15 @@ const PublshDealerSpreads = () => {
   const [bidSpreads, setBidSpreads] = useState("");
   const [askSpreads, setAskSpreads] = useState("");
   const dealerId = localStorage.getItem("userID");
+
+  const GetSingleDealersSpread = useSelector(
+    (state) => state.WatchListReducer.GetSingleDealersSpread
+  );
+
+  console.log(
+    GetSingleDealersSpread,
+    "GetSingleDealersSpreadGetSingleDealersSpread"
+  );
   const handlePublishSpreads = () => {
     const Data = {
       BidSpread: bidSpreads !== "" ? Number(bidSpreads) : 0,
@@ -35,6 +44,14 @@ const PublshDealerSpreads = () => {
       return;
     }
   };
+  useEffect(() => {
+    if (GetSingleDealersSpread) {
+      const { dealersSpread } = GetSingleDealersSpread;
+
+      setBidSpreads(dealersSpread?.bidSpread || "");
+      setAskSpreads(dealersSpread?.askSpread || "");
+    }
+  }, [GetSingleDealersSpread]);
   return (
     <>
       <Row>

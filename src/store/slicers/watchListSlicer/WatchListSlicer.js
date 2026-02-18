@@ -25,6 +25,7 @@ import {
   getMarketStatusApi,
   GetMisDataByRangeAPI,
   GetNonFEDiscountingTableApi,
+  GetSingleDealersSpreadApi,
   getTenorWiseForwardsAction,
   marketOnOffAction,
   PublishCurrentUSDRateSheetAction,
@@ -79,6 +80,7 @@ const WatchListSlice = createSlice({
     GetDiscountingRatesForDealerLoading: false,
     GetAllDealersSpreadLoading: false,
     AddDealerSpreadLoading: false,
+    GetSingleDealersSpreadLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -132,6 +134,7 @@ const WatchListSlice = createSlice({
     GetDiscountingRatesForDealer: null,
     GetAllDealersSpread: null,
     AddDealerSpread: null,
+    GetSingleDealersSpread: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -743,6 +746,20 @@ const WatchListSlice = createSlice({
       .addCase(AddDealerSpreadApi.rejected, (state, { payload }) => {
         state.AddDealerSpreadLoading = false;
         state.AddDealerSpread = null;
+        state.error = payload;
+      })
+      // ✅ GetSingleDealersSpread
+      .addCase(GetSingleDealersSpreadApi.pending, (state) => {
+        state.GetSingleDealersSpreadLoading = true;
+      })
+      .addCase(GetSingleDealersSpreadApi.fulfilled, (state, { payload }) => {
+        state.GetSingleDealersSpreadLoading = false;
+        state.GetSingleDealersSpread = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetSingleDealersSpreadApi.rejected, (state, { payload }) => {
+        state.GetSingleDealersSpreadLoading = false;
+        state.GetSingleDealersSpread = null;
         state.error = payload;
       });
   },
