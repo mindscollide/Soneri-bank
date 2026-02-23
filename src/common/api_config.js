@@ -160,3 +160,7 @@ export const AddDealerSpread = {
 export const GetSingleDealersSpread = {
   RequestMethod: "ServiceManager.GetSingleDealersSpread",
 };
+
+export const GetAllOtherInstruments = {
+  RequestMethod: "ServiceManager.GetAllOtherInstruments",
+};

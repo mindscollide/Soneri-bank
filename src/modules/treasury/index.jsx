@@ -7,6 +7,7 @@ import RateSheet from "../../shareComponents/commonComponents/rateSheet";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
+  GetAllOtherInstrumentsApi,
   getAllTenorsAction,
   getAllTreasuryInstrumentsApi,
   GetBankForwardForTreasuryApi,
@@ -58,7 +59,7 @@ const Treasury = () => {
     hasFetched.current = true;
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(getAllTenorsAction({ navigate }));
-
+    dispatch(GetAllOtherInstrumentsApi({ navigate }));
     dispatch(GetBankSpotForTreasuryApi({ navigate }));
     dispatch(GetCurrencyCrossesApi({ navigate }));
     dispatch(GetBankForwardForTreasuryApi({ navigate }));

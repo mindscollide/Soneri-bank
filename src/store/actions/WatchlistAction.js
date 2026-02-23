@@ -21,6 +21,7 @@ import {
   clearRatesRM,
   createTenorRM,
   GetAllDealersSpread,
+  GetAllOtherInstruments,
   getAllTenorsRM,
   GetBankForwardForTreasuryDealer,
   GetBankSpotForDealer,
@@ -2496,6 +2497,78 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
       }
     } catch (error) {
       console.log("Error publishing FE discounting data:", error);
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+// Define the GetAllFowardsAndDiscountsRates async thunk
+export const GetAllOtherInstrumentsApi = createAsyncThunk(
+  "watchlist/GetAllOtherInstruments", // A unique action type string
+  async ({ navigate }, { dispatch, rejectWithValue }) => {
+    try {
+      let GetAllOtherInstrumentsData = createPostAPI(
+        watchListApi,
+        GetAllOtherInstruments.RequestMethod
+      );
+
+      const response = await GetAllOtherInstrumentsData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
       return rejectWithValue("Something went wrong");
     }
   }

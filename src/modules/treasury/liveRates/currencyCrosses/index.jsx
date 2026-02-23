@@ -16,7 +16,12 @@ const SelectGetCurrencyCrosses = (state) =>
   state.WatchListReducer.GetCurrencyCrosses?.currencyCrossList;
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
+const GetAllOtherInstruments = (state) =>
+  state.WatchListReducer.GetAllOtherInstruments?.otherInstruments;
+
 const CurrencyCrosses = memo(() => {
+  const otherInstruments = useSelector(GetAllOtherInstruments);
+
   const crossInstruments = useSelector(
     selectGetAllInstrumentForTreasury,
     shallowEqual
@@ -27,8 +32,7 @@ const CurrencyCrosses = memo(() => {
     SelectGetCurrencyCrosses,
     shallowEqual
   );
-
-
+  console.log({ otherInstruments, GetCurrencyCrosses }, "otherInstruments");
 
   // ✅ Memoized essential feed values
   const feedEssentials = useMemo(() => {
@@ -228,10 +232,21 @@ const CurrencyCrosses = memo(() => {
   //   };
   // }, []);
   useEffect(() => {
-    if (GetCurrencyCrosses && GetCurrencyCrosses !== null) {
-      setProcessedData(GetCurrencyCrosses);
+    if (GetCurrencyCrosses && otherInstruments) {
+      const updatedCurrencyCrosses = GetCurrencyCrosses.map((cross) => {
+        const matchedInstrument = otherInstruments.find(
+          (instrument) => instrument.instrumentId === cross.instrumentId
+        );
+
+        return {
+          ...cross,
+          instrument: matchedInstrument ? matchedInstrument.name : null,
+        };
+      });
+
+      setProcessedData(updatedCurrencyCrosses);
     }
-  }, [GetCurrencyCrosses]);
+  }, [GetCurrencyCrosses, otherInstruments]);
   // Columns
   const columns = useMemo(
     () => [

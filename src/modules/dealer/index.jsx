@@ -5,6 +5,7 @@ import GlobalTabs from "../../shareComponents/elements/tabs";
 import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
 import {
   GetAllDealersSpreadApi,
+  GetAllOtherInstrumentsApi,
   getAllTenorsAction,
   getAllTreasuryInstrumentsApi,
   GetBankForwardForTreasuryDealerApi,
@@ -107,6 +108,7 @@ const Dealer = () => {
   useEffect(() => {
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(getAllTenorsAction({ navigate }));
+    dispatch(GetAllOtherInstrumentsApi({ navigate }));
     if (isTreasury) {
       dispatch(GetAllDealersSpreadApi({ navigate }));
     }

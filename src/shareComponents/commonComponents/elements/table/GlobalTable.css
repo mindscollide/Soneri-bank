@@ -1671,7 +1671,26 @@ tr.OutStanding_Table-cell-scrollbar {
 }
 
 /* FIRST COLUMN (fixed style) */
-.Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(1) > th {
+
+.Dealer_Forwards_Treasury-thead {
+  border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+.Dealer_Forwards_Treasury-measure-row {
+  visibility: collapse !important;
+  border-radius: 0 !important;
+}
+
+.Dealer_Forwards_Treasury
+  .Dealer_Forwards_Treasury-thead
+  > tr:nth-child(1)
+  > th {
+  border-radius: 0 !important;
+}
+.Dealer_Forwards_Treasury-content {
+  border-radius: 0 !important;
+}
+.Dealer_Forwards_Treasury tr:nth-child(1) > th {
   color: #fff;
   text-align: center;
   font-family: "Helvetica-Bold", sans-serif !important;
@@ -1681,7 +1700,7 @@ tr.OutStanding_Table-cell-scrollbar {
   border-right: 1px solid #837c66 !important;
 }
 
-.Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(2) > th {
+.Dealer_Forwards_Treasury tr:nth-child(2) > th {
   background: #000;
   color: #fff;
   text-align: center;
@@ -1690,7 +1709,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: "Helvetica-Bold", sans-serif;
   font-size: 14px;
 }
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:first-child {
+.Dealer_Forwards_Treasury tr > td:first-child {
   font-size: 14px;
   text-align: center;
   padding: 5px 10px !important;
@@ -1702,10 +1721,7 @@ tr.OutStanding_Table-cell-scrollbar {
 }
 
 /* ALTERNATE COLUMNS AFTER FIRST */
-.Dealer_Forwards_Treasury
-  .ant-table-tbody
-  > tr
-  > td:not(:first-child):nth-child(even) {
+.Dealer_Forwards_Treasury tr > td:not(:first-child):nth-child(even) {
   background: #ffd567;
   font-family: "Helvetica", sans-serif !important;
   font-size: 14px;
@@ -1713,10 +1729,7 @@ tr.OutStanding_Table-cell-scrollbar {
   min-width: 120px;
 }
 
-.Dealer_Forwards_Treasury
-  .ant-table-tbody
-  > tr
-  > td:not(:first-child):nth-child(odd) {
+.Dealer_Forwards_Treasury tr > td:not(:first-child):nth-child(odd) {
   background: var(--color-gray2);
   font-family: "Helvetica", sans-serif !important;
   font-size: 14px;
@@ -1725,7 +1738,7 @@ tr.OutStanding_Table-cell-scrollbar {
 }
 
 /* Common styles for all other columns */
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:not(:first-child) {
+.Dealer_Forwards_Treasury tr > td:not(:first-child) {
   text-align: center;
   padding: 5px 10px !important;
   color: var(--color-black);
@@ -1735,7 +1748,7 @@ tr.OutStanding_Table-cell-scrollbar {
 
 /* USD Parity */
 
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(5) {
+.Dealer_Forwards_Treasury tr > td:nth-child(5) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-Yorange-gray);
@@ -1743,7 +1756,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: "Helvetica-Bold", sans-serif !important;
   border-bottom: 1px solid #837c66;
 }
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(6) {
+.Dealer_Forwards_Treasury tr > td:nth-child(6) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-yellow);
@@ -1751,7 +1764,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
 }
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(7) {
+.Dealer_Forwards_Treasury tr > td:nth-child(7) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-gray2);
@@ -1759,13 +1772,16 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
 }
-.Dealer_Forwards_Treasury.ant-table-tbody > tr > td:nth-child(8) {
+.Dealer_Forwards_Treasury tr > td:nth-child(8) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-white);
   color: var(--color-black);
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
+}
+.Dealer_Forwards_Treasury-cell::before {
+  display: none !important;
 }
 
 /* Currency Crosses */
@@ -1802,15 +1818,13 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
 }
-.ant-table-measure-row {
-  visibility: collapse !important;
-}
 
 .ant-table-measure-row {
   visibility: collapse !important;
 }
 .LiveRatesTable-measure-row {
   visibility: collapse !important;
+  /* border-radius: 0; */
 }
 /* ================= HEADER ROW 1 ================= */
 
@@ -1821,6 +1835,7 @@ tr.OutStanding_Table-cell-scrollbar {
   color: var(--color-black) !important;
   padding: 5px 10px !important;
   border-right: 1px solid #837c66 !important;
+  border-radius: 0px !important;
 }
 
 /* ================= HEADER ROW 2 ================= */
@@ -1947,108 +1962,19 @@ tr.OutStanding_Table-cell-scrollbar {
 .LiveRatesTable_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
   display: none;
 }
-
-/* Discounting Table CSS */
-/* FIRST COLUMN (fixed style) */
-/* .Dealer_FE_Discounting .ant-table-thead > tr:nth-child(1) > th {
-  text-align: center;
-  font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
-  color: var(--color-black) !important;
-  padding: 5px 10px !important;
-  border-right: 1px solid #837c66 !important;
+.LiveRatesTable-header {
+  border-radius: 0px !important;
 }
-
-.Dealer_FE_Discounting .ant-table-thead > tr:nth-child(2) > th {
-  background: #000;
-  color: #fff;
-  text-align: center;
-  padding: 5px 10px !important;
-  border: none !important;
-  font-family: "Helvetica-Bold", sans-serif;
-  font-size: 14px;
+.LiveRatesTable-cell::before {
+  display: none !important;
 }
-.Dealer_FE_Discounting .ant-table-tbody > tr > td:first-child {
-  font-size: 14px;
-  text-align: center;
-  padding: 5px 10px !important;
-  background: #e9e2dc;
-  color: var(--color-black);
-  font-family: "Helvetica-Bold", sans-serif !important;
-  border-bottom: 1px solid #837c66;
-}
-
-ALTERNATE COLUMNS AFTER FIRST
-.Dealer_FE_Discounting
-  .ant-table-tbody
-  > tr
-  > td:not(:first-child):nth-child(even) {
-  background: #ffd567;
-  font-family: "Helvetica", sans-serif !important;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.Dealer_FE_Discounting
-  .ant-table-tbody
-  > tr
-  > td:not(:first-child):nth-child(odd) {
-  background: var(--color-gray2);
-  font-family: "Helvetica", sans-serif !important;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-Common styles for all other columns
-.Dealer_FE_Discounting .ant-table-tbody > tr > td:not(:first-child) {
-  text-align: center;
-  padding: 5px 10px !important;
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-
-USD Parity
-
-.Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(5) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-Yorange-gray);
-  color: var(--color-black);
-  font-family: "Helvetica-Bold", sans-serif !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(6) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-yellow);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_FE_Discounting .ant-table-tbody > tr > td:nth-child(7) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-gray2);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_FE_Discounting.ant-table-tbody > tr > td:nth-child(8) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-white);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-} */
-/* .Dealer_FE_Discounting{
-
-} */
 
 /* ================= HEADER ROW 1 ================= */
 
-/* ================= HEADER ROW 1 ================= */
+.Dealer_FE_Discounting-content {
+  border-radius: 0 !important;
+}
+
 .Dealer_FE_Discounting .Dealer_FE_Discounting-thead > tr:nth-child(1) > th {
   text-align: center;
   font-family: "Helvetica-Bold", sans-serif !important;
@@ -2056,6 +1982,7 @@ USD Parity
   color: var(--color-black) !important;
   padding: 5px 10px !important;
   border-right: 1px solid #837c66 !important;
+  border-radius: 0 !important;
 }
 
 /* ================= HEADER ROW 2 ================= */
@@ -2098,4 +2025,8 @@ USD Parity
 /* Table wrapper scroll if needed */
 .Dealer_FE_Discounting-wrapper {
   overflow-x: auto;
+  overflow-y: hidden;
+}
+.Dealer_FE_Discounting-cell::before {
+  display: none !important;
 }

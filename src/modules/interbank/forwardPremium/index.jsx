@@ -408,7 +408,7 @@ const ForwardsPremium = () => {
           </>
         }
       />
-      <NotificationSnackbar message={snackbarData.message} />
+      {/* <NotificationSnackbar messages={snackbarData.message} /> */}
     </>
   );
 };

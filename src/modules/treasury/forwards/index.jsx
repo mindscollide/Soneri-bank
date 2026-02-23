@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import {
   clearCategoryForwardClearRates,
   setCategoryFowardsTenorsChanges,
+  setDealerForwardTenorChanged,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
@@ -53,6 +54,9 @@ const Forwards = () => {
   // const categoryFowardsTenorsChanges = useSelector(
   //   (state) => state.RealtimeActionsSlice.categoryFowardsTenorsChanges
   // );
+  const dealerForwardTenorChanged = useSelector(
+    (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged
+  );
 
   // Define the columns structure for the Ant Design Table
   // Define the data source for the Ant Design Table
@@ -140,57 +144,69 @@ const Forwards = () => {
       );
     }
   }, [marketStatus]);
-  // useEffect(() => {
-  //   if (
-  //     categoryFowardsTenorsChanges !== null &&
-  //     getAllTenorsRecords !== null &&
-  //     allInstrumentForTreasuryData !== null
-  //   ) {
-  //     try {
-  //       const { newIsForwardtenorList = [], removedtenorList = [] } =
-  //         categoryFowardsTenorsChanges;
-  //       const allTenors = [...(getAllTenorsRecords.tenors || [])];
+  useEffect(() => {
+    if (
+      dealerForwardTenorChanged !== null &&
+      getAllTenorsRecords !== null &&
+      allInstrumentForTreasuryData !== null
+    ) {
+      console.log(dealerForwardTenorChanged, "dealerForwardTenorChanged");
+      try {
+        const { newIsForwardtenorList = [], removedtenorList = [] } =
+          dealerForwardTenorChanged;
+        const allTenors = [...(getAllTenorsRecords.tenors || [])];
 
-  //       // Convert arrays of objects to Set of IDs
-  //       const removedSet = new Set(
-  //         removedtenorList.map((item) => item.tenorID)
-  //       );
+        // Convert arrays of objects to Set of IDs
+        const removedSet = new Set(
+          removedtenorList.map((item) => item.tenorID)
+        );
 
-  //       // Update each tenor's isForwardingApplicable field
-  //       const updatedTenors = allTenors.map((tenor) => ({
-  //         ...tenor,
-  //         isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
-  //       }));
+        // Update each tenor's isForwardingApplicable field
+        const updatedTenors = allTenors.map((tenor) => ({
+          ...tenor,
+          isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
+        }));
+        console.log(updatedTenors, "updatedTenorsupdatedTenors");
+        let getAllTenorsData = { tenors: updatedTenors };
+        let getAllInstrument = {
+          instruments: allInstrumentForTreasuryData.forwardInstruments,
+        };
 
-  //       let getAllTenorsData = { tenors: updatedTenors };
-  //       let getAllInstrument = {
-  //         instruments: allInstrumentForTreasuryData.forwardInstruments,
-  //       };
-
-  //       const { forwardRates = [] } =
-  //         GetCategoryWiseForwardRatesData !== null &&
-  //         GetCategoryWiseForwardRatesData;
-  //       const { rowData, columnsData } = buildForwardsTable(
-  //         forwardRates,
-  //         getAllTenorsData,
-  //         getAllInstrument,
-  //         IndexCell
-  //       );
-  //       if (rowData.length > 0) {
-  //         setDataSource(rowData);
-  //         setColumnsData(columnsData);
-  //       }
-  //       dispatch(setCategoryFowardsTenorsChanges(null));
-  //       console.log(updatedTenors, "updatedTenorsupdatedTenors");
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // }, [
-  //   categoryFowardsTenorsChanges,
-  //   getAllTenorsRecords,
-  //   allInstrumentForTreasuryData,
-  // ]);
+        console.log(
+          GetBankForwardForTreasury,
+          "GetBankForwardForTreasuryGetBankForwardForTreasury"
+        );
+        const { forwardRates = [] } =
+          GetBankForwardForTreasury !== null && GetBankForwardForTreasury;
+        console.log(
+          { forwardRates, getAllTenorsData, getAllInstrument },
+          "forwardRatesforwardRatesforwardRatesforwardRates"
+        );
+        const { rowData, columnsData } = buildForwardsTable(
+          forwardRates,
+          getAllTenorsData,
+          getAllInstrument,
+          IndexCell
+        );
+        console.log(
+          { rowData, columnsData },
+          "updatedTenorsupdatedTenorsBefore"
+        );
+        if (rowData.length > 0) {
+          setDataSource(rowData);
+          setColumnsData(columnsData);
+        }
+        dispatch(setDealerForwardTenorChanged(null));
+        console.log(updatedTenors, "updatedTenorsupdatedTenors");
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [
+    dealerForwardTenorChanged,
+    getAllTenorsRecords,
+    allInstrumentForTreasuryData,
+  ]);
 
   // const throttledCategoryForwardUpdate = useMemo(
   //   () =>
@@ -292,7 +308,7 @@ const Forwards = () => {
         </span>
         <GlobalTable
           columns={columnsData}
-          className="Dealer_Forwards_Treasury"
+          prefixCls={"Dealer_Forwards_Treasury"}
           dataSource={dataSource}
           pagination={false}
           rowHoverBg={"#000"}

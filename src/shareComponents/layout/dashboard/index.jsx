@@ -33,6 +33,7 @@ import {
   setCounterPartyNonFeDiscounting,
   setCounterPartySpotRates,
   setCurrencyCrossesRatesFeed,
+  setDealerForwardTenorChanged,
   setDealerSpotRatesFeed,
   setFxTradingCards,
   setMarketTimingsUpdated,
@@ -148,6 +149,7 @@ const Dashboard = () => {
 
             dispatch(setCategoryFowardsTenorsChanges(tenorsData));
             dispatch(setTreasuryFowardsTenorsChanges(tenorsData));
+            dispatch(setDealerForwardTenorChanged(tenorsData));
           });
           break;
         // ✅ Market & Tenor

@@ -18,9 +18,9 @@ const Forwards = () => {
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
-  // const GetCategoryWiseForwardRatesData = useSelector(
-  //   (state) => state.categoryReducer.GetCategoryWiseForwardRates
-  // );
+  const TreasuryDealerForwardRates = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
+  );
   // const GetCategoryWiseForwardRatesData = null;
   // console.log(
   //   GetCategoryWiseForwardRatesData,
@@ -42,9 +42,9 @@ const Forwards = () => {
   //   (state) => state.RealtimeActionsSlice.CategoryForwardRates
   // );
 
-  const TreasuryDealerForwardRates = useSelector(
-    (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
-  );
+  // const TreasuryDealerForwardRates = useSelector(
+  //   (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
+  // );
 
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
@@ -248,7 +248,8 @@ const Forwards = () => {
         </span>
         <GlobalTable
           columns={columnsData}
-          className="Dealer_Forwards_Treasury"
+          // className="Dealer_Forwards_Treasury"
+          prefixCls={"Dealer_Forwards_Treasury"}
           dataSource={dataSource}
           pagination={false}
           scroll={{ x: "scroll" }}

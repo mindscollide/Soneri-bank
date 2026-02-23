@@ -4,6 +4,7 @@ import {
   clearRatesAction,
   createTenorAction,
   GetAllDealersSpreadApi,
+  GetAllOtherInstrumentsApi,
   getAllTenorsAction,
   getAllTreasuryInstrumentsApi,
   GetBankForwardForTreasuryApi,
@@ -81,6 +82,7 @@ const WatchListSlice = createSlice({
     GetAllDealersSpreadLoading: false,
     AddDealerSpreadLoading: false,
     GetSingleDealersSpreadLoading: false,
+    GetAllOtherInstrumentsLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -135,6 +137,7 @@ const WatchListSlice = createSlice({
     GetAllDealersSpread: null,
     AddDealerSpread: null,
     GetSingleDealersSpread: null,
+    GetAllOtherInstruments: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -760,6 +763,21 @@ const WatchListSlice = createSlice({
       .addCase(GetSingleDealersSpreadApi.rejected, (state, { payload }) => {
         state.GetSingleDealersSpreadLoading = false;
         state.GetSingleDealersSpread = null;
+        state.error = payload;
+      })
+
+      // ✅ GetAllOtherInstruments
+      .addCase(GetAllOtherInstrumentsApi.pending, (state) => {
+        state.GetAllOtherInstrumentsLoading = true;
+      })
+      .addCase(GetAllOtherInstrumentsApi.fulfilled, (state, { payload }) => {
+        state.GetAllOtherInstrumentsLoading = false;
+        state.GetAllOtherInstruments = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetAllOtherInstrumentsApi.rejected, (state, { payload }) => {
+        state.GetAllOtherInstrumentsLoading = false;
+        state.GetAllOtherInstruments = null;
         state.error = payload;
       });
   },
