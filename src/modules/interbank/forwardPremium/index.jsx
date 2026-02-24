@@ -55,9 +55,7 @@ const ForwardsPremium = () => {
   });
 
   // state for NotificationSnackbar
-  const [snackbarData, setSnackbarData] = useState({
-    message: "",
-  });
+  const [snackbarData, setSnackbarData] = useState([]);
   useEffect(() => {
     if (snackbarData.message !== "") {
       const timer = setTimeout(() => {
@@ -116,16 +114,22 @@ const ForwardsPremium = () => {
         );
 
         if (isExistTenorName) {
-          setSnackbarData({
-            message: "Tenor name already exists",
-          });
+          setSnackbarData([
+            {
+              id: Date.now(),
+              message: "Tenor name already exists",
+            },
+          ]);
           return;
         }
 
         if (isExistTenorDays) {
-          setSnackbarData({
-            message: "No of days already exists",
-          });
+          setSnackbarData([
+            {
+              id: Date.now(),
+              message: "No of days already exists",
+            },
+          ]);
           return;
         }
       }
@@ -408,7 +412,7 @@ const ForwardsPremium = () => {
           </>
         }
       />
-      {/* <NotificationSnackbar messages={snackbarData.message} /> */}
+      <NotificationSnackbar messages={snackbarData} />
     </>
   );
 };

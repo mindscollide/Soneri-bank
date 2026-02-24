@@ -150,7 +150,6 @@ const Forwards = () => {
       getAllTenorsRecords !== null &&
       allInstrumentForTreasuryData !== null
     ) {
-      console.log(dealerForwardTenorChanged, "dealerForwardTenorChanged");
       try {
         const { newIsForwardtenorList = [], removedtenorList = [] } =
           dealerForwardTenorChanged;
@@ -166,38 +165,27 @@ const Forwards = () => {
           ...tenor,
           isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
         }));
-        console.log(updatedTenors, "updatedTenorsupdatedTenors");
         let getAllTenorsData = { tenors: updatedTenors };
         let getAllInstrument = {
           instruments: allInstrumentForTreasuryData.forwardInstruments,
         };
 
-        console.log(
-          GetBankForwardForTreasury,
-          "GetBankForwardForTreasuryGetBankForwardForTreasury"
-        );
         const { forwardRates = [] } =
           GetBankForwardForTreasury !== null && GetBankForwardForTreasury;
-        console.log(
-          { forwardRates, getAllTenorsData, getAllInstrument },
-          "forwardRatesforwardRatesforwardRatesforwardRates"
-        );
+
         const { rowData, columnsData } = buildForwardsTable(
+          3,
           forwardRates,
           getAllTenorsData,
           getAllInstrument,
           IndexCell
         );
-        console.log(
-          { rowData, columnsData },
-          "updatedTenorsupdatedTenorsBefore"
-        );
+
         if (rowData.length > 0) {
           setDataSource(rowData);
           setColumnsData(columnsData);
         }
         dispatch(setDealerForwardTenorChanged(null));
-        console.log(updatedTenors, "updatedTenorsupdatedTenors");
       } catch (error) {
         console.log(error);
       }

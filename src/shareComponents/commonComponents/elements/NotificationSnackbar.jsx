@@ -7,6 +7,8 @@ const NotificationSnackbar = ({ messages }) => {
   //   { messages, message },
   //   "NotificationSnackbarNotificationSnackbar"
   // );
+
+  console.log(messages, "NotificationSnackbar");
   const [api, contextHolder] = notification.useNotification();
   const queueRef = useRef([]);
   const shownKeys = useRef(new Set()); // prevent duplicates

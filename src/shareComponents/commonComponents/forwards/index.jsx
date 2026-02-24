@@ -9,6 +9,7 @@ import { buildForwardsTable } from "../utils/generateColumnsData";
 import {
   clearCategoryForwardClearRates,
   setCategoryFowardsTenorsChanges,
+  setDealerForwardTenorChanged,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { IndexCell } from "../elements/inputField/IndexCell";
 import GlobalTable from "../elements/table/GlobalTable";
@@ -46,6 +47,9 @@ const Forwards = () => {
   //   (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
   // );
 
+  const dealerForwardTenorChanged = useSelector(
+    (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged
+  );
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
@@ -199,6 +203,59 @@ const Forwards = () => {
       );
     }
   }, [marketStatus]);
+
+  useEffect(() => {
+    if (
+      dealerForwardTenorChanged !== null &&
+      getAllTenorsRecords !== null &&
+      allInstrumentForTreasuryData !== null
+    ) {
+      try {
+        const { newIsForwardtenorList = [], removedtenorList = [] } =
+          dealerForwardTenorChanged;
+        const allTenors = [...(getAllTenorsRecords.tenors || [])];
+
+        // Convert arrays of objects to Set of IDs
+        const removedSet = new Set(
+          removedtenorList.map((item) => item.tenorID)
+        );
+
+        // Update each tenor's isForwardingApplicable field
+        const updatedTenors = allTenors.map((tenor) => ({
+          ...tenor,
+          isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
+        }));
+        let getAllTenorsData = { tenors: updatedTenors };
+        let getAllInstrument = {
+          instruments: allInstrumentForTreasuryData.forwardInstruments,
+        };
+
+        const { forwardRates = [] } =
+          GetBankForwardForTreasuryDealer !== null &&
+          GetBankForwardForTreasuryDealer;
+
+        const { rowData, columnsData } = buildForwardsTable(
+          3,
+          forwardRates,
+          getAllTenorsData,
+          getAllInstrument,
+          IndexCell
+        );
+
+        if (rowData.length > 0) {
+          setDataSource(rowData);
+          setColumnsData(columnsData);
+        }
+        dispatch(setDealerForwardTenorChanged(null));
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [
+    dealerForwardTenorChanged,
+    getAllTenorsRecords,
+    allInstrumentForTreasuryData,
+  ]);
 
   // For clear Forward Rates
   // useEffect(() => {
