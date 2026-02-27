@@ -58,12 +58,6 @@ const Forwards = () => {
     (state) => state.RealtimeActionsSlice.DealerForwardClearRates
   );
 
-  // console.log({ dealerForwardTenorChanged, ClearRatesData }, "RealtimeData");
-  // const categoryFowardsTenorsChanges = useSelector(
-  //   (state) => state.RealtimeActionsSlice.categoryFowardsTenorsChanges
-  // );
-
-  // Define the columns structure for the Ant Design Table
   // Define the data source for the Ant Design Table
   useEffect(() => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {

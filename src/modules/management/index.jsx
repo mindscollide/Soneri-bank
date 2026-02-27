@@ -50,7 +50,7 @@ const Management = () => {
   return (
     <div className={styles.managementWrapper}>
       <Row>
-        <Col sm={12} md={6} lg={6}>
+        <Col sm={12} md={6} lg={6} className="pe-0">
           <Suspense fallback={<>...Loading</>}>
             <USDParityComponent />
           </Suspense>

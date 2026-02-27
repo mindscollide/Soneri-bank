@@ -1999,7 +1999,7 @@ tr.OutStanding_Table-cell-scrollbar {
   padding: 5px 10px !important;
   border: none !important;
   font-family: "Helvetica-Bold", sans-serif;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 /* Hide Scrollbar Column */
@@ -2016,7 +2016,9 @@ tr.OutStanding_Table-cell-scrollbar {
   text-align: center;
   padding: 5px 10px !important;
   border-bottom: 1px solid #837c66;
-  font-family: Helvetica;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 0.9em;
+  line-height: 1.5em;
 }
 
 .managementTables .managementTables-tbody > tr > td:nth-child(1) {

@@ -20,14 +20,13 @@ const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 const GetAllOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.commodities;
 
-const CurrencyCrosses = memo(() => {
+const Commodities = memo(() => {
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
   const otherInstruments = useSelector(GetAllOtherInstruments);
   const commodityList = useSelector(GetCommoditiesForTreasury);
-  console.log({ otherInstruments, commodityList }, "otherInstruments");
 
   const fullFeed = useSelector(currencyCrossesRatesFeed);
   const marketStatus = useSelector(selectMarketStatus);
@@ -256,14 +255,14 @@ const CurrencyCrosses = memo(() => {
   const columns = useMemo(
     () => [
       {
-        title: "Currency Crosses",
+        title: "Commodities",
         children: [
           { title: "Instrument", dataIndex: "instrumentName" },
           {
             title: "Bid",
             dataIndex: "bid",
             className: "bidCol",
-            width: "14%",
+            // width: "14%",
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -321,8 +320,6 @@ const CurrencyCrosses = memo(() => {
   const enrichedData = useMemo(() => {
     if (!otherInstruments || !commodityList) return [];
 
-    console.log({ otherInstruments, commodityList }, "enrichedData");
-
     try {
       return otherInstruments.map((instrument) => {
         const matchedCross = commodityList.find(
@@ -368,4 +365,4 @@ const CurrencyCrosses = memo(() => {
   );
 });
 
-export default CurrencyCrosses;
+export default Commodities;

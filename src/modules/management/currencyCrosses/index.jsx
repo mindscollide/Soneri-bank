@@ -25,7 +25,6 @@ const CurrencyCrosses = memo(() => {
   const animationFrameRef = useRef(null);
   const otherInstruments = useSelector(GetAllOtherInstruments);
   const currencyCrosses = useSelector(SelectGetCurrencyCrosses);
-  console.log({ otherInstruments, currencyCrosses }, "otherInstruments");
 
   const fullFeed = useSelector(currencyCrossesRatesFeed);
   const marketStatus = useSelector(selectMarketStatus);

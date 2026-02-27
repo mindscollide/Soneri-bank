@@ -52,42 +52,47 @@ const USDParity = memo(() => {
             title: "Bid",
             dataIndex: "bid",
             className: "bidCol",
-            width: "14%",
+            // width: "14%",
+            width: 90,
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              return text !== "-" && <IndexCell value={text} />;
             },
           },
           {
             title: "Ask",
             dataIndex: "ask",
             className: "offerCol",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              return text !== "-" && <IndexCell value={text} />;
             },
           },
           {
             title: "High",
             dataIndex: "high",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              return text !== "-" && <IndexCell value={text} />;
             },
           },
           {
             title: "Low",
             dataIndex: "low",
             className: "offerCol",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              return text !== "-" && <IndexCell value={text} />;
             },
           },
           {
             title: "% Change",
             dataIndex: "percentageChange",
             className: "offerCol",
-            width: "16%",
+            width: 120,
+
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -95,7 +100,7 @@ const USDParity = memo(() => {
           {
             title: "Time",
             dataIndex: "time",
-            width: "14%",
+            width: 90,
             render: (text) =>
               text
                 ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
@@ -155,7 +160,7 @@ const USDParity = memo(() => {
         `${record.instrumentID}-${record.secondaryInstrumentID}`
       }
       pagination={false}
-      scroll={{ y: 300 }}
+      scroll={{ y: 265 }}
     />
   );
 });
