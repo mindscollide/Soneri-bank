@@ -1,9 +1,10 @@
-import styles from "./bankSpotAndUSDParity.module.css";
 import GlobalTable from "../../elements/table/GlobalTable";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { shallowEqual, useSelector } from "react-redux";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
 import { IndexCell } from "../../elements/inputField/IndexCell";
+import { clearDealerSpotClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import { UpdatetDealerSpotRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
 
 // // ✅ Pure selectors (no object creation here)
 const selectGetAllInstrumentForTreasury = (state) =>
@@ -19,10 +20,26 @@ const SelectGetCurrencyCrosses = (state) =>
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
 const BankSpotAndUSDParity = memo(() => {
+  const dispatch = useDispatch();
   const crossInstruments = useSelector(
     selectGetAllInstrumentForTreasury,
     shallowEqual
   );
+
+  // Checklist
+  const GetBankSpotForDealer = useSelector(
+    (state) => state.WatchListReducer.GetBankSpotForDealer
+  );
+
+  // console.log(GetBankSpotForDealer, "GetBankSpotForDealerGetBankSpotForDealer");
+
+  const ClearRatesData = useSelector(
+    (state) => state.RealtimeActionsSlice.DealerSpotClearRates
+  );
+
+  // console.log(ClearRatesData, "ClearRatesDataDataNew");
+
+  // console.log(ClearRatesData, "ClearRatesData");
   const fullFeed = useSelector(selectDealerSpotRatesFeed);
 
   const marketStatus = useSelector(selectMarketStatus);
@@ -213,7 +230,7 @@ const BankSpotAndUSDParity = memo(() => {
     },
     [processUpdateQueue]
   );
-
+  // console.log(processedData, "ProcessedData");
   // ✅ Feed update effect
   useEffect(() => {
     if (!feedEssentials || !fullFeed) return;
@@ -228,6 +245,65 @@ const BankSpotAndUSDParity = memo(() => {
       }
     };
   }, []);
+
+  // useEffect(() => {
+  //   if (ClearRatesData && ClearRatesData?.areRatesClear) {
+  //     // let Rates = GetCategoryWiseSpotRatesDaata?.instruments.map((item) =>
+  //     //   item.secondaryInstrumentID === 0 ? { ...item, bid: 0, offer: 0 } : item
+  //     // );
+  //     // let newData = { ...GetCategoryWiseSpotRatesDaata, instruments: Rates };
+  //     dispatch(UpdatetDealerSpotRates(newData));
+  //     dispatch(clearDealerSpotClearRates(null));
+  //   }
+  // }, [ClearRatesData]);
+
+  useEffect(() => {
+    if (marketStatus === false) {
+      setProcessedData((prevData) =>
+        prevData.map((data) => ({
+          ...data,
+          worldCrossBid: 0,
+          worldCrossOffer: 0,
+          worldCurBid: 0,
+          worldCurOffer: 0,
+        }))
+      );
+
+      setProcessedData((prevData) =>
+        prevData.map((data) => ({
+          ...data,
+          bid: 0,
+          offer: 0,
+        }))
+      );
+    }
+  }, [marketStatus]);
+
+  useEffect(() => {
+    if (ClearRatesData?.areRatesClear && GetBankSpotForDealer) {
+      console.log(ClearRatesData, "ClearRatesDataClearRatesData");
+      const clearedData = {
+        ...GetBankSpotForDealer,
+        worldCurrencies:
+          GetBankSpotForDealer.worldCurrencies?.map((item) => ({
+            ...item,
+            bid: 0,
+            offer: 0,
+          })) || [],
+        worldCrosses:
+          GetBankSpotForDealer.worldCrosses?.map((item) => ({
+            ...item,
+            bid: 0,
+            offer: 0,
+          })) || [],
+      };
+
+      dispatch(UpdatetDealerSpotRates(clearedData));
+
+      // optional reset so it doesn't re-trigger
+      dispatch(clearDealerSpotClearRates(null));
+    }
+  }, [ClearRatesData, GetBankSpotForDealer, dispatch]);
   // Columns
   const columns = useMemo(
     () => [

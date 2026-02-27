@@ -164,3 +164,23 @@ export const GetSingleDealersSpread = {
 export const GetAllOtherInstruments = {
   RequestMethod: "ServiceManager.GetAllOtherInstruments",
 };
+
+export const GetUSDParityForTreasury = {
+  RequestMethod: "ServiceManager.GetUSDParityForTreasury",
+};
+
+export const GetCommoditiesForTreasury = {
+  RequestMethod: "ServiceManager.GetCommoditiesForTreasury",
+};
+
+export const GetIndicesForTreasury = {
+  RequestMethod: "ServiceManager.GetIndicesForTreasury",
+};
+
+export const GetKiborDataForTreasury = {
+  RequestMethod: "ServiceManager.GetKiborDataForTreasury",
+};
+
+export const GetSOFRDataForTreasury = {
+  RequestMethod: "ServieManager.GetSOFRDataForTreasury",
+};

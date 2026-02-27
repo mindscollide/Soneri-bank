@@ -118,10 +118,6 @@ const FeDiscountingTable = () => {
         );
 
         if (rowData.length > 0) {
-          console.log(
-            feDiscountingRates,
-            "feDiscountingRatesfeDiscountingRates"
-          );
           setRowData(rowData);
           setColumnsData(columnsData);
           setDate(feDiscountingRates[0]?.dateTime);

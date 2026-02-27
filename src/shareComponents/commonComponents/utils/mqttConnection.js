@@ -14,7 +14,9 @@ export const useMqttClient = ({
 
   const subscribeToTopics = useCallback(
     (topics = []) => {
-      if (!clientRef.current || !clientRef.current.isConnected()) return;
+      const client = clientRef.current;
+
+      if (!client || !client.isConnected()) return;
 
       topics.forEach((topic) => {
         if (!subscribedTopics.includes(topic)) {
@@ -36,24 +38,24 @@ export const useMqttClient = ({
     [subscribedTopics]
   );
 
-  const unsubscribeFromTopics = useCallback(
-    (topics = []) => {
-      if (!clientRef.current || !isConnected) return;
+  const unsubscribeFromTopics = useCallback((topics = []) => {
+    const client = clientRef.current;
 
-      topics.forEach((topic) => {
-        clientRef.current.unsubscribe(topic, {
-          onSuccess: () => {
-            console.log(`Unsubscribed from topic: ${topic}`);
-            setSubscribedTopics((prev) => prev.filter((t) => t !== topic));
-          },
-          onFailure: (err) => {
-            console.error(`Failed to unsubscribe: ${topic}`, err?.errorMessage);
-          },
-        });
+    // 🔐 Real safety check
+    if (!client || !client.isConnected()) return;
+
+    topics.forEach((topic) => {
+      client.unsubscribe(topic, {
+        onSuccess: () => {
+          console.log(`Unsubscribed from topic: ${topic}`);
+          setSubscribedTopics((prev) => prev.filter((t) => t !== topic));
+        },
+        onFailure: (err) => {
+          console.error(`Failed to unsubscribe: ${topic}`, err?.errorMessage);
+        },
       });
-    },
-    [isConnected]
-  );
+    });
+  }, []);
 
   const onMessageArrived = useCallback(
     (message) => {

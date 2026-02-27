@@ -30,7 +30,6 @@ const ForwardsPremium = () => {
     (state) => state.WatchListReducer.forwardsForTreasuryBranch
   );
 
-  console.log(forwardsForTreasuryBranch, "forwardsForTreasuryBranch");
   const treasuryFowardsTenorsChanges = useSelector(
     (state) => state.RealtimeActionsSlice.treasuryFowardsTenorsChanges
   );
@@ -100,7 +99,6 @@ const ForwardsPremium = () => {
     }
     setCreateTenor({ ...createTenor, [name]: value });
   };
-  console.log(getAllTenorsList, "getAllTenorsListgetAllTenorsList");
   const handleCreateTenor = () => {
     const { tenorName, noOfDays } = createTenor;
 
@@ -193,7 +191,6 @@ const ForwardsPremium = () => {
       console.log(error);
     }
   };
-  console.log(getAllTenorsData, "getAllTenorsDatagetAllTenorsData");
 
   useEffect(() => {
     if (getAllTenorsData?.tenors?.length) {
@@ -207,11 +204,13 @@ const ForwardsPremium = () => {
           }));
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setTenorValue({
-          value: tenorsList[0].value,
-          label: tenorsList[0].label,
-        });
-
+        // setTenorValue({
+        //   value: tenorsList[0].value,
+        //   label: tenorsList[0].label,
+        // });
+        if (tenorsList.length > 0) {
+          setTenorValue(tenorsList[0]);
+        }
         setAllTenorsList(tenorsList);
       } catch (error) {
         console.error("Error processing tenors", error);

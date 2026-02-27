@@ -23,7 +23,6 @@ const RateSheet = () => {
   const navigate = useNavigate();
   const { showMessage } = useNotification();
   const [isMarketOn, setIsMarketOn] = useState(false);
-  console.log(isMarketOn, "isMarketOnisMarketOn");
   const getLastPublishRatesSheet = useSelector(
     (state) => state.WatchListReducer.getLastPublishRatesSheet
   );

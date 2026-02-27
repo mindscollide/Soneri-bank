@@ -1969,6 +1969,117 @@ tr.OutStanding_Table-cell-scrollbar {
   display: none !important;
 }
 
+/* managementTables */
+
+.managementTables-measure-row {
+  visibility: collapse !important;
+}
+.managementTables-cell::before {
+  display: none !important;
+}
+.managementTables-header {
+  border-radius: 0px !important;
+}
+
+.managementTables .managementTables-thead > tr:nth-child(1) > th {
+  text-align: left !important;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables .managementTables-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+}
+
+/* Hide Scrollbar Column */
+.managementTables
+  .managementTables-thead
+  > tr:nth-child(1)
+  > th.managementTables-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.managementTables .managementTables-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: Helvetica;
+}
+
+.managementTables .managementTables-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+}
+
+.managementTables .managementTables-tbody > tr > td:nth-child(2) {
+  background: var(--color-yellow);
+}
+
+.managementTables .managementTables-tbody > tr > td:nth-child(3) {
+  background: var(--color-gray2);
+}
+
+.managementTables-wrapper .managementTables {
+  scrollbar-color: auto !important;
+}
+.managementTables-wrapper .managementTables table {
+  padding-right: 5px;
+}
+
+.managementTables-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.managementTables-wrapper
+  .managementTables-tbody
+  > tr.managementTables-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.managementTables_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.managementTables_Empty {
+  border-radius: 0px !important;
+}
+.managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables_Empty .managementTables_Empty-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+}
+.managementTables_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
+  display: none;
+}
+
 /* ================= HEADER ROW 1 ================= */
 
 .Dealer_FE_Discounting-content {

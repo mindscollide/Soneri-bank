@@ -33,16 +33,12 @@ const isTreasury = import.meta.env.VITE_APP_INCLUDE_TREASURY === "true";
 const isDealer = import.meta.env.VITE_APP_INCLUDE_DEALER === "true";
 
 const Dealer = () => {
-  console.log({ isDealer, isTreasury }, "Role");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const GetAllDealersSpread = useSelector(
     (state) => state.WatchListReducer.GetAllDealersSpread
   );
-  console.log(
-    { GetAllDealersSpread },
-    "GetAllDealersSpreadGetAllDealersSpread"
-  );
+
   const [dealerOptions, setDealerOptions] = useState([]);
   const [selectedDealer, setSelectedDealer] = useState(null);
 
@@ -153,7 +149,6 @@ const Dealer = () => {
     }
   }, [GetAllDealersSpread]);
 
-  console.log(dealerOptions, "dealerOptions");
   return (
     <div className="mt-2">
       <GlobalTabs

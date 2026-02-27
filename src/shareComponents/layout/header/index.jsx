@@ -11,7 +11,6 @@ import { NumericFormat } from "react-number-format";
 import PublshDealerSpreads from "../../../modules/dealer/publishDealerSpreads";
 const MainHeader = () => {
   const location = useLocation();
-  console.log(location, "locationlocation");
 
   return (
     <Row>
@@ -53,11 +52,11 @@ const MainHeader = () => {
                     Dealer
                   </Nav.Link>
                   <Nav.Link
-                    // as={Link}
+                    as={Link}
                     className={
                       location.pathname
                         .toLowerCase()
-                        .includes("Management".toLowerCase())
+                        .includes("management".toLowerCase())
                         ? styles.navItemAcitve
                         : styles.navItem
                     }

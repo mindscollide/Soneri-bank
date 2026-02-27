@@ -174,7 +174,7 @@ const DealerFeDiscountingTable = () => {
   return (
     <div className={styles["mainDiscountingTable"]}>
       <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
-        FE Discountings
+        FE Discounting
       </span>
       <GlobalTable
         columns={columnsData}

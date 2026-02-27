@@ -7,12 +7,12 @@ import { throttle } from "lodash";
 import { useDispatch } from "react-redux";
 import { buildForwardsTable } from "../utils/generateColumnsData";
 import {
-  clearCategoryForwardClearRates,
-  setCategoryFowardsTenorsChanges,
+  clearDealerForwardClearRates,
   setDealerForwardTenorChanged,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { IndexCell } from "../elements/inputField/IndexCell";
 import GlobalTable from "../elements/table/GlobalTable";
+import { UpdateDealerForwardRates } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 
 const Forwards = () => {
   const dispatch = useDispatch();
@@ -54,17 +54,14 @@ const Forwards = () => {
     (state) => state.WatchListReducer.getMarketStatus
   );
 
-  // const ClearRatesData = useSelector(
-  //   (state) => state.RealtimeActionsSlice.CategoryForwardClearRates
-  // );
+  const ClearRatesData = useSelector(
+    (state) => state.RealtimeActionsSlice.DealerForwardClearRates
+  );
+
+  // console.log({ dealerForwardTenorChanged, ClearRatesData }, "RealtimeData");
   // const categoryFowardsTenorsChanges = useSelector(
   //   (state) => state.RealtimeActionsSlice.categoryFowardsTenorsChanges
   // );
-
-  console.log(
-    TreasuryDealerForwardRates,
-    "TreasuryDealerForwardRatesTreasuryDealerForwardRates"
-  );
 
   // Define the columns structure for the Ant Design Table
   // Define the data source for the Ant Design Table
@@ -79,6 +76,11 @@ const Forwards = () => {
         const { forwardRates = [] } =
           GetBankForwardForTreasuryDealer !== null &&
           GetBankForwardForTreasuryDealer;
+
+        console.log(
+          { forwardRates, getAllTenorsData, getAllInstrument },
+          "buildForwardsTable"
+        );
         const { rowData, columnsData } = buildForwardsTable(
           3,
           forwardRates,
@@ -256,8 +258,47 @@ const Forwards = () => {
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
   ]);
+  GetBankForwardForTreasuryDealer;
 
   // For clear Forward Rates
+  useEffect(() => {
+    if (!ClearRatesData?.areRatesClear) return;
+
+    if (GetBankForwardForTreasuryDealer?.forwardRates) {
+      // ✅ Clear bid/ask values
+      const clearedForwardRates =
+        GetBankForwardForTreasuryDealer.forwardRates.map((item) => ({
+          ...item,
+          bid: 0,
+          ask: 0,
+        }));
+
+      const newGetCategoryWiseForwardRatesData = {
+        ...GetBankForwardForTreasuryDealer,
+        forwardRates: clearedForwardRates,
+      };
+
+      dispatch(UpdateDealerForwardRates(newGetCategoryWiseForwardRatesData));
+    } else {
+      // ✅ Fallback: clear current local dataSource if Redux data missing
+      setDataSource((prevData) =>
+        prevData.map((row) => {
+          const updatedRow = { ...row };
+          Object.keys(row).forEach((key) => {
+            if (key.startsWith("bid_") || key.startsWith("ask_")) {
+              updatedRow[key] = 0;
+            }
+          });
+          return updatedRow;
+        })
+      );
+    }
+
+    // ✅ Reset ClearRatesData flag in Redux
+    dispatch(clearDealerForwardClearRates());
+  }, [ClearRatesData, GetBankForwardForTreasuryDealer, dispatch]);
+
+  // // For clear Forward Rates
   // useEffect(() => {
   //   if (!ClearRatesData?.areRatesClear) return;
 
@@ -305,7 +346,6 @@ const Forwards = () => {
         </span>
         <GlobalTable
           columns={columnsData}
-          // className="Dealer_Forwards_Treasury"
           prefixCls={"Dealer_Forwards_Treasury"}
           dataSource={dataSource}
           pagination={false}

@@ -88,8 +88,6 @@ const TenoreWiseCurrentAndLastRates = ({
   useEffect(() => {
     if (getAllTenorsData !== null) {
       try {
-        console.log(getAllTenorsData, "Filtered Applicable Tenors");
-
         const {
           currentTenorWiseForwardRates = [],
           lastTenorWiseForwardRates = [],
@@ -124,7 +122,6 @@ const TenoreWiseCurrentAndLastRates = ({
             dateTime: current?.dateTime ?? "",
           };
         });
-        console.log(newDataMap[0]?.dateTime, "newDataMapnewDataMap");
         setDate(newDataMap[0]?.dateTime);
         dispatch(setForwardsForTreasuryBranch(newDataMap));
       } catch (error) {

@@ -3,12 +3,6 @@ import { notification } from "antd";
 import IconElement from "./IconElement/IconElement";
 
 const NotificationSnackbar = ({ messages }) => {
-  // console.log(
-  //   { messages, message },
-  //   "NotificationSnackbarNotificationSnackbar"
-  // );
-
-  console.log(messages, "NotificationSnackbar");
   const [api, contextHolder] = notification.useNotification();
   const queueRef = useRef([]);
   const shownKeys = useRef(new Set()); // prevent duplicates

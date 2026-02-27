@@ -27,6 +27,7 @@ const loadRoutes = async () => {
     const Interbank = (await import("../modules/interbank")).default;
     const Dealer = (await import("../modules/dealer")).default;
     const Treasury = (await import("../modules/treasury")).default;
+    const Management = (await import("../modules/management")).default;
     dashboardRoute.children.push({
       path: "interbank",
       element: withErrorBoundary(<PrivateRoute element={<Interbank />} />),
@@ -38,6 +39,10 @@ const loadRoutes = async () => {
     dashboardRoute.children.push({
       path: "treasury",
       element: withErrorBoundary(<PrivateRoute element={<Treasury />} />),
+    });
+    dashboardRoute.children.push({
+      path: "management",
+      element: withErrorBoundary(<PrivateRoute element={<Management />} />),
     });
   }
 

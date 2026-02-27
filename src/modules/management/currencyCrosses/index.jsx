@@ -1,7 +1,8 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useSelector } from "react-redux";
-import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
-import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import { formatDateUTCToGMT } from "../../../utils/timeFunction";
+import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 
 // // ✅ Pure selectors (no object creation here)
 
@@ -16,8 +17,15 @@ const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
 const GetAllOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.currencyCrosses;
+
 const CurrencyCrosses = memo(() => {
+  const dataRef = useRef([]);
+  const lastUpdateRef = useRef(0);
+  const updateQueueRef = useRef([]);
+  const animationFrameRef = useRef(null);
   const otherInstruments = useSelector(GetAllOtherInstruments);
+  const currencyCrosses = useSelector(SelectGetCurrencyCrosses);
+  console.log({ otherInstruments, currencyCrosses }, "otherInstruments");
 
   const fullFeed = useSelector(currencyCrossesRatesFeed);
   const marketStatus = useSelector(selectMarketStatus);
@@ -27,29 +35,29 @@ const CurrencyCrosses = memo(() => {
   );
 
   // ✅ Memoized essential feed values
-  // const feedEssentials = useMemo(() => {
-  //   if (!fullFeed) return null;
+  const feedEssentials = useMemo(() => {
+    if (!fullFeed) return null;
 
-  //   return {
-  //     crossBid: fullFeed.instrumentCrossRate?.bid,
-  //     crossAsk: fullFeed.instrumentCrossRate?.ask,
-  //     crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
-  //     crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
-  //     crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
-  //     spotBid: fullFeed.instrumentParitySpot?.bid,
-  //     spotAsk: fullFeed.instrumentParitySpot?.ask,
-  //     spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
-  //   };
-  // }, [
-  //   fullFeed?.instrumentCrossRate?.bid,
-  //   fullFeed?.instrumentCrossRate?.ask,
-  //   fullFeed?.instrumentCrossRate?.updateDateTime,
-  //   fullFeed?.instrumentCrossRate?.instrumentID,
-  //   fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
-  //   fullFeed?.instrumentParitySpot?.bid,
-  //   fullFeed?.instrumentParitySpot?.ask,
-  //   fullFeed?.instrumentParitySpot?.instrumentID,
-  // ]);
+    return {
+      crossBid: fullFeed.instrumentCrossRate?.bid,
+      crossAsk: fullFeed.instrumentCrossRate?.ask,
+      crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
+      crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
+      crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
+      spotBid: fullFeed.instrumentParitySpot?.bid,
+      spotAsk: fullFeed.instrumentParitySpot?.ask,
+      spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
+    };
+  }, [
+    fullFeed?.instrumentCrossRate?.bid,
+    fullFeed?.instrumentCrossRate?.ask,
+    fullFeed?.instrumentCrossRate?.updateDateTime,
+    fullFeed?.instrumentCrossRate?.instrumentID,
+    fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
+    fullFeed?.instrumentParitySpot?.bid,
+    fullFeed?.instrumentParitySpot?.ask,
+    fullFeed?.instrumentParitySpot?.instrumentID,
+  ]);
 
   // // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
@@ -223,34 +231,80 @@ const CurrencyCrosses = memo(() => {
   //     }
   //   };
   // }, []);
-  useEffect(() => {
-    if (GetCurrencyCrosses && otherInstruments) {
-      const updatedCurrencyCrosses = GetCurrencyCrosses.map((cross) => {
-        const matchedInstrument = otherInstruments.find(
-          (instrument) => instrument.instrumentId === cross.instrumentId
-        );
+  //   useEffect(() => {
+  //     if (GetCurrencyCrosses && otherInstruments) {
+  //       const updatedCurrencyCrosses = GetCurrencyCrosses.map((cross) => {
+  //         const matchedInstrument = otherInstruments.find(
+  //           (instrument) => instrument.instrumentId === cross.instrumentId
+  //         );
 
-        return {
-          ...cross,
-          instrument: matchedInstrument ? matchedInstrument.name : null,
-        };
-      });
+  //         console.log(updatedCurrencyCrosses, "CurrencmatchedInstrumentyCrosses");
 
-      setProcessedData(updatedCurrencyCrosses);
-    }
-  }, [GetCurrencyCrosses, otherInstruments]);
+  //         return {
+  //           ...cross,
+  //           instrument: matchedInstrument ? matchedInstrument.name : null,
+  //         };
+  //       });
+
+  //       setProcessedData(updatedCurrencyCrosses);
+  //     }
+  //   }, [GetCurrencyCrosses, otherInstruments]);
+
   // Columns
   const columns = useMemo(
     () => [
       {
         title: "Currency Crosses",
         children: [
-          { title: "Instrument", dataIndex: "instrument" },
-          { title: "Bid", dataIndex: "bid", className: "bidCol" },
-          { title: "Offer", dataIndex: "ask", className: "offerCol" },
+          { title: "Instrument", dataIndex: "instrumentName" },
+          {
+            title: "Bid",
+            dataIndex: "bid",
+            className: "bidCol",
+            width: "14%",
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
+          },
+          {
+            title: "Ask",
+            dataIndex: "ask",
+            className: "offerCol",
+            width: "14%",
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
+          },
+          {
+            title: "High",
+            dataIndex: "high",
+            width: "14%",
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
+          },
+          {
+            title: "Low",
+            dataIndex: "low",
+            className: "offerCol",
+            width: "14%",
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
+          },
+          {
+            title: "% Change",
+            dataIndex: "percentageChange",
+            className: "offerCol",
+            width: "20px",
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
+          },
           {
             title: "Time",
             dataIndex: "time",
+            width: "14%",
             render: (text) =>
               text
                 ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
@@ -261,16 +315,51 @@ const CurrencyCrosses = memo(() => {
     ],
     []
   );
+  // ✅ Enriched base data
+  const enrichedData = useMemo(() => {
+    if (!otherInstruments || !currencyCrosses) return [];
 
+    try {
+      return otherInstruments.map((instrument) => {
+        const matchedCross = currencyCrosses.find(
+          (wc) => Number(wc.instrumentId) === instrument.instrumentId
+        );
+        return {
+          instrumentID: Number(instrument.instrumentId),
+          instrumentName: instrument.name,
+          time: matchedCross?.time ?? "",
+
+          bid: Number(matchedCross?.bid ?? 0),
+          ask: Number(matchedCross?.ask ?? 0),
+          high: Number(matchedCross?.high ?? 0),
+          low: Number(matchedCross?.low ?? 0),
+          percentageChange: Number(matchedCross?.percentChange ?? 0),
+
+          version: 0,
+        };
+      });
+    } catch (error) {
+      console.error("Error enriching data:", error);
+      return [];
+    }
+  }, [otherInstruments, currencyCrosses]);
+
+  // Initialize processed data when enriched data changes
+  useEffect(() => {
+    if (enrichedData.length > 0) {
+      dataRef.current = enrichedData;
+      setProcessedData(enrichedData);
+    }
+  }, [enrichedData]);
   return (
     <GlobalTable
       columns={columns}
       dataSource={processedData}
       prefixCls={
-        processedData.length > 0 ? "LiveRatesTable" : "LiveRatesTable_Empty"
+        processedData.length > 0 ? "managementTables" : "managementTables_Empty"
       }
       pagination={false}
-      scroll={{ x: "max-content", y: 500 }}
+      scroll={{ y: 300 }}
     />
   );
 });

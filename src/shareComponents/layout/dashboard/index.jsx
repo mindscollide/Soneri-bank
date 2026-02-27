@@ -317,7 +317,7 @@ const Dashboard = () => {
 
     // Condition for Dealer user when Logged in
     if (isDealerPath && isDealer && isConnected) {
-      console.log("reaced here");
+      // console.log("reaced here");
       const topic1 = `SBL_TREASURY_DEALER_RATES_${Number(
         localStorage.getItem("userID")
       )}`;

@@ -11,6 +11,7 @@ import {
   GetBankForwardForTreasuryDealerApi,
   GetBankSpotForDealerApi,
   GetBankSpotForTreasuryApi,
+  GetCommoditiesForTreasuryApi,
   GetCorporateDailyVolumeAPI,
   GetCurrencyCrossesApi,
   GetDashboardDataAPI,
@@ -21,13 +22,17 @@ import {
   GetDiscountingRatesForTreasuryApi,
   GetFEDiscountingTableApi,
   GetForwardRatesForCounterPartyApi,
+  GetIndicesForTreasuryApi,
+  GetKiborDataForTreasuryApi,
   GetLastAndCurrentPublishUSDRateSheetAction,
   getLastPublishRatesAction,
   getMarketStatusApi,
   GetMisDataByRangeAPI,
   GetNonFEDiscountingTableApi,
   GetSingleDealersSpreadApi,
+  GetSOFRDataForTreasuryApi,
   getTenorWiseForwardsAction,
+  GetUSDParityForTreasuryApi,
   marketOnOffAction,
   PublishCurrentUSDRateSheetAction,
   publishDiscountingRatesAction,
@@ -83,6 +88,11 @@ const WatchListSlice = createSlice({
     AddDealerSpreadLoading: false,
     GetSingleDealersSpreadLoading: false,
     GetAllOtherInstrumentsLoading: false,
+    GetUSDParityForTreasuryLoading: false,
+    GetCommoditiesForTreasuryLoading: false,
+    GetIndicesForTreasuryLoading: false,
+    GetKiborDataForTreasuryLoading: false,
+    GetSOFRDataForTreasuryLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -138,6 +148,11 @@ const WatchListSlice = createSlice({
     AddDealerSpread: null,
     GetSingleDealersSpread: null,
     GetAllOtherInstruments: null,
+    GetUSDParityForTreasury: null,
+    GetCommoditiesForTreasury: null,
+    GetIndicesForTreasury: null,
+    GetKiborDataForTreasury: null,
+    GetSOFRDataForTreasury: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -184,6 +199,19 @@ const WatchListSlice = createSlice({
         }
       );
     },
+
+    // UpdateGetDealerForwardRates: (state) => {
+    //   state.GetCategoryWiseForwardRates = null;
+    // },
+    UpdatetDealerSpotRates: (state, { payload }) => {
+      state.GetBankSpotForDealer = payload;
+    },
+    UpdateDealerForwardRates: (state) => {
+      state.GetBankForwardForTreasuryDealer = null;
+    },
+    // UpdateDealerWiseDiscountingRates: (state) => {
+    //   state.GetCategoryWiseDiscountingRates = null;
+    // },
   },
   extraReducers: (builder) => {
     builder
@@ -779,6 +807,79 @@ const WatchListSlice = createSlice({
         state.GetAllOtherInstrumentsLoading = false;
         state.GetAllOtherInstruments = null;
         state.error = payload;
+      })
+      // ✅ GetUSDParityForTreasury
+      .addCase(GetUSDParityForTreasuryApi.pending, (state) => {
+        state.GetUSDParityForTreasuryLoading = true;
+      })
+      .addCase(GetUSDParityForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetUSDParityForTreasuryLoading = false;
+        state.GetUSDParityForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetUSDParityForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetUSDParityForTreasuryLoading = false;
+        state.GetUSDParityForTreasury = null;
+        state.error = payload;
+      })
+      // ✅ GetCommoditiesForTreasury
+      .addCase(GetCommoditiesForTreasuryApi.pending, (state) => {
+        state.GetCommoditiesForTreasuryLoading = true;
+      })
+      .addCase(GetCommoditiesForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetCommoditiesForTreasuryLoading = false;
+        state.GetCommoditiesForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetCommoditiesForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetCommoditiesForTreasuryLoading = false;
+        state.GetCommoditiesForTreasury = null;
+        state.error = payload;
+      })
+
+      // ✅ GetIndicesForTreasuryApi
+      .addCase(GetIndicesForTreasuryApi.pending, (state) => {
+        state.GetIndicesForTreasuryLoading = true;
+      })
+      .addCase(GetIndicesForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetIndicesForTreasuryLoading = false;
+        state.GetIndicesForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetIndicesForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetIndicesForTreasuryLoading = false;
+        state.GetIndicesForTreasury = null;
+        state.error = payload;
+      })
+
+      // ✅ GetKiborDataForTreasury
+      .addCase(GetKiborDataForTreasuryApi.pending, (state) => {
+        state.GetIndicesForTreasuryLoading = true;
+      })
+      .addCase(GetKiborDataForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetKiborDataForTreasuryLoading = false;
+        state.GetKiborDataForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetKiborDataForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetKiborDataForTreasuryLoading = false;
+        state.GetKiborDataForTreasury = null;
+        state.error = payload;
+      })
+
+      // ✅ GetSOFRDataForTreasury
+      .addCase(GetSOFRDataForTreasuryApi.pending, (state) => {
+        state.GetSOFRDataForTreasuryLoading = true;
+      })
+      .addCase(GetSOFRDataForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetSOFRDataForTreasuryLoading = false;
+        state.GetSOFRDataForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetSOFRDataForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetSOFRDataForTreasuryLoading = false;
+        state.GetSOFRDataForTreasury = null;
+        state.error = payload;
       });
   },
 });
@@ -794,5 +895,7 @@ export const {
   setCategoryValue,
   setDealerValue,
   updateForwardItem,
+  UpdatetDealerSpotRates,
+  UpdateDealerForwardRates,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;

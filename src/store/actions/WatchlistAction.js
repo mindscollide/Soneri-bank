@@ -25,16 +25,21 @@ import {
   getAllTenorsRM,
   GetBankForwardForTreasuryDealer,
   GetBankSpotForDealer,
+  GetCommoditiesForTreasury,
   GetCurrencyCrosses,
   getDealerDasboardDataRM,
   GetDiscountingRatesForDealer,
   getDiscountingRatesRM,
   GetFeDiscountingRM,
+  GetIndicesForTreasury,
+  GetKiborDataForTreasury,
   GetLastAndCurrentPublishUSDRateSheet,
   getLastAndCurrentUSDRatesRM,
   GetNonFeDiscountingRatesRM,
   GetSingleDealersSpread,
+  GetSOFRDataForTreasury,
   getTenorWiseForwardRatesRM,
+  GetUSDParityForTreasury,
   marketOnOffRM,
   PublishCurrentUSDRateSheet,
   publishCurrentUSDRatesRM,
@@ -2570,6 +2575,356 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
       // Reject with error message
       console.log("", error);
       return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+//GetUSDParityForTreasury
+export const GetUSDParityForTreasuryApi = createAsyncThunk(
+  "watchlist/GetUSDParityForTreasury",
+  async ({ navigate }, { dispatch, rejectWithValue }) => {
+    try {
+      let GetUSDParityForTreasuryData = createPostAPI(
+        watchListApi,
+        GetUSDParityForTreasury.RequestMethod
+      );
+
+      const response = await GetUSDParityForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetCommoditiesForTreasury
+export const GetCommoditiesForTreasuryApi = createAsyncThunk(
+  "watchlist/GetCommoditiesForTreasury",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetCommoditiesForTreasuryData = createPostAPI(
+        watchListApi,
+        GetCommoditiesForTreasury.RequestMethod
+      );
+
+      const response = await GetCommoditiesForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetIndicesForTreasury
+export const GetIndicesForTreasuryApi = createAsyncThunk(
+  "watchlist/GetIndicesForTreasury",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetIndicesForTreasuryData = createPostAPI(
+        watchListApi,
+        GetIndicesForTreasury.RequestMethod
+      );
+
+      const response = await GetIndicesForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetKiborDataForTreasury
+export const GetKiborDataForTreasuryApi = createAsyncThunk(
+  "watchlist/GetKiborDataForTreasury",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetKiborDataForTreasuryData = createPostAPI(
+        watchListApi,
+        GetKiborDataForTreasury.RequestMethod
+      );
+
+      const response = await GetKiborDataForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetSOFRDataForTreasury
+export const GetSOFRDataForTreasuryApi = createAsyncThunk(
+  "watchlist/GetSOFRDataForTreasury",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetSOFRDataForTreasuryData = createPostAPI(
+        watchListApi,
+        GetSOFRDataForTreasury.RequestMethod
+      );
+
+      const response = await GetSOFRDataForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
   }
 );
