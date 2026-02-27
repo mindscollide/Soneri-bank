@@ -52,7 +52,7 @@ const MainHeader = () => {
                     Dealer
                   </Nav.Link>
                   <Nav.Link
-                    // as={Link}
+                    as={Link}
                     className={
                       location.pathname
                         .toLowerCase()

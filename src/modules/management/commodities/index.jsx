@@ -257,12 +257,18 @@ const Commodities = memo(() => {
       {
         title: "Commodities",
         children: [
-          { title: "Instrument", dataIndex: "instrumentName" },
+          {
+            title: "Instrument",
+            dataIndex: "instrumentName",
+            ellipsis: true,
+            width: 90,
+            align: "left",
+          },
           {
             title: "Bid",
             dataIndex: "bid",
             className: "bidCol",
-            // width: "14%",
+            width: 90,
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -271,7 +277,7 @@ const Commodities = memo(() => {
             title: "Ask",
             dataIndex: "ask",
             className: "offerCol",
-            width: "14%",
+            width: 90,
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -279,7 +285,7 @@ const Commodities = memo(() => {
           {
             title: "High",
             dataIndex: "high",
-            width: "14%",
+            width: 90,
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -288,7 +294,7 @@ const Commodities = memo(() => {
             title: "Low",
             dataIndex: "low",
             className: "offerCol",
-            width: "14%",
+            width: 90,
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -297,15 +303,25 @@ const Commodities = memo(() => {
             title: "% Change",
             dataIndex: "percentageChange",
             className: "offerCol",
-            width: "20px",
+            width: 120,
+            ellipsis: true,
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              if (text === "-") return null;
+              const value = Number(text);
+              let cellClassName =
+                value < 0
+                  ? "color-red"
+                  : value > 0
+                  ? "color-green"
+                  : "color-blue";
+
+              return <IndexCell value={value} CellClassName={cellClassName} />;
             },
           },
           {
             title: "Time",
             dataIndex: "time",
-            width: "14%",
+            width: 90,
             render: (text) =>
               text
                 ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
@@ -360,7 +376,7 @@ const Commodities = memo(() => {
         processedData.length > 0 ? "managementTables" : "managementTables_Empty"
       }
       pagination={false}
-      scroll={{ y: 300 }}
+      scroll={{ y: 265, x: "max-content" }}
     />
   );
 });

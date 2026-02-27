@@ -94,7 +94,18 @@ const USDParity = memo(() => {
             width: 120,
 
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              if (text === "-") return null;
+
+              const value = Number(text);
+
+              let cellClassName =
+                value < 0
+                  ? "color-red"
+                  : value > 0
+                  ? "color-green"
+                  : "color-blue";
+
+              return <IndexCell value={value} CellClassName={cellClassName} />;
             },
           },
           {

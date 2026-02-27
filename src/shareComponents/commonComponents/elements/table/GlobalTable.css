@@ -1988,6 +1988,7 @@ tr.OutStanding_Table-cell-scrollbar {
   color: var(--color-black) !important;
   padding: 5px 10px !important;
   border-radius: 0px !important;
+  font-size: 1rem;
 }
 
 /* ================= HEADER ROW 2 ================= */
@@ -1999,7 +2000,7 @@ tr.OutStanding_Table-cell-scrollbar {
   padding: 5px 10px !important;
   border: none !important;
   font-family: "Helvetica-Bold", sans-serif;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* Hide Scrollbar Column */
@@ -2017,7 +2018,7 @@ tr.OutStanding_Table-cell-scrollbar {
   padding: 5px 10px !important;
   border-bottom: 1px solid #837c66;
   font-family: "Helvetica", sans-serif !important;
-  font-size: 0.9em;
+  font-size: 14px;
   line-height: 1.5em;
 }
 

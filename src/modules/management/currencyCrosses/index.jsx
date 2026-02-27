@@ -260,7 +260,8 @@ const CurrencyCrosses = memo(() => {
             title: "Bid",
             dataIndex: "bid",
             className: "bidCol",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -269,7 +270,8 @@ const CurrencyCrosses = memo(() => {
             title: "Ask",
             dataIndex: "ask",
             className: "offerCol",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -277,7 +279,8 @@ const CurrencyCrosses = memo(() => {
           {
             title: "High",
             dataIndex: "high",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -286,7 +289,8 @@ const CurrencyCrosses = memo(() => {
             title: "Low",
             dataIndex: "low",
             className: "offerCol",
-            width: "14%",
+            width: 90,
+
             render: (text) => {
               return text !== "-" && <IndexCell value={text.toFixed(4)} />;
             },
@@ -295,15 +299,28 @@ const CurrencyCrosses = memo(() => {
             title: "% Change",
             dataIndex: "percentageChange",
             className: "offerCol",
-            width: "20px",
+            width: 120,
+
             render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+              if (text === "-") return null;
+
+              const value = Number(text);
+
+              let cellClassName =
+                value < 0
+                  ? "color-red"
+                  : value > 0
+                  ? "color-green"
+                  : "color-blue";
+
+              return <IndexCell value={value} CellClassName={cellClassName} />;
             },
           },
           {
             title: "Time",
             dataIndex: "time",
-            width: "14%",
+            width: 90,
+
             render: (text) =>
               text
                 ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
@@ -358,7 +375,7 @@ const CurrencyCrosses = memo(() => {
         processedData.length > 0 ? "managementTables" : "managementTables_Empty"
       }
       pagination={false}
-      scroll={{ y: 300 }}
+      scroll={{ y: 265 }}
     />
   );
 });

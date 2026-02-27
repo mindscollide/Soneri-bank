@@ -2669,7 +2669,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager.GetCommoditiesForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_01".toLowerCase()
               )
           ) {
             return {
