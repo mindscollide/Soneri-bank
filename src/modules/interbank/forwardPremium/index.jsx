@@ -233,7 +233,6 @@ const ForwardsPremium = () => {
             label: tenor.tenorName,
           };
           setAllTenorsList([...getAllTenorsList, newObj]);
-          // dispatch(setTenorsCreated(null));
         }
       } catch (error) {
         console.log(error);
