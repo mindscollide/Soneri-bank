@@ -379,11 +379,9 @@ const Dashboard = () => {
         // Subscribe only when status is true AND path is treasury
         subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
         // console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
-      } else {
-        // Unsubscribe when status is false OR path is not treasury
-        unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
-        console.log("Unsubscribed from SBL_REAL_TIME_FEED_TREASURY_DEALER");
-      }
+      } 
+    } else {
+      unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
     }
   }, [location.pathname, isConnected, marketStatus]);
 

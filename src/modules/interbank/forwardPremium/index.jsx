@@ -193,7 +193,6 @@ const ForwardsPremium = () => {
       console.log(error);
     }
   };
-  console.log(getAllTenorsData, "getAllTenorsDatagetAllTenorsData");
 
   useEffect(() => {
     if (getAllTenorsData?.tenors?.length) {
@@ -234,7 +233,6 @@ const ForwardsPremium = () => {
             label: tenor.tenorName,
           };
           setAllTenorsList([...getAllTenorsList, newObj]);
-          // dispatch(setTenorsCreated(null));
         }
       } catch (error) {
         console.log(error);
