@@ -6,6 +6,8 @@ import { throttle } from "lodash";
 import GlobalTable from "../../elements/table/GlobalTable";
 import { Col, Row } from "react-bootstrap";
 import styles from "./dealerNonFEDiscountingTable.module.css";
+import { UpdateDealerDiscountingRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
+import { clearDealerDiscountingClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 const DealerNonFeDiscountingTable = () => {
   const dispatch = useDispatch();
@@ -22,11 +24,6 @@ const DealerNonFeDiscountingTable = () => {
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
-  console.log(GetDiscountingRatesForDealer, "GetDiscountingRatesForDealer");
-
-  //   const CategoryFeDiscounting = useSelector(
-  //     (state) => state.RealtimeActionsSlice.CategoryFeDiscounting
-  //   );
 
   const TreasuryDealerNonFeDiscounting = useSelector(
     (state) => state.RealtimeActionsSlice.TreasuryDealerNonFeDiscounting
@@ -36,11 +33,10 @@ const DealerNonFeDiscountingTable = () => {
     (state) => state.WatchListReducer.getMarketStatus
   );
 
-  //   const ClearRatesData = useSelector(
-  //     (state) => state.RealtimeActionsSlice.CategoryDiscountingClearRates
-  //   );
+  const ClearRatesData = useSelector(
+    (state) => state.RealtimeActionsSlice.DealerDiscountingClearRates
+  );
 
-  //   console.log("CategoryFeDiscounting MQTT: ", CategoryFeDiscounting);
   useEffect(() => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
       try {
@@ -125,51 +121,51 @@ const DealerNonFeDiscountingTable = () => {
   }, [marketStatus]);
 
   // ✅ For clear FE Discounting Rates
-  //   useEffect(() => {
-  //     if (!ClearRatesData?.areRatesClear) return;
+  useEffect(() => {
+    if (!ClearRatesData?.areRatesClear) return;
 
-  //     try {
-  //       if (GetCategoryWiseDiscountingRates?.feDiscountingRates?.length) {
-  //         // 🔹 Reset Redux rates to "0"
-  //         const clearedDiscountingRates =
-  //           GetCategoryWiseDiscountingRates.feDiscountingRates.map((item) => ({
-  //             ...item,
-  //             rate: "0",
-  //           }));
+    try {
+      if (GetDiscountingRatesForDealer?.nonFEDiscountingRates?.length) {
+        // 🔹 Reset Redux rates to "0"
+        const clearedDiscountingRates =
+          GetDiscountingRatesForDealer.nonFEDiscountingRates.map((item) => ({
+            ...item,
+            rate: "0",
+          }));
 
-  //         const updatedData = {
-  //           ...GetCategoryWiseDiscountingRates,
-  //           feDiscountingRates: clearedDiscountingRates,
-  //         };
+        const updatedData = {
+          ...GetDiscountingRatesForDealer,
+          nonFEDiscountingRates: clearedDiscountingRates,
+        };
 
-  //         dispatch(UpdateGetCategoryWiseDiscountingRates(updatedData));
+        dispatch(UpdateDealerDiscountingRates(updatedData));
 
-  //         console.log(
-  //           clearedDiscountingRates,
-  //           "✅ Cleared FE Discounting Rates in Redux"
-  //         );
-  //       } else {
-  //         // 🔹 Fallback: Clear only local dataSource
-  //         setDataSource((prevData) =>
-  //           prevData.map((row) => {
-  //             const updatedRow = { ...row };
-  //             for (const key in updatedRow) {
-  //               if (key.startsWith("rate_")) {
-  //                 updatedRow[key] = "0";
-  //               }
-  //             }
-  //             return updatedRow;
-  //           })
-  //         );
-  //         console.log("✅ Cleared FE Discounting Rates in local dataSource");
-  //       }
+        console.log(
+          clearedDiscountingRates,
+          "✅ Cleared FE Discounting Rates in Redux"
+        );
+      } else {
+        // 🔹 Fallback: Clear only local dataSource
+        setDataSource((prevData) =>
+          prevData.map((row) => {
+            const updatedRow = { ...row };
+            for (const key in updatedRow) {
+              if (key.startsWith("rate_")) {
+                updatedRow[key] = "0";
+              }
+            }
+            return updatedRow;
+          })
+        );
+        console.log("✅ Cleared FE Discounting Rates in local dataSource");
+      }
 
-  //       // 🔹 Always reset clear flag
-  //       dispatch(clearCategoryDiscountingClearRates());
-  //     } catch (error) {
-  //       console.error("❌ Error while clearing FE Discounting Rates:", error);
-  //     }
-  //   }, [ClearRatesData, GetCategoryWiseDiscountingRates, dispatch]);
+      // 🔹 Always reset clear flag
+      dispatch(clearDealerDiscountingClearRates());
+    } catch (error) {
+      console.error("❌ Error while clearing FE Discounting Rates:", error);
+    }
+  }, [ClearRatesData, GetDiscountingRatesForDealer, dispatch]);
 
   return (
     <div className={styles["mainDiscountingTable"]}>

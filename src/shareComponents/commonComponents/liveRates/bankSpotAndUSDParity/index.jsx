@@ -42,6 +42,7 @@ const BankSpotAndUSDParity = memo(() => {
   // console.log(ClearRatesData, "ClearRatesData");
   const fullFeed = useSelector(selectDealerSpotRatesFeed);
 
+  // console.log(fullFeed, "fullFeedfullFeed");
   const marketStatus = useSelector(selectMarketStatus);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
@@ -301,7 +302,7 @@ const BankSpotAndUSDParity = memo(() => {
       dispatch(UpdatetDealerSpotRates(clearedData));
 
       // optional reset so it doesn't re-trigger
-      dispatch(clearDealerSpotClearRates(null));
+      dispatch(clearDealerSpotClearRates());
     }
   }, [ClearRatesData, GetBankSpotForDealer, dispatch]);
   // Columns

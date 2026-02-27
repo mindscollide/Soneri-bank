@@ -76,6 +76,7 @@ const RealtimeActionsSlice = createSlice({
     dealerForwardTenorChanged: null,
     DealerSpotClearRates: null,
     DealerForwardClearRates: null,
+    DealerDiscountingClearRates: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -91,7 +92,9 @@ const RealtimeActionsSlice = createSlice({
     clearDealerForwardClearRates: (state) => {
       state.DealerForwardClearRates = null;
     },
-
+    clearDealerDiscountingClearRates: (state) => {
+      state.DealerDiscountingClearRates = null;
+    },
     clearCategoryDiscountingClearRates: (state) => {
       state.CategoryDiscountingClearRates = null;
     },
@@ -113,6 +116,7 @@ const RealtimeActionsSlice = createSlice({
       // New Work
       state.DealerSpotClearRates = payload;
       state.DealerForwardClearRates = payload;
+      state.DealerDiscountingClearRates = payload;
     },
     setCategoryNonFeDiscounting: (state, { payload }) => {
       state.CategoryNonFeDiscouting = payload;
@@ -350,6 +354,7 @@ export const {
   setDealerForwardTenorChanged,
   clearDealerSpotClearRates,
   clearDealerForwardClearRates,
+  clearDealerDiscountingClearRates,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

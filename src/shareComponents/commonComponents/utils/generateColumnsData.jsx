@@ -182,10 +182,6 @@ export const buildForwardsTable = (
   try {
     const { tenors } = getAllTenorsData;
     const { instruments } = getAllInstrument;
-    console.log(
-      { tenors, instruments, Data },
-      "buildForwardsTablebuildForwardsTable"
-    );
 
     const applicableInstruments =
       value === 1

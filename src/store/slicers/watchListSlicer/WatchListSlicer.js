@@ -200,18 +200,15 @@ const WatchListSlice = createSlice({
       );
     },
 
-    // UpdateGetDealerForwardRates: (state) => {
-    //   state.GetCategoryWiseForwardRates = null;
-    // },
     UpdatetDealerSpotRates: (state, { payload }) => {
       state.GetBankSpotForDealer = payload;
     },
     UpdateDealerForwardRates: (state) => {
       state.GetBankForwardForTreasuryDealer = null;
     },
-    // UpdateDealerWiseDiscountingRates: (state) => {
-    //   state.GetCategoryWiseDiscountingRates = null;
-    // },
+    UpdateDealerDiscountingRates: (state) => {
+      state.GetDiscountingRatesForDealer = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -897,5 +894,6 @@ export const {
   updateForwardItem,
   UpdatetDealerSpotRates,
   UpdateDealerForwardRates,
+  UpdateDealerDiscountingRates,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;
