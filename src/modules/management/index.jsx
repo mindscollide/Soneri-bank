@@ -5,13 +5,16 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   GetAllOtherInstrumentsApi,
+  getAllTenorsAction,
   getAllTreasuryInstrumentsApi,
   GetBankSpotForTreasuryApi,
   GetCommoditiesForTreasuryApi,
   GetCurrencyCrossesApi,
   GetIndicesForTreasuryApi,
   GetKiborDataForTreasuryApi,
+  GetRevalRatesForTreasuryApi,
   GetSOFRDataForTreasuryApi,
+  GetSwapsInUSDForTreasuryApi,
   GetUSDParityForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
 
@@ -43,9 +46,8 @@ const Management = () => {
     dispatch(GetIndicesForTreasuryApi({ navigate }));
     dispatch(GetKiborDataForTreasuryApi({ navigate }));
     dispatch(GetSOFRDataForTreasuryApi({ navigate }));
-    // dispatch(getAllTenorsAction({ navigate }));
-    // dispatch(GetBankForwardForTreasuryApi({ navigate }));
-    // dispatch(GetDiscountingRatesForTreasuryApi({ navigate }));
+    dispatch(GetRevalRatesForTreasuryApi({ navigate }));
+    dispatch(GetSwapsInUSDForTreasuryApi({ navigate }));
   }, []);
   return (
     <div className={styles.managementWrapper}>
@@ -73,7 +75,7 @@ const Management = () => {
           </Suspense>
         </Col>
       </Row>
-      <Row>
+      <Row className="mt-3">
         <Col sm={12} md={6} lg={6}>
           <Suspense fallback={<>...Loading</>}>
             <KIBOR />
@@ -85,7 +87,7 @@ const Management = () => {
           </Suspense>
         </Col>
       </Row>
-      <Row>
+      <Row className="mt-3">
         <Col sm={12} md={6} lg={6}>
           <Suspense fallback={<>...Loading</>}>
             <SBPFXRevalRates />

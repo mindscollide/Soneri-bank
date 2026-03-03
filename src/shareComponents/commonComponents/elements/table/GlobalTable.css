@@ -1969,7 +1969,11 @@ tr.OutStanding_Table-cell-scrollbar {
   display: none !important;
 }
 
-/* managementTables */
+/* managementTables] */
+.managementTables-wrapper .managementTables-container {
+  position: relative;
+  min-height: 332px !important;
+}
 
 .managementTables-measure-row {
   visibility: collapse !important;
@@ -1981,19 +1985,9 @@ tr.OutStanding_Table-cell-scrollbar {
   border-radius: 0px !important;
 }
 
-.managementTables .managementTables-thead > tr:nth-child(1) > th {
-  text-align: left !important;
-  font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
-  color: var(--color-black) !important;
-  padding: 5px 10px !important;
-  border-radius: 0px !important;
-  font-size: 1rem;
-}
-
 /* ================= HEADER ROW 2 ================= */
 
-.managementTables .managementTables-thead > tr:nth-child(2) > th {
+.managementTables .managementTables-thead > tr:nth-child(1) > th {
   background: #000;
   color: #fff;
   text-align: center;
@@ -2001,6 +1995,7 @@ tr.OutStanding_Table-cell-scrollbar {
   border: none !important;
   font-family: "Helvetica-Bold", sans-serif;
   font-size: 14px;
+  border-radius: 0px !important;
 }
 
 /* Hide Scrollbar Column */
@@ -2008,7 +2003,8 @@ tr.OutStanding_Table-cell-scrollbar {
   .managementTables-thead
   > tr:nth-child(1)
   > th.managementTables-cell-scrollbar {
-  display: none !important;
+  /* display: none !important; */
+  border: none !important;
 }
 
 /* ================= BODY COMMON ================= */
@@ -2060,17 +2056,17 @@ tr.OutStanding_Table-cell-scrollbar {
 .managementTables_Empty {
   border-radius: 0px !important;
 }
-.managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
+/* .managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
   text-align: center;
   font-family: "Helvetica-Bold", sans-serif !important;
   background: var(--color-light) !important;
   color: var(--color-black) !important;
   padding: 5px 10px !important;
-}
+} */
 
 /* ================= HEADER ROW 2 ================= */
 
-.managementTables_Empty .managementTables_Empty-thead > tr:nth-child(2) > th {
+.managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
   background: #000;
   color: #fff;
   text-align: center;
@@ -2078,9 +2074,83 @@ tr.OutStanding_Table-cell-scrollbar {
   border: none !important;
   font-family: "Helvetica-Bold", sans-serif;
   font-size: 14px;
+  border-radius: 0px !important;
 }
 .managementTables_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
   display: none;
+}
+
+/* SOFR */
+.managementTables_sofr-wrapper .managementTables_sofr-container {
+  position: relative;
+  min-height: 332px !important;
+}
+
+.managementTables_sofr-measure-row {
+  visibility: collapse !important;
+}
+.managementTables_sofr-cell::before {
+  display: none !important;
+}
+.managementTables_sofr-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables_sofr .managementTables_sofr-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  margin: 0;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0 !important;
+}
+
+/* Hide Scrollbar Column */
+.managementTables_sofr
+  .managementTables_sofr-thead
+  > tr:nth-child(1)
+  > th.managementTables_sofr-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.managementTables_sofr .managementTables_sofr-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.managementTables_sofr .managementTables_sofr-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+  /* width: 150px !important; */
+}
+
+.managementTables_sofr-wrapper .managementTables_sofr {
+  scrollbar-color: auto !important;
+}
+.managementTables_sofr-wrapper .managementTables_sofr table {
+  padding-right: 5px;
+}
+
+.managementTables_sofr-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.managementTables_sofr-wrapper
+  .managementTables_sofr-tbody
+  > tr.managementTables_sofr-placeholder:hover
+  > td {
+  background: none !important;
 }
 
 /* ================= HEADER ROW 1 ================= */

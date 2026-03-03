@@ -31,18 +31,11 @@ const BankSpotAndUSDParity = memo(() => {
     (state) => state.WatchListReducer.GetBankSpotForDealer
   );
 
-  // console.log(GetBankSpotForDealer, "GetBankSpotForDealerGetBankSpotForDealer");
-
   const ClearRatesData = useSelector(
     (state) => state.RealtimeActionsSlice.DealerSpotClearRates
   );
 
-  // console.log(ClearRatesData, "ClearRatesDataDataNew");
-
-  // console.log(ClearRatesData, "ClearRatesData");
   const fullFeed = useSelector(selectDealerSpotRatesFeed);
-
-  // console.log(fullFeed, "fullFeedfullFeed");
   const marketStatus = useSelector(selectMarketStatus);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
@@ -246,17 +239,6 @@ const BankSpotAndUSDParity = memo(() => {
       }
     };
   }, []);
-
-  // useEffect(() => {
-  //   if (ClearRatesData && ClearRatesData?.areRatesClear) {
-  //     // let Rates = GetCategoryWiseSpotRatesDaata?.instruments.map((item) =>
-  //     //   item.secondaryInstrumentID === 0 ? { ...item, bid: 0, offer: 0 } : item
-  //     // );
-  //     // let newData = { ...GetCategoryWiseSpotRatesDaata, instruments: Rates };
-  //     dispatch(UpdatetDealerSpotRates(newData));
-  //     dispatch(clearDealerSpotClearRates(null));
-  //   }
-  // }, [ClearRatesData]);
 
   useEffect(() => {
     if (marketStatus === false) {

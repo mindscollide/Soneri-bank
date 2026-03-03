@@ -18,10 +18,7 @@ const PublshDealerSpreads = () => {
   const spreadsForSingleUser = useSelector(
     (state) => state.RealtimeActionsSlice.spreadsForSingleUser
   );
-  console.log(
-    GetSingleDealersSpread,
-    "GetSingleDealersSpreadGetSingleDealersSpread"
-  );
+
   const handlePublishSpreads = () => {
     const Data = {
       BidSpread: bidSpreads !== "" ? Number(bidSpreads) : 0,

@@ -28,16 +28,21 @@ import {
   setCategoryNonFeDiscounting,
   setCategorySpotRates,
   setClearRates,
+  setCommoditiesForManagmentFeed,
   setCounterPartyFeDiscounting,
   setCounterPartyForwardRates,
   setCounterPartyNonFeDiscounting,
   setCounterPartySpotRates,
+  setCurrencyCrossesForManagementFeed,
   setCurrencyCrossesRatesFeed,
   setDealerForwardTenorChanged,
   setDealerSpotRatesFeed,
   setFxTradingCards,
+  setKiborForManagmentFeed,
   setMarketTimingsUpdated,
+  setSofrForManagmentFeed,
   setSpreadsForSingleUser,
+  setStockIndicesForManagmentFeed,
   setTenorsCreated,
   setTradeRightsStatusUpdated,
   setTreasuryDealerFeDiscounting,
@@ -48,6 +53,7 @@ import {
   setTreasuryFowardsTenorsChanges,
   setTreasuryNonFeDiscounting,
   setTreasurySpotRatesFeed,
+  setUSDParityForManagementFeed,
   tenorWiseFowardsRatesPublishedActions,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { setMarketStatus } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
@@ -215,6 +221,51 @@ const Dashboard = () => {
         case "CURRENT_RATE_SHEET_RATES_PUBLISHED":
           startTransition(dispatch(setSpreadsForSingleUser(payload)));
           break;
+
+        case "TREASURY_USD_PARITY_FEED":
+          startTransition(() => {
+            dispatch(setUSDParityForManagementFeed(payload));
+          });
+          break;
+        case "TREASURY_CURRENCY_CROSSES_FEED":
+          startTransition(() => {
+            dispatch(setCurrencyCrossesForManagementFeed(payload));
+          });
+          break;
+        case "TREASURY_CROSSES_PREMIUMS_RATES":
+          startTransition(() => {
+            // dispatch(setUSDParityForManagementFeed(payload));
+          });
+          break;
+
+        case "TREASURY_COMMODITIES_FEED":
+          startTransition(() => {
+            dispatch(setCommoditiesForManagmentFeed(payload));
+          });
+          break;
+
+        case "TREASURY_STOCK_INDICES_FEED":
+          startTransition(() => {
+            dispatch(setStockIndicesForManagmentFeed(payload));
+          });
+          break;
+        case "TREASURY_MANAGEMENT_KIBOR":
+          startTransition(() => {
+            dispatch(setKiborForManagmentFeed(payload));
+          });
+          break;
+
+        case "TREASURY_MANAGEMENT_SOFR":
+          startTransition(() => {
+            dispatch(setSofrForManagmentFeed(payload));
+          });
+          break;
+
+        case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
+          startTransition(() => {
+            // dispatch(setStockIndicesForManagmentFeed(payload));
+          });
+          break;
         default:
           console.warn("No specific handler for this message type", payload);
       }
@@ -315,6 +366,10 @@ const Dashboard = () => {
   useEffect(() => {
     const isDealerPath = location.pathname.toLowerCase().includes("dealer");
 
+    const isManagementPath = location.pathname
+      .toLowerCase()
+      .includes("management");
+
     // Condition for Dealer user when Logged in
     if (isDealerPath && isDealer && isConnected) {
       // console.log("reaced here");
@@ -332,8 +387,18 @@ const Dashboard = () => {
 
     const dealerId = dealerValue.value;
 
+    // Management Work
+    if (isManagementPath && isConnected) {
+      subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
+    }
     // ❌ If ANY required condition fails → unsubscribe
-    if (!isTreasury || !isDealerPath || !dealerId || dealerId === 0) {
+    if (
+      !isTreasury ||
+      !isDealerPath ||
+      !dealerId ||
+      dealerId === 0 ||
+      !isManagementPath
+    ) {
       if (prevTopicRef.current?.length) {
         unsubscribeFromTopics(prevTopicRef.current);
         console.log("Unsubscribed (condition failed):", prevTopicRef.current);
@@ -379,11 +444,24 @@ const Dashboard = () => {
         // Subscribe only when status is true AND path is treasury
         subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
         // console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
-      } 
+      }
     } else {
       unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
     }
   }, [location.pathname, isConnected, marketStatus]);
+
+  // useEffect(() => {
+  //   if (!isConnected) return;
+
+  //   //make isTreasuryCommented
+  //   if (location.pathname.toLowerCase().includes("management".toLowerCase())) {
+  //     // Subscribe only when status is true AND path is treasury
+  //     subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
+  //     console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
+  //   } else {
+  //     unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
+  //   }
+  // }, [location.pathname, isConnected]);
 
   // Handle unsubscription only when leaving treasury path
   // useEffect(() => {

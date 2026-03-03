@@ -36,8 +36,10 @@ import {
   GetLastAndCurrentPublishUSDRateSheet,
   getLastAndCurrentUSDRatesRM,
   GetNonFeDiscountingRatesRM,
+  GetRevalRatesForTreasury,
   GetSingleDealersSpread,
   GetSOFRDataForTreasury,
+  GetSwapsInUSDForTreasury,
   getTenorWiseForwardRatesRM,
   GetUSDParityForTreasury,
   marketOnOffRM,
@@ -1226,7 +1228,7 @@ export const marketOnOffAction = createAsyncThunk(
 // Define the login async thunk
 export const getAllTenorsAction = createAsyncThunk(
   "uploadRate/getAllTenors", // A unique action type string
-  async ({ navigate }, { rejectWithValue, dispatch }) => {
+  async ({ rejectWithValue }) => {
     try {
       let getAllTenors = createPostAPI(authApi, getAllTenorsRM.RequestMethod);
 
@@ -2909,6 +2911,146 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
               .toLowerCase()
               .includes(
                 "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetRevalRatesForTreasury
+export const GetRevalRatesForTreasuryApi = createAsyncThunk(
+  "watchlist/GetRevalRatesForTreasury",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetRevalRatesForTreasuryData = createPostAPI(
+        watchListApi,
+        GetRevalRatesForTreasury.RequestMethod
+      );
+
+      const response = await GetRevalRatesForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetRevalRatesForTreasury
+export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
+  "watchlist/GetSwapsInUSDForTreasury",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetSwapsInUSDForTreasuryData = createPostAPI(
+        watchListApi,
+        GetSwapsInUSDForTreasury.RequestMethod
+      );
+
+      const response = await GetSwapsInUSDForTreasuryData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_04".toLowerCase()
               )
           ) {
             return rejectWithValue("Exception occured.");

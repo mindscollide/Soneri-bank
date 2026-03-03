@@ -30,10 +30,6 @@ const ForwardsPremium = () => {
     (state) => state.WatchListReducer.forwardsForTreasuryBranch
   );
 
-  const treasuryFowardsTenorsChanges = useSelector(
-    (state) => state.RealtimeActionsSlice.treasuryFowardsTenorsChanges
-  );
-
   const createTenorLoading = useSelector(
     (state) => state.WatchListReducer.createTenorLoading
   );
@@ -41,6 +37,7 @@ const ForwardsPremium = () => {
   const getAllTenorsData = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
+
   const [getAllTenorsList, setAllTenorsList] = useState([]);
   const [createTenor, setCreateTenor] = useState({
     tenorName: "",

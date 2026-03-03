@@ -61,13 +61,6 @@ const FeDiscountingTable = () => {
     (state) => state.WatchListReducer.getAllTenors
   );
 
-  // console.log(
-  //   getDashboardForwards,
-  //   getAllTenorsData,
-  //   GetAllInstrumentForTreasury,
-  //   GetAllInstrumentForTreasury,
-  //   "getDashboardForwardsgetDashboardForwards"
-  // );
   const onInputChange = (record, instrumentName, value) => {
     const previousValue = record[instrumentName]; // Get previous value from record
     const validated = isValidMaxFourNumberAfterPoint(value, previousValue, 100);

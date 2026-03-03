@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import React from "react";
 import RealtimeActionsSlice from "./slicers/realtimeActionsSlicer/realtimeActionSlice";
 import WatchListSlice from "./slicers/watchListSlicer/WatchListSlicer";
 import authSlicer from "./slicers/authSlicer/authSlicer";

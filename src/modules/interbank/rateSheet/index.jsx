@@ -10,8 +10,6 @@ import {
 import { formatDateUTCToGMT } from "../../../utils/timeFunction";
 import GlobalModal from "../../../shareComponents/commonComponents/elements/globalModal/Modal";
 import CustomButton from "../../../shareComponents/commonComponents/elements/globalButton/button";
-import SwitchButton from "../../../shareComponents/commonComponents/elements/switchButton/SwitchBtn";
-import InputFIeld from "../../../shareComponents/commonComponents/elements/inputField/InputField";
 import { useDispatch, useSelector } from "react-redux";
 import { PublishCurrentUSDRateSheetAction } from "../../../store/actions/WatchlistAction";
 import { useNavigate } from "react-router-dom";
@@ -26,17 +24,11 @@ const RateSheet = () => {
   const getLastPublishRatesSheet = useSelector(
     (state) => state.WatchListReducer.getLastPublishRatesSheet
   );
-  //   const currentUpdatedRates = useSelector(
-  //     (state) => state.RealtimeActionsSlice.currentRatesPublished
-  //   );
-
-  //   console.log({ currentUpdatedRates, getLastPublishRates }, "ratestoworkon");
 
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
 
-  //   console.log("marketStatus", marketStatus);
   const publishedSpotRateSheet = useSelector(
     (state) => state.modalReducer.publishedSpotRateSheet
   );

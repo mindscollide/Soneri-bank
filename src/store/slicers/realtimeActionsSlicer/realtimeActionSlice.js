@@ -77,6 +77,14 @@ const RealtimeActionsSlice = createSlice({
     DealerSpotClearRates: null,
     DealerForwardClearRates: null,
     DealerDiscountingClearRates: null,
+    usdParityForManagmentFeed: null,
+    currencyCrossesForManagmentFeed: null,
+    commoditiesForManagementFeed: null,
+    stockIndicesForManagementFeed: null,
+    kiborForManagementFeed: null,
+    sofrForManagementFeed: null,
+    sbpFXRevalRatesForManagementFeed: null,
+    swapsinUSDForManagementFeed: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -286,6 +294,32 @@ const RealtimeActionsSlice = createSlice({
     setDealerForwardTenorChanged: (state, { payload }) => {
       state.dealerForwardTenorChanged = payload;
     },
+    setUSDParityForManagementFeed: (state, { payload }) => {
+      state.usdParityForManagmentFeed = { ...payload };
+    },
+    setCurrencyCrossesForManagementFeed: (state, { payload }) => {
+      state.currencyCrossesForManagmentFeed = { ...payload };
+    },
+
+    setCommoditiesForManagmentFeed: (state, { payload }) => {
+      state.commoditiesForManagementFeed = { ...payload };
+    },
+    setStockIndicesForManagmentFeed: (state, { payload }) => {
+      state.stockIndicesForManagementFeed = { ...payload };
+    },
+
+    setKiborForManagmentFeed: (state, { payload }) => {
+      state.kiborForManagementFeed = { ...payload };
+    },
+    setSofrForManagmentFeed: (state, { payload }) => {
+      state.sofrForManagementFeed = { ...payload };
+    },
+    setSbpFXRevalRatesForManagmentFeed: (state, { payload }) => {
+      state.sbpFXRevalRatesForManagementFeed = { ...payload };
+    },
+    setSwapsinUSDForManagementFeed: (state, { payload }) => {
+      state.swapsinUSDForManagementFeed = { ...payload };
+    },
   },
 });
 
@@ -355,6 +389,14 @@ export const {
   clearDealerSpotClearRates,
   clearDealerForwardClearRates,
   clearDealerDiscountingClearRates,
+  setUSDParityForManagementFeed,
+  setCurrencyCrossesForManagementFeed,
+  setCommoditiesForManagmentFeed,
+  setStockIndicesForManagmentFeed,
+  setKiborForManagmentFeed,
+  setSofrForManagmentFeed,
+  setSbpFXRevalRatesForManagmentFeed,
+  setSwapsinUSDForManagementFeed,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

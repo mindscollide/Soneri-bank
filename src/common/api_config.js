@@ -182,5 +182,13 @@ export const GetKiborDataForTreasury = {
 };
 
 export const GetSOFRDataForTreasury = {
-  RequestMethod: "ServieManager.GetSOFRDataForTreasury",
+  RequestMethod: "ServiceManager.GetSOFRDataForTreasury",
+};
+
+export const GetSwapsInUSDForTreasury = {
+  RequestMethod: "ServiceManager.GetSwapsInUSDForTreasury",
+};
+
+export const GetRevalRatesForTreasury = {
+  RequestMethod: "ServiceManager.GetRevalRatesForTreasury",
 };

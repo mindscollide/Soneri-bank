@@ -29,8 +29,10 @@ import {
   getMarketStatusApi,
   GetMisDataByRangeAPI,
   GetNonFEDiscountingTableApi,
+  GetRevalRatesForTreasuryApi,
   GetSingleDealersSpreadApi,
   GetSOFRDataForTreasuryApi,
+  GetSwapsInUSDForTreasuryApi,
   getTenorWiseForwardsAction,
   GetUSDParityForTreasuryApi,
   marketOnOffAction,
@@ -93,6 +95,8 @@ const WatchListSlice = createSlice({
     GetIndicesForTreasuryLoading: false,
     GetKiborDataForTreasuryLoading: false,
     GetSOFRDataForTreasuryLoading: false,
+    GetRevalRatesForTreasuryLoading: false,
+    GetSwapsInUSDForTreasuryLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -153,6 +157,8 @@ const WatchListSlice = createSlice({
     GetIndicesForTreasury: null,
     GetKiborDataForTreasury: null,
     GetSOFRDataForTreasury: null,
+    GetRevalRatesForTreasury: null,
+    GetSwapsInUSDForTreasury: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -876,6 +882,36 @@ const WatchListSlice = createSlice({
       .addCase(GetSOFRDataForTreasuryApi.rejected, (state, { payload }) => {
         state.GetSOFRDataForTreasuryLoading = false;
         state.GetSOFRDataForTreasury = null;
+        state.error = payload;
+      })
+
+      // ✅ GetRevalRatesForTreasury
+      .addCase(GetRevalRatesForTreasuryApi.pending, (state) => {
+        state.GetRevalRatesForTreasuryLoading = true;
+      })
+      .addCase(GetRevalRatesForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetRevalRatesForTreasuryLoading = false;
+        state.GetRevalRatesForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetRevalRatesForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetRevalRatesForTreasuryLoading = false;
+        state.GetRevalRatesForTreasury = null;
+        state.error = payload;
+      })
+
+      // ✅ GetSwapsInUSDForTreasury
+      .addCase(GetSwapsInUSDForTreasuryApi.pending, (state) => {
+        state.GetSwapsInUSDForTreasuryLoading = true;
+      })
+      .addCase(GetSwapsInUSDForTreasuryApi.fulfilled, (state, { payload }) => {
+        state.GetSwapsInUSDForTreasuryLoading = false;
+        state.GetSwapsInUSDForTreasury = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetSwapsInUSDForTreasuryApi.rejected, (state, { payload }) => {
+        state.GetSwapsInUSDForTreasuryLoading = false;
+        state.GetSwapsInUSDForTreasury = null;
         state.error = payload;
       });
   },
