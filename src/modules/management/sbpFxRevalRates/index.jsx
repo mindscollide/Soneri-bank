@@ -1,20 +1,15 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import { formatDateUTCToGMT } from "../../../utils/timeFunction";
-import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
 const GetRevalRatesForTreasury = (state) =>
   state.WatchListReducer.GetRevalRatesForTreasury;
-const GetAllOtherInstruments = (state) =>
-  state.WatchListReducer.GetAllOtherInstruments?.stockIndices;
 
 const SBPFXRevalRates = memo(() => {
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
-  const otherInstruments = useSelector(GetAllOtherInstruments);
   const revalRatesList = useSelector(GetRevalRatesForTreasury);
 
   console.log(revalRatesList, "revalRatesListrevalRatesList");
@@ -470,8 +465,8 @@ const SBPFXRevalRates = memo(() => {
         dataSource={processedData}
         prefixCls={
           processedData.length > 0
-            ? "managementTables"
-            : "managementTables_Empty"
+            ? "managementTables_sofr"
+            : "managementTables_sofr_Empty"
         }
         pagination={false}
         scroll={{ y: 300, x: "max-content" }}

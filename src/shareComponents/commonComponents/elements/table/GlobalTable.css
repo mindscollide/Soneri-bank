@@ -1972,7 +1972,7 @@ tr.OutStanding_Table-cell-scrollbar {
 /* managementTables] */
 .managementTables-wrapper .managementTables-container {
   position: relative;
-  min-height: 332px !important;
+  /* min-height: 332px !important; */
 }
 
 .managementTables-measure-row {
@@ -2055,6 +2055,7 @@ tr.OutStanding_Table-cell-scrollbar {
 /* ================= HEADER ROW 1 ================= */
 .managementTables_Empty {
   border-radius: 0px !important;
+  min-height: 332px !important;
 }
 /* .managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
   text-align: center;
@@ -2083,7 +2084,7 @@ tr.OutStanding_Table-cell-scrollbar {
 /* SOFR */
 .managementTables_sofr-wrapper .managementTables_sofr-container {
   position: relative;
-  min-height: 332px !important;
+  /* min-height: 332px !important; */
 }
 
 .managementTables_sofr-measure-row {
@@ -2151,6 +2152,122 @@ tr.OutStanding_Table-cell-scrollbar {
   > tr.managementTables_sofr-placeholder:hover
   > td {
   background: none !important;
+}
+
+/* managementTable_Swaps] */
+.managementTable_Swaps-wrapper .managementTables-container {
+  position: relative;
+  min-height: 332px !important;
+}
+
+.managementTable_Swaps-measure-row {
+  visibility: collapse !important;
+}
+.managementTable_Swaps-cell::before {
+  display: none !important;
+}
+.managementTable_Swaps-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTable_Swaps .managementTable_Swaps-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTable_Swaps .managementTable_Swaps-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+
+/* Hide Scrollbar Column */
+.managementTable_Swaps
+  .managementTable_Swaps-thead
+  > tr:nth-child(1)
+  > th.managementTable_Swaps-cell-scrollbar {
+  /* display: none !important; */
+  border: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.managementTable_Swaps .managementTable_Swaps-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.managementTable_Swaps .managementTable_Swaps-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+}
+
+.managementTable_Swaps-wrapper .managementTable_Swaps {
+  scrollbar-color: auto !important;
+}
+.managementTable_Swaps-wrapper .managementTable_Swaps table {
+  padding-right: 5px;
+}
+
+.managementTable_Swaps-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.managementTable_Swaps-wrapper
+  .managementTable_Swaps-tbody
+  > tr.managementTables-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.managementTable_Swaps_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.managementTable_Swaps_Empty {
+  border-radius: 0px !important;
+}
+/* .managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+} */
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTable_Swaps_Empty
+  .managementTable_Swaps_Empty-thead
+  > tr:nth-child(1)
+  > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTable_Swaps_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
+  display: none;
 }
 
 /* ================= HEADER ROW 1 ================= */

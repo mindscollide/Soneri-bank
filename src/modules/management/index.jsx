@@ -5,9 +5,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   GetAllOtherInstrumentsApi,
-  getAllTenorsAction,
   getAllTreasuryInstrumentsApi,
-  GetBankSpotForTreasuryApi,
   GetCommoditiesForTreasuryApi,
   GetCurrencyCrossesApi,
   GetIndicesForTreasuryApi,
@@ -18,9 +16,6 @@ import {
   GetUSDParityForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
 
-const LiveRates = lazy(() =>
-  import("../../shareComponents/commonComponents/liveRates/index")
-);
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
 const CurrencyCrosses = lazy(() => import("./currencyCrosses/index"));

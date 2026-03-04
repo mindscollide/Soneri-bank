@@ -163,7 +163,7 @@ const KIBOR = memo(() => {
             : "managementTables_Empty"
         }
         pagination={false}
-        scroll={{ y: 300, x: "max-content" }}
+        scroll={{ y: 225, x: "max-content" }}
       />
     </>
   );
