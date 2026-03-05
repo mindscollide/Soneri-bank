@@ -40,9 +40,11 @@ import {
   setFxTradingCards,
   setKiborForManagmentFeed,
   setMarketTimingsUpdated,
+  setSbpFXRevalRatesForManagmentFeed,
   setSofrForManagmentFeed,
   setSpreadsForSingleUser,
   setStockIndicesForManagmentFeed,
+  setSwapsinUSDForManagementFeed,
   setTenorsCreated,
   setTradeRightsStatusUpdated,
   setTreasuryDealerFeDiscounting,
@@ -261,11 +263,17 @@ const Dashboard = () => {
           });
           break;
 
-        case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
+        case "TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES":
           startTransition(() => {
-            // dispatch(setStockIndicesForManagmentFeed(payload));
+            dispatch(setSbpFXRevalRatesForManagmentFeed(payload));
           });
           break;
+        case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
+          startTransition(() => {
+            dispatch(setSwapsinUSDForManagementFeed(payload));
+          });
+          break;
+
         default:
           console.warn("No specific handler for this message type", payload);
       }

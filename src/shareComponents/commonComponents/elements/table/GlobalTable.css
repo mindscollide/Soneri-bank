@@ -2057,13 +2057,6 @@ tr.OutStanding_Table-cell-scrollbar {
   border-radius: 0px !important;
   min-height: 332px !important;
 }
-/* .managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
-  text-align: center;
-  font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
-  color: var(--color-black) !important;
-  padding: 5px 10px !important;
-} */
 
 /* ================= HEADER ROW 2 ================= */
 
@@ -2152,6 +2145,37 @@ tr.OutStanding_Table-cell-scrollbar {
   > tr.managementTables_sofr-placeholder:hover
   > td {
   background: none !important;
+}
+
+.managementTables_sofr_Empty-empty {
+  background: none !important;
+}
+
+.managementTables_sofr_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.managementTables_sofr_Empty {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables_sofr_Empty
+  .managementTable_Swaps_Empty-thead
+  > tr:nth-child(1)
+  > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTables_sofr_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
+  display: none;
 }
 
 /* managementTable_Swaps] */

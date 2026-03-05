@@ -8,7 +8,7 @@
 }
 .tableheaderbar {
   font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
+  bsbpconversionratesackground: var(--color-light) !important;
   color: var(--color-black) !important;
   padding: 5px 10px !important;
   font-size: 1rem;

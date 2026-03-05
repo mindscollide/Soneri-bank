@@ -3,6 +3,10 @@ import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
+import {
+  formatCompactDate,
+  formatDateUTCToGMT,
+} from "../../../utils/timeFunction";
 const GetSOFRDataForTreasury = (state) =>
   state.WatchListReducer.GetSOFRDataForTreasury?.sofrList;
 
@@ -17,8 +21,10 @@ const SOFR = memo(() => {
 
   const sofrList = useSelector(GetSOFRDataForTreasury);
   const fullFeed = useSelector(SOFRForManagementFeed);
-
+  console.log(fullFeed, "fullFeedSOFR");
   const [processedData, setProcessedData] = useState([]);
+  const [latestDate, setLatestDate] = useState("");
+  console.log(latestDate, "latestDatelatestDate");
 
   // Columns
   const columns = useMemo(
@@ -49,6 +55,7 @@ const SOFR = memo(() => {
   // ✅ Initialize base data
   useEffect(() => {
     if (sofrList && sofrList.length > 0) {
+      setLatestDate(sofrList[0].lastModifiedDate);
       const enriched = sofrList.map((item) => ({
         ...item,
         rate: Number(item.rate ?? 0),
@@ -60,57 +67,61 @@ const SOFR = memo(() => {
       setProcessedData(enriched);
     }
   }, [sofrList]);
-
+  // MQTT Work
   // ✅ Process queued updates
   const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
-      return;
-    }
+    try {
+      if (updateQueueRef.current.length === 0) {
+        animationFrameRef.current = null;
+        return;
+      }
 
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
+      const updates = updateQueueRef.current;
+      updateQueueRef.current = [];
 
-    setProcessedData((prevData) => {
-      let hasChanges = false;
+      setProcessedData((prevData) => {
+        let hasChanges = false;
 
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
+        const updatedData = prevData.map((item) => {
+          let updatedItem = { ...item };
+          let changed = false;
 
-        updates.forEach((update) => {
-          const { sofr } = update;
-          if (!sofr) return;
-
-          sofr.forEach((feedItem) => {
-            if (item.tenor === feedItem.tenor) {
-              if (
-                Number(item.rate) !== Number(feedItem.rate) ||
-                Number(item.change) !== Number(feedItem.change)
-              ) {
-                updatedItem = {
-                  ...updatedItem,
-                  rate: Number(feedItem.rate),
-                  change: Number(feedItem.change),
-                  version: item.version + 1,
-                };
-                changed = true;
+          updates.forEach((update) => {
+            const { sofr } = update;
+            if (!sofr) return;
+            const sofrArray = Array.isArray(sofr) ? sofr : [sofr];
+            sofrArray.forEach((feedItem) => {
+              if (item.tenor === feedItem.tenor) {
+                if (
+                  Number(item.rate) !== Number(feedItem.rate) ||
+                  Number(item.change) !== Number(feedItem.change)
+                ) {
+                  updatedItem = {
+                    ...updatedItem,
+                    rate: Number(feedItem.rate),
+                    change: Number(feedItem.change),
+                    version: item.version + 1,
+                  };
+                  changed = true;
+                }
               }
-            }
+            });
           });
+
+          return changed ? updatedItem : item;
         });
 
-        return changed ? updatedItem : item;
+        hasChanges = updatedData.some(
+          (newItem, index) => newItem !== prevData[index]
+        );
+
+        return hasChanges ? updatedData : prevData;
       });
 
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
-
-      return hasChanges ? updatedData : prevData;
-    });
-
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+    } catch (error) {
+      console.log(error, "error");
+    }
   }, []);
 
   // ✅ Queue update (60fps throttle)
@@ -148,15 +159,21 @@ const SOFR = memo(() => {
 
   return (
     <>
-      <span className={styles.tableheaderbar}>SOFR</span>
-
+      <span
+        className={`${styles.tableheaderbar} d-flex justify-content-between`}
+      >
+        <span>SOFR</span>
+        <span className={styles.management_date}>
+          {formatCompactDate(latestDate)}
+        </span>
+      </span>
       <GlobalTable
         columns={columns}
         dataSource={processedData}
         prefixCls={
           processedData.length > 0
             ? "managementTables_sofr"
-            : "managementTables_Empty"
+            : "managementTables_sofr_Empty"
         }
         pagination={false}
         scroll={{ y: 225, x: "max-content" }}

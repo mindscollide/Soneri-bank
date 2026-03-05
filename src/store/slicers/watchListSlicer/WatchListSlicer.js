@@ -22,16 +22,21 @@ import {
   GetDiscountingRatesForTreasuryApi,
   GetFEDiscountingTableApi,
   GetForwardRatesForCounterPartyApi,
+  GetIndicativeFBPRatesApi,
   GetIndicesForTreasuryApi,
+  GetKiborDataForRateSheetApi,
   GetKiborDataForTreasuryApi,
   GetLastAndCurrentPublishUSDRateSheetAction,
   getLastPublishRatesAction,
   getMarketStatusApi,
   GetMisDataByRangeAPI,
   GetNonFEDiscountingTableApi,
+  GetRatesForCurrencyNotesForRateSheetApi,
   GetRevalRatesForTreasuryApi,
   GetSingleDealersSpreadApi,
+  GetSOFRDataForRateSheetApi,
   GetSOFRDataForTreasuryApi,
+  GetSpotTTRatesForRateSheetApi,
   GetSwapsInUSDForTreasuryApi,
   getTenorWiseForwardsAction,
   GetUSDParityForTreasuryApi,
@@ -97,6 +102,11 @@ const WatchListSlice = createSlice({
     GetSOFRDataForTreasuryLoading: false,
     GetRevalRatesForTreasuryLoading: false,
     GetSwapsInUSDForTreasuryLoading: false,
+    GetSpotTTRatesForRateSheetLoading: false,
+    GetRatesForCurrencyNotesForRateSheetLoading: false,
+    GetKiborDataForRateSheetLoading: false,
+    GetSOFRDataForRateSheetLoading: false,
+    GetIndicativeFBPRatesLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -159,6 +169,11 @@ const WatchListSlice = createSlice({
     GetSOFRDataForTreasury: null,
     GetRevalRatesForTreasury: null,
     GetSwapsInUSDForTreasury: null,
+    GetSpotTTRatesForRateSheet: null,
+    GetRatesForCurrencyNotesForRateSheet: null,
+    GetKiborDataForRateSheet: null,
+    GetSOFRDataForRateSheet: null,
+    GetIndicativeFBPRates: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -912,6 +927,90 @@ const WatchListSlice = createSlice({
       .addCase(GetSwapsInUSDForTreasuryApi.rejected, (state, { payload }) => {
         state.GetSwapsInUSDForTreasuryLoading = false;
         state.GetSwapsInUSDForTreasury = null;
+        state.error = payload;
+      })
+
+      // ✅ GetSpotTTRatesForRateSheet
+      .addCase(GetSpotTTRatesForRateSheetApi.pending, (state) => {
+        state.GetSpotTTRatesForRateSheetLoading = true;
+      })
+      .addCase(
+        GetSpotTTRatesForRateSheetApi.fulfilled,
+        (state, { payload }) => {
+          state.GetSpotTTRatesForRateSheetLoading = false;
+          state.GetSpotTTRatesForRateSheet = payload?.response;
+          state.responseMessage = payload?.message;
+        }
+      )
+      .addCase(GetSpotTTRatesForRateSheetApi.rejected, (state, { payload }) => {
+        state.GetSpotTTRatesForRateSheetLoading = false;
+        state.GetSpotTTRatesForRateSheet = null;
+        state.error = payload;
+      })
+
+      // ✅ GetRatesForCurrencyNotesForRateSheet
+      .addCase(GetRatesForCurrencyNotesForRateSheetApi.pending, (state) => {
+        state.GetRatesForCurrencyNotesForRateSheetLoading = true;
+      })
+      .addCase(
+        GetRatesForCurrencyNotesForRateSheetApi.fulfilled,
+        (state, { payload }) => {
+          state.GetRatesForCurrencyNotesForRateSheetLoading = false;
+          state.GetRatesForCurrencyNotesForRateSheet = payload?.response;
+          state.responseMessage = payload?.message;
+        }
+      )
+      .addCase(
+        GetRatesForCurrencyNotesForRateSheetApi.rejected,
+        (state, { payload }) => {
+          state.GetRatesForCurrencyNotesForRateSheetLoading = false;
+          state.GetRatesForCurrencyNotesForRateSheet = null;
+          state.error = payload;
+        }
+      )
+
+      // ✅ GetKiborDataForRateSheet
+      .addCase(GetKiborDataForRateSheetApi.pending, (state) => {
+        state.GetKiborDataForRateSheetLoading = true;
+      })
+      .addCase(GetKiborDataForRateSheetApi.fulfilled, (state, { payload }) => {
+        state.GetKiborDataForRateSheetLoading = false;
+        state.GetKiborDataForRateSheet = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetKiborDataForRateSheetApi.rejected, (state, { payload }) => {
+        state.GetKiborDataForRateSheetLoading = false;
+        state.GetKiborDataForRateSheet = null;
+        state.error = payload;
+      })
+
+      // ✅ GetSOFRDataForRateSheet
+      .addCase(GetSOFRDataForRateSheetApi.pending, (state) => {
+        state.GetSOFRDataForRateSheetLoading = true;
+      })
+      .addCase(GetSOFRDataForRateSheetApi.fulfilled, (state, { payload }) => {
+        state.GetSOFRDataForRateSheetLoading = false;
+        state.GetSOFRDataForRateSheet = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetSOFRDataForRateSheetApi.rejected, (state, { payload }) => {
+        state.GetSOFRDataForRateSheetLoading = false;
+        state.GetSOFRDataForRateSheet = null;
+        state.error = payload;
+      })
+
+      // ✅ GetIndicativeFBPRates
+      .addCase(GetIndicativeFBPRatesApi.pending, (state) => {
+        state.GetIndicativeFBPRatesLoading = true;
+      })
+      .addCase(GetIndicativeFBPRatesApi.fulfilled, (state, { payload }) => {
+        state.GetIndicativeFBPRatesLoading = false;
+        state.GetIndicativeFBPRates = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetIndicativeFBPRatesApi.rejected, (state, { payload }) => {
+        state.GetIndicativeFBPRatesLoading = false;
+        state.GetIndicativeFBPRates = null;
         state.error = payload;
       });
   },

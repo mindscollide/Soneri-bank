@@ -19,6 +19,7 @@ const KIBOR = memo(() => {
 
   const [processedData, setProcessedData] = useState([]);
 
+  // console.log(fullFeed, "fullFeedfullFeedKibor");
   // Columns
   const columns = useMemo(
     () => [
@@ -65,57 +66,61 @@ const KIBOR = memo(() => {
 
   // ✅ Process queued MQTT updates
   const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
-      return;
-    }
+    try {
+      if (updateQueueRef.current.length === 0) {
+        animationFrameRef.current = null;
+        return;
+      }
 
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
+      const updates = updateQueueRef.current;
+      updateQueueRef.current = [];
 
-    setProcessedData((prevData) => {
-      let hasChanges = false;
+      setProcessedData((prevData) => {
+        let hasChanges = false;
 
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
+        const updatedData = prevData.map((item) => {
+          let updatedItem = { ...item };
+          let changed = false;
 
-        updates.forEach((update) => {
-          const { kibor } = update;
+          updates.forEach((update) => {
+            const { kibor } = update;
 
-          if (!kibor) return;
-
-          kibor.forEach((feedItem) => {
-            if (item.displayName === feedItem.displayName) {
-              if (
-                Number(item.bid) !== Number(feedItem.bid) ||
-                Number(item.ask) !== Number(feedItem.ask) ||
-                item.modifiedDateTime !== feedItem.modifiedDateTime
-              ) {
-                updatedItem = {
-                  ...updatedItem,
-                  bid: Number(feedItem.bid),
-                  ask: Number(feedItem.ask),
-                  modifiedDateTime: feedItem.modifiedDateTime,
-                  version: item.version + 1,
-                };
-                changed = true;
+            if (!kibor) return;
+            const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
+            kiborArray.forEach((feedItem) => {
+              if (item.displayName === feedItem.displayName) {
+                if (
+                  Number(item.bid) !== Number(feedItem.bid) ||
+                  Number(item.ask) !== Number(feedItem.ask) ||
+                  item.modifiedDateTime !== feedItem.modifiedDateTime
+                ) {
+                  updatedItem = {
+                    ...updatedItem,
+                    bid: Number(feedItem.bid),
+                    ask: Number(feedItem.ask),
+                    modifiedDateTime: feedItem.modifiedDateTime,
+                    version: item.version + 1,
+                  };
+                  changed = true;
+                }
               }
-            }
+            });
           });
+
+          return changed ? updatedItem : item;
         });
 
-        return changed ? updatedItem : item;
+        hasChanges = updatedData.some(
+          (newItem, index) => newItem !== prevData[index]
+        );
+
+        return hasChanges ? updatedData : prevData;
       });
 
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
-
-      return hasChanges ? updatedData : prevData;
-    });
-
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+    } catch (error) {
+      console.log(error, "error");
+    }
   }, []);
 
   // ✅ Queue update (60fps throttle)

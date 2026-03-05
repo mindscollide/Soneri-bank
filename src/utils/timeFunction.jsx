@@ -95,3 +95,30 @@ export const convertUTCToLocalDateWithToday = (timeStr) => {
 
   return localDate;
 };
+
+export const formatCompactDate = (input) => {
+  if (!input || input.length < 8) return "";
+
+  const day = input.slice(0, 2);
+  const month = input.slice(2, 4);
+  const year = input.slice(4, 8);
+
+  const date = new Date(`${year}-${month}-${day}T00:00:00`);
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  return `${day}-${monthNames[date.getUTCMonth()]}-${date.getUTCFullYear()}`;
+};

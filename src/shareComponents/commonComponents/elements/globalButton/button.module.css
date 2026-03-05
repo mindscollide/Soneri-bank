@@ -159,6 +159,31 @@
   color: #000 !important;
   min-width: 120px;
 }
+
+/* Start Clear Rates Publish Button Dealer Bit Button */
+.exportToPDF {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  min-width: 120px;
+  font-family: "Helvetica-Bold", sans-serif !important;
+}
+.exportToPDF:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: 120px;
+  font-family: "Helvetica-Bold", sans-serif !important;
+}
+
 /* End Clear Rates Publish Button Dealer Bit Button */
 
 /* View Deal Button  */

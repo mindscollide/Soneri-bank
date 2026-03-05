@@ -1,9 +1,12 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import styles from "../management.module.css";
 const GetRevalRatesForTreasury = (state) =>
   state.WatchListReducer.GetRevalRatesForTreasury;
+
+const sbpFXRevalRatesForManagementFeed = (state) =>
+  state.RealtimeActionsSlice.sbpFXRevalRatesForManagementFeed;
 
 const SBPFXRevalRates = memo(() => {
   const dataRef = useRef([]);
@@ -11,8 +14,11 @@ const SBPFXRevalRates = memo(() => {
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
   const revalRatesList = useSelector(GetRevalRatesForTreasury);
+  const fullFeed = useSelector(sbpFXRevalRatesForManagementFeed);
 
-  console.log(revalRatesList, "revalRatesListrevalRatesList");
+  // Local state for processed data
+  const [processedData, setProcessedData] = useState([]);
+  const [latestDate, setLatestDate] = useState("");
 
   const getUniqueTenors = (data) => {
     const tenorMap = new Map();
@@ -68,6 +74,14 @@ const SBPFXRevalRates = memo(() => {
       try {
         const { revalRatesList: revalRatesListData } = revalRatesList;
 
+        // ✅ Set initial date from API (take first item)
+        if (revalRatesListData.length > 0) {
+          const apiDate = revalRatesListData[0]?.lastModifiedDate;
+          if (apiDate) {
+            setLatestDate(apiDate);
+          }
+        }
+
         const uniqueTenors = Array.from(
           new Map(
             revalRatesListData.map((item) => [
@@ -103,361 +117,101 @@ const SBPFXRevalRates = memo(() => {
       }
     }
   }, [revalRatesList]);
-  // const fullFeed = useSelector(currencyCrossesRatesFeed);
-  // const GetCurrencyCrosses = useSelector(
-  //   SelectGetCurrencyCrosses,
-  //   shallowEqual
-  // );
 
-  // ✅ Memoized essential feed values
-  // const feedEssentials = useMemo(() => {
-  //   if (!fullFeed) return null;
+  // MQTT Work
+  // ✅ Batch update function
+  // ✅ Batch update function (SBP FX Reval Rates)
+  const processUpdateQueue = useCallback(() => {
+    if (updateQueueRef.current.length === 0) {
+      animationFrameRef.current = null;
+      return;
+    }
 
-  //   return {
-  //     crossBid: fullFeed.instrumentCrossRate?.bid,
-  //     crossAsk: fullFeed.instrumentCrossRate?.ask,
-  //     crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
-  //     crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
-  //     crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
-  //     spotBid: fullFeed.instrumentParitySpot?.bid,
-  //     spotAsk: fullFeed.instrumentParitySpot?.ask,
-  //     spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
-  //   };
-  // }, [
-  //   fullFeed?.instrumentCrossRate?.bid,
-  //   fullFeed?.instrumentCrossRate?.ask,
-  //   fullFeed?.instrumentCrossRate?.updateDateTime,
-  //   fullFeed?.instrumentCrossRate?.instrumentID,
-  //   fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
-  //   fullFeed?.instrumentParitySpot?.bid,
-  //   fullFeed?.instrumentParitySpot?.ask,
-  //   fullFeed?.instrumentParitySpot?.instrumentID,
-  // ]);
+    const updates = updateQueueRef.current;
+    updateQueueRef.current = [];
 
-  // // Local state for processed data
-  const [processedData, setProcessedData] = useState([]);
+    setProcessedData((prevData) => {
+      let updatedData = [...prevData];
 
-  // // Refs for batching updates
-  // const dataRef = useRef([]);
-  // const lastUpdateRef = useRef(0);
-  // const updateQueueRef = useRef([]);
-  // const animationFrameRef = useRef(null);
+      updates.forEach((feed) => {
+        const reval = feed?.revalRates;
+        if (!reval) return;
 
-  // // ✅ Enriched base data
-  //   const enrichedData = useMemo(() => {
-  //     if (!crossInstruments || !worldCrosses || !worldCurrencies) return [];
+        const { currency, tenorId, value, lastModifiedDate } = reval;
 
-  //     try {
-  //       return crossInstruments.map((instrument) => {
-  //         const matchedCross = worldCrosses.find(
-  //           (wc) =>
-  //             wc.instrumentID === instrument.instrumentID &&
-  //             wc.secondaryInstrumentID === instrument.secondaryInstrumentID
-  //         );
+        const dynamicKey = `tenorId_${tenorId}_value`;
 
-  //         const matchedCurrency = worldCurrencies.find(
-  //           (wc) => wc.instrumentID === instrument.instrumentID
-  //         );
+        const rowIndex = updatedData.findIndex(
+          (row) => row.currencyName === currency
+        );
 
-  //         return {
-  //           instrumentID: instrument.instrumentID,
-  //           secondaryInstrumentID: instrument.secondaryInstrumentID,
-  //           instrumentName: instrument.instrumentName,
-  //           secondaryInstrumentName: instrument.secondaryInstrumentName,
-  //           time: matchedCross?.time ?? "",
+        // ✅ Update latest date here
+        if (lastModifiedDate) {
+          setLatestDate(lastModifiedDate);
+        }
 
-  //           worldCrossBid: matchedCross?.bid ?? 0,
-  //           worldCrossOffer: matchedCross?.offer ?? 0,
-  //           worldCurBid:
-  //             instrument.instrumentID === 21
-  //               ? matchedCross?.bid ?? 0
-  //               : matchedCurrency?.bid ?? 0,
-  //           worldCurOffer:
-  //             instrument.instrumentID === 21
-  //               ? matchedCross?.offer ?? 0
-  //               : matchedCurrency?.offer ?? 0,
+        if (rowIndex !== -1) {
+          const existingRow = updatedData[rowIndex];
 
-  //           version: 0,
-  //         };
-  //       });
-  //     } catch (error) {
-  //       console.error("Error enriching data:", error);
-  //       return [];
-  //     }
-  //   }, [crossInstruments, worldCrosses, worldCurrencies]);
+          if (existingRow[dynamicKey] !== value) {
+            updatedData[rowIndex] = {
+              ...existingRow,
+              [dynamicKey]: value,
+            };
+          }
+        } else {
+          updatedData.push({
+            currencyName: currency,
+            [dynamicKey]: value,
+          });
+        }
+      });
 
-  // // Initialize processed data when enriched data changes
-  // useEffect(() => {
-  //   if (enrichedData.length > 0) {
-  //     dataRef.current = enrichedData;
-  //     setProcessedData(enrichedData);
-  //   }
-  // }, [enrichedData]);
+      return updatedData;
+    });
 
-  // // ✅ Batch update function
-  // const processUpdateQueue = useCallback(() => {
-  //   if (updateQueueRef.current.length === 0) {
-  //     animationFrameRef.current = null;
-  //     return;
-  //   }
+    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+  }, []);
 
-  //   const updates = updateQueueRef.current;
-  //   updateQueueRef.current = [];
+  // ✅ Queue update
+  const queueUpdate = useCallback(
+    (feed) => {
+      if (!feed) return;
 
-  //   setProcessedData((prevData) => {
-  //     let hasChanges = false;
-  //     const updatedData = prevData.map((item) => {
-  //       let updatedItem = { ...item };
-  //       let changed = false;
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 16) return; // ~60fps
+      lastUpdateRef.current = now;
 
-  //       updates.forEach((update) => {
-  //         const { instrumentCrossRate, instrumentParitySpot } = update;
+      updateQueueRef.current.push(feed);
 
-  //         if (
-  //           instrumentCrossRate &&
-  //           item.instrumentID === instrumentCrossRate.instrumentID &&
-  //           item.secondaryInstrumentID ===
-  //             instrumentCrossRate.secondaryInstrumentID
-  //         ) {
-  //           if (item.worldCrossBid !== instrumentCrossRate.bid) {
-  //             updatedItem = {
-  //               ...updatedItem,
-  //               worldCrossBid: instrumentCrossRate.bid,
-  //               worldCrossOffer: instrumentCrossRate.ask,
-  //               time: instrumentCrossRate.updateDateTime,
-  //               version: updatedItem.version + 1,
-  //             };
-  //             changed = true;
-  //           }
+      if (!animationFrameRef.current) {
+        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      }
+    },
+    [processUpdateQueue]
+  );
+  // ✅ Feed update effect
+  useEffect(() => {
+    if (!fullFeed) return;
+    queueUpdate(fullFeed);
+  }, [fullFeed, queueUpdate]);
 
-  //           if (item.instrumentID === 21) {
-  //             updatedItem = {
-  //               ...updatedItem,
-  //               worldCurBid: instrumentCrossRate.bid,
-  //               worldCurOffer: instrumentCrossRate.ask,
-  //               version: updatedItem.version + 1,
-  //             };
-  //             changed = true;
-  //           }
-  //         }
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
-  //         if (
-  //           instrumentParitySpot &&
-  //           item.instrumentID === instrumentParitySpot.instrumentID &&
-  //           item.instrumentID !== 21
-  //         ) {
-  //           if (
-  //             Number(updatedItem.worldCurBid) !==
-  //               Number(instrumentParitySpot.bid) ||
-  //             Number(updatedItem.worldCurOffer) !==
-  //               Number(instrumentParitySpot.ask)
-  //           ) {
-  //             updatedItem = {
-  //               ...updatedItem,
-  //               worldCurBid: instrumentParitySpot.bid,
-  //               worldCurOffer: instrumentParitySpot.ask,
-  //               version: updatedItem.version + 1,
-  //             };
-  //             changed = true;
-  //           }
-  //         }
-  //       });
-
-  //       return changed ? updatedItem : item;
-  //     });
-
-  //     hasChanges = updatedData.some(
-  //       (newItem, index) => newItem !== prevData[index]
-  //     );
-
-  //     return hasChanges ? updatedData : prevData;
-  //   });
-  // }, []);
-
-  // // ✅ Queue update
-  // const queueUpdate = useCallback(
-  //   (feed) => {
-  //     if (!feed) return;
-
-  //     const now = Date.now();
-  //     if (now - lastUpdateRef.current < 16) return; // ~60fps
-  //     lastUpdateRef.current = now;
-
-  //     updateQueueRef.current.push(feed);
-
-  //     if (!animationFrameRef.current) {
-  //       animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-  //     }
-  //   },
-  //   [processUpdateQueue]
-  // );
-
-  // // ✅ Feed update effect
-  // useEffect(() => {
-  //   if (!feedEssentials || !fullFeed) return;
-  //   queueUpdate(fullFeed);
-  // }, [feedEssentials, fullFeed, queueUpdate]);
-
-  // // Cleanup
-  // useEffect(() => {
-  //   return () => {
-  //     if (animationFrameRef.current) {
-  //       cancelAnimationFrame(animationFrameRef.current);
-  //     }
-  //   };
-  // }, []);
-  //   useEffect(() => {
-  //     if (GetCurrencyCrosses && otherInstruments) {
-  //       const updatedCurrencyCrosses = GetCurrencyCrosses.map((cross) => {
-  //         const matchedInstrument = otherInstruments.find(
-  //           (instrument) => instrument.instrumentId === cross.instrumentId
-  //         );
-
-  //         console.log(updatedCurrencyCrosses, "CurrencmatchedInstrumentyCrosses");
-
-  //         return {
-  //           ...cross,
-  //           instrument: matchedInstrument ? matchedInstrument.name : null,
-  //         };
-  //       });
-
-  //       setProcessedData(updatedCurrencyCrosses);
-  //     }
-  //   }, [GetCurrencyCrosses, otherInstruments]);
-
-  // Columns
-  // const columns = useMemo(
-  //   () => [
-  //     {
-  //       title: "",
-  //       dataIndex: "instrumentName",
-  //       ellipsis: true,
-  //       width: 90,
-  //     },
-  //     {
-  //       title: "Current",
-  //       dataIndex: "current",
-  //       className: "bidCol",
-  //       width: 90,
-  //       render: (text) => {
-  //         return text !== "-" && <IndexCell value={text} />;
-  //       },
-  //     },
-  //     {
-  //       title: "Change",
-  //       dataIndex: "change",
-  //       className: "offerCol",
-  //       ellipsis: true,
-  //       width: 90,
-
-  //       render: (text) => {
-  //         return text !== "-" && <IndexCell value={text} />;
-  //       },
-  //     },
-  //     {
-  //       title: "% Change",
-  //       dataIndex: "percentageChange",
-  //       className: "offerCol",
-  //       ellipsis: true,
-  //       render: (text) => {
-  //         if (text === "-") return null;
-
-  //         const value = Number(text);
-
-  //         let cellClassName =
-  //           value < 0 ? "color-red" : value > 0 ? "color-green" : "color-blue";
-
-  //         return <IndexCell value={value} CellClassName={cellClassName} />;
-  //       },
-  //     },
-  //     {
-  //       title: "High",
-  //       dataIndex: "high",
-  //       // width: 90,
-  //       render: (text) => {
-  //         return text !== "-" && <IndexCell value={text} />;
-  //       },
-  //     },
-  //     {
-  //       title: "Low",
-  //       dataIndex: "low",
-  //       className: "offerCol",
-  //       // width: 90,
-
-  //       render: (text) => {
-  //         return text !== "-" && <IndexCell value={text} />;
-  //       },
-  //     },
-  //     {
-  //       title: "Volume",
-  //       dataIndex: "volume",
-  //       className: "offerCol",
-  //       // width: 90,
-
-  //       render: (text) => {
-  //         return text !== "-" && <IndexCell value={text} />;
-  //       },
-  //     },
-  //     {
-  //       title: "Time",
-  //       dataIndex: "time",
-  //       // width: 90,
-
-  //       render: (text) =>
-  //         text
-  //           ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
-  //           : "--:--:--",
-  //     },
-  //   ],
-  //   []
-  // );
-  // // ✅ Enriched base data
-  // const enrichedData = useMemo(() => {
-  //   if (!otherInstruments || !stockIndexList) return [];
-  //   console.log(
-  //     { otherInstruments, stockIndexList },
-  //     "stockIndexListstockIndexList"
-  //   );
-  //   try {
-  //     return otherInstruments.map((instrument) => {
-  //       const matchedCross = stockIndexList.find(
-  //         (wc) => Number(wc.instrumentId) === instrument.instrumentId
-  //       );
-
-  //       console.log(matchedCross, "matchedCrossmatchedCross");
-  //       return {
-  //         instrumentName: instrument.name,
-  //         change: Number(matchedCross?.change ?? 0),
-  //         current: Number(matchedCross?.current ?? 0),
-  //         high: Number(matchedCross?.high ?? 0),
-  //         instrumentID: Number(instrument.instrumentId),
-  //         low: Number(matchedCross?.low ?? 0),
-  //         percentageChange: Number(matchedCross?.percentChange ?? 0),
-  //         time: matchedCross?.time ?? "",
-  //         volume: Number(matchedCross?.change ?? 0),
-  //         version: 0,
-  //       };
-  //     });
-  //   } catch (error) {
-  //     console.error("Error enriching data:", error);
-  //     return [];
-  //   }
-  // }, [otherInstruments, stockIndexList]);
-
-  // // Initialize processed data when enriched data changes
-  // useEffect(() => {
-  //   if (enrichedData.length > 0) {
-  //     dataRef.current = enrichedData;
-  //     setProcessedData(enrichedData);
-  //   }
-  // }, [enrichedData]);
   return (
     <>
       <span
         className={`${styles.tableheaderbar} d-flex justify-content-between`}
       >
         <span>SBP FX Reval Rates</span>
-        <span className={styles.management_date}>10-Jan-2026</span>
+        <span className={styles.management_date}>{latestDate}</span>
       </span>
 
       <GlobalTable

@@ -192,3 +192,21 @@ export const GetSwapsInUSDForTreasury = {
 export const GetRevalRatesForTreasury = {
   RequestMethod: "ServiceManager.GetRevalRatesForTreasury",
 };
+
+export const GetSpotTTRatesForRateSheet = {
+  RequestMethod: "ServiceManager.GetSpotTTRatesForRateSheet",
+};
+
+export const GetRatesForCurrencyNotesForRateSheet = {
+  RequestMethod: "ServiceManager.GetRatesForCurrencyNotesForRateSheet",
+};
+
+export const GetKiborDataForRateSheet = {
+  RequestMethod: "ServiceManager.GetKiborDataForRateSheet",
+};
+export const GetSOFRDataForRateSheet = {
+  RequestMethod: "ServiceManager.GetSOFRDataForRateSheet",
+};
+export const GetIndicativeFBPRates = {
+  RequestMethod: "ServiceManager.GetIndicativeFBPRates",
+};
