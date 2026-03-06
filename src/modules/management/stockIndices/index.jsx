@@ -256,7 +256,7 @@ const StockIndices = memo(() => {
             : "managementTables_Empty"
         }
         pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
+        scroll={{ y: 235, x: "max-content" }}
       />
     </>
   );

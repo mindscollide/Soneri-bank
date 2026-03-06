@@ -3166,7 +3166,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_01".toLowerCase()
               )
           ) {
             return {
@@ -3177,7 +3177,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesF2rRateSheet_01".toLowerCase()
               )
           ) {
             return rejectWithValue(
@@ -3187,7 +3187,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_03".toLowerCase()
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -3195,7 +3195,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_04".toLowerCase()
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -3236,7 +3236,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager.GetKiborDataForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_01".toLowerCase()
               )
           ) {
             return {
@@ -3247,7 +3247,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager.GetKiborDataForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_02".toLowerCase()
               )
           ) {
             return rejectWithValue(
@@ -3257,7 +3257,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager.GetKiborDataForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_03".toLowerCase()
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -3265,7 +3265,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager.GetKiborDataForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_04".toLowerCase()
               )
           ) {
             return rejectWithValue("Exception occured.");

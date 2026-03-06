@@ -27,6 +27,7 @@ const KIBOR = memo(() => {
         title: "Tenor",
         dataIndex: "displayName",
         width: 150,
+        align: "left",
       },
       {
         title: "Bid",

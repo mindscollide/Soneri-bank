@@ -288,7 +288,6 @@ const USDParity = memo(() => {
             ? "managementTables"
             : "managementTables_Empty"
         }
-        // prefixCls={"LiveRatesTable"}
         rowKey={(record) =>
           `${record.instrumentID}-${record.secondaryInstrumentID}`
         }

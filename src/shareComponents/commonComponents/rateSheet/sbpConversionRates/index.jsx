@@ -13,9 +13,7 @@ const SBPConversionRates = () => {
         // columns={columns}
         // dataSource={processedData}
         prefixCls={
-          processedData.length > 0
-            ? "managementTables_sofr"
-            : "managementTables_sofr_Empty"
+          processedData.length > 0 ? "rateSheetTable" : "rateSheetTable_Empty"
         }
         pagination={false}
         scroll={{ y: 225, x: "max-content" }}

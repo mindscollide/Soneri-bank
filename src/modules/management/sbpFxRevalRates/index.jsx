@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import styles from "../management.module.css";
+import { formatCompactDate } from "../../../utils/timeFunction";
 const GetRevalRatesForTreasury = (state) =>
   state.WatchListReducer.GetRevalRatesForTreasury;
 
@@ -9,7 +10,6 @@ const sbpFXRevalRatesForManagementFeed = (state) =>
   state.RealtimeActionsSlice.sbpFXRevalRatesForManagementFeed;
 
 const SBPFXRevalRates = memo(() => {
-  const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
@@ -45,6 +45,7 @@ const SBPFXRevalRates = memo(() => {
         dataIndex: "currencyName",
         key: "currencyName",
         fixed: "left",
+        align: "left",
         width: 120,
       },
     ];
@@ -211,7 +212,9 @@ const SBPFXRevalRates = memo(() => {
         className={`${styles.tableheaderbar} d-flex justify-content-between`}
       >
         <span>SBP FX Reval Rates</span>
-        <span className={styles.management_date}>{latestDate}</span>
+        <span className={styles.management_date}>
+          {formatCompactDate(latestDate)}
+        </span>
       </span>
 
       <GlobalTable
@@ -220,7 +223,7 @@ const SBPFXRevalRates = memo(() => {
         prefixCls={
           processedData.length > 0
             ? "managementTables_sofr"
-            : "managementTables_sofr_Empty"
+            : "managementTables_Empty"
         }
         pagination={false}
         scroll={{ y: 300, x: "max-content" }}

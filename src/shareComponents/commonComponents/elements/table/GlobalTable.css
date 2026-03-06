@@ -2059,7 +2059,9 @@ tr.OutStanding_Table-cell-scrollbar {
 }
 
 /* ================= HEADER ROW 2 ================= */
-
+.managementTables_Empty .managementTables_Empty-header {
+  border-radius: 0px !important;
+}
 .managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
   background: #000;
   color: #fff;
@@ -2070,8 +2072,8 @@ tr.OutStanding_Table-cell-scrollbar {
   font-size: 14px;
   border-radius: 0px !important;
 }
-.managementTables_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
-  display: none;
+.managementTables_Empty-cell::before {
+  display: none !important;
 }
 
 /* SOFR */
@@ -2137,7 +2139,7 @@ tr.OutStanding_Table-cell-scrollbar {
   padding-right: 5px;
 }
 
-.managementTables_sofr-empty .LiveRatesTable-tbody {
+.managementTables_sofr-empty {
   background: none !important;
 }
 .managementTables_sofr-wrapper
@@ -2165,7 +2167,7 @@ tr.OutStanding_Table-cell-scrollbar {
   .managementTable_Swaps_Empty-thead
   > tr:nth-child(1)
   > th {
-  background: #000;
+  background: #000 !important;
   color: #fff;
   text-align: center;
   padding: 5px 10px !important;
@@ -2174,8 +2176,15 @@ tr.OutStanding_Table-cell-scrollbar {
   font-size: 14px;
   border-radius: 0px !important;
 }
-.managementTables_sofr_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
-  display: none;
+.managementTables_sofr_Empty-cell::before {
+  display: none !important;
+}
+.managementTables_sofr_Empty-thead {
+  background: #000;
+  border-radius: 0;
+}
+.managementTables_Empty-wrapper {
+  border-collapse: none;
 }
 
 /* managementTable_Swaps] */
@@ -2267,13 +2276,6 @@ tr.OutStanding_Table-cell-scrollbar {
 .managementTable_Swaps_Empty {
   border-radius: 0px !important;
 }
-/* .managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
-  text-align: center;
-  font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
-  color: var(--color-black) !important;
-  padding: 5px 10px !important;
-} */
 
 /* ================= HEADER ROW 2 ================= */
 
@@ -2354,4 +2356,186 @@ tr.OutStanding_Table-cell-scrollbar {
 }
 .Dealer_FE_Discounting-cell::before {
   display: none !important;
+}
+
+/* rateSheetTable */
+/* SOFR */
+.rateSheetTable-wrapper .rateSheetTable-container {
+  position: relative;
+  /* min-height: 332px !important; */
+}
+
+.rateSheetTable-measure-row {
+  visibility: collapse !important;
+}
+.rateSheetTable-cell::before {
+  display: none !important;
+}
+.rateSheetTable-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.rateSheetTable .rateSheetTable-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  margin: 0;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0 !important;
+}
+
+/* Hide Scrollbar Column */
+.rateSheetTable
+  .rateSheetTable-thead
+  > tr:nth-child(1)
+  > th.rateSheetTable-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.rateSheetTable .rateSheetTable-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.rateSheetTable .rateSheetTable-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+  /* width: 150px !important; */
+}
+
+.rateSheetTable-wrapper .rateSheetTable {
+  scrollbar-color: auto !important;
+}
+.rateSheetTable-wrapper .rateSheetTable table {
+  padding-right: 5px;
+}
+
+.rateSheetTable-empty {
+  background: none !important;
+}
+.rateSheetTable-wrapper
+  .rateSheetTable-tbody
+  > tr.rateSheetTable-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.rateSheetTable_Empty-empty {
+  background: none !important;
+}
+
+.rateSheetTable_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.rateSheetTable_Empty {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.rateSheetTable_Empty .rateSheetTable_Empty-thead > tr:nth-child(1) > th {
+  background: #000 !important;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.rateSheetTable_Empty-cell::before {
+  display: none !important;
+}
+.rateSheetTable_Empty-thead {
+  background: #000;
+  border-radius: 0;
+}
+
+.rateSheetTable_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.rateSheetTable_Empty {
+  border-radius: 0px !important;
+  min-height: 332px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+.rateSheetTable_Empty .rateSheetTable_Empty-header {
+  border-radius: 0px !important;
+}
+.rateSheetTable_Empty .rateSheetTable_Empty-thead > tr:nth-child(1) > th {
+  display: none !important;
+}
+.rateSheetTable_Empty-cell::before {
+  display: none !important;
+}
+
+/* RateSheetSoftAndKIBOR */
+.RateSheetSoftAndKIBOR-wrapper .RateSheetSoftAndKIBOR-container {
+  position: relative;
+}
+.RateSheetSoftAndKIBOR-measure-row {
+  visibility: collapse !important;
+}
+.RateSheetSoftAndKIBOR-cell::before {
+  display: none !important;
+}
+.RateSheetSoftAndKIBOR-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.RateSheetSoftAndKIBOR .RateSheetSoftAndKIBOR-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  margin: 0;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0 !important;
+}
+
+.RateSheetSoftAndKIBOR .RateSheetSoftAndKIBOR-tbody > tr > td:nth-child(1) {
+  font-weight: 700 !important;
+  /* width: 150px !important; */
+}
+
+/* Hide Scrollbar Column */
+.RateSheetSoftAndKIBOR
+  .RateSheetSoftAndKIBOR-thead
+  > tr:nth-child(1)
+  > th.RateSheetSoftAndKIBOR-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.RateSheetSoftAndKIBOR .RateSheetSoftAndKIBOR-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.RateSheetSoftAndKIBOR-wrapper .RateSheetSoftAndKIBOR {
+  scrollbar-color: auto !important;
 }

@@ -33,6 +33,7 @@ const SOFR = memo(() => {
         title: "Tenor",
         dataIndex: "tenor",
         width: 150,
+        align: "left",
       },
       {
         title: "Rate",
@@ -173,7 +174,7 @@ const SOFR = memo(() => {
         prefixCls={
           processedData.length > 0
             ? "managementTables_sofr"
-            : "managementTables_sofr_Empty"
+            : "managementTables_Empty"
         }
         pagination={false}
         scroll={{ y: 225, x: "max-content" }}
