@@ -45,7 +45,7 @@ const Dealer = () => {
   const tabs = [
     {
       label: `Live Rates`,
-      key: 0,
+      key: "0",
       children: (
         <Suspense fallback={<>...Loadings</>}>
           <LiveRates />
@@ -54,7 +54,7 @@ const Dealer = () => {
     },
     {
       label: `Forwards`,
-      key: 1,
+      key: "1",
       children: (
         <Suspense fallback={<>...Loadings</>}>
           <Forwards />
@@ -63,7 +63,7 @@ const Dealer = () => {
     },
     {
       label: `Discounting`,
-      key: 2,
+      key: "2",
       children: (
         <Suspense fallback={<>...Loadings</>}>
           <Discounting />
@@ -75,7 +75,7 @@ const Dealer = () => {
       ? [
           {
             label: `News`,
-            key: 3,
+            key: "3",
             children: (
               <Suspense fallback={<>...Loadings</>}>
                 <News />

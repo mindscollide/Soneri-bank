@@ -9,6 +9,7 @@ import {
   GetIndicativeFBPRatesApi,
   GetKiborDataForRateSheetApi,
   GetRatesForCurrencyNotesForRateSheetApi,
+  GetSBPConversionRatesForRateSheetApi,
   GetSOFRDataForRateSheetApi,
   GetSpotTTRatesForRateSheetApi,
 } from "../../../store/actions/WatchlistAction";
@@ -34,6 +35,7 @@ const RateSheet = () => {
     dispatch(GetKiborDataForRateSheetApi({ navigate }));
     dispatch(GetSOFRDataForRateSheetApi({ navigate }));
     dispatch(GetIndicativeFBPRatesApi({ navigate }));
+    dispatch(GetSBPConversionRatesForRateSheetApi({ navigate }));
   }, []);
 
   return (
@@ -70,7 +72,7 @@ const RateSheet = () => {
             </Suspense>
           </div>
 
-          <div className="mt-2">
+          <div className="mt-3">
             <Suspense fallback={<>...Loading</>}>
               <SbpConversionRates />
             </Suspense>

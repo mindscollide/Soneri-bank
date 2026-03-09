@@ -1,8 +1,30 @@
 import { Tabs } from "antd";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./tabs.css";
 
-const GlobalTabs = ({ items, tabBarExtraContent }) => {
+const GlobalTabs = ({ items = [], tabBarExtraContent }) => {
+  const storageKey = "globalTabsActiveKey";
+
+  const [activeKey, setActiveKey] = useState();
+
+  // set initial tab when items load
+  useEffect(() => {
+    if (items.length > 0) {
+      const savedKey = localStorage.getItem(storageKey);
+
+      const validKey = items.find((tab) => tab.key === savedKey)
+        ? savedKey
+        : items[0].key;
+
+      setActiveKey(validKey);
+    }
+  }, [items]);
+
+  const handleChange = (key) => {
+    setActiveKey(key);
+    localStorage.setItem(storageKey, key);
+  };
+
   return (
     <Tabs
       type="card"
@@ -10,7 +32,9 @@ const GlobalTabs = ({ items, tabBarExtraContent }) => {
       centered
       items={items}
       tabBarExtraContent={tabBarExtraContent}
-      destroyOnHidden={true}
+      destroyOnHidden
+      activeKey={activeKey}
+      onChange={handleChange}
     />
   );
 };

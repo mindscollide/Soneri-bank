@@ -40,6 +40,7 @@ import {
   GetNonFeDiscountingRatesRM,
   GetRatesForCurrencyNotesForRateSheet,
   GetRevalRatesForTreasury,
+  GetSBPConversionRatesForRateSheet,
   GetSingleDealersSpread,
   GetSOFRDataForRateSheet,
   GetSOFRDataForTreasury,
@@ -3406,6 +3407,76 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
               .toLowerCase()
               .includes(
                 "WatchList_WatchListServiceManager_GetIndicativeFBPRates_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Exception occured.");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetSBPConversionRatesForRateSheet
+export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
+  "watchlist/GetSBPConversionRatesForRateSheet",
+  async ({ rejectWithValue }) => {
+    try {
+      let GetSBPConversionRatesForRateSheetData = createPostAPI(
+        watchListApi,
+        GetSBPConversionRatesForRateSheet.RequestMethod
+      );
+
+      const response = await GetSBPConversionRatesForRateSheetData();
+      const { responseCode } = response.data;
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched.");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_04".toLowerCase()
               )
           ) {
             return rejectWithValue("Exception occured.");

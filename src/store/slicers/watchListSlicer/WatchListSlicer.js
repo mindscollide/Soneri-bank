@@ -1,4 +1,6 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAction, createSlice } from "@reduxjs/toolkit";
+export const setActiveTab = createAction("tabs/setActiveTab");
+
 import {
   AddDealerSpreadApi,
   clearRatesAction,
@@ -33,6 +35,7 @@ import {
   GetNonFEDiscountingTableApi,
   GetRatesForCurrencyNotesForRateSheetApi,
   GetRevalRatesForTreasuryApi,
+  GetSBPConversionRatesForRateSheetApi,
   GetSingleDealersSpreadApi,
   GetSOFRDataForRateSheetApi,
   GetSOFRDataForTreasuryApi,
@@ -107,6 +110,7 @@ const WatchListSlice = createSlice({
     GetKiborDataForRateSheetLoading: false,
     GetSOFRDataForRateSheetLoading: false,
     GetIndicativeFBPRatesLoading: false,
+    GetSBPConversionRatesForRateSheetLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -174,6 +178,7 @@ const WatchListSlice = createSlice({
     GetKiborDataForRateSheet: null,
     GetSOFRDataForRateSheet: null,
     GetIndicativeFBPRates: null,
+    GetSBPConversionRatesForRateSheet: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -1012,7 +1017,31 @@ const WatchListSlice = createSlice({
         state.GetIndicativeFBPRatesLoading = false;
         state.GetIndicativeFBPRates = null;
         state.error = payload;
-      });
+      })
+
+      // ✅ GetIndicativeFBPRates
+      .addCase(GetSBPConversionRatesForRateSheetApi.pending, (state) => {
+        state.GetIndicativeFBPRatesLoading = true;
+      })
+      .addCase(
+        GetSBPConversionRatesForRateSheetApi.fulfilled,
+        (state, { payload }) => {
+          state.GetSBPConversionRatesForRateSheetLoading = false;
+          state.GetSBPConversionRatesForRateSheet = payload?.response;
+          state.responseMessage = payload?.message;
+        }
+      )
+      .addCase(
+        GetSBPConversionRatesForRateSheetApi.rejected,
+        (state, { payload }) => {
+          state.GetSBPConversionRatesForRateSheetLoading = false;
+          state.GetSBPConversionRatesForRateSheet = null;
+          state.error = payload;
+        }
+      );
+    builder.addCase(setActiveTab, (state, action) => {
+      state.activeTab = action.payload;
+    });
   },
 });
 

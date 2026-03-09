@@ -14,6 +14,7 @@ const IndicativeFBPRates = () => {
   // const animationFrameRef = useRef(null);
   // const fullFeed = useSelector(sbpFXRevalRatesForManagementFeed);
 
+  console.log(fbpRates, "fbpRatesfbpRates");
   const getUniqueTenors = (data) => {
     const tenorMap = new Map();
 
@@ -21,8 +22,8 @@ const IndicativeFBPRates = () => {
       if (!tenorMap.has(item.tenorId)) {
         tenorMap.set(item.tenorId, {
           tenorId: item.tenorId,
-          tenorName: item.tenorName,
-          displayOrderPriority: item.displayOrderPriority,
+          tenorName: item.tenor,
+          // displayOrderPriority: item.displayOrderPriority,
         });
       }
     });
@@ -38,23 +39,23 @@ const IndicativeFBPRates = () => {
         title: "Currency",
         dataIndex: "currencyName",
         key: "currencyName",
-        fixed: "left",
-        align: "left",
+        align: "center",
         width: 120,
       },
     ];
 
+    console.log(tenors, "generateColumnsgenerateColumns");
+
     const tenorColumns = tenors.map((tenor) => ({
-      title: tenor.tenorName,
+      title: tenor.tenorName.toUpperCase(),
       dataIndex: `tenorId_${tenor.tenorId}_value`,
       key: `tenor_${tenor.tenorId}`,
       align: "center",
       width: 110,
-      render: (value) => value ?? "-",
+      render: (value) => value.toFixed(2) ?? "-",
     }));
     return [...baseColumn, ...tenorColumns];
   };
-
   const tenors = useMemo(() => {
     if (!fbpRates?.fbpRates) return [];
     return getUniqueTenors(fbpRates.fbpRates);
@@ -64,6 +65,7 @@ const IndicativeFBPRates = () => {
     return generateColumns(tenors);
   }, [tenors]);
 
+  console.log(columns, "columnscolumns");
   useEffect(() => {
     if (fbpRates?.fbpRates) {
       try {

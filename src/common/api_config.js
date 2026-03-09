@@ -210,3 +210,7 @@ export const GetSOFRDataForRateSheet = {
 export const GetIndicativeFBPRates = {
   RequestMethod: "ServiceManager.GetIndicativeFBPRates",
 };
+
+export const GetSBPConversionRatesForRateSheet = {
+  RequestMethod: "ServiceManager.GetSBPConversionRatesForRateSheet",
+};

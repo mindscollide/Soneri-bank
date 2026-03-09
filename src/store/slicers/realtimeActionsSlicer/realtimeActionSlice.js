@@ -85,6 +85,9 @@ const RealtimeActionsSlice = createSlice({
     sofrForManagementFeed: null,
     sbpFXRevalRatesForManagementFeed: null,
     swapsinUSDForManagementFeed: null,
+    treasuryRateSheetSpotTTRates: null,
+    // TREASURY_RATE_SHEET_CURRENCY_NOTES
+    treasuryRateSheetCurrencyNotes: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -320,6 +323,12 @@ const RealtimeActionsSlice = createSlice({
     setSwapsinUSDForManagementFeed: (state, { payload }) => {
       state.swapsinUSDForManagementFeed = { ...payload };
     },
+    setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
+      state.treasuryRateSheetSpotTTRates = { ...payload };
+    },
+    setTreasuryRateSheetCurrencyNotes: (state, { payload }) => {
+      state.treasuryRateSheetCurrencyNotes = { ...payload };
+    },
   },
 });
 
@@ -397,6 +406,8 @@ export const {
   setSofrForManagmentFeed,
   setSbpFXRevalRatesForManagmentFeed,
   setSwapsinUSDForManagementFeed,
+  setTreasuryRateSheetSpotTTRates,
+  setTreasuryRateSheetCurrencyNotes,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

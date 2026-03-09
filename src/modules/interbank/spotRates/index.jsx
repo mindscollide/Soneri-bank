@@ -40,8 +40,6 @@ const SpotRates = () => {
     (state) => state.RealtimeActionsSlice.currentRatesPublished
   );
 
-  //   console.log({ currentUpdatedRates, getLastPublishRates }, "ratestoworkon");
-
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );

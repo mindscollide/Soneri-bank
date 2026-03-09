@@ -54,6 +54,8 @@ import {
   setTreasuryForwardRates,
   setTreasuryFowardsTenorsChanges,
   setTreasuryNonFeDiscounting,
+  setTreasuryRateSheetCurrencyNotes,
+  setTreasuryRateSheetSpotTTRates,
   setTreasurySpotRatesFeed,
   setUSDParityForManagementFeed,
   tenorWiseFowardsRatesPublishedActions,
@@ -273,7 +275,16 @@ const Dashboard = () => {
             dispatch(setSwapsinUSDForManagementFeed(payload));
           });
           break;
-
+        case "TREASURY_RATE_SHEET_SPOT_TT_RATES":
+          startTransition(() => {
+            dispatch(setTreasuryRateSheetSpotTTRates(payload));
+          });
+          break;
+        case "TREASURY_RATE_SHEET_CURRENCY_NOTES":
+          startTransition(() => {
+            dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+          });
+          break;
         default:
           console.warn("No specific handler for this message type", payload);
       }
@@ -448,13 +459,17 @@ const Dashboard = () => {
 
     //make isTreasuryCommented
     if (location.pathname.toLowerCase().includes("treasury".toLowerCase())) {
+      subscribeToTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
       if (marketStatus) {
         // Subscribe only when status is true AND path is treasury
         subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
         // console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
       }
     } else {
-      unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
+      unsubscribeFromTopics([
+        "SBL_REAL_TIME_FEED_TREASURY",
+        "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
+      ]);
     }
   }, [location.pathname, isConnected, marketStatus]);
 
