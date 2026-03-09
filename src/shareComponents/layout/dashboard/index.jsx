@@ -285,6 +285,33 @@ const Dashboard = () => {
             dispatch(setTreasuryRateSheetCurrencyNotes(payload));
           });
           break;
+
+        case "TREASURY_RATE_SHEET_CONVERSION_RATE":
+          startTransition(() => {
+            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+          });
+          break;
+
+        case "TREASURY_RATE_SHEET_KIBOR":
+          startTransition(() => {
+            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+          });
+          break;
+
+        case "TREASURY_RATE_SHEET_SOFR":
+          startTransition(() => {
+            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+          });
+          break;
+
+        case "TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES":
+          startTransition(() => {
+            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+          });
+          break;
+
+        //
+
         default:
           console.warn("No specific handler for this message type", payload);
       }

@@ -88,6 +88,10 @@ const RealtimeActionsSlice = createSlice({
     treasuryRateSheetSpotTTRates: null,
     // TREASURY_RATE_SHEET_CURRENCY_NOTES
     treasuryRateSheetCurrencyNotes: null,
+    treasuryRateSheetConversionRate: null,
+    treasuryRateSheetKibor: null,
+    treasuryRateSheetSofr: null,
+    treasuryRateSheetIndicativeFBPRates: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -329,6 +333,20 @@ const RealtimeActionsSlice = createSlice({
     setTreasuryRateSheetCurrencyNotes: (state, { payload }) => {
       state.treasuryRateSheetCurrencyNotes = { ...payload };
     },
+
+    setTreasuryRateSheetConversionRate: (state, { payload }) => {
+      state.treasuryRateSheetConversionRate = { ...payload };
+    },
+    setTreasuryRateSheetKibor: (state, { payload }) => {
+      state.treasuryRateSheetKibor = { ...payload };
+    },
+    setTreasuryRateSheetSofr: (state, { payload }) => {
+      state.treasuryRateSheetSofr = { ...payload };
+    },
+    setTreasuryRateSheetIndicativeFBPRates: (state, { payload }) => {
+      state.treasuryRateSheetIndicativeFBPRates = { ...payload };
+    },
+    // treasuryRateSheetKibor
   },
 });
 
@@ -408,6 +426,10 @@ export const {
   setSwapsinUSDForManagementFeed,
   setTreasuryRateSheetSpotTTRates,
   setTreasuryRateSheetCurrencyNotes,
+  setTreasuryRateSheetConversionRate,
+  setTreasuryRateSheetKibor,
+  setTreasuryRateSheetSofr,
+  setTreasuryRateSheetIndicativeFBPRates,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;
