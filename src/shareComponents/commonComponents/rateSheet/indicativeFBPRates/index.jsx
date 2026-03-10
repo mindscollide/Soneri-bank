@@ -5,16 +5,17 @@ import { useSelector } from "react-redux";
 
 const GetIndicativeFBPRates = (state) =>
   state.WatchListReducer.GetIndicativeFBPRates;
+const treasuryRateSheetIndicativeFBPRates = (state) =>
+  state.RealtimeActionsSlice.treasuryRateSheetIndicativeFBPRates;
 
 const IndicativeFBPRates = () => {
-  const [processedData, setProcessedData] = useState("");
+  const [processedData, setProcessedData] = useState([]);
   const fbpRates = useSelector(GetIndicativeFBPRates);
   // const lastUpdateRef = useRef(0);
   // const updateQueueRef = useRef([]);
   // const animationFrameRef = useRef(null);
-  // const fullFeed = useSelector(sbpFXRevalRatesForManagementFeed);
+  const fullFeed = useSelector(treasuryRateSheetIndicativeFBPRates);
 
-  console.log(fbpRates, "fbpRatesfbpRates");
   const getUniqueTenors = (data) => {
     const tenorMap = new Map();
 
@@ -44,15 +45,13 @@ const IndicativeFBPRates = () => {
       },
     ];
 
-    console.log(tenors, "generateColumnsgenerateColumns");
-
     const tenorColumns = tenors.map((tenor) => ({
       title: tenor.tenorName.toUpperCase(),
       dataIndex: `tenorId_${tenor.tenorId}_value`,
       key: `tenor_${tenor.tenorId}`,
       align: "center",
       width: 110,
-      render: (value) => value.toFixed(2) ?? "-",
+      render: (value) => (value ? Number(value).toFixed(2) : "-"),
     }));
     return [...baseColumn, ...tenorColumns];
   };
@@ -65,7 +64,6 @@ const IndicativeFBPRates = () => {
     return generateColumns(tenors);
   }, [tenors]);
 
-  console.log(columns, "columnscolumns");
   useEffect(() => {
     if (fbpRates?.fbpRates) {
       try {
@@ -106,6 +104,28 @@ const IndicativeFBPRates = () => {
       }
     }
   }, [fbpRates]);
+
+  // MQTT Work
+  // ✅ Batch update function
+  // (row) => row.currencyName === currency;
+  useEffect(() => {
+    if (fullFeed && fullFeed.fbp) {
+      const { currency, tenorId, value } = fullFeed.fbp;
+
+      setProcessedData((prev) =>
+        prev.map((row) => {
+          if (row.currencyName === currency) {
+            return {
+              ...row,
+              [`tenorId_${tenorId}_value`]: Number(value),
+            };
+          }
+          return row;
+        })
+      );
+    }
+  }, [fullFeed]);
+
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>Indicative FBP Rates</span>

@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense, useEffect, useRef } from "react";
 import { Col, Row } from "react-bootstrap";
 import styles from "./RateSheet.module.css";
 import CustomButton from "../elements/globalButton/button";
@@ -14,6 +14,8 @@ import {
   GetSpotTTRatesForRateSheetApi,
 } from "../../../store/actions/WatchlistAction";
 import { useNavigate } from "react-router-dom";
+
+import logo from "../../../assets/img/logo.png";
 const SpotTTRates = lazy(() => import("./spotTTRates/index"));
 const RatesForCurrencyNotes = lazy(() =>
   import("./ratesForCurrencyNotes/index")
@@ -22,11 +24,13 @@ const SbpConversionRates = lazy(() => import("./sbpConversionRates/index"));
 const IndicativeFBPRates = lazy(() => import("./indicativeFBPRates/index"));
 const Sofr = lazy(() => import("./sofr/index"));
 const Kibor = lazy(() => import("./kibor/index"));
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const RateSheet = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const screenRef = useRef(null);
   useEffect(() => {
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(GetAllOtherInstrumentsApi({ navigate }));
@@ -38,8 +42,73 @@ const RateSheet = () => {
     dispatch(GetSBPConversionRatesForRateSheetApi({ navigate }));
   }, []);
 
+  const getBase64Image = (imgUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.setAttribute("crossOrigin", "anonymous");
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        const dataURL = canvas.toDataURL("image/png");
+        resolve(dataURL);
+      };
+      img.src = imgUrl;
+    });
+  };
+  const handleExportPDF = async () => {
+    const element = screenRef.current;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const logoBase64 = await getBase64Image(logo);
+
+    /* -------- CENTER LOGO -------- */
+
+    const headerWidth = 60;
+    const headerHeight = 15;
+
+    const xPosition = (pageWidth - headerWidth) / 2;
+
+    pdf.addImage(logoBase64, "PNG", xPosition, 8, headerWidth, headerHeight);
+
+    /* -------- HEADER TEXT -------- */
+
+    pdf.setFontSize(10);
+    pdf.text("Roshan Har Qadam", pageWidth / 2, 28, { align: "center" });
+
+    pdf.setFontSize(11);
+    pdf.text("FOREIGN EXCHANGE RATE SHEET", 10, 35);
+
+    pdf.text("TREASURY & CAPITAL MARKETS GROUP", pageWidth - 10, 35, {
+      align: "right",
+    });
+
+    pdf.text("14-Jan-2026 - Wednesday", 10, 42);
+
+    /* -------- ADD SCREENSHOT -------- */
+
+    const imgWidth = pageWidth - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 10, 48, imgWidth, imgHeight);
+
+    pdf.save("RateSheet.pdf");
+  };
   return (
-    <div className={styles.mainRateSheetContianer}>
+    <div ref={screenRef} className={styles.mainRateSheetContianer}>
       <Row className="d-flex justify-space-between">
         <Col sm={12} md={6} lg={6} className={styles.dateDay}>
           14-Jan-2026 - Wednesday
@@ -53,8 +122,7 @@ const RateSheet = () => {
           <CustomButton
             value={"Export to PDF"}
             applyClass="exportToPDF"
-            // disabled={isMarketOn === true ? false : true}
-            // onClick={handleClearRates}
+            onClick={handleExportPDF}
             // loading={clearRatesLoading}
           />
         </Col>

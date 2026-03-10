@@ -346,7 +346,6 @@ const RealtimeActionsSlice = createSlice({
     setTreasuryRateSheetIndicativeFBPRates: (state, { payload }) => {
       state.treasuryRateSheetIndicativeFBPRates = { ...payload };
     },
-    // treasuryRateSheetKibor
   },
 });
 

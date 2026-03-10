@@ -54,7 +54,11 @@ import {
   setTreasuryForwardRates,
   setTreasuryFowardsTenorsChanges,
   setTreasuryNonFeDiscounting,
+  setTreasuryRateSheetConversionRate,
   setTreasuryRateSheetCurrencyNotes,
+  setTreasuryRateSheetIndicativeFBPRates,
+  setTreasuryRateSheetKibor,
+  setTreasuryRateSheetSofr,
   setTreasuryRateSheetSpotTTRates,
   setTreasurySpotRatesFeed,
   setUSDParityForManagementFeed,
@@ -276,37 +280,43 @@ const Dashboard = () => {
           });
           break;
         case "TREASURY_RATE_SHEET_SPOT_TT_RATES":
+          // console.log("TREASURY_RATE_SHEET_SPOT_TT_RATES");
           startTransition(() => {
             dispatch(setTreasuryRateSheetSpotTTRates(payload));
           });
           break;
         case "TREASURY_RATE_SHEET_CURRENCY_NOTES":
+          // console.log("TREASURY_RATE_SHEET_CURRENCY_NOTES");
           startTransition(() => {
             dispatch(setTreasuryRateSheetCurrencyNotes(payload));
           });
           break;
 
         case "TREASURY_RATE_SHEET_CONVERSION_RATE":
+          console.log("TREASURY_RATE_SHEET_CONVERSION_RATE");
           startTransition(() => {
-            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+            dispatch(setTreasuryRateSheetConversionRate(payload));
           });
           break;
 
         case "TREASURY_RATE_SHEET_KIBOR":
+          console.log("TREASURY_RATE_SHEET_KIBOR FBP Rates");
           startTransition(() => {
-            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+            dispatch(setTreasuryRateSheetKibor(payload));
           });
           break;
 
         case "TREASURY_RATE_SHEET_SOFR":
+          console.log("TREASURY_RATE_SHEET_SOFR");
           startTransition(() => {
-            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+            dispatch(setTreasuryRateSheetSofr(payload));
           });
           break;
 
         case "TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES":
+          console.log("TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES");
           startTransition(() => {
-            // dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+            dispatch(setTreasuryRateSheetIndicativeFBPRates(payload));
           });
           break;
 
