@@ -14,7 +14,6 @@ import {
   getDealerDashboardApi,
   GetLastAndCurrentPublishUSDRateSheetAction,
   getLastPublishRatesAction,
-  getMarketStatusApi,
 } from "../../store/actions/WatchlistAction";
 
 const Interbank = () => {

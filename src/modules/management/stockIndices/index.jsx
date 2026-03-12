@@ -1,7 +1,10 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import { formatDateUTCToGMT } from "../../../utils/timeFunction";
+import {
+  convertUTCTimeToLocalTime,
+  formatDateUTCToGMT,
+} from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
 
@@ -105,10 +108,7 @@ const StockIndices = memo(() => {
         dataIndex: "time",
         // width: 90,
 
-        render: (text) =>
-          text
-            ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
-            : "--:--:--",
+        render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
       },
     ],
     []

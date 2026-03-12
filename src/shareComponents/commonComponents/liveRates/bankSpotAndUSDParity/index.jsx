@@ -1,7 +1,11 @@
 import GlobalTable from "../../elements/table/GlobalTable";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
+import {
+  convertUTCTimeToLocalTime,
+  extractTimeFromCompactDate,
+  formatDateUTCToGMT,
+} from "../../../../utils/timeFunction";
 import { IndexCell } from "../../elements/inputField/IndexCell";
 import { clearDealerSpotClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { UpdatetDealerSpotRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
@@ -324,9 +328,7 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Time",
             dataIndex: "time",
             render: (text) =>
-              text
-                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
-                : "--:--:--",
+              text ? extractTimeFromCompactDate(text) : "--:--:--",
           },
         ],
       },
@@ -356,9 +358,7 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Time",
             dataIndex: "time",
             render: (text) =>
-              text
-                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
-                : "--:--:--",
+              text ? extractTimeFromCompactDate(text) : "--:--:--",
           },
         ],
       },

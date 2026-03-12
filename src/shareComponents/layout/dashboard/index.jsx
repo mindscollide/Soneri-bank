@@ -35,6 +35,7 @@ import {
   setCounterPartySpotRates,
   setCurrencyCrossesForManagementFeed,
   setCurrencyCrossesRatesFeed,
+  setCurrentRateSheetRatesPublished,
   setDealerForwardTenorChanged,
   setDealerSpotRatesFeed,
   setFxTradingCards,
@@ -227,7 +228,11 @@ const Dashboard = () => {
           });
           break;
         case "CURRENT_RATE_SHEET_RATES_PUBLISHED":
-          startTransition(dispatch(setSpreadsForSingleUser(payload)));
+          // startTransition(dispatch(setSpreadsForSingleUser(payload)));
+          console.log("CURRENT_RATE_SHEET_RATES_PUBLISHED");
+          startTransition(() => {
+            dispatch(setCurrentRateSheetRatesPublished(payload));
+          });
           break;
 
         case "TREASURY_USD_PARITY_FEED":

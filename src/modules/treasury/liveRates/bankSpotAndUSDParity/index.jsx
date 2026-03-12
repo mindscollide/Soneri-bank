@@ -1,4 +1,3 @@
-import styles from "./bankSpotAndUSDParity.module.css";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useSelector } from "react-redux";
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";

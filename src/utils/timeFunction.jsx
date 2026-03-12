@@ -72,7 +72,8 @@ export function extractTimeFromCompactDate(input) {
     .toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true,
+      second: "2-digit",
+      hour12: false,
     })
     .toLowerCase();
 }
@@ -122,3 +123,37 @@ export const formatCompactDate = (input) => {
 
   return `${day}-${monthNames[date.getUTCMonth()]}-${date.getUTCFullYear()}`;
 };
+
+export function convertUTCTimeToLocalTime(timeStr) {
+  try {
+    if (!timeStr || timeStr.length !== 6) return "";
+
+    const hour = parseInt(timeStr.slice(0, 2));
+    const minute = parseInt(timeStr.slice(2, 4));
+    const second = parseInt(timeStr.slice(4, 6));
+
+    const now = new Date();
+
+    // Create UTC date
+    const utcDate = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        hour,
+        minute,
+        second
+      )
+    );
+
+    // Format to HH:MM:SS
+    return utcDate.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}

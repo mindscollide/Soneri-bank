@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
-import { formatDateUTCToGMT } from "../../../utils/timeFunction";
+import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import { shallowEqual, useSelector } from "react-redux";
 import styles from "../management.module.css";
@@ -111,10 +111,7 @@ const USDParity = memo(() => {
         title: "Time",
         dataIndex: "time",
         width: 90,
-        render: (text) =>
-          text
-            ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
-            : "--:--:--",
+        render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
       },
     ],
     []
@@ -172,9 +169,12 @@ const USDParity = memo(() => {
       const updatedData = prevData.map((item) => {
         let updatedItem = { ...item };
         let changed = false;
-
         updates.forEach((update) => {
           const { instrumentParitySpot } = update;
+          console.log(
+            instrumentParitySpot,
+            "instrumentParitySpotinstrumentParitySpot"
+          );
 
           // if (
           //   instrumentCrossRate &&

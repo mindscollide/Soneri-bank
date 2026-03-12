@@ -1,6 +1,9 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { shallowEqual, useSelector } from "react-redux";
-import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
+import {
+  convertUTCTimeToLocalTime,
+  formatDateUTCToGMT,
+} from "../../../../utils/timeFunction";
 import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 
 // // ✅ Pure selectors (no object creation here)
@@ -252,9 +255,7 @@ const CurrencyCrosses = memo(() => {
             title: "Time",
             dataIndex: "time",
             render: (text) =>
-              text
-                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
-                : "--:--:--",
+              text ? convertUTCTimeToLocalTime(text) : "--:--:--",
           },
         ],
       },
