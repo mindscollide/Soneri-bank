@@ -9,7 +9,6 @@ const swapsinUSDForManagementFeed = (state) =>
   state.RealtimeActionsSlice.swapsinUSDForManagementFeed;
 
 const SwapsInUSD = memo(() => {
-  const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);

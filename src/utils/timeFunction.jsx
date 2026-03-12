@@ -157,3 +157,12 @@ export function convertUTCTimeToLocalTime(timeStr) {
     console.log(error);
   }
 }
+
+export const formatTodayForRateSheet = (date = new Date()) => {
+  const day = date.toLocaleDateString("en-GB", { day: "2-digit" });
+  const month = date.toLocaleDateString("en-GB", { month: "short" });
+  const year = date.getFullYear();
+  const weekday = date.toLocaleDateString("en-GB", { weekday: "long" });
+
+  return `${day}-${month}-${year} - ${weekday}`;
+};

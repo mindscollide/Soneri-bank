@@ -119,7 +119,24 @@ const SBPFXRevalRates = memo(() => {
     }
   }, [revalRatesList]);
 
-  (row) => row.currencyName === currency;
+  useEffect(() => {
+    console.log(fullFeed, "fullFeedSBP FX Reval Rates");
+    if (fullFeed && fullFeed.revalRates) {
+      const { currency, tenorId, value } = fullFeed.revalRates;
+
+      setProcessedData((prev) =>
+        prev.map((row) => {
+          if (row.currencyName === currency) {
+            return {
+              ...row,
+              [`tenorId_${tenorId}_value`]: Number(value),
+            };
+          }
+          return row;
+        })
+      );
+    }
+  }, [fullFeed]);
 
   return (
     <>

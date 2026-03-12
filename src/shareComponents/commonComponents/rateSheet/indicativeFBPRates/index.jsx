@@ -11,9 +11,6 @@ const treasuryRateSheetIndicativeFBPRates = (state) =>
 const IndicativeFBPRates = () => {
   const [processedData, setProcessedData] = useState([]);
   const fbpRates = useSelector(GetIndicativeFBPRates);
-  // const lastUpdateRef = useRef(0);
-  // const updateQueueRef = useRef([]);
-  // const animationFrameRef = useRef(null);
   const fullFeed = useSelector(treasuryRateSheetIndicativeFBPRates);
 
   const getUniqueTenors = (data) => {

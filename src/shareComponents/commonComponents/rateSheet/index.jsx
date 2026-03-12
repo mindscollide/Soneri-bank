@@ -26,6 +26,7 @@ const Sofr = lazy(() => import("./sofr/index"));
 const Kibor = lazy(() => import("./kibor/index"));
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { formatTodayForRateSheet } from "../../../utils/timeFunction";
 
 const RateSheet = () => {
   const dispatch = useDispatch();
@@ -41,7 +42,7 @@ const RateSheet = () => {
     dispatch(GetIndicativeFBPRatesApi({ navigate }));
     dispatch(GetSBPConversionRatesForRateSheetApi({ navigate }));
   }, []);
-
+  const todayDate = formatTodayForRateSheet();
   const getBase64Image = (imgUrl) => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -68,10 +69,14 @@ const RateSheet = () => {
       useCORS: true,
     });
 
-    const imgData = canvas.toDataURL("image/png");
+    const imgData = canvas.toDataURL("image/jpeg", 0.9); // better quality
 
-    const pdf = new jsPDF("p", "mm", "a4");
-
+    const pdf = new jsPDF({
+      orientation: "p",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const logoBase64 = await getBase64Image(logo);
 
@@ -85,7 +90,6 @@ const RateSheet = () => {
     pdf.addImage(logoBase64, "PNG", xPosition, 8, headerWidth, headerHeight);
 
     /* -------- HEADER TEXT -------- */
-
     pdf.setFontSize(10);
     pdf.text("Roshan Har Qadam", pageWidth / 2, 28, { align: "center" });
 
@@ -96,22 +100,30 @@ const RateSheet = () => {
       align: "right",
     });
 
-    pdf.text("14-Jan-2026 - Wednesday", 10, 42);
+    pdf.text(todayDate, 10, 42);
 
     /* -------- ADD SCREENSHOT -------- */
 
     const imgWidth = pageWidth - 20;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 10, 48, imgWidth, imgHeight);
-
+    pdf.addImage(
+      imgData,
+      "JPEG",
+      10,
+      48,
+      imgWidth,
+      imgHeight,
+      undefined,
+      "FAST"
+    );
     pdf.save("RateSheet.pdf");
   };
   return (
-    <div ref={screenRef} className={styles.mainRateSheetContianer}>
+    <div className={styles.mainRateSheetContianer}>
       <Row className="d-flex justify-space-between">
         <Col sm={12} md={6} lg={6} className={styles.dateDay}>
-          14-Jan-2026 - Wednesday
+          {todayDate}
         </Col>
         <Col
           sm={12}
@@ -127,63 +139,65 @@ const RateSheet = () => {
           />
         </Col>
       </Row>
-      <Row className="mt-3">
-        <Col sm={12} md={8} lg={8}>
-          <Suspense fallback={<>...Loading</>}>
-            <SpotTTRates />
-          </Suspense>
-        </Col>
-        <Col sm={12} md={4} lg={4}>
-          <div>
+      <div ref={screenRef}>
+        <Row className="mt-3">
+          <Col sm={12} md={8} lg={8}>
             <Suspense fallback={<>...Loading</>}>
-              <RatesForCurrencyNotes />
+              <SpotTTRates />
             </Suspense>
-          </div>
+          </Col>
+          <Col sm={12} md={4} lg={4}>
+            <div>
+              <Suspense fallback={<>...Loading</>}>
+                <RatesForCurrencyNotes />
+              </Suspense>
+            </div>
 
-          <div className="mt-3">
-            <Suspense fallback={<>...Loading</>}>
-              <SbpConversionRates />
-            </Suspense>
-          </div>
-        </Col>
-      </Row>
-      <Row className="mt-3">
-        <Col sm={12} md={12} lg={12}>
-          <IndicativeFBPRates />
-        </Col>
-      </Row>
-      <Row className="mt-3">
-        <Col sm={12} md={6} lg={6}>
-          <Sofr />
-        </Col>
-        <Col sm={12} md={6} lg={6}>
-          <Kibor />
-        </Col>
-      </Row>
-      <Row className="mt-3 mb-3">
-        <Col sm={12} md={12} lg={12} className={styles.importantNote}>
-          <div class="fw-bold text-decoration-underline">IMPORTANT NOTE:</div>
-          <ul class="color-red">
-            <li>
-              THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE WITHOUT
-              PRIOR NOTICE.
-            </li>
-            <li>
-              FX TRANSACTIONS CUT OFF TIME FOR REPORTING IS 15:30 HOURS
-              (MON-THU) AND 14:30 HOURS (FRIDAY).
-            </li>
-            <li>
-              PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN
-              USD.5,000/=
-            </li>
-            <li>
-              SONERI CAPTURES ABOVE FOREIGN EXCHANGE RATES FROM SOURCES BELIEVED
-              TO BE RELIABLE AND DOES NOT ACCEPT ANY LIABILITY FOR CONSEQUENCES
-              THAT MAY ARISE USING THESE RATES.
-            </li>
-          </ul>
-        </Col>
-      </Row>
+            <div className="mt-3">
+              <Suspense fallback={<>...Loading</>}>
+                <SbpConversionRates />
+              </Suspense>
+            </div>
+          </Col>
+        </Row>
+        <Row className="mt-3">
+          <Col sm={12} md={12} lg={12}>
+            <IndicativeFBPRates />
+          </Col>
+        </Row>
+        <Row className="mt-3">
+          <Col sm={12} md={6} lg={6}>
+            <Sofr />
+          </Col>
+          <Col sm={12} md={6} lg={6}>
+            <Kibor />
+          </Col>
+        </Row>
+        <Row className="mt-3 mb-3">
+          <Col sm={12} md={12} lg={12} className={styles.importantNote}>
+            <div class="fw-bold text-decoration-underline">IMPORTANT NOTE:</div>
+            <ul class="color-red">
+              <li>
+                THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE
+                WITHOUT PRIOR NOTICE.
+              </li>
+              <li>
+                FX TRANSACTIONS CUT OFF TIME FOR REPORTING IS 15:30 HOURS
+                (MON-THU) AND 14:30 HOURS (FRIDAY).
+              </li>
+              <li>
+                PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN
+                USD.5,000/=
+              </li>
+              <li>
+                SONERI CAPTURES ABOVE FOREIGN EXCHANGE RATES FROM SOURCES
+                BELIEVED TO BE RELIABLE AND DOES NOT ACCEPT ANY LIABILITY FOR
+                CONSEQUENCES THAT MAY ARISE USING THESE RATES.
+              </li>
+            </ul>
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 };
