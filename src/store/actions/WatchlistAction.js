@@ -37,6 +37,8 @@ import {
   GetKiborDataForTreasury,
   GetLastAndCurrentPublishUSDRateSheet,
   getLastAndCurrentUSDRatesRM,
+  GetNewsDetailsByID,
+  GetNewsHeadlines,
   GetNonFeDiscountingRatesRM,
   GetRatesForCurrencyNotesForRateSheet,
   GetRevalRatesForTreasury,
@@ -3493,6 +3495,150 @@ export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
       }
     } catch (error) {
       return rejectWithValue(error.message);
+    }
+  }
+);
+
+//GetNewsHeadlines
+export const GetNewsHeadlinesApi = createAsyncThunk(
+  "watchlist/GetNewsHeadlines", // A unique action type string
+  async ({ Data }, { rejectWithValue }) => {
+    try {
+      let GetNewsHeadlinesData = createPostAPI(
+        watchListApi,
+        GetNewsHeadlines.RequestMethod
+      );
+
+      const response = await GetNewsHeadlinesData(Data);
+
+      const { responseCode } = response.data;
+      console.log(responseCode, "responseCoderesponseCode");
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_01".toLowerCase()
+              )
+          ) {
+            // dispatch(setPublishedSpotRates(false));
+
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      // Reject with error message
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+//GetNewsDetailsByID
+export const GetNewsDetailsByIDApi = createAsyncThunk(
+  "watchlist/GetNewsDetailsByID", // A unique action type string
+  async ({ Data }, { rejectWithValue }) => {
+    try {
+      let GetNewsDetailsByIDData = createPostAPI(
+        watchListApi,
+        GetNewsDetailsByID.RequestMethod
+      );
+
+      const response = await GetNewsDetailsByIDData(Data);
+
+      const { responseCode } = response.data;
+      console.log(responseCode, "responseCoderesponseCode");
+
+      if (responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsDetails_01".toLowerCase()
+              )
+          ) {
+            // dispatch(setPublishedSpotRates(false));
+
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsDetails_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsDetails_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetNewsDetails_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      // Reject with error message
+      return rejectWithValue("Something went wrong");
     }
   }
 );

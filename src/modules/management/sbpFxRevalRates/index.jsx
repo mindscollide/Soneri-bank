@@ -120,7 +120,6 @@ const SBPFXRevalRates = memo(() => {
   }, [revalRatesList]);
 
   useEffect(() => {
-    console.log(fullFeed, "fullFeedSBP FX Reval Rates");
     if (fullFeed && fullFeed.revalRates) {
       const { currency, tenorId, value } = fullFeed.revalRates;
 

@@ -89,7 +89,7 @@ const Treasury = () => {
   }, []);
 
   return (
-    <div className="mt-2">
+    <div>
       <GlobalTabs items={tabs} defaultActiveKey={"0"} />
     </div>
   );

@@ -98,7 +98,7 @@ const SwapsInUSD = memo(() => {
           key: `${currency}_bid`,
           align: "center",
           width: 100,
-          render: (val) => (val ? Number(val).toFixed(2) : "-"),
+          render: (val) => (val ? Number(val).toFixed(2) : "0.00"),
         },
         {
           title: "Offer",
@@ -106,7 +106,7 @@ const SwapsInUSD = memo(() => {
           key: `${currency}_ask`,
           align: "center",
           width: 100,
-          render: (val) => (val ? Number(val).toFixed(2) : "-"),
+          render: (val) => (val ? Number(val).toFixed(2) : "0.00"),
         },
       ],
     }));

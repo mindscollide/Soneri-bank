@@ -214,3 +214,11 @@ export const GetIndicativeFBPRates = {
 export const GetSBPConversionRatesForRateSheet = {
   RequestMethod: "ServiceManager.GetSBPConversionRatesForRateSheet",
 };
+
+export const GetNewsHeadlines = {
+  RequestMethod: "ServiceManager.GetNewsHeadlines",
+};
+
+export const GetNewsDetailsByID = {
+  RequestMethod: "ServiceManager.GetNewsDetailsByID",
+};

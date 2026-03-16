@@ -85,6 +85,7 @@ const KIBOR = memo(() => {
 
           updates.forEach((update) => {
             const { kibor } = update;
+            console.log(kibor, "updatedKibor");
 
             if (!kibor) return;
             const kiborArray = Array.isArray(kibor) ? kibor : [kibor];

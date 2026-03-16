@@ -150,7 +150,7 @@ const Dealer = () => {
   }, [GetAllDealersSpread]);
 
   return (
-    <div className="mt-2">
+    <div>
       <GlobalTabs
         items={tabs}
         tabBarExtraContent={

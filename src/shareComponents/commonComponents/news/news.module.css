@@ -10,6 +10,7 @@
   background: #f6f4ef;
   border: 1px solid #dee2e6;
   margin: 0;
+  padding: 0.5rem 0;
 }
 .newsHeadingStyles {
   font-weight: 700 !important;
@@ -19,4 +20,88 @@
   font-size: 13px !important;
   font-family: "Helvetica-Bold", sans-serif !important;
   color: var(--color-blue);
+}
+.newsViewAll:hover {
+  color: var(--bs-link-hover-color);
+  cursor: pointer;
+}
+/* .searchRow {
+  border: 1px solid #dee2e6;
+  margin: 0;
+  padding: 10px 0;
+} */
+.SearchBoxStyle {
+  width: 40%;
+  font-family: "Helvetica", sans-serif !important;
+  font-weight: 700 !important;
+  padding: 5px 10px;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background: var(--color-light-gray);
+  border: 1px solid #ccc;
+  backface-visibility: hidden;
+}
+
+.tresIcon {
+  width: 28px;
+  height: 61px; /* double height because image has 2 icons */
+  transition: transform 0.4s ease;
+}
+
+.tresIcon_inactive {
+  transform: translateY(-28px);
+}
+.toggleButtons {
+  width: 40px;
+}
+.dateHeader {
+  background: black;
+  color: white;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+.newsRow {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding: 8px;
+}
+
+.newsTime {
+  width: 60px;
+  color: #555;
+}
+
+.newsIcon img {
+  width: 40px;
+  margin-right: 10px;
+}
+
+.newsHeadline {
+  flex: 1;
+  cursor: pointer;
+}
+.searchRow {
+  border: 1px solid #dee2e6;
+  margin: 0;
+  padding: 10px 0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+.newsScrollArea {
+  max-height: 400px; /* adjust as needed */
+  overflow-y: auto;
+}
+.headerRow {
+  padding: 1rem 1rem !important;
 }

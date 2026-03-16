@@ -21,10 +21,8 @@ const SOFR = memo(() => {
 
   const sofrList = useSelector(GetSOFRDataForTreasury);
   const fullFeed = useSelector(SOFRForManagementFeed);
-  console.log(fullFeed, "fullFeedSOFR");
   const [processedData, setProcessedData] = useState([]);
   const [latestDate, setLatestDate] = useState("");
-  console.log(latestDate, "latestDatelatestDate");
 
   // Columns
   const columns = useMemo(

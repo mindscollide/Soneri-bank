@@ -32,6 +32,8 @@ import {
   getLastPublishRatesAction,
   getMarketStatusApi,
   GetMisDataByRangeAPI,
+  GetNewsDetailsByIDApi,
+  GetNewsHeadlinesApi,
   GetNonFEDiscountingTableApi,
   GetRatesForCurrencyNotesForRateSheetApi,
   GetRevalRatesForTreasuryApi,
@@ -111,6 +113,8 @@ const WatchListSlice = createSlice({
     GetSOFRDataForRateSheetLoading: false,
     GetIndicativeFBPRatesLoading: false,
     GetSBPConversionRatesForRateSheetLoading: false,
+    GetNewsHeadlinesLoading: false,
+    GetNewsDetailsByIDLoading: false,
 
     // data states
     getAllInstrumentForCounterParties: null,
@@ -179,6 +183,8 @@ const WatchListSlice = createSlice({
     GetSOFRDataForRateSheet: null,
     GetIndicativeFBPRates: null,
     GetSBPConversionRatesForRateSheet: null,
+    GetNewsHeadlines: null,
+    GetNewsDetailsByID: null,
   },
   reducers: {
     clearWatchListResponseMessage: (state) => {
@@ -190,10 +196,7 @@ const WatchListSlice = createSlice({
     setWatchlistTableDataCopy(state, { payload }) {
       state.watchlistTableDataCopy = payload;
     },
-    clearCorporateDailyVolume: (state) => {
-      state.GetCorporateDailyVolume = null;
-      state.GetCorporateDailyVolumeLoading = false;
-    },
+
     // codeof dealer
     setUpdateVolMeterRealtime: (state, action) => {
       state.GetVoltMeterStatusRealtime = action.payload;
@@ -1038,7 +1041,38 @@ const WatchListSlice = createSlice({
           state.GetSBPConversionRatesForRateSheet = null;
           state.error = payload;
         }
-      );
+      )
+
+      // ------------------ GetNewsHeadlines ------------------
+      .addCase(GetNewsHeadlinesApi.pending, (state) => {
+        state.GetNewsHeadlinesLoading = true;
+      })
+      .addCase(GetNewsHeadlinesApi.fulfilled, (state, { payload }) => {
+        state.GetNewsHeadlinesLoading = false;
+        state.GetNewsHeadlines = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetNewsHeadlinesApi.rejected, (state, { payload }) => {
+        state.GetNewsHeadlinesLoading = false;
+        state.GetNewsHeadlines = null;
+        state.error = payload;
+      })
+
+      // ------------------ GetNewsDetailsByID ------------------
+      .addCase(GetNewsDetailsByIDApi.pending, (state) => {
+        state.GetNewsDetailsByIDLoading = true;
+      })
+      .addCase(GetNewsDetailsByIDApi.fulfilled, (state, { payload }) => {
+        state.GetNewsDetailsByIDLoading = false;
+        state.GetNewsDetailsByID = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetNewsDetailsByIDApi.rejected, (state, { payload }) => {
+        state.GetNewsDetailsByIDLoading = false;
+        state.GetNewsDetailsByID = null;
+        state.error = payload;
+      });
+
     builder.addCase(setActiveTab, (state, action) => {
       state.activeTab = action.payload;
     });
@@ -1049,7 +1083,6 @@ export const {
   clearWatchListResponseMessage,
   setMarketStatus,
   setWatchlistTableDataCopy,
-  clearCorporateDailyVolume,
   setUpdateVolMeterRealtime,
   clearDealerResponseMessage,
   setForwardsForTreasuryBranch,

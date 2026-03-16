@@ -171,11 +171,6 @@ const USDParity = memo(() => {
         let changed = false;
         updates.forEach((update) => {
           const { instrumentParitySpot } = update;
-          console.log(
-            instrumentParitySpot,
-            "instrumentParitySpotinstrumentParitySpot"
-          );
-
           // if (
           //   instrumentCrossRate &&
           //   item.instrumentID === instrumentCrossRate.instrumentID &&

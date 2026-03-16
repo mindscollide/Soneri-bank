@@ -166,3 +166,23 @@ export const formatTodayForRateSheet = (date = new Date()) => {
 
   return `${day}-${month}-${year} - ${weekday}`;
 };
+
+export const formatDateTimeForNews = (dateTime) => {
+  const year = dateTime.slice(0, 4);
+  const month = dateTime.slice(4, 6);
+  const day = dateTime.slice(6, 8);
+  const hour = dateTime.slice(8, 10);
+  const minute = dateTime.slice(10, 12);
+
+  const dateObj = new Date(`${year}-${month}-${day}`);
+
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+  });
+
+  return {
+    date: formattedDate,
+    time: `${hour}:${minute}`,
+  };
+};
