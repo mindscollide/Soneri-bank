@@ -1,18 +1,23 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Col, Row } from "react-bootstrap";
-import styles from "./news.module.css";
-import { Input } from "antd";
-import tresmarkIcon from "../../../assets/icons/tress-news.png";
-import dowjhonesIcon from "../../../assets/icons/dowjhones-news.png";
-import mintIcon from "../../../assets/icons/mint-news.png";
-import tresmarkImg from "../../../assets/img/tresmarkImg.png";
-import { formatDateTimeForNews } from "../../../utils/timeFunction";
+import styles from "./allNews.module.css";
+import tresmarkIcon from "../../assets/icons/tress-news.png";
+import dowjhonesIcon from "../../assets/icons/dowjhones-news.png";
+import mintIcon from "../../assets/icons/mint-news.png";
+import tresmarkImg from "../../assets/img/tresmarkImg.png";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetNewsDetailsByIDApi,
   GetNewsHeadlinesApi,
-} from "../../../store/actions/WatchlistAction";
-import GlobalModal from "../elements/globalModal/Modal";
+} from "../../store/actions/WatchlistAction";
+import { formatDateTimeForNews } from "../../utils/timeFunction";
+import GlobalModal from "../../shareComponents/commonComponents/elements/globalModal/Modal";
+import CustomButton from "../../shareComponents/commonComponents/elements/globalButton/button";
+// import DatePicker from "react-multi-date-picker";
+import { DatePicker, Input } from "antd";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 const News = () => {
   const dispatch = useDispatch();
@@ -29,6 +34,19 @@ const News = () => {
     tresmark: true,
     dowjones: true,
     mint: true,
+  });
+
+  const [allNews, setAllNews] = useState({
+    dateFrom: {
+      value: null, // ✅ no default
+      errorMessage: "",
+      errorStatus: false,
+    },
+    dateTo: {
+      value: null,
+      errorMessage: "",
+      errorStatus: false,
+    },
   });
 
   const [searchVal, setSearchVal] = useState("");
@@ -58,9 +76,22 @@ const News = () => {
     return activeIds;
   }, [activeStates]);
 
-  // Function to fetch news with current filters
-  const fetchNews = useCallback(
-    (searchText = "", startRow = 0) => {
+  const formatToUTCString = (date, type) => {
+    if (!date) return "";
+
+    if (type === "start") {
+      return date.startOf("day").utc().format("YYYYMMDDHHmmss");
+    }
+
+    if (type === "end") {
+      return date.endOf("day").utc().format("YYYYMMDDHHmmss");
+    }
+
+    return date.utc().format("YYYYMMDDHHmmss");
+  };
+
+  const handleSearch = useCallback(
+    ({ searchText = searchVal, startRow = 0 } = {}) => {
       const activeSourceIds = getActiveSourceIds();
 
       if (activeSourceIds.length === 0) {
@@ -73,15 +104,14 @@ const News = () => {
         length: 10,
         sRow: startRow,
         SearchText: searchText,
-        FromDate: "",
-        ToDate: "",
+        FromDate: formatToUTCString(allNews.dateFrom.value),
+        ToDate: formatToUTCString(allNews.dateTo.value),
       };
 
       dispatch(GetNewsHeadlinesApi({ Data }));
     },
-    [dispatch, getActiveSourceIds]
+    [dispatch, getActiveSourceIds, searchVal, allNews]
   );
-
   // Refetch when active states change
   useEffect(() => {
     setNewsList([]);
@@ -89,9 +119,8 @@ const News = () => {
     setRecordLength(0);
     setIsLoading(false);
 
-    fetchNews(searchVal, 0);
+    handleSearch({ searchText: searchVal, startRow: 0 });
   }, [activeStates]);
-
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -111,7 +140,7 @@ const News = () => {
         setNewsList((prev) => [...prev, ...newData]);
       }
 
-      setSRow((prev) => prev + newData.length);
+      setSRow((prev) => prev + newData?.length);
       setRecordLength(totalCount);
       setIsLoading(false); // ✅ reset loading
     }
@@ -149,12 +178,12 @@ const News = () => {
       debounceRef.current = setTimeout(() => {
         setNewsList([]);
         setSRow(0);
-        fetchNews(value, 0);
+        handleSearch({ searchText: value, startRow: 0 });
       }, 500);
     } else if (value.length === 0) {
       setNewsList([]);
       setSRow(0);
-      fetchNews("", 0);
+      handleSearch({ searchText: value, startRow: 0 });
     }
   };
 
@@ -166,7 +195,9 @@ const News = () => {
       }
 
       if (searchVal.length >= 3 || searchVal.length === 0) {
-        fetchNews(searchVal);
+        setNewsList([]);
+        setSRow(0);
+        handleSearch({ searchText: searchVal, startRow: 0 });
       }
     }
   };
@@ -218,11 +249,15 @@ const News = () => {
           length: 10, // ✅ small l
           sRow: sRow,
           SearchText: searchVal,
-          FromDate: "",
-          ToDate: "",
+          FromDate: allNews.dateFrom.value
+            ? allNews.dateFrom.value.format("YYYY-MM-DD")
+            : "",
+          ToDate: allNews.dateTo.value
+            ? allNews.dateTo.value.format("YYYY-MM-DD")
+            : "",
         };
 
-        dispatch(GetNewsHeadlinesApi({ Data }));
+        handleSearch({ startRow: sRow });
       }
     },
     [
@@ -233,6 +268,8 @@ const News = () => {
       searchVal,
       getActiveSourceIds,
       dispatch,
+      allNews,
+      handleSearch,
     ]
   );
   useEffect(() => {
@@ -240,8 +277,33 @@ const News = () => {
       setNewsByIdModal(true);
     }
   }, [GetNewsDetailsByID]);
-  const handleClickViewAll = () => {
-    window.open("/SONERI/allnews", "_blank");
+
+  const handleDateChange = (fieldName, date) => {
+    setAllNews((prev) => ({
+      ...prev,
+      [fieldName]: {
+        ...prev[fieldName],
+        value: date,
+        errorMessage: "",
+        errorStatus: false,
+      },
+    }));
+
+    // Validation
+    if (
+      fieldName === "dateFrom" &&
+      allNews.dateTo.value &&
+      date?.isAfter(allNews.dateTo.value)
+    ) {
+      setAllNews((prev) => ({
+        ...prev,
+        dateFrom: {
+          ...prev.dateFrom,
+          errorMessage: "Start date cannot be after end date.",
+          errorStatus: true,
+        },
+      }));
+    }
   };
 
   return (
@@ -254,25 +316,14 @@ const News = () => {
             lg={6}
             className={`d-flex justify-content-start align-items-center ${styles.newsHeadingStyles}`}
           >
-            News
-          </Col>
-          <Col
-            sm={12}
-            md={6}
-            lg={6}
-            className={`d-flex justify-content-end align-items-center `}
-          >
-            <div className={styles.newsViewAll} onClick={handleClickViewAll}>
-              <i className="icon-external-link color-blue fs-6 pe-2"></i>
-              View All
-            </div>
+            All News
           </Col>
         </Row>
         <Row className={`${styles.searchRow}`}>
           <Col
             sm={12}
-            md={6}
-            lg={6}
+            md={2}
+            lg={2}
             className={`d-flex justify-content-start align-items-center`}
           >
             <Input
@@ -284,7 +335,12 @@ const News = () => {
               allowClear
             />
           </Col>
-          <Col sm={12} md={6} lg={6} className={`d-flex justify-content-end `}>
+          <Col
+            sm={12}
+            md={2}
+            lg={2}
+            className={`d-flex justify-content-start `}
+          >
             <div className="d-flex align-items-center">
               <button
                 className={`news-toggle-button ${
@@ -314,6 +370,69 @@ const News = () => {
                 <img src={mintIcon} alt="Mint" />
               </button>
             </div>
+          </Col>
+
+          <Col
+            lg={8}
+            md={8}
+            sm={12}
+            className="d-flex align-items-center justify-content-end pe-4"
+          >
+            <span className="fs-normal fw-bold nowrap me-1">
+              Search by date:
+            </span>
+            <DatePicker
+              placeholder="Start date"
+              onChange={(date, dateString) =>
+                handleDateChange("dateFrom", date, dateString)
+              }
+              value={allNews.dateFrom.value}
+              disabledDate={(current) => {
+                return (
+                  (current &&
+                    allNews.dateTo.value &&
+                    current.isAfter(allNews.dateTo.value)) ||
+                  current.isAfter(dayjs(), "day")
+                );
+              }}
+              format="YYYY-MM-DD" // or whatever format you need
+              className={styles["Tradecount-Datepicker-left"]}
+              allowClear={true}
+              // If you want to disable manual input:
+              inputReadOnly={true}
+            />
+            <label className={styles["Tradecount-date-to"]}>to</label>
+
+            <DatePicker
+              placeholder="End Date"
+              onChange={(date, dateString) =>
+                handleDateChange("dateTo", date, dateString)
+              }
+              value={allNews.dateTo.value}
+              disabledDate={(current) => {
+                return (
+                  current &&
+                  // ❌ disable dates before start date
+                  ((allNews.dateFrom.value &&
+                    current.isBefore(allNews.dateFrom.value, "day")) ||
+                    // ❌ disable future dates
+                    current.isAfter(dayjs(), "day"))
+                );
+              }}
+              format="YYYY-MM-DD"
+              className={styles["Tradecount-Datepicker-right"]}
+              allowClear={true}
+              inputReadOnly={true}
+            />
+            <CustomButton
+              value={"Search"}
+              applyClass="searchAllNews"
+              onClick={() => {
+                setNewsList([]);
+                setSRow(0);
+                handleSearch({ startRow: 0 });
+              }}
+            />
           </Col>
         </Row>
         <Row>

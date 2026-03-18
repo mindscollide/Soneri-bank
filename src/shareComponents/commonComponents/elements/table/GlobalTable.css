@@ -1556,53 +1556,6 @@ tr.OutStanding_Table-cell-scrollbar {
   background-color: #ffeeec !important;
 }
 
-/* Daily Trade Table */
-.DailyTrade-table {
-  /* max-height: 45vh !important; */
-  /* height: 45vh; */
-  /* max-width: 76vw; */
-  width: 100%;
-  box-sizing: border-box !important;
-  /* overflow-x: auto !important; */
-  border-radius: 0px !important;
-}
-
-.DailyTrade-table .ant-table-cell-scrollbar {
-  box-shadow: none !important;
-}
-
-.DailyTrade-table th.ant-table-cell {
-  color: #ffffff !important;
-  border-radius: 0% !important;
-  position: sticky !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  /* top: 0 !important; */
-  z-index: 10;
-  background: #f26522 !important;
-}
-
-.DailyTrade-table::-webkit-scrollbar {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 20px;
-  background-color: #ffffff;
-}
-
-.DailyTrade-table::-webkit-scrollbar-thumb {
-  border-radius: 20px;
-  background: #ccc;
-  margin-left: -15px;
-}
-
-.DailyTrade-table .ant-table-thead > tr > th {
-  height: 40px;
-  line-height: 30px;
-  padding: 0;
-  overflow: hidden !important;
-}
-
 /* Comapny List Table */
 .CompanyList-table {
   /* max-height: 45vh !important; */

@@ -9,6 +9,7 @@ import {
   ErrorFallback,
   logErrors,
 } from "../shareComponents/elements/errorBoundary/ErrorBoundary";
+import AllNews from "../modules/allNews";
 
 const withErrorBoundary = (element) => (
   <ErrorBoundary FallbackComponent={ErrorFallback} onError={logErrors}>
@@ -22,6 +23,11 @@ const loadRoutes = async () => {
     element: withErrorBoundary(<PrivateRoute element={<DashboardLayout />} />),
     children: [],
   };
+
+  dashboardRoute.children.push({
+    path: "allnews",
+    element: withErrorBoundary(<PrivateRoute element={<AllNews />} />),
+  });
 
   if (import.meta.env.VITE_APP_INCLUDE_TREASURY === "true") {
     const Interbank = (await import("../modules/interbank")).default;

@@ -1076,3 +1076,27 @@
   -ms-transition: all 0.3s ease-in !important;
   position: relative !important;
 }
+
+/* Start Clear Rates Publish Button Dealer Bit Button */
+.searchAllNews {
+  margin-left: 10px;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+  min-width: 120px;
+}
+.searchAllNews:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: 120px;
+}

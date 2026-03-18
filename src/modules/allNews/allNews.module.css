@@ -26,12 +26,11 @@
   cursor: pointer;
 }
 /* .searchRow {
-  border: 1px solid #dee2e6;
-  margin: 0;
-  padding: 10px 0;
-} */
+    border: 1px solid #dee2e6;
+    margin: 0;
+    padding: 10px 0;
+  } */
 .SearchBoxStyle {
-  width: 40%;
   font-family: "Helvetica", sans-serif !important;
   font-weight: 700 !important;
   padding: 5px 10px;
@@ -99,10 +98,56 @@
   z-index: 10;
 }
 .newsScrollArea {
-  max-height: 400px; /* adjust as needed */
+  max-height: 580px; /* adjust as needed */
   overflow-y: auto;
   border: 1px solid #ccc;
 }
 .headerRow {
   padding: 1rem 1rem !important;
+}
+
+.Tradecount-Datepicker-left {
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  border-top-left-radius: 6px !important;
+  border-bottom-left-radius: 6px !important;
+  border: 1px solid #ced4da;
+  width: 250px !important;
+  height: 37px !important;
+  font-size: 13px !important;
+  font-family: "Montserrat", sans-serif !important;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.Tradecount-Datepicker-left:is(:focus, :focus-visible) {
+  outline: none !important;
+}
+
+.Tradecount-date-to {
+  display: flex;
+  justify-content: center;
+  min-width: 35px;
+  height: 37px !important;
+  align-items: center !important;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+}
+
+.Tradecount-Datepicker-right {
+  border-top-left-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+  border-top-right-radius: 6px !important;
+  border-bottom-right-radius: 6px !important;
+  border: 1px solid #ced4da;
+  font-size: 13px !important;
+  width: 250px !important;
+  height: 37px !important;
+  font-family: "Montserrat", sans-serif !important;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.Tradecount-Datepicker-right:is(:focus, :focus-visible) {
+  outline: none !important;
 }

@@ -33,3 +33,6 @@
 .ProfileDropdown_menu {
   max-width: 20px !important;
 }
+.logoutDropdown {
+  z-index: 1000;
+}

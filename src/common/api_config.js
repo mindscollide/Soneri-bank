@@ -220,5 +220,5 @@ export const GetNewsHeadlines = {
 };
 
 export const GetNewsDetailsByID = {
-  RequestMethod: "ServiceManager.GetNewsDetailsByID",
+  RequestMethod: "ServiceManager.GetNewsDetails",
 };
