@@ -15,6 +15,7 @@ import {
   GetSwapsInUSDForTreasuryApi,
   GetUSDParityForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
+import News from "../../shareComponents/commonComponents/news";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -94,8 +95,10 @@ const Management = () => {
           </Suspense>
         </Col>
       </Row>
-      <Row>
-        <Col>News</Col>
+      <Row className="mt-2">
+        <Col>
+          <News />
+        </Col>
       </Row>
     </div>
   );

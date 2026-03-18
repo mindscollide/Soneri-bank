@@ -25,11 +25,7 @@
   color: var(--bs-link-hover-color);
   cursor: pointer;
 }
-/* .searchRow {
-  border: 1px solid #dee2e6;
-  margin: 0;
-  padding: 10px 0;
-} */
+
 .SearchBoxStyle {
   width: 40%;
   font-family: "Helvetica", sans-serif !important;
@@ -99,10 +95,42 @@
   z-index: 10;
 }
 .newsScrollArea {
-  max-height: 400px; /* adjust as needed */
+  max-height: 550px; /* adjust as needed */
   overflow-y: auto;
   border: 1px solid #ccc;
 }
-.headerRow {
+.mainContainer {
   padding: 1rem 1rem !important;
+  max-height: 70vh !important; /* adjust as needed */
+}
+.headerRow {
+  font-weight: 700 !important;
+  font-size: 20px !important;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  color: #0326b3;
+}
+
+.modalDateStyle {
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  color: #000000;
+}
+.modalTitle {
+  font-family: "Helvetica-Bold", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.25rem !important;
+  color: black;
+}
+.modalPersonName {
+  font-family: "Helvetica-Bold", sans-serif !important;
+  font-weight: 700 !important;
+  color: black;
+}
+.modalDetailWithScroll {
+  max-height: 40vh; /* adjust as needed */
+  overflow-y: auto;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  font-weight: 500;
 }

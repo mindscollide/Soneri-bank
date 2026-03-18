@@ -933,9 +933,15 @@ table.alt-row-highlight tr td.title-col,
   color: var(--color-secondary);
   font-family: "Helvetica-Bold", sans-serif;
 }
+
 .modal-body {
   padding-top: 5px;
   max-height: 60vh;
+  overflow: auto;
+}
+.newsModal {
+  padding-top: 5px;
+  max-height: 72vh !important;
   overflow: auto;
 }
 .form-control {

@@ -17,6 +17,11 @@ import CustomButton from "../../shareComponents/commonComponents/elements/global
 import { DatePicker, Input } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import {
+  convertUTCToDateTime,
+  formatToUTCString,
+} from "../../shareComponents/commonComponents/utils/timeFunction";
+import { clearGetNewsDetailsByID } from "../../store/slicers/watchListSlicer/WatchListSlicer";
 dayjs.extend(utc);
 
 const News = () => {
@@ -24,9 +29,9 @@ const News = () => {
 
   // Map icons to their source IDs
   const sourceIdMap = {
-    tresmark: 3,
-    dowjones: 4,
-    mint: 8,
+    mint: 3,
+    tresmark: 4,
+    dowjones: 8,
   };
 
   // Track each icon's state independently
@@ -35,7 +40,11 @@ const News = () => {
     dowjones: true,
     mint: true,
   });
-
+  const newsSourceIconMap = {
+    3: tresmarkImg,
+    4: tresmarkImg,
+    8: tresmarkImg,
+  };
   const [allNews, setAllNews] = useState({
     dateFrom: {
       value: null, // ✅ no default
@@ -57,6 +66,7 @@ const News = () => {
   const debounceRef = useRef(null);
   const scrollRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [newsById, setNewsById] = useState("");
 
   const GetNewsHeadlines = useSelector(
     (state) => state.WatchListReducer.GetNewsHeadlines
@@ -76,22 +86,23 @@ const News = () => {
     return activeIds;
   }, [activeStates]);
 
-  const formatToUTCString = (date, type) => {
-    if (!date) return "";
-
-    if (type === "start") {
-      return date.startOf("day").utc().format("YYYYMMDDHHmmss");
+  useEffect(() => {
+    setNewsById("");
+    setNewsByIdModal(false);
+    return () => {
+      dispatch(clearGetNewsDetailsByID());
+    };
+  }, []);
+  useEffect(() => {
+    if (GetNewsDetailsByID && GetNewsDetailsByID.newsDetail !== null) {
+      setNewsById(GetNewsDetailsByID.newsDetail);
+      setNewsByIdModal(true);
     }
+  }, [GetNewsDetailsByID]);
 
-    if (type === "end") {
-      return date.endOf("day").utc().format("YYYYMMDDHHmmss");
-    }
-
-    return date.utc().format("YYYYMMDDHHmmss");
-  };
-
-  const handleSearch = useCallback(
-    ({ searchText = searchVal, startRow = 0 } = {}) => {
+  // Function to fetch news with current filters
+  const fetchNews = useCallback(
+    (searchText = "", startRow = 0) => {
       const activeSourceIds = getActiveSourceIds();
 
       if (activeSourceIds.length === 0) {
@@ -104,23 +115,51 @@ const News = () => {
         length: 10,
         sRow: startRow,
         SearchText: searchText,
-        FromDate: formatToUTCString(allNews.dateFrom.value),
-        ToDate: formatToUTCString(allNews.dateTo.value),
+        FromDate: allNews?.dateFrom?.value
+          ? formatToUTCString(allNews.dateFrom.value)
+          : "",
+        ToDate: allNews?.dateTo?.value
+          ? formatToUTCString(allNews.dateTo.value)
+          : "",
       };
 
       dispatch(GetNewsHeadlinesApi({ Data }));
     },
-    [dispatch, getActiveSourceIds, searchVal, allNews]
+    [dispatch, getActiveSourceIds, allNews]
   );
+  // const handleSearch = useCallback(
+  //   ({ searchText = searchVal, startRow = 0 } = {}) => {
+  //     const activeSourceIds = getActiveSourceIds();
+
+  //     if (activeSourceIds.length === 0) {
+  //       setNewsList([]);
+  //       return;
+  //     }
+
+  //     const Data = {
+  //       NewsSourceIDs: activeSourceIds,
+  //       length: 10,
+  //       sRow: startRow,
+  //       SearchText: searchText,
+  //       FromDate: formatToUTCString(allNews.dateFrom.value),
+  //       ToDate: formatToUTCString(allNews.dateTo.value),
+  //     };
+
+  //     dispatch(GetNewsHeadlinesApi({ Data }));
+  //   },
+  //   [dispatch, getActiveSourceIds, searchVal, allNews]
+  // );
+
   // Refetch when active states change
+
   useEffect(() => {
     setNewsList([]);
     setSRow(0);
     setRecordLength(0);
     setIsLoading(false);
-
-    handleSearch({ searchText: searchVal, startRow: 0 });
+    fetchNews(searchVal, 0);
   }, [activeStates]);
+
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -178,12 +217,12 @@ const News = () => {
       debounceRef.current = setTimeout(() => {
         setNewsList([]);
         setSRow(0);
-        handleSearch({ searchText: value, startRow: 0 });
+        fetchNews(value, 0);
       }, 500);
     } else if (value.length === 0) {
       setNewsList([]);
       setSRow(0);
-      handleSearch({ searchText: value, startRow: 0 });
+      fetchNews("", 0);
     }
   };
 
@@ -195,9 +234,9 @@ const News = () => {
       }
 
       if (searchVal.length >= 3 || searchVal.length === 0) {
-        setNewsList([]);
-        setSRow(0);
-        handleSearch({ searchText: searchVal, startRow: 0 });
+        // setNewsList([]);
+        // setSRow(0);
+        fetchNews(searchVal);
       }
     }
   };
@@ -224,7 +263,6 @@ const News = () => {
   const groupedNews = groupNewsByDate(newsList);
 
   const handleClickNewsHeading = (newsID) => {
-    setNewsByIdModal(true);
     console.log("NewsID:", newsID);
     // API for Search News By Id
     const Data = { NewsID: Number(newsID) };
@@ -249,15 +287,15 @@ const News = () => {
           length: 10, // ✅ small l
           sRow: sRow,
           SearchText: searchVal,
-          FromDate: allNews.dateFrom.value
-            ? allNews.dateFrom.value.format("YYYY-MM-DD")
+          FromDate: allNews?.dateFrom?.value
+            ? formatToUTCString(allNews.dateFrom.value)
             : "",
-          ToDate: allNews.dateTo.value
-            ? allNews.dateTo.value.format("YYYY-MM-DD")
+          ToDate: allNews?.dateTo?.value
+            ? formatToUTCString(allNews.dateTo.value)
             : "",
         };
 
-        handleSearch({ startRow: sRow });
+        dispatch(GetNewsHeadlinesApi({ Data }));
       }
     },
     [
@@ -269,14 +307,8 @@ const News = () => {
       getActiveSourceIds,
       dispatch,
       allNews,
-      handleSearch,
     ]
   );
-  useEffect(() => {
-    if (GetNewsDetailsByID !== null) {
-      setNewsByIdModal(true);
-    }
-  }, [GetNewsDetailsByID]);
 
   const handleDateChange = (fieldName, date) => {
     setAllNews((prev) => ({
@@ -304,6 +336,12 @@ const News = () => {
         },
       }));
     }
+  };
+
+  const handleCloseModal = () => {
+    setNewsByIdModal(false);
+    setNewsById(""); // ✅ clear local state
+    dispatch(clearGetNewsDetailsByID()); // ✅ clear redux
   };
 
   return (
@@ -430,7 +468,7 @@ const News = () => {
               onClick={() => {
                 setNewsList([]);
                 setSRow(0);
-                handleSearch({ startRow: 0 });
+                fetchNews(searchVal, 0);
               }}
             />
           </Col>
@@ -484,16 +522,22 @@ const News = () => {
 
       <GlobalModal
         show={newsByIdModal}
+        size={"lg"}
         centered={true}
         footerClassName={"d-block border-0"}
-        bodyClassName={"b-0"}
-        onHide={() => setNewsByIdModal(false)}
+        bodyClassName={"newsModal"}
+        onHide={handleCloseModal}
+        // modalHeader={}
         modalBody={
           <div className={styles.mainContainer}>
-            <Row className={styles.headerRow}>
+            <Row>
               <Col sm={12} md={6} lg={6}>
-                <div className="color-blue fw-bold">News</div>
-                <span className="color-black fs-sm"> 18-Dec-2025 3:30 PM</span>
+                <div className={`${styles.headerRow}`}>News</div>
+                <span className={styles.modalDateStyle}>
+                  {newsById.createdOn
+                    ? convertUTCToDateTime(newsById.createdOn)
+                    : ""}
+                </span>
               </Col>
               <Col
                 sm={12}
@@ -502,23 +546,36 @@ const News = () => {
                 className="d-flex justify-content-end align-items-center"
               >
                 <div
-                  className="cursor-pointer"
-                  onClick={() => setNewsByIdModal(false)}
+                  className="cursor-pointer fw-bold"
+                  onClick={handleCloseModal}
                 >
                   X
                 </div>
               </Col>
             </Row>
-            <Row>
+            <Row className="mt-3">
+              <Col className="d-flex align-items-center gap-2">
+                <span>
+                  {newsById.newsSourceID && (
+                    <img
+                      src={newsSourceIconMap[newsById.newsSourceID]}
+                      alt="source"
+                      style={{ width: "40px", height: "40px" }}
+                    />
+                  )}
+                </span>
+                <span className={styles.modalTitle}>{newsById.headline}</span>
+              </Col>
+            </Row>
+
+            <Row className="mt-3">
               <Col
                 sm={12}
                 md={12}
                 lg={12}
-                className="d-flex justify-content-center"
+                className={styles.modalDetailWithScroll}
               >
-                <span className="modalDescription">
-                  Are you sure you want to delete it ?
-                </span>
+                {newsById.content}
               </Col>
             </Row>
           </div>

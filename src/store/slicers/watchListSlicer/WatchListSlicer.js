@@ -238,6 +238,9 @@ const WatchListSlice = createSlice({
     UpdateDealerDiscountingRates: (state) => {
       state.GetDiscountingRatesForDealer = null;
     },
+    clearGetNewsDetailsByID: (state) => {
+      state.GetNewsDetailsByID = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -1092,5 +1095,6 @@ export const {
   UpdatetDealerSpotRates,
   UpdateDealerForwardRates,
   UpdateDealerDiscountingRates,
+  clearGetNewsDetailsByID,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;

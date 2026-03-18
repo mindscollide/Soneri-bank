@@ -95,3 +95,62 @@ export const convertUTCToLocalDateWithToday = (timeStr) => {
 
   return localDate;
 };
+
+export function convertUTCToDateTime(input) {
+  const year = input.slice(0, 4);
+  const month = input.slice(4, 6);
+  const day = input.slice(6, 8);
+  const hour = input.slice(8, 10);
+  const minute = input.slice(10, 12);
+  const second = input.slice(12, 14);
+
+  // Create date object (months are 0-indexed in JS)
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+
+  // Month abbreviations
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  // Get components
+  const dayFormatted = day;
+  const monthFormatted = months[parseInt(month) - 1];
+  const yearFormatted = year;
+
+  // Format hour for 12-hour clock
+  let hourFormatted = parseInt(hour) % 12;
+  hourFormatted = hourFormatted === 0 ? 12 : hourFormatted; // Convert 0 to 12
+
+  // Format minute
+  const minuteFormatted = minute;
+
+  // Determine AM/PM
+  const ampm = parseInt(hour) >= 12 ? "PM" : "AM";
+
+  return `${dayFormatted}-${monthFormatted}-${yearFormatted} ${hourFormatted}:${minuteFormatted} ${ampm}`;
+}
+
+export const formatToUTCString = (date, type) => {
+  if (!date) return "";
+
+  if (type === "start") {
+    return date.startOf("day").utc().format("YYYYMMDDHHmmss");
+  }
+
+  if (type === "end") {
+    return date.endOf("day").utc().format("YYYYMMDDHHmmss");
+  }
+
+  return date.utc().format("YYYYMMDDHHmmss");
+};

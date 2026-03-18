@@ -6,6 +6,8 @@ import tresmarkIcon from "../../../assets/icons/tress-news.png";
 import dowjhonesIcon from "../../../assets/icons/dowjhones-news.png";
 import mintIcon from "../../../assets/icons/mint-news.png";
 import tresmarkImg from "../../../assets/img/tresmarkImg.png";
+// import tresmarkImg from "../../../assets/img/tresmarkImg.png";
+// import tresmarkImg from "../../../assets/img/tresmarkImg.png";
 import { formatDateTimeForNews } from "../../../utils/timeFunction";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,15 +15,23 @@ import {
   GetNewsHeadlinesApi,
 } from "../../../store/actions/WatchlistAction";
 import GlobalModal from "../elements/globalModal/Modal";
+import { convertUTCToDateTime } from "../utils/timeFunction";
+import { clearGetNewsDetailsByID } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 
 const News = () => {
   const dispatch = useDispatch();
 
   // Map icons to their source IDs
   const sourceIdMap = {
-    tresmark: 3,
-    dowjones: 4,
-    mint: 8,
+    mint: 3,
+    tresmark: 4,
+    dowjones: 8,
+  };
+
+  const newsSourceIconMap = {
+    3: tresmarkImg,
+    4: tresmarkImg,
+    8: tresmarkImg,
   };
 
   // Track each icon's state independently
@@ -39,12 +49,17 @@ const News = () => {
   const debounceRef = useRef(null);
   const scrollRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [newsById, setNewsById] = useState("");
 
+  // GlobalState
   const GetNewsHeadlines = useSelector(
     (state) => state.WatchListReducer.GetNewsHeadlines
   );
   const GetNewsDetailsByID = useSelector(
     (state) => state.WatchListReducer.GetNewsDetailsByID
+  );
+  const realTimeNewsFeed = useSelector(
+    (state) => state.RealtimeActionsSlice.realTimeNewsFeed
   );
 
   // Function to get active source IDs based on active states
@@ -57,6 +72,21 @@ const News = () => {
 
     return activeIds;
   }, [activeStates]);
+
+  useEffect(() => {
+    setNewsById("");
+    setNewsByIdModal(false);
+    return () => {
+      dispatch(clearGetNewsDetailsByID());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (GetNewsDetailsByID && GetNewsDetailsByID.newsDetail !== null) {
+      setNewsById(GetNewsDetailsByID.newsDetail);
+      setNewsByIdModal(true);
+    }
+  }, [GetNewsDetailsByID]);
 
   // Function to fetch news with current filters
   const fetchNews = useCallback(
@@ -88,7 +118,6 @@ const News = () => {
     setSRow(0);
     setRecordLength(0);
     setIsLoading(false);
-
     fetchNews(searchVal, 0);
   }, [activeStates]);
 
@@ -193,13 +222,12 @@ const News = () => {
   const groupedNews = groupNewsByDate(newsList);
 
   const handleClickNewsHeading = (newsID) => {
-    setNewsByIdModal(true);
-    console.log("NewsID:", newsID);
     // API for Search News By Id
     const Data = { NewsID: Number(newsID) };
     dispatch(GetNewsDetailsByIDApi({ Data }));
   };
 
+  console.log(newsById, "setNewsByIdModalsetNewsByIdModal");
   const handleScroll = useCallback(
     (e) => {
       const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -235,15 +263,44 @@ const News = () => {
       dispatch,
     ]
   );
-  useEffect(() => {
-    if (GetNewsDetailsByID !== null) {
-      setNewsByIdModal(true);
-    }
-  }, [GetNewsDetailsByID]);
+
   const handleClickViewAll = () => {
     window.open("/SONERI/allnews", "_blank");
   };
 
+  const handleCloseModal = () => {
+    setNewsByIdModal(false);
+    setNewsById(""); // ✅ clear local state
+    dispatch(clearGetNewsDetailsByID()); // ✅ clear redux
+  };
+
+  // Realtime work
+  useEffect(() => {
+    if (realTimeNewsFeed?.News) {
+      const incomingNews = realTimeNewsFeed.News;
+
+      setNewsList((prev) => {
+        // ❌ جلوگیری از duplicate
+        const alreadyExists = prev.some(
+          (item) => item.newsID === incomingNews.NewsID
+        );
+
+        if (alreadyExists) return prev;
+
+        // ✅ normalize incoming structure to match your UI
+        const formattedNews = {
+          newsID: incomingNews.NewsID,
+          newsSourceID: incomingNews.NewsSourceID,
+          headline: incomingNews.Headline,
+          content: incomingNews.Content,
+          newsDateTime: incomingNews.NewsDateTime,
+        };
+
+        // ✅ add on top
+        return [formattedNews, ...prev];
+      });
+    }
+  }, [realTimeNewsFeed]);
   return (
     <>
       <div className={styles.mainNewsContainer}>
@@ -365,16 +422,22 @@ const News = () => {
 
       <GlobalModal
         show={newsByIdModal}
+        onHide={handleCloseModal}
+        size={"lg"}
         centered={true}
         footerClassName={"d-block border-0"}
-        bodyClassName={"b-0"}
-        onHide={() => setNewsByIdModal(false)}
+        bodyClassName={"newsModal"}
+        // modalHeader={}
         modalBody={
           <div className={styles.mainContainer}>
-            <Row className={styles.headerRow}>
+            <Row>
               <Col sm={12} md={6} lg={6}>
-                <div className="color-blue fw-bold">News</div>
-                <span className="color-black fs-sm"> 18-Dec-2025 3:30 PM</span>
+                <div className={`${styles.headerRow}`}>News</div>
+                <span className={styles.modalDateStyle}>
+                  {newsById.createdOn
+                    ? convertUTCToDateTime(newsById.createdOn)
+                    : ""}
+                </span>
               </Col>
               <Col
                 sm={12}
@@ -383,23 +446,35 @@ const News = () => {
                 className="d-flex justify-content-end align-items-center"
               >
                 <div
-                  className="cursor-pointer"
-                  onClick={() => setNewsByIdModal(false)}
+                  className="cursor-pointer fw-bold"
+                  onClick={handleCloseModal}
                 >
                   X
                 </div>
               </Col>
             </Row>
-            <Row>
+            <Row className="mt-3">
+              <Col className="d-flex align-items-center gap-2">
+                <span>
+                  {newsById.newsSourceID && (
+                    <img
+                      src={newsSourceIconMap[newsById.newsSourceID]}
+                      alt="source"
+                      style={{ width: "40px", height: "40px" }}
+                    />
+                  )}
+                </span>
+                <span className={styles.modalTitle}>{newsById.headline}</span>
+              </Col>
+            </Row>
+            <Row className="mt-3">
               <Col
                 sm={12}
                 md={12}
                 lg={12}
-                className="d-flex justify-content-center"
+                className={styles.modalDetailWithScroll}
               >
-                <span className="modalDescription">
-                  Are you sure you want to delete it ?
-                </span>
+                {newsById.content}
               </Col>
             </Row>
           </div>

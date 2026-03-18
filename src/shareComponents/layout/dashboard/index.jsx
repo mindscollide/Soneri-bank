@@ -41,6 +41,7 @@ import {
   setFxTradingCards,
   setKiborForManagmentFeed,
   setMarketTimingsUpdated,
+  setRealTimeNewsFeed,
   setSbpFXRevalRatesForManagmentFeed,
   setSofrForManagmentFeed,
   setSpreadsForSingleUser,
@@ -325,6 +326,13 @@ const Dashboard = () => {
           });
           break;
 
+        case "REAL_TIME_NEWS_FEED":
+          console.log("REAL_TIME_NEWS_FEED");
+          startTransition(() => {
+            dispatch(setRealTimeNewsFeed(payload));
+          });
+          break;
+
         //
 
         default:
@@ -501,16 +509,23 @@ const Dashboard = () => {
 
     //make isTreasuryCommented
     if (location.pathname.toLowerCase().includes("treasury".toLowerCase())) {
-      subscribeToTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
+      subscribeToTopics([
+        "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
+        "REAL_TIME_FEED_NEWS",
+      ]);
       if (marketStatus) {
         // Subscribe only when status is true AND path is treasury
         subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
         // console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
       }
+    }
+    if (location.pathname.toLowerCase().includes("allnews".toLowerCase())) {
+      subscribeToTopics(["REAL_TIME_FEED_NEWS"]);
     } else {
       unsubscribeFromTopics([
         "SBL_REAL_TIME_FEED_TREASURY",
         "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
+        "REAL_TIME_FEED_NEWS",
       ]);
     }
   }, [location.pathname, isConnected, marketStatus]);

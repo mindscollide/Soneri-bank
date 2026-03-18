@@ -93,6 +93,7 @@ const RealtimeActionsSlice = createSlice({
     treasuryRateSheetSofr: null,
     treasuryRateSheetIndicativeFBPRates: null,
     currentRateSheetRatesPublished: null,
+    realTimeNewsFeed: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -350,6 +351,9 @@ const RealtimeActionsSlice = createSlice({
     setCurrentRateSheetRatesPublished: (state, { payload }) => {
       state.currentRateSheetRatesPublished = { ...payload };
     },
+    setRealTimeNewsFeed: (state, { payload }) => {
+      state.realTimeNewsFeed = { ...payload };
+    },
   },
 });
 
@@ -434,6 +438,7 @@ export const {
   setTreasuryRateSheetSofr,
   setTreasuryRateSheetIndicativeFBPRates,
   setCurrentRateSheetRatesPublished,
+  setRealTimeNewsFeed,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;
