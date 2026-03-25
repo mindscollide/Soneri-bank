@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useRef } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useRef } from "react";
 import styles from "./management.module.css";
 import { Col, Row } from "react-bootstrap";
 import { useDispatch } from "react-redux";
@@ -15,7 +15,7 @@ import {
   GetSwapsInUSDForTreasuryApi,
   GetUSDParityForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
-import News from "../../shareComponents/commonComponents/news";
+import { IsolatedBlock } from "../../shareComponents/commonComponents/utils/isolateBlock";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -25,7 +25,7 @@ const SBPFXRevalRates = lazy(() => import("./sbpFxRevalRates/index"));
 const SOFR = lazy(() => import("./sofr/index"));
 const StockIndices = lazy(() => import("./stockIndices/index"));
 const SwapsInUSD = lazy(() => import("./swapsInUSD/index"));
-
+const News = lazy(() => import("../../shareComponents/commonComponents/news"));
 const Management = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -45,63 +45,89 @@ const Management = () => {
     dispatch(GetRevalRatesForTreasuryApi({ navigate }));
     dispatch(GetSwapsInUSDForTreasuryApi({ navigate }));
   }, []);
-  return (
-    <div className={styles.managementWrapper}>
-      <Row>
-        <Col sm={12} md={6} lg={6} className="pe-0">
-          <Suspense fallback={<>...Loading</>}>
-            <USDParityComponent />
-          </Suspense>
-        </Col>
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={<>...Loading</>}>
-            <CurrencyCrosses />
-          </Suspense>
-        </Col>
-      </Row>
-      <Row className="mt-3">
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={<>...Loading</>}>
-            <Commodities />
-          </Suspense>
-        </Col>
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={<>...Loading</>}>
-            <StockIndices />
-          </Suspense>
-        </Col>
-      </Row>
-      <Row className="mt-3">
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={<>...Loading</>}>
-            <KIBOR />
-          </Suspense>
-        </Col>
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={"...Loading"}>
-            <SOFR />
-          </Suspense>
-        </Col>
-      </Row>
-      <Row className="mt-3">
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={<>...Loading</>}>
-            <SBPFXRevalRates />
-          </Suspense>
-        </Col>
-        <Col sm={12} md={6} lg={6}>
-          <Suspense fallback={<>...Loading</>}>
-            <SwapsInUSD />
-          </Suspense>
-        </Col>
-      </Row>
-      <Row className="mt-2">
-        <Col>
-          <News />
-        </Col>
-      </Row>
-    </div>
+
+  const layout = useMemo(
+    () => (
+      <div className={styles.managementWrapper}>
+        <Row>
+          <Col sm={12} md={6} lg={6} className="pe-0">
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <USDParityComponent />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <CurrencyCrosses />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+        </Row>
+        <Row className="mt-3">
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <Commodities />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <StockIndices />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+        </Row>
+        <Row className="mt-3">
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <KIBOR />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <SOFR />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+        </Row>
+        <Row className="mt-3">
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <SBPFXRevalRates />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+          <Col sm={12} md={6} lg={6}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <SwapsInUSD />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+        </Row>
+        <Row className="mt-2">
+          <Col sm={12} md={12} lg={12}>
+            <IsolatedBlock>
+              <Suspense fallback={<>...Loading</>}>
+                <SwapsInUSD />
+                <News />
+              </Suspense>
+            </IsolatedBlock>
+          </Col>
+        </Row>
+      </div>
+    ),
+    []
   );
+  return layout;
 };
 
 export default Management;

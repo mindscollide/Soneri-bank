@@ -176,16 +176,14 @@ const RealtimeActionsSlice = createSlice({
     },
     setTreasurySpotRatesFeed: (state, { payload }) => {
       // if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
-      state.TreasurySpotRatesFeed = { ...payload };
+      state.TreasurySpotRatesFeed = payload;
       // }
     },
     setDealerSpotRatesFeed: (state, { payload }) => {
       state.DealerSpotRatesFeed = payload;
     },
     setCurrencyCrossesRatesFeed: (state, { payload }) => {
-      if (!isEqual(state.CurrencyCrossesRatesFeed, payload)) {
-        state.CurrencyCrossesRatesFeed = payload;
-      }
+      state.CurrencyCrossesRatesFeed = payload;
     },
     setDealBoxData(state, { payload }) {
       state.dealBoxData = payload;
@@ -304,55 +302,55 @@ const RealtimeActionsSlice = createSlice({
       state.dealerForwardTenorChanged = payload;
     },
     setUSDParityForManagementFeed: (state, { payload }) => {
-      state.usdParityForManagmentFeed = { ...payload };
+      state.usdParityForManagmentFeed = payload;
     },
     setCurrencyCrossesForManagementFeed: (state, { payload }) => {
-      state.currencyCrossesForManagmentFeed = { ...payload };
+      state.currencyCrossesForManagmentFeed = payload;
     },
 
     setCommoditiesForManagmentFeed: (state, { payload }) => {
-      state.commoditiesForManagementFeed = { ...payload };
+      state.commoditiesForManagementFeed = payload;
     },
     setStockIndicesForManagmentFeed: (state, { payload }) => {
-      state.stockIndicesForManagementFeed = { ...payload };
+      state.stockIndicesForManagementFeed = payload;
     },
 
     setKiborForManagmentFeed: (state, { payload }) => {
-      state.kiborForManagementFeed = { ...payload };
+      state.kiborForManagementFeed = payload;
     },
     setSofrForManagmentFeed: (state, { payload }) => {
-      state.sofrForManagementFeed = { ...payload };
+      state.sofrForManagementFeed = payload;
     },
     setSbpFXRevalRatesForManagmentFeed: (state, { payload }) => {
-      state.sbpFXRevalRatesForManagementFeed = { ...payload };
+      state.sbpFXRevalRatesForManagementFeed = payload;
     },
     setSwapsinUSDForManagementFeed: (state, { payload }) => {
-      state.swapsinUSDForManagementFeed = { ...payload };
+      state.swapsinUSDForManagementFeed = payload;
     },
     setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
-      state.treasuryRateSheetSpotTTRates = { ...payload };
+      state.treasuryRateSheetSpotTTRates = payload;
     },
     setTreasuryRateSheetCurrencyNotes: (state, { payload }) => {
-      state.treasuryRateSheetCurrencyNotes = { ...payload };
+      state.treasuryRateSheetCurrencyNotes = payload;
     },
 
     setTreasuryRateSheetConversionRate: (state, { payload }) => {
-      state.treasuryRateSheetConversionRate = { ...payload };
+      state.treasuryRateSheetConversionRate = payload;
     },
     setTreasuryRateSheetKibor: (state, { payload }) => {
-      state.treasuryRateSheetKibor = { ...payload };
+      state.treasuryRateSheetKibor = payload;
     },
     setTreasuryRateSheetSofr: (state, { payload }) => {
-      state.treasuryRateSheetSofr = { ...payload };
+      state.treasuryRateSheetSofr = payload;
     },
     setTreasuryRateSheetIndicativeFBPRates: (state, { payload }) => {
-      state.treasuryRateSheetIndicativeFBPRates = { ...payload };
+      state.treasuryRateSheetIndicativeFBPRates = payload;
     },
     setCurrentRateSheetRatesPublished: (state, { payload }) => {
-      state.currentRateSheetRatesPublished = { ...payload };
+      state.currentRateSheetRatesPublished = payload;
     },
     setRealTimeNewsFeed: (state, { payload }) => {
-      state.realTimeNewsFeed = { ...payload };
+      state.realTimeNewsFeed = payload;
     },
   },
 });

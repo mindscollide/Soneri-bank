@@ -122,221 +122,229 @@ const Dashboard = () => {
       const payload = data?.payload;
       // const type = data?.message; // ✅ FIX
       // const payload = data;
+      if (type === "TREASURY_MANAGEMENT_KIBOR") {
+        console.log({ data, payload, type }, "handleMqttMessage");
+      }
+      try {
+        switch (type) {
+          case "MARKET_STATUS_UPDATED":
+            console.log("MARKET_STATUS_UPDATED", payload);
 
-      // console.log({ data, payload, type }, "handleMqttMessage");
+            dispatch(marketStatusUpdated(payload?.marketStatus?.isMarketOn));
+            dispatch(setMarketStatus(payload?.marketStatus?.isMarketOn));
+            break;
 
-      switch (type) {
-        case "MARKET_STATUS_UPDATED":
-          console.log("MARKET_STATUS_UPDATED", payload);
+          // ✅ USD, FE, NONFE (wrap in startTransition for smoothness)
+          case "CURRENT_USD_RATES_PUBLISHED":
+            console.log("CURRENT_USD_RATES_PUBLISHED_TEST");
+            startTransition(() => {
+              dispatch(currentRatePublishedAction(payload));
+            });
+            break;
 
-          dispatch(marketStatusUpdated(payload?.marketStatus?.isMarketOn));
-          dispatch(setMarketStatus(payload?.marketStatus?.isMarketOn));
-          break;
+          case "FE_DISCOUNTING_RATES_PUBLISHED":
+            startTransition(() => {
+              dispatch(FeDiscountingPublishedAction(payload));
+            });
+            break;
+          case "NONFE_DISCOUNTING_RATES_PUBLISHED":
+            startTransition(() => {
+              dispatch(NonFeDiscountingPublishedAction(payload));
+            });
+            break;
+          case "TENOR_WISE_FORWARD_RATES_PUBLISHED":
+            startTransition(() => {
+              dispatch(tenorWiseFowardsRatesPublishedActions(payload));
 
-        // ✅ USD, FE, NONFE (wrap in startTransition for smoothness)
-        case "CURRENT_USD_RATES_PUBLISHED":
-          console.log("CURRENT_USD_RATES_PUBLISHED_TEST");
-          startTransition(() => {
-            dispatch(currentRatePublishedAction(payload));
-          });
-          break;
+              let tenorsData = {
+                newIsForwardtenorList:
+                  payload.tenorWiseForwardRates.newIsForwardtenorList,
+                removedtenorList:
+                  payload.tenorWiseForwardRates.removedtenorList,
+                updateTenorsDays:
+                  payload.tenorWiseForwardRates.updatedTenorDaysList,
+              };
 
-        case "FE_DISCOUNTING_RATES_PUBLISHED":
-          startTransition(() => {
-            dispatch(FeDiscountingPublishedAction(payload));
-          });
-          break;
-        case "NONFE_DISCOUNTING_RATES_PUBLISHED":
-          startTransition(() => {
-            dispatch(NonFeDiscountingPublishedAction(payload));
-          });
-          break;
-        case "TENOR_WISE_FORWARD_RATES_PUBLISHED":
-          startTransition(() => {
-            dispatch(tenorWiseFowardsRatesPublishedActions(payload));
+              dispatch(setCategoryFowardsTenorsChanges(tenorsData));
+              dispatch(setTreasuryFowardsTenorsChanges(tenorsData));
+              dispatch(setDealerForwardTenorChanged(tenorsData));
+            });
+            break;
+          // ✅ Market & Tenor
+          case "TENOR_CREATED":
+            dispatch(setTenorsCreated(payload));
+            break;
+          case "RATES_CLEAR":
+            dispatch(setClearRates(payload));
+            break;
+          // ✅ Spot/Forward rates — wrap in transition
+          case "DISPATCHER_DEALER_SPOT_RATES":
+            startTransition(() => {
+              dispatch(setDealerSpotRatesFeed(payload));
+            });
+            break;
+          case "TREASURY_CURRENCY_CROSS_FEED":
+            startTransition(() => {
+              dispatch(setCurrencyCrossesRatesFeed(payload));
+            });
+            break;
+          case "TREASURY_SPOT_RATES_FEED":
+            startTransition(() => {
+              dispatch(setTreasurySpotRatesFeed(payload));
+            });
+            break;
+          case "TREASURY_FORWARD_RATES_FEED":
+            startTransition(() => {
+              dispatch(setTreasuryForwardRates(payload));
+            });
+            break;
+          case "TREASURY_DEALER_FORWARD_RATES_FEED":
+            // Dealer Forward will handle there
+            startTransition(() => {
+              dispatch(setTreasuryDealerForwardRates(payload));
+            });
+            break;
 
-            let tenorsData = {
-              newIsForwardtenorList:
-                payload.tenorWiseForwardRates.newIsForwardtenorList,
-              removedtenorList: payload.tenorWiseForwardRates.removedtenorList,
-              updateTenorsDays:
-                payload.tenorWiseForwardRates.updatedTenorDaysList,
-            };
+          case "TREASURY_DEALER_FEDISCOUNTING_RATES_FEED":
+            // Dealer Fe Discounting will handle there
+            startTransition(() => {
+              dispatch(setTreasuryDealerFeDiscounting(payload));
+            });
+            break;
 
-            dispatch(setCategoryFowardsTenorsChanges(tenorsData));
-            dispatch(setTreasuryFowardsTenorsChanges(tenorsData));
-            dispatch(setDealerForwardTenorChanged(tenorsData));
-          });
-          break;
-        // ✅ Market & Tenor
-        case "TENOR_CREATED":
-          dispatch(setTenorsCreated(payload));
-          break;
-        case "RATES_CLEAR":
-          dispatch(setClearRates(payload));
-          break;
-        // ✅ Spot/Forward rates — wrap in transition
-        case "DISPATCHER_DEALER_SPOT_RATES":
-          startTransition(() => {
-            dispatch(setDealerSpotRatesFeed(payload));
-          });
-          break;
-        case "TREASURY_CURRENCY_CROSS_FEED":
-          startTransition(() => {
-            dispatch(setCurrencyCrossesRatesFeed(payload));
-          });
-          break;
-        case "TREASURY_SPOT_RATES_FEED":
-          startTransition(() => {
-            dispatch(setTreasurySpotRatesFeed(payload));
-          });
-          break;
-        case "TREASURY_FORWARD_RATES_FEED":
-          startTransition(() => {
-            dispatch(setTreasuryForwardRates(payload));
-          });
-          break;
-        case "TREASURY_DEALER_FORWARD_RATES_FEED":
-          // Dealer Forward will handle there
-          startTransition(() => {
-            dispatch(setTreasuryDealerForwardRates(payload));
-          });
-          break;
+          case "TREASURY_DEALER_NONFEDISCOUNTING_RATES_FEED":
+            // Dealer Non - Fe Discounting will handle there
+            startTransition(() => {
+              dispatch(setTreasuryDealerNonFeDiscounting(payload));
+            });
+            break;
 
-        case "TREASURY_DEALER_FEDISCOUNTING_RATES_FEED":
-          // Dealer Fe Discounting will handle there
-          startTransition(() => {
-            dispatch(setTreasuryDealerFeDiscounting(payload));
-          });
-          break;
+          case "TREASURY_FEDISCOUNTING_RATES_FEED":
+            startTransition(() => {
+              dispatch(setTreasuryFeDiscounting(payload));
+            });
+            break;
 
-        case "TREASURY_DEALER_NONFEDISCOUNTING_RATES_FEED":
-          // Dealer Non - Fe Discounting will handle there
-          startTransition(() => {
-            dispatch(setTreasuryDealerNonFeDiscounting(payload));
-          });
-          break;
+          case "TREASURY_NONFEDISCOUNTING_RATES_FEED":
+            startTransition(() => {
+              dispatch(setTreasuryNonFeDiscounting(payload));
+            });
+            break;
+          case "CURRENT_RATE_SHEET_RATES_PUBLISHED":
+            // startTransition(dispatch(setSpreadsForSingleUser(payload)));
+            console.log("CURRENT_RATE_SHEET_RATES_PUBLISHED");
+            startTransition(() => {
+              dispatch(setCurrentRateSheetRatesPublished(payload));
+            });
+            break;
 
-        case "TREASURY_FEDISCOUNTING_RATES_FEED":
-          startTransition(() => {
-            dispatch(setTreasuryFeDiscounting(payload));
-          });
-          break;
+          case "TREASURY_USD_PARITY_FEED":
+            startTransition(() => {
+              dispatch(setUSDParityForManagementFeed(payload));
+            });
+            break;
+          case "TREASURY_CURRENCY_CROSSES_FEED":
+            startTransition(() => {
+              dispatch(setCurrencyCrossesForManagementFeed(payload));
+            });
+            break;
+          case "TREASURY_CROSSES_PREMIUMS_RATES":
+            startTransition(() => {
+              // dispatch(setUSDParityForManagementFeed(payload));
+            });
+            break;
 
-        case "TREASURY_NONFEDISCOUNTING_RATES_FEED":
-          startTransition(() => {
-            dispatch(setTreasuryNonFeDiscounting(payload));
-          });
-          break;
-        case "CURRENT_RATE_SHEET_RATES_PUBLISHED":
-          // startTransition(dispatch(setSpreadsForSingleUser(payload)));
-          console.log("CURRENT_RATE_SHEET_RATES_PUBLISHED");
-          startTransition(() => {
-            dispatch(setCurrentRateSheetRatesPublished(payload));
-          });
-          break;
+          case "TREASURY_COMMODITIES_FEED":
+            startTransition(() => {
+              dispatch(setCommoditiesForManagmentFeed(payload));
+            });
+            break;
 
-        case "TREASURY_USD_PARITY_FEED":
-          startTransition(() => {
-            dispatch(setUSDParityForManagementFeed(payload));
-          });
-          break;
-        case "TREASURY_CURRENCY_CROSSES_FEED":
-          startTransition(() => {
-            dispatch(setCurrencyCrossesForManagementFeed(payload));
-          });
-          break;
-        case "TREASURY_CROSSES_PREMIUMS_RATES":
-          startTransition(() => {
-            // dispatch(setUSDParityForManagementFeed(payload));
-          });
-          break;
+          case "TREASURY_STOCK_INDICES_FEED":
+            startTransition(() => {
+              dispatch(setStockIndicesForManagmentFeed(payload));
+            });
+            break;
+          case "TREASURY_MANAGEMENT_KIBOR":
+            console.log("TREASURY_MANAGEMENT_KIBOR_Received");
+            startTransition(() => {
+              dispatch(setKiborForManagmentFeed(payload));
+            });
+            break;
 
-        case "TREASURY_COMMODITIES_FEED":
-          startTransition(() => {
-            dispatch(setCommoditiesForManagmentFeed(payload));
-          });
-          break;
+          case "TREASURY_MANAGEMENT_SOFR":
+            startTransition(() => {
+              dispatch(setSofrForManagmentFeed(payload));
+            });
+            break;
 
-        case "TREASURY_STOCK_INDICES_FEED":
-          startTransition(() => {
-            dispatch(setStockIndicesForManagmentFeed(payload));
-          });
-          break;
-        case "TREASURY_MANAGEMENT_KIBOR":
-          startTransition(() => {
-            dispatch(setKiborForManagmentFeed(payload));
-          });
-          break;
+          case "TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES":
+            console.log("TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES_Received");
 
-        case "TREASURY_MANAGEMENT_SOFR":
-          startTransition(() => {
-            dispatch(setSofrForManagmentFeed(payload));
-          });
-          break;
+            startTransition(() => {
+              dispatch(setSbpFXRevalRatesForManagmentFeed(payload));
+            });
+            break;
+          case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
+            startTransition(() => {
+              dispatch(setSwapsinUSDForManagementFeed(payload));
+            });
+            break;
+          case "TREASURY_RATE_SHEET_SPOT_TT_RATES":
+            // console.log("TREASURY_RATE_SHEET_SPOT_TT_RATES");
+            startTransition(() => {
+              dispatch(setTreasuryRateSheetSpotTTRates(payload));
+            });
+            break;
+          case "TREASURY_RATE_SHEET_CURRENCY_NOTES":
+            // console.log("TREASURY_RATE_SHEET_CURRENCY_NOTES");
+            startTransition(() => {
+              dispatch(setTreasuryRateSheetCurrencyNotes(payload));
+            });
+            break;
 
-        case "TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES":
-          startTransition(() => {
-            dispatch(setSbpFXRevalRatesForManagmentFeed(payload));
-          });
-          break;
-        case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
-          startTransition(() => {
-            dispatch(setSwapsinUSDForManagementFeed(payload));
-          });
-          break;
-        case "TREASURY_RATE_SHEET_SPOT_TT_RATES":
-          // console.log("TREASURY_RATE_SHEET_SPOT_TT_RATES");
-          startTransition(() => {
-            dispatch(setTreasuryRateSheetSpotTTRates(payload));
-          });
-          break;
-        case "TREASURY_RATE_SHEET_CURRENCY_NOTES":
-          // console.log("TREASURY_RATE_SHEET_CURRENCY_NOTES");
-          startTransition(() => {
-            dispatch(setTreasuryRateSheetCurrencyNotes(payload));
-          });
-          break;
+          case "TREASURY_RATE_SHEET_CONVERSION_RATE":
+            console.log("TREASURY_RATE_SHEET_CONVERSION_RATE");
+            startTransition(() => {
+              dispatch(setTreasuryRateSheetConversionRate(payload));
+            });
+            break;
 
-        case "TREASURY_RATE_SHEET_CONVERSION_RATE":
-          console.log("TREASURY_RATE_SHEET_CONVERSION_RATE");
-          startTransition(() => {
-            dispatch(setTreasuryRateSheetConversionRate(payload));
-          });
-          break;
+          case "TREASURY_RATE_SHEET_KIBOR":
+            console.log("TREASURY_RATE_SHEET_KIBOR FBP Rates");
+            startTransition(() => {
+              dispatch(setTreasuryRateSheetKibor(payload));
+            });
+            break;
 
-        case "TREASURY_RATE_SHEET_KIBOR":
-          console.log("TREASURY_RATE_SHEET_KIBOR FBP Rates");
-          startTransition(() => {
-            dispatch(setTreasuryRateSheetKibor(payload));
-          });
-          break;
+          case "TREASURY_RATE_SHEET_SOFR":
+            console.log("TREASURY_RATE_SHEET_SOFR");
+            startTransition(() => {
+              dispatch(setTreasuryRateSheetSofr(payload));
+            });
+            break;
 
-        case "TREASURY_RATE_SHEET_SOFR":
-          console.log("TREASURY_RATE_SHEET_SOFR");
-          startTransition(() => {
-            dispatch(setTreasuryRateSheetSofr(payload));
-          });
-          break;
+          case "TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES":
+            console.log("TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES");
+            startTransition(() => {
+              dispatch(setTreasuryRateSheetIndicativeFBPRates(payload));
+            });
+            break;
 
-        case "TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES":
-          console.log("TREASURY_RATE_SHEET_INDICATIVE_FBP_RATES");
-          startTransition(() => {
-            dispatch(setTreasuryRateSheetIndicativeFBPRates(payload));
-          });
-          break;
+          case "REAL_TIME_NEWS_FEED":
+            console.log("REAL_TIME_NEWS_FEED");
+            startTransition(() => {
+              dispatch(setRealTimeNewsFeed(payload));
+            });
+            break;
 
-        case "REAL_TIME_NEWS_FEED":
-          console.log("REAL_TIME_NEWS_FEED");
-          startTransition(() => {
-            dispatch(setRealTimeNewsFeed(payload));
-          });
-          break;
+          //
 
-        //
-
-        default:
-          console.warn("No specific handler for this message type", payload);
+          default:
+            console.warn("No specific handler for this message type", payload);
+        }
+      } catch (error) {
+        console.error(error);
       }
     },
     [dispatch]
@@ -439,6 +447,8 @@ const Dashboard = () => {
       .toLowerCase()
       .includes("management");
 
+    const isTreasuryPath = location.pathname.toLowerCase().includes("treasury");
+
     // Condition for Dealer user when Logged in
     if (isDealerPath && isDealer && isConnected) {
       // console.log("reaced here");
@@ -459,6 +469,13 @@ const Dashboard = () => {
     // Management Work
     if (isManagementPath && isConnected) {
       subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
+      console.log("SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
+    }
+    // Treasury Work
+    if (isTreasuryPath && isConnected) {
+      console.log("in treasury path");
+      subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
+      console.log("SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
     }
     // ❌ If ANY required condition fails → unsubscribe
     if (

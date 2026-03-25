@@ -20,6 +20,8 @@ const SBPFXRevalRates = memo(() => {
   const [processedData, setProcessedData] = useState([]);
   const [latestDate, setLatestDate] = useState("");
 
+  console.log(fullFeed, "fullFeedRevalRaters");
+
   const getUniqueTenors = (data) => {
     const tenorMap = new Map();
 
@@ -121,6 +123,7 @@ const SBPFXRevalRates = memo(() => {
 
   useEffect(() => {
     if (fullFeed && fullFeed.revalRates) {
+      console.log(fullFeed, "fullFeedfullFeedRevalRates");
       const { currency, tenorId, value } = fullFeed.revalRates;
 
       setProcessedData((prev) =>

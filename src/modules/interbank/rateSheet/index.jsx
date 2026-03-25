@@ -538,7 +538,7 @@ const RateSheet = () => {
                         dispatch(
                           PublishCurrentUSDRateSheetAction({ Data, navigate })
                         );
-                        dispatch(publishedSpotRateSheet(false));
+                        dispatch(setPublishedSpotRateSheet(false));
                       }}
                     />
                     <CustomButton

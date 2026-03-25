@@ -175,8 +175,10 @@ const RateSheet = () => {
         </Row>
         <Row className="mt-3 mb-3">
           <Col sm={12} md={12} lg={12} className={styles.importantNote}>
-            <div class="fw-bold text-decoration-underline">IMPORTANT NOTE:</div>
-            <ul class="color-red">
+            <div className="fw-bold text-decoration-underline">
+              IMPORTANT NOTE:
+            </div>
+            <ul className="color-red">
               <li>
                 THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE
                 WITHOUT PRIOR NOTICE.

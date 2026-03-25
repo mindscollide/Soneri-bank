@@ -3,8 +3,10 @@ import { Col, Row } from "react-bootstrap";
 import styles from "./allNews.module.css";
 import tresmarkIcon from "../../assets/icons/tress-news.png";
 import dowjhonesIcon from "../../assets/icons/dowjhones-news.png";
-import mintIcon from "../../assets/icons/mint-news.png";
+import cnbcIcon from "../../assets/icons/cnbc-news.png";
 import tresmarkImg from "../../assets/img/tresmarkImg.png";
+import cnbcImg from "../../assets/img/cnbcImg.png";
+import dowjonesImg from "../../assets/img/dowjonesImg.png";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetNewsDetailsByIDApi,
@@ -13,7 +15,6 @@ import {
 import { formatDateTimeForNews } from "../../utils/timeFunction";
 import GlobalModal from "../../shareComponents/commonComponents/elements/globalModal/Modal";
 import CustomButton from "../../shareComponents/commonComponents/elements/globalButton/button";
-// import DatePicker from "react-multi-date-picker";
 import { DatePicker, Input } from "antd";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -29,7 +30,7 @@ const News = () => {
 
   // Map icons to their source IDs
   const sourceIdMap = {
-    mint: 3,
+    cnbc: 3,
     tresmark: 4,
     dowjones: 8,
   };
@@ -38,12 +39,12 @@ const News = () => {
   const [activeStates, setActiveStates] = useState({
     tresmark: true,
     dowjones: true,
-    mint: true,
+    cnbc: true,
   });
   const newsSourceIconMap = {
-    3: tresmarkImg,
+    3: cnbcImg,
     4: tresmarkImg,
-    8: tresmarkImg,
+    8: dowjonesImg,
   };
   const [allNews, setAllNews] = useState({
     dateFrom: {
@@ -81,7 +82,7 @@ const News = () => {
 
     if (activeStates.tresmark) activeIds.push(sourceIdMap.tresmark);
     if (activeStates.dowjones) activeIds.push(sourceIdMap.dowjones);
-    if (activeStates.mint) activeIds.push(sourceIdMap.mint);
+    if (activeStates.cnbc) activeIds.push(sourceIdMap.cnbc);
 
     return activeIds;
   }, [activeStates]);
@@ -176,7 +177,17 @@ const News = () => {
         setNewsList(newData);
       } else {
         // 🔥 append on scroll
-        setNewsList((prev) => [...prev, ...newData]);
+        // setNewsList((prev) => [...prev, ...newData]);
+
+        setNewsList((prev) => {
+          const combined = [...prev, ...newData];
+
+          const unique = Array.from(
+            new Map(combined.map((item) => [item.newsID, item])).values()
+          );
+
+          return unique;
+        });
       }
 
       setSRow((prev) => prev + newData?.length);
@@ -197,7 +208,7 @@ const News = () => {
       const activeIds = [];
       if (newState.tresmark) activeIds.push(sourceIdMap.tresmark);
       if (newState.dowjones) activeIds.push(sourceIdMap.dowjones);
-      if (newState.mint) activeIds.push(sourceIdMap.mint);
+      if (newState.cnbc) activeIds.push(sourceIdMap.cnbc);
 
       console.log("Active Source IDs:", activeIds);
 
@@ -399,13 +410,13 @@ const News = () => {
                 <img src={dowjhonesIcon} alt="Dow Jhones" />
               </button>
               <button
-                onClick={() => toggleActive("mint")}
+                onClick={() => toggleActive("cnbc")}
                 className={`news-toggle-button ${
-                  activeStates.mint ? "active" : "inactive"
+                  activeStates.cnbc ? "active" : "inactive"
                 }`}
-                title="Toggle Mint News"
+                title="Toggle CNBC News"
               >
-                <img src={mintIcon} alt="Mint" />
+                <img src={cnbcIcon} alt="CNBC Icon" />
               </button>
             </div>
           </Col>
@@ -496,7 +507,15 @@ const News = () => {
                           <div className={styles.newsTime}>{item.time}</div>
 
                           <div className={styles.newsIcon}>
-                            <img src={tresmarkImg} alt="" />
+                            {item.newsSourceID === 3 ? (
+                              <img src={cnbcImg} alt="CNBC Icon" />
+                            ) : item.newsSourceID === 4 ? (
+                              <img src={tresmarkImg} alt="Tresmark Icon" />
+                            ) : item.newsSourceID === 8 ? (
+                              <img src={dowjonesImg} alt="Dowjones Icon" />
+                            ) : (
+                              <img src={tresmarkImg} alt="Tresmark Icon" />
+                            )}
                           </div>
 
                           <div

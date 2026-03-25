@@ -70,7 +70,7 @@ const RatesForCurrencyNotes = () => {
           instrumentID: item.instrumentID,
           instrumentName: matchedInstrument?.instrumentName || "",
           buying: Number(item.bid ?? 0),
-          selling: Number(item.ask ?? 0),
+          selling: Number(item.offer ?? 0),
           version: 0,
         };
       });

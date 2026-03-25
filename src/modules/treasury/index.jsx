@@ -50,7 +50,7 @@ const Treasury = () => {
       label: `Discounting`,
       key: "2",
       children: (
-        <Suspense fallback={<>...Loading Doscountings</>}>
+        <Suspense fallback={<>...Loading Discountings</>}>
           <TreasuryDiscounting />
         </Suspense>
       ),
@@ -60,7 +60,7 @@ const Treasury = () => {
       label: `News`,
       key: "3",
       children: (
-        <Suspense fallback={<>...Loading Doscountings</>}>
+        <Suspense fallback={<>...Loading News</>}>
           <News />
         </Suspense>
       ),
@@ -69,7 +69,7 @@ const Treasury = () => {
       label: `Rate Sheet`,
       key: "4",
       children: (
-        <Suspense fallback={<>...Loading Doscountings</>}>
+        <Suspense fallback={<>...Loading Rate Sheet</>}>
           <RateSheet />
         </Suspense>
       ),

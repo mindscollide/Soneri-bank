@@ -2319,7 +2319,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
 
 export const GetCurrencyCrossesApi = createAsyncThunk(
   "watchlist/GetCurrencyCrosses",
-  async ({ navigate }, { rejectWithValue, dispatch }) => {
+  async ({ rejectWithValue }) => {
     try {
       const GetCurrencyCrossesData = createPostAPI(
         watchListApi,

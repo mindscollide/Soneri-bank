@@ -28,7 +28,7 @@ const CurrencyCrosses = memo(() => {
     SelectGetCurrencyCrosses,
     shallowEqual
   );
-
+  console.log(fullFeed, "fullFeedfullFeedCurrency");
   // ✅ Memoized essential feed values
   // const feedEssentials = useMemo(() => {
   //   if (!fullFeed) return null;
