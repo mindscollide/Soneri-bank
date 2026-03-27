@@ -237,7 +237,6 @@ const News = () => {
     dispatch(GetNewsDetailsByIDApi({ Data }));
   };
 
-  console.log(newsById, "setNewsByIdModalsetNewsByIdModal");
   const handleScroll = useCallback(
     (e) => {
       const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -312,7 +311,6 @@ const News = () => {
     }
   }, [realTimeNewsFeed]);
 
-  console.log(groupedNews, "groupedNewsgroupedNews");
   return (
     <>
       <div className={styles.mainNewsContainer}>

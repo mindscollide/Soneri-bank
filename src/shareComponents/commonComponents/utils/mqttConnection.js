@@ -62,6 +62,8 @@ export const useMqttClient = ({
       try {
         const parsed = JSON.parse(message.payloadString);
         // console.log("MQTT message arrived:", parsed);
+        if (parsed.payload.message === "TREASURY_MANAGEMENT_KIBOR")
+          console.log("MQTT message arrived:", parsed);
         if (onMessageArrivedCallback) onMessageArrivedCallback(parsed);
       } catch (err) {
         console.error("Failed to parse message:", err);
@@ -127,7 +129,7 @@ export const useMqttClient = ({
   );
 
   return {
-    client: clientRef.current,
+    client: clientRef,
     isConnected,
     connectToMqtt,
     subscribeToTopics,

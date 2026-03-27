@@ -66,17 +66,6 @@ const IndicativeFBPRates = () => {
       try {
         const { fbpRates: fbpRatesData } = fbpRates;
 
-        const uniqueTenors = Array.from(
-          new Map(
-            fbpRatesData.map((item) => [
-              item.tenorId,
-              {
-                tenorId: item.tenorId,
-                tenorName: item.tenorName,
-              },
-            ])
-          ).values()
-        );
         const grouped = Object.values(
           fbpRatesData.reduce((acc, item) => {
             const { currency, tenorId, value } = item;
@@ -94,8 +83,6 @@ const IndicativeFBPRates = () => {
           }, {})
         );
         setProcessedData(grouped);
-        console.log(grouped, "grouped");
-        console.log(uniqueTenors, "uniqueTenors");
       } catch (error) {
         console.error(error);
       }

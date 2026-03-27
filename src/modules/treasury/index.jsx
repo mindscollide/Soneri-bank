@@ -12,6 +12,7 @@ import {
   GetDiscountingRatesForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
 import { setActiveTab } from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
 const LiveRates = lazy(() => import("./liveRates/index"));
 const Forwards = lazy(() => import("./forwards/index"));
 const TreasuryDiscounting = lazy(() => import("./discounting/index"));
@@ -24,8 +25,8 @@ const Treasury = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleTabChange = (tabTitle) => {
-    localStorage.setItem("activeTreasuryTab", tabTitle);
-    dispatch(setActiveTab(tabTitle));
+    dispatch(setActiveTab(tabTitle)); // ✅ keep existing logic
+    dispatch(setActiveTreasuryTab(Number(tabTitle))); // ✅ reactive for Dashboard subscriptions
   };
   const tabs = [
     {
@@ -90,7 +91,11 @@ const Treasury = () => {
 
   return (
     <div>
-      <GlobalTabs items={tabs} defaultActiveKey={"0"} />
+      <GlobalTabs
+        items={tabs}
+        defaultActiveKey={"0"}
+        onChange={handleTabChange}
+      />
     </div>
   );
 };

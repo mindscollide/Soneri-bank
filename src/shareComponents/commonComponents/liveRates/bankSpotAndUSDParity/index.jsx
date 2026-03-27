@@ -328,7 +328,9 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Time",
             dataIndex: "time",
             render: (text) =>
-              text ? extractTimeFromCompactDate(text) : "--:--:--",
+              text
+                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
+                : "--:--:--",
           },
         ],
       },
@@ -358,7 +360,9 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Time",
             dataIndex: "time",
             render: (text) =>
-              text ? extractTimeFromCompactDate(text) : "--:--:--",
+              text
+                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
+                : "--:--:--",
           },
         ],
       },

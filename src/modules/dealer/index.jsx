@@ -1,7 +1,5 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react"; // ✅ added useRef
 import GlobalTabs from "../../shareComponents/elements/tabs";
-// import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
-// import Discounting from "../../shareComponents/commonComponents/discounting";
 import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
 import {
   GetAllDealersSpreadApi,
@@ -17,7 +15,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setDealerValue } from "../../store/slicers/watchListSlicer/WatchListSlicer";
-// import LiveRates from "../../shareComponents/commonComponents/liveRates";
+import { setActiveDealerTab } from "../../store/slicers/tabSlicer/tabSlicer";
+// import { setActiveDealerTab } from "../../store/slicers/tabSlice/tabSlice"; // ✅ new
 
 const LiveRates = lazy(() =>
   import("../../shareComponents/commonComponents/liveRates/index")
@@ -29,12 +28,14 @@ const Discounting = lazy(() =>
   import("../../shareComponents/commonComponents/discounting/index")
 );
 const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+
 const isTreasury = import.meta.env.VITE_APP_INCLUDE_TREASURY === "true";
 const isDealer = import.meta.env.VITE_APP_INCLUDE_DEALER === "true";
 
 const Dealer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const GetAllDealersSpread = useSelector(
     (state) => state.WatchListReducer.GetAllDealersSpread
   );
@@ -42,9 +43,14 @@ const Dealer = () => {
   const [dealerOptions, setDealerOptions] = useState([]);
   const [selectedDealer, setSelectedDealer] = useState(null);
 
+  // ✅ Tab change handler — mirrors Treasury pattern
+  const handleTabChange = (tabTitle) => {
+    dispatch(setActiveDealerTab(Number(tabTitle)));
+  };
+
   const tabs = [
     {
-      label: `Live Rates`,
+      label: "Live Rates",
       key: "0",
       children: (
         <Suspense fallback={<>...Loadings</>}>
@@ -53,7 +59,7 @@ const Dealer = () => {
       ),
     },
     {
-      label: `Forwards`,
+      label: "Forwards",
       key: "1",
       children: (
         <Suspense fallback={<>...Loadings</>}>
@@ -62,7 +68,7 @@ const Dealer = () => {
       ),
     },
     {
-      label: `Discounting`,
+      label: "Discounting",
       key: "2",
       children: (
         <Suspense fallback={<>...Loadings</>}>
@@ -70,11 +76,10 @@ const Dealer = () => {
         </Suspense>
       ),
     },
-
     ...(isDealer
       ? [
           {
-            label: `News`,
+            label: "News",
             key: "3",
             children: (
               <Suspense fallback={<>...Loadings</>}>
@@ -87,12 +92,9 @@ const Dealer = () => {
   ];
 
   const handleChangeDealer = (event) => {
-    console.log(event, "handleChangeDealer");
-    let Data = { DealerId: event.value };
-    let obj = {
-      value: event.value,
-      label: event.label,
-    };
+    const Data = { DealerId: event.value };
+    const obj = { value: event.value, label: event.label };
+
     dispatch(setDealerValue(obj));
     setSelectedDealer(event);
     dispatch(GetBankSpotForDealerApi({ navigate, Data }));
@@ -101,16 +103,23 @@ const Dealer = () => {
     dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
   };
 
+  // ✅ guard against double-fetch
+  const hasFetched = useRef(false);
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(getAllTenorsAction({ navigate }));
     dispatch(GetAllOtherInstrumentsApi({ navigate }));
+
     if (isTreasury) {
       dispatch(GetAllDealersSpreadApi({ navigate }));
     }
+
     if (isDealer) {
       const dealerId = localStorage.getItem("userID");
-      let Data = { DealerId: Number(dealerId) };
+      const Data = { DealerId: Number(dealerId) };
       dispatch(GetSingleDealersSpreadApi({ Data }));
       dispatch(GetBankSpotForDealerApi({ navigate, Data }));
       dispatch(GetCurrencyCrossesApi({ navigate }));
@@ -120,32 +129,32 @@ const Dealer = () => {
   }, []);
 
   useEffect(() => {
-    if (GetAllDealersSpread && GetAllDealersSpread !== null) {
-      try {
-        const { dealersSpread } = GetAllDealersSpread;
-        if (dealersSpread && Array.isArray(dealersSpread)) {
-          const mappedDealers = dealersSpread.map((dealer) => ({
-            value: dealer.userID,
-            label: dealer.userName,
-          }));
-          if (mappedDealers.length > 0) {
-            let Data = { DealerId: mappedDealers[0].value };
-            dispatch(GetBankSpotForDealerApi({ navigate, Data }));
-            dispatch(GetCurrencyCrossesApi({ navigate }));
-            dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
-            dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
-            setSelectedDealer(mappedDealers[0]);
-            setDealerOptions(mappedDealers);
-            let obj = {
-              value: mappedDealers[0].value,
-              label: mappedDealers[0].label,
-            };
-            dispatch(setDealerValue(obj));
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
+    if (!GetAllDealersSpread) return; // ✅ simpler null check
+
+    try {
+      const { dealersSpread } = GetAllDealersSpread;
+      if (!Array.isArray(dealersSpread) || dealersSpread.length === 0) return;
+
+      const mappedDealers = dealersSpread.map((dealer) => ({
+        value: dealer.userID,
+        label: dealer.userName,
+      }));
+
+      const firstDealer = mappedDealers[0];
+      const Data = { DealerId: firstDealer.value };
+
+      dispatch(GetBankSpotForDealerApi({ navigate, Data }));
+      dispatch(GetCurrencyCrossesApi({ navigate }));
+      dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
+      dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
+      dispatch(
+        setDealerValue({ value: firstDealer.value, label: firstDealer.label })
+      );
+
+      setSelectedDealer(firstDealer);
+      setDealerOptions(mappedDealers);
+    } catch (error) {
+      console.error("Error mapping dealers:", error);
     }
   }, [GetAllDealersSpread]);
 
@@ -153,6 +162,7 @@ const Dealer = () => {
     <div>
       <GlobalTabs
         items={tabs}
+        onChange={handleTabChange} // ✅ was missing
         tabBarExtraContent={
           !isDealer && (
             <SelectDropdown

@@ -67,7 +67,7 @@ import {
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const GetDashboardDataAPI = createAsyncThunk(
   "watchlist/GetDashboardData", // A unique action type string
-  async ({ navigate }, { dispatch, rejectWithValue }) => {
+  async ({ rejectWithValue }) => {
     try {
       let GetDashboardDataAction = createPostAPI(
         watchListApi,

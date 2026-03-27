@@ -71,10 +71,6 @@ const Forwards = () => {
           GetBankForwardForTreasuryDealer !== null &&
           GetBankForwardForTreasuryDealer;
 
-        console.log(
-          { forwardRates, getAllTenorsData, getAllInstrument },
-          "buildForwardsTable"
-        );
         const { rowData, columnsData } = buildForwardsTable(
           3,
           forwardRates,

@@ -9,18 +9,14 @@ const KIBORForManagementFeed = (state) =>
   state.RealtimeActionsSlice.kiborForManagementFeed;
 
 const KIBOR = memo(() => {
-  const dataRef = useRef([]);
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
+  const pendingFeedRef = useRef(null); // ✅ Always keep latest feed only (no queue, no throttle)
 
   const kiborList = useSelector(GetKiborDataForTreasury);
   const fullFeed = useSelector(KIBORForManagementFeed);
 
   const [processedData, setProcessedData] = useState([]);
 
-  // console.log(fullFeed, "fullFeedfullFeedKibor");
-  // Columns
   const columns = useMemo(
     () => [
       {
@@ -50,7 +46,7 @@ const KIBOR = memo(() => {
     []
   );
 
-  // ✅ Initialize base data
+  // ✅ Initialize base data from REST API
   useEffect(() => {
     if (kiborList && kiborList.length > 0) {
       const enriched = kiborList.map((item) => ({
@@ -59,97 +55,122 @@ const KIBOR = memo(() => {
         ask: Number(item.ask ?? 0),
         version: 0,
       }));
-
-      dataRef.current = enriched;
       setProcessedData(enriched);
     }
   }, [kiborList]);
 
-  // ✅ Process queued MQTT updates
-  const processUpdateQueue = useCallback(() => {
-    try {
-      if (updateQueueRef.current.length === 0) {
-        animationFrameRef.current = null;
-        return;
-      }
+  // ✅ Flush the latest pending MQTT update via rAF (no throttle, no queue)
+  // const flushUpdate = useCallback(() => {
+  //   animationFrameRef.current = null;
+  //   const feed = pendingFeedRef.current;
+  //   pendingFeedRef.current = null;
 
-      const updates = updateQueueRef.current;
-      updateQueueRef.current = [];
+  //   if (!feed) return;
 
-      setProcessedData((prevData) => {
-        let hasChanges = false;
+  //   const { kibor } = feed;
+  //   if (!kibor) return;
 
-        const updatedData = prevData.map((item) => {
-          let updatedItem = { ...item };
-          let changed = false;
+  //   const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
 
-          updates.forEach((update) => {
-            const { kibor } = update;
-            console.log(kibor, "updatedKibor");
+  //   setProcessedData((prevData) => {
+  //     let hasChanges = false;
 
-            if (!kibor) return;
-            const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
-            kiborArray.forEach((feedItem) => {
-              if (item.displayName === feedItem.displayName) {
-                if (
-                  Number(item.bid) !== Number(feedItem.bid) ||
-                  Number(item.ask) !== Number(feedItem.ask) ||
-                  item.modifiedDateTime !== feedItem.modifiedDateTime
-                ) {
-                  updatedItem = {
-                    ...updatedItem,
-                    bid: Number(feedItem.bid),
-                    ask: Number(feedItem.ask),
-                    modifiedDateTime: feedItem.modifiedDateTime,
-                    version: item.version + 1,
-                  };
-                  changed = true;
-                }
-              }
-            });
-          });
+  //     const updatedData = prevData.map((item) => {
+  //       const feedItem = kiborArray.find(
+  //         (f) => f.displayName === item.displayName
+  //       );
 
-          return changed ? updatedItem : item;
-        });
+  //       if (!feedItem) return item;
 
-        hasChanges = updatedData.some(
-          (newItem, index) => newItem !== prevData[index]
-        );
+  //       return {
+  //         ...item,
+  //         bid: Number(feedItem.bid),
+  //         ask: Number(feedItem.ask),
+  //         modifiedDateTime: feedItem.modifiedDateTime,
+  //         version: item.version + 1,
+  //       };
+  //     });
 
-        return hasChanges ? updatedData : prevData;
-      });
+  //     return hasChanges ? updatedData : prevData;
+  //   });
+  // }, []);
 
-      animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-    } catch (error) {
-      console.log(error, "error");
-    }
-  }, []);
+  // const flushUpdate = useCallback(() => {
+  //   animationFrameRef.current = null;
 
-  // ✅ Queue update (60fps throttle)
-  const queueUpdate = useCallback(
-    (feed) => {
-      if (!feed) return;
+  //   const feeds = pendingFeedsRef.current;
+  //   pendingFeedsRef.current = [];
 
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return;
-      lastUpdateRef.current = now;
+  //   if (!feeds.length) return;
 
-      updateQueueRef.current.push(feed);
+  //   setProcessedData((prevData) => {
+  //     let updatedData = [...prevData];
 
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-      }
-    },
-    [processUpdateQueue]
-  );
+  //     feeds.forEach((feed) => {
+  //       const { kibor } = feed;
+  //       if (!kibor) return;
 
-  // ✅ MQTT Feed effect
+  //       const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
+
+  //       updatedData = updatedData.map((item) => {
+  //         const feedItem = kiborArray.find(
+  //           (f) => f.displayName === item.displayName
+  //         );
+
+  //         if (!feedItem) return item;
+
+  //         return {
+  //           ...item,
+  //           bid: Number(feedItem.bid),
+  //           ask: Number(feedItem.ask),
+  //           modifiedDateTime: feedItem.modifiedDateTime,
+  //           version: (item.version || 0) + 1,
+  //         };
+  //       });
+  //     });
+
+  //     return updatedData;
+  //   });
+  // }, []);
+
+  // ✅ On new MQTT feed: store latest and schedule ONE rAF flush
+  // No throttle — KIBOR updates are infrequent so every update must be applied
+  // useEffect(() => {
+  //   if (!fullFeed) return;
+
+  //   pendingFeedRef.current = fullFeed; // overwrite with latest
+
+  //   if (!animationFrameRef.current) {
+  //     animationFrameRef.current = requestAnimationFrame(flushUpdate);
+  //   }
+  // }, [fullFeed, flushUpdate]);
+
   useEffect(() => {
     if (!fullFeed) return;
-    queueUpdate(fullFeed);
-  }, [fullFeed, queueUpdate]);
 
-  // Cleanup
+    const { kibor } = fullFeed;
+    if (!kibor) return;
+
+    const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
+
+    setProcessedData((prevData) =>
+      prevData.map((item) => {
+        const feedItem = kiborArray.find(
+          (f) => f.displayName === item.displayName
+        );
+
+        if (!feedItem) return item;
+
+        return {
+          ...item,
+          bid: Number(feedItem.bid),
+          ask: Number(feedItem.ask),
+          modifiedDateTime: feedItem.modifiedDateTime,
+        };
+      })
+    );
+  }, [fullFeed]);
+
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) {

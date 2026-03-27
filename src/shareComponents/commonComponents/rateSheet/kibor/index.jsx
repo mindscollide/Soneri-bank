@@ -24,7 +24,6 @@ const KIBOR = () => {
   const fullFeed = useSelector(treasuryRateSheetKibor);
 
   const kiborList = useSelector(GetKiborDataForRateSheet);
-  console.log({ kiborList, fullFeed }, "GetRatesForCurrencsofKibor");
 
   const columns = useMemo(() => {
     if (!kiborList || kiborList.length === 0) return [];
@@ -52,7 +51,6 @@ const KIBOR = () => {
     }
   }, [kiborList]);
 
-  // console.log({ processedData, fullFeed }, "TotalData");
   // MQTT Work
   // ✅ Batch update function
   const processUpdateQueue = useCallback(() => {

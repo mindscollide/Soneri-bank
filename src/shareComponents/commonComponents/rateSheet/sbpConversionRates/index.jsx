@@ -132,7 +132,6 @@ const SBPConversionRates = () => {
       }
     };
   }, []);
-  console.log({ processedData, fullFeed }, "TotalData");
 
   return (
     <>

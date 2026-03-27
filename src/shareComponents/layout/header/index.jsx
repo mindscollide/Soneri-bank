@@ -9,6 +9,7 @@ import CustomButton from "../../commonComponents/elements/globalButton/button";
 import InputFIeld from "../../commonComponents/elements/inputField/InputField";
 import { NumericFormat } from "react-number-format";
 import PublshDealerSpreads from "../../../modules/dealer/publishDealerSpreads";
+import Management from "../../../modules/management";
 const MainHeader = () => {
   const location = useLocation();
 
@@ -75,6 +76,8 @@ const MainHeader = () => {
                   </>
                 ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
                   <PublshDealerSpreads />
+                ) : import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true" ? (
+                  <Management />
                 ) : null)}
 
               <ProfileDropdown />

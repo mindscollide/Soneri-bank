@@ -316,8 +316,14 @@ const RealtimeActionsSlice = createSlice({
     },
 
     setKiborForManagmentFeed: (state, { payload }) => {
-      state.kiborForManagementFeed = payload;
+      state.kiborForManagementFeed = {
+        ...payload,
+        kibor: Array.isArray(payload.kibor)
+          ? [...payload.kibor]
+          : { ...payload.kibor },
+      };
     },
+
     setSofrForManagmentFeed: (state, { payload }) => {
       state.sofrForManagementFeed = payload;
     },

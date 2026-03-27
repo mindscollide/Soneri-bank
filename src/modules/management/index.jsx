@@ -16,6 +16,8 @@ import {
   GetUSDParityForTreasuryApi,
 } from "../../store/actions/WatchlistAction";
 import { IsolatedBlock } from "../../shareComponents/commonComponents/utils/isolateBlock";
+import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+// import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -116,8 +118,8 @@ const Management = () => {
         <Row className="mt-2">
           <Col sm={12} md={12} lg={12}>
             <IsolatedBlock>
+              {/* <Suspense fallback={<SectionLoader />}> */}
               <Suspense fallback={<>...Loading</>}>
-                <SwapsInUSD />
                 <News />
               </Suspense>
             </IsolatedBlock>

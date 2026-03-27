@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import styles from "../management.module.css";
 import { formatCompactDate } from "../../../utils/timeFunction";
+
 const GetRevalRatesForTreasury = (state) =>
   state.WatchListReducer.GetRevalRatesForTreasury;
 
@@ -10,21 +11,17 @@ const sbpFXRevalRatesForManagementFeed = (state) =>
   state.RealtimeActionsSlice.sbpFXRevalRatesForManagementFeed;
 
 const SBPFXRevalRates = memo(() => {
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
+  const pendingFeedRef = useRef(null); // ✅ Always keep latest feed only (no queue, no throttle)
+
   const revalRatesList = useSelector(GetRevalRatesForTreasury);
   const fullFeed = useSelector(sbpFXRevalRatesForManagementFeed);
 
-  // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
   const [latestDate, setLatestDate] = useState("");
 
-  console.log(fullFeed, "fullFeedRevalRaters");
-
   const getUniqueTenors = (data) => {
     const tenorMap = new Map();
-
     data.forEach((item) => {
       if (!tenorMap.has(item.tenorId)) {
         tenorMap.set(item.tenorId, {
@@ -34,7 +31,6 @@ const SBPFXRevalRates = memo(() => {
         });
       }
     });
-
     return Array.from(tenorMap.values()).sort(
       (a, b) => a.displayOrderPriority - b.displayOrderPriority
     );
@@ -51,7 +47,6 @@ const SBPFXRevalRates = memo(() => {
         width: 120,
       },
     ];
-
     const tenorColumns = tenors.map((tenor) => ({
       title: tenor.tenorName,
       dataIndex: `tenorId_${tenor.tenorId}_value`,
@@ -68,77 +63,88 @@ const SBPFXRevalRates = memo(() => {
     return getUniqueTenors(revalRatesList.revalRatesList);
   }, [revalRatesList]);
 
-  const columns = useMemo(() => {
-    return generateColumns(tenors);
-  }, [tenors]);
+  const columns = useMemo(() => generateColumns(tenors), [tenors]);
 
+  // ✅ Initialize base data from REST API
   useEffect(() => {
-    if (revalRatesList?.revalRatesList) {
-      try {
-        const { revalRatesList: revalRatesListData } = revalRatesList;
+    if (!revalRatesList?.revalRatesList) return;
+    try {
+      const { revalRatesList: revalRatesListData } = revalRatesList;
 
-        // ✅ Set initial date from API (take first item)
-        if (revalRatesListData.length > 0) {
-          const apiDate = revalRatesListData[0]?.lastModifiedDate;
-          if (apiDate) {
-            setLatestDate(apiDate);
-          }
-        }
-
-        const uniqueTenors = Array.from(
-          new Map(
-            revalRatesListData.map((item) => [
-              item.tenorId,
-              {
-                tenorId: item.tenorId,
-                tenorName: item.tenorName,
-              },
-            ])
-          ).values()
-        );
-        const grouped = Object.values(
-          revalRatesListData.reduce((acc, item) => {
-            const { currency, tenorId, value } = item;
-
-            if (!acc[currency]) {
-              acc[currency] = {
-                currencyName: currency,
-              };
-            }
-
-            // Create dynamic key
-            acc[currency][`tenorId_${tenorId}_value`] = value;
-
-            return acc;
-          }, {})
-        );
-        setProcessedData(grouped);
-        console.log(grouped, "grouped");
-        console.log(uniqueTenors, "uniqueTenors");
-      } catch (error) {
-        console.error(error);
+      if (revalRatesListData.length > 0) {
+        const apiDate = revalRatesListData[0]?.lastModifiedDate;
+        if (apiDate) setLatestDate(apiDate);
       }
+
+      const grouped = Object.values(
+        revalRatesListData.reduce((acc, item) => {
+          const { currency, tenorId, value } = item;
+          if (!acc[currency]) {
+            acc[currency] = { currencyName: currency };
+          }
+          acc[currency][`tenorId_${tenorId}_value`] = value;
+          return acc;
+        }, {})
+      );
+
+      setProcessedData(grouped);
+    } catch (error) {
+      console.error(error);
     }
   }, [revalRatesList]);
 
-  useEffect(() => {
-    if (fullFeed && fullFeed.revalRates) {
-      console.log(fullFeed, "fullFeedfullFeedRevalRates");
-      const { currency, tenorId, value } = fullFeed.revalRates;
+  // ✅ Flush the latest pending MQTT update via rAF (no throttle)
+  const flushUpdate = useCallback(() => {
+    animationFrameRef.current = null;
+    const feed = pendingFeedRef.current;
+    pendingFeedRef.current = null;
 
-      setProcessedData((prev) =>
-        prev.map((row) => {
-          if (row.currencyName === currency) {
-            return {
-              ...row,
-              [`tenorId_${tenorId}_value`]: Number(value),
-            };
-          }
-          return row;
-        })
-      );
+    if (!feed?.revalRates) return;
+
+    const { currency, tenorId, value, lastModifiedDate } = feed.revalRates;
+
+    setProcessedData((prev) => {
+      const rowIndex = prev.findIndex((row) => row.currencyName === currency);
+      if (rowIndex === -1) return prev; // no match, skip
+
+      const key = `tenorId_${tenorId}_value`;
+      const existingRow = prev[rowIndex];
+
+      // Skip if value hasn't changed
+      if (existingRow[key] === Number(value)) return prev;
+
+      const updatedRow = { ...existingRow, [key]: Number(value) };
+      const updatedData = [...prev];
+      updatedData[rowIndex] = updatedRow;
+      return updatedData;
+    });
+
+    // ✅ Update the date header if the feed carries one
+    if (lastModifiedDate) {
+      setLatestDate(lastModifiedDate);
     }
-  }, [fullFeed]);
+  }, []);
+
+  // ✅ On new MQTT feed: store latest and schedule ONE rAF flush
+  // No throttle — RevalRates updates are infrequent so every update must be applied
+  useEffect(() => {
+    if (!fullFeed) return;
+
+    pendingFeedRef.current = fullFeed; // overwrite with latest
+
+    if (!animationFrameRef.current) {
+      animationFrameRef.current = requestAnimationFrame(flushUpdate);
+    }
+  }, [fullFeed, flushUpdate]);
+
+  // ✅ Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>

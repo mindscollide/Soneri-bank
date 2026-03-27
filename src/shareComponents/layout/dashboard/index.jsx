@@ -8,47 +8,28 @@ import React, {
 } from "react";
 import MainHeader from "../header";
 import "./dashboard.css";
-import Dealer from "../../../modules/dealer";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  BlotterTransactionAdded,
-  BlotterTransactionAddedForTreasury,
-  BlotterTransactionRFQExpired,
   currentRatePublishedAction,
   FeDiscountingPublishedAction,
   marketStatusUpdated,
   NonFeDiscountingPublishedAction,
-  setBlotterTransactionAddedForTreasuryDealBox,
-  setBlotterTransactionRFQExpiredForTreasury,
-  setBlotterTransactionRFQExpiredForTreasuryDealBox,
-  setCategoryFeDiscounting,
-  setCategoryForwardRates,
   setCategoryFowardsTenorsChanges,
-  setCategoryNonFeDiscounting,
-  setCategorySpotRates,
   setClearRates,
   setCommoditiesForManagmentFeed,
-  setCounterPartyFeDiscounting,
-  setCounterPartyForwardRates,
-  setCounterPartyNonFeDiscounting,
-  setCounterPartySpotRates,
   setCurrencyCrossesForManagementFeed,
   setCurrencyCrossesRatesFeed,
   setCurrentRateSheetRatesPublished,
   setDealerForwardTenorChanged,
   setDealerSpotRatesFeed,
-  setFxTradingCards,
   setKiborForManagmentFeed,
-  setMarketTimingsUpdated,
   setRealTimeNewsFeed,
   setSbpFXRevalRatesForManagmentFeed,
   setSofrForManagmentFeed,
-  setSpreadsForSingleUser,
   setStockIndicesForManagmentFeed,
   setSwapsinUSDForManagementFeed,
   setTenorsCreated,
-  setTradeRightsStatusUpdated,
   setTreasuryDealerFeDiscounting,
   setTreasuryDealerForwardRates,
   setTreasuryDealerNonFeDiscounting,
@@ -73,7 +54,6 @@ import {
 } from "../../../store/actions/authAction";
 import { useMqttClient } from "../../commonComponents/utils/mqttConnection";
 import { getMarketStatusApi } from "../../../store/actions/WatchlistAction";
-import { setDealModalRequest } from "../../../store/slicers/modalSlicer/modalSlicer";
 
 const Dashboard = () => {
   const { Content, Footer, Header } = Layout;
@@ -94,6 +74,12 @@ const Dashboard = () => {
   const prevPathRef = useRef(null);
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
+  );
+  const activeTreasuryTab = useSelector(
+    (state) => state.tabReducer.activeTreasuryTab
+  );
+  const activeDealerTab = useSelector(
+    (state) => state.tabReducer.activeDealerTab
   );
   // const categoryValue = useSelector(
   //   (state) => state.WatchListReducer.categoryValue
@@ -120,11 +106,14 @@ const Dashboard = () => {
     (data) => {
       const type = data?.payload?.message;
       const payload = data?.payload;
+      // console.log({ type }, "handleMqttMessage");
+      // console.log(type === "TREASURY_MANAGEMENT_KIBOR", "handleMqttMessage");
+
       // const type = data?.message; // ✅ FIX
       // const payload = data;
-      if (type === "TREASURY_MANAGEMENT_KIBOR") {
-        console.log({ data, payload, type }, "handleMqttMessage");
-      }
+      // if (type === "TREASURY_MANAGEMENT_KIBOR") {
+      //   console.log({ data, payload, type }, "handleMqttMessage");
+      // }
       try {
         switch (type) {
           case "MARKET_STATUS_UPDATED":
@@ -249,9 +238,7 @@ const Dashboard = () => {
             });
             break;
           case "TREASURY_CROSSES_PREMIUMS_RATES":
-            startTransition(() => {
-              // dispatch(setUSDParityForManagementFeed(payload));
-            });
+            // no dispatch needed currently
             break;
 
           case "TREASURY_COMMODITIES_FEED":
@@ -267,20 +254,18 @@ const Dashboard = () => {
             break;
           case "TREASURY_MANAGEMENT_KIBOR":
             console.log("TREASURY_MANAGEMENT_KIBOR_Received");
-            startTransition(() => {
-              dispatch(setKiborForManagmentFeed(payload));
-            });
+            // startTransition(() => {
+            dispatch(setKiborForManagmentFeed(payload));
+            // });
             break;
 
           case "TREASURY_MANAGEMENT_SOFR":
-            startTransition(() => {
-              dispatch(setSofrForManagmentFeed(payload));
-            });
+            // startTransition(() => {
+            dispatch(setSofrForManagmentFeed(payload));
+            // });
             break;
 
           case "TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES":
-            console.log("TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES_Received");
-
             startTransition(() => {
               dispatch(setSbpFXRevalRatesForManagmentFeed(payload));
             });
@@ -369,215 +354,384 @@ const Dashboard = () => {
   } = useMqttClient(mqttConfig);
 
   // useEffect(() => {
-  //   if (isTreasury || isDealer) {
-  //     if (!dealerValue.value) return;
-
-  //     if (location.pathname.toLowerCase().includes("dealer".toLowerCase())) {
-  //       // unsubscribe the toic of treasury
-  //     } else if (
-  //       location.pathname.toLowerCase().includes("treasury".toLowerCase())
-  //     ) {
-  //       // Unsubscribe the Topics of Dealer
-  //     }
-  //     console.log(dealerValue, "dealerValuedealerValuedealerValue");
-  //     const newTopic = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerValue.value}`;
-
-  //     // Subscribe to the new topic
-  //     subscribeToTopics([newTopic]);
-  //     console.log("Subscribed to:", newTopic);
-
-  //     // Store this topic as previous for next run
-  //     if (prevTopicRef.current !== newTopic) {
-  //       prevTopicRef.current = newTopic;
-  //     }
-  //   }
-
-  //   // Cleanup to unsubscribe the previous topic
-  //   return () => {
-  //     if (prevTopicRef.current) {
-  //       unsubscribeFromTopics([prevTopicRef.current]);
-  //       console.log("Unsubscribed from:", prevTopicRef.current);
-  //     }
-  //   };
-  // }, [dealerValue.value]);
-
-  // useEffect(() => {
+  //   if (!isConnected) return;
   //   const isDealerPath = location.pathname.toLowerCase().includes("dealer");
 
-  //   const dealerId = dealerValue?.value;
+  //   if (isDealerPath) {
+  //     if (isDealer) {
+  //       // Dealer If Self (Login Dealer)
+  //       const topic1 = `SBL_TREASURY_DEALER_RATES_${Number(
+  //         localStorage.getItem("userID")
+  //       )}`;
+  //       const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${Number(
+  //         localStorage.getItem("userID")
+  //       )}`;
+  //       const topic3 = "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY";
+  //       subscribeToTopics([topic1, topic2, topic3]);
+  //       return;
+  //     } else if (
+  //       dealerValue !== null &&
+  //       dealerValue !== undefined &&
+  //       dealerValue.value !== 0
+  //     ) {
+  //       const topic1 = `SBL_TREASURY_DEALER_RATES_${dealerValue.value}`;
+  //       const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerValue.value}`;
+  //       const topic3 = "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY";
 
-  //   // If ANY required condition fails → unsubscribe
-  //   if (!isTreasury || !isDealerPath || !dealerId || dealerId === 0) {
-  //     if (prevTopicRef.current) {
-  //       unsubscribeFromTopics([prevTopicRef.current]);
-  //       console.log("Unsubscribed (condition failed):", prevTopicRef.current);
-  //       prevTopicRef.current = null;
+  //       const newTopics = [topic1, topic2, topic3];
+  //       subscribeToTopics(newTopics);
+  //       return;
   //     }
-  //     return;
   //   }
+  //   // const isTreasuryPath = location.pathname.toLowerCase().includes("treasury"); //for all treasury except rate sheet
+  //   // const activeTab = localStorage.getItem("activeTreasuryTab"); // for Rate Sheet in Treasury
+  //   // if (isTreasuryPath) {
+  //   //   if (activeTab === 4) {
+  //   //     subscribeToTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
+  //   //   }
+  //   //   if (activeTab === 3) {
+  //   //     subscribeToTopics(["REAL_TIME_FEED_NEWS"]);
+  //   //   }
+  //   // }
+  // }, [isConnected, dealerValue]);
 
-  //   const newTopic = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
-
-  //   // Switch topic if changed
-  //   if (prevTopicRef.current !== newTopic) {
-  //     if (prevTopicRef.current) {
-  //       unsubscribeFromTopics([prevTopicRef.current]);
-  //       console.log("Unsubscribed (switch):", prevTopicRef.current);
-  //     }
-
-  //     subscribeToTopics([newTopic]);
-  //     console.log("Subscribed:", newTopic);
-
-  //     prevTopicRef.current = newTopic;
-  //   }
-
-  //   return () => {
-  //     if (prevTopicRef.current) {
-  //       unsubscribeFromTopics([prevTopicRef.current]);
-  //       console.log("Cleanup unsubscribe:", prevTopicRef.current);
-  //       prevTopicRef.current = null;
-  //     }
-  //   };
-  // }, [dealerValue?.value, location.pathname, isTreasury]);
-
-  useEffect(() => {
-    const isDealerPath = location.pathname.toLowerCase().includes("dealer");
-
-    const isManagementPath = location.pathname
-      .toLowerCase()
-      .includes("management");
-
-    const isTreasuryPath = location.pathname.toLowerCase().includes("treasury");
-
-    // Condition for Dealer user when Logged in
-    if (isDealerPath && isDealer && isConnected) {
-      // console.log("reaced here");
-      const topic1 = `SBL_TREASURY_DEALER_RATES_${Number(
-        localStorage.getItem("userID")
-      )}`;
-      const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${Number(
-        localStorage.getItem("userID")
-      )}`;
-      subscribeToTopics([topic1, topic2]);
-      return;
-    }
-    // 🛑 Wait until dealerValue is ready
-    if (!dealerValue && !isConnected) return;
-
-    const dealerId = dealerValue.value;
-
-    // Management Work
-    if (isManagementPath && isConnected) {
-      subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
-      console.log("SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
-    }
-    // Treasury Work
-    if (isTreasuryPath && isConnected) {
-      console.log("in treasury path");
-      subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
-      console.log("SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
-    }
-    // ❌ If ANY required condition fails → unsubscribe
-    if (
-      !isTreasury ||
-      !isDealerPath ||
-      !dealerId ||
-      dealerId === 0 ||
-      !isManagementPath
-    ) {
-      if (prevTopicRef.current?.length) {
-        unsubscribeFromTopics(prevTopicRef.current);
-        console.log("Unsubscribed (condition failed):", prevTopicRef.current);
-        prevTopicRef.current = [];
-      }
-      return;
-    }
-
-    const topic1 = `SBL_TREASURY_DEALER_RATES_${dealerId}`;
-    const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
-    const newTopics = [topic1, topic2];
-
-    const isSame =
-      JSON.stringify(prevTopicRef.current) === JSON.stringify(newTopics);
-
-    if (!isSame) {
-      if (prevTopicRef.current?.length) {
-        unsubscribeFromTopics(prevTopicRef.current);
-        console.log("Unsubscribed (switch):", prevTopicRef.current);
-      }
-
-      subscribeToTopics(newTopics);
-      console.log("Subscribed:", newTopics);
-
-      prevTopicRef.current = newTopics;
-    }
-
-    return () => {
-      if (prevTopicRef.current?.length) {
-        unsubscribeFromTopics(prevTopicRef.current);
-        console.log("Cleanup unsubscribe:", prevTopicRef.current);
-        prevTopicRef.current = [];
-      }
-    };
-  }, [dealerValue, location.pathname, isTreasury, isConnected]);
-
-  useEffect(() => {
-    if (!isConnected) return;
-
-    //make isTreasuryCommented
-    if (location.pathname.toLowerCase().includes("treasury".toLowerCase())) {
-      subscribeToTopics([
-        "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
-        "REAL_TIME_FEED_NEWS",
-      ]);
-      if (marketStatus) {
-        // Subscribe only when status is true AND path is treasury
-        subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
-        // console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY");
-      }
-    }
-    if (location.pathname.toLowerCase().includes("allnews".toLowerCase())) {
-      subscribeToTopics(["REAL_TIME_FEED_NEWS"]);
-    } else {
-      unsubscribeFromTopics([
-        "SBL_REAL_TIME_FEED_TREASURY",
-        "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
-        "REAL_TIME_FEED_NEWS",
-      ]);
-    }
-  }, [location.pathname, isConnected, marketStatus]);
+  // const prevTopicRef = useRef([]);
 
   // useEffect(() => {
   //   if (!isConnected) return;
 
-  //   //make isTreasuryCommented
-  //   if (location.pathname.toLowerCase().includes("management".toLowerCase())) {
-  //     // Subscribe only when status is true AND path is treasury
-  //     subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
-  //     console.log("Subscribed to SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
-  //   } else {
-  //     unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
-  //   }
-  // }, [location.pathname, isConnected]);
+  //   const isDealerPath = location.pathname.toLowerCase().includes("dealer");
+  //   const isTreasuryPath = location.pathname.toLowerCase().includes("treasury");
+  //   const isManagementPath = location.pathname
+  //     .toLowerCase()
+  //     .includes("management");
+  //   const activeTab = Number(localStorage.getItem("activeTreasuryTab"));
 
-  // Handle unsubscription only when leaving treasury path
-  // useEffect(() => {
-  //   const handlePathChange = () => {
-  //     const wasTreasury = prevPathRef.current?.includes("treasury");
-  //     const isNowTreasury = location.pathname.includes("treasury");
+  //   let newTopics = [];
 
-  //     // Unsubscribe only if we're leaving treasury path
-  //     if (wasTreasury && !isNowTreasury) {
-  //       unsubscribeFromTopics(["SBL_REAL_TIME_FEED_TREASURY_DEALER"]);
-  //       console.log("Unsubscribed from BOP_REAL_TIME_FEED_TREASURY");
+  //   if (isDealerPath) {
+  //     // ✅ CASE 1: Logged-in Dealer
+  //     if (isDealer) {
+  //       if (activeTab === 3) {
+  //         // 🔴 Only NEWS for dealer on tab 3
+  //         newTopics = ["REAL_TIME_FEED_NEWS"];
+  //       } else {
+  //         const userId = Number(localStorage.getItem("userID"));
+
+  //         newTopics = [
+  //           `SBL_TREASURY_DEALER_RATES_${userId}`,
+  //           `SBL_REAL_TIME_FEED_TREASURY_DEALER_${userId}`,
+  //           "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY",
+  //         ];
+  //       }
   //     }
 
-  //     prevPathRef.current = location.pathname;
+  //     // ✅ CASE 2: Not a Dealer (viewer mode)
+  //     else if (dealerValue && dealerValue.value !== 0) {
+  //       newTopics = [
+  //         `SBL_TREASURY_DEALER_RATES_${dealerValue.value}`,
+  //         `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerValue.value}`,
+  //         "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY",
+  //       ];
+  //       // ❌ NO NEWS here ever
+  //     }
+  //   }
+
+  //   if (isTreasuryPath) {
+  //     newTopics = ["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"];
+  //     // do work for treasury
+  //   }
+
+  //   if (isManagementPath) {
+  //     // Do management Activity here
+  //   }
+  //   if (newTopics.length === 0) {
+  //     //   const isTreasuryPath = location.pathname.toLowerCase().includes("treasury");
+
+  //     // 🔴 No topics → unsubscribe all
+  //     if (prevTopicRef.current.length) {
+  //       unsubscribeFromTopics(prevTopicRef.current);
+  //       console.log("Unsubscribed (no topics):", prevTopicRef.current);
+  //       prevTopicRef.current = [];
+  //     }
+  //     return;
+  //   }
+
+  //   // 🔁 Compare with previous
+  //   const prevTopics = prevTopicRef.current;
+
+  //   const isSame =
+  //     prevTopics.length === newTopics.length &&
+  //     prevTopics.every((t, i) => t === newTopics[i]);
+
+  //   if (!isSame) {
+  //     if (prevTopics.length) {
+  //       unsubscribeFromTopics(prevTopics);
+  //       console.log("Unsubscribed:", prevTopics);
+  //     }
+
+  //     subscribeToTopics(newTopics);
+  //     console.log("Subscribed:", newTopics);
+
+  //     prevTopicRef.current = newTopics;
+  //   }
+  // }, [isConnected, dealerValue, isDealer, location.pathname]);
+
+  // // Currently this useEffect is used
+  // useEffect(() => {
+  //   const isDealerPath = location.pathname.toLowerCase().includes("dealer");
+
+  //   const isManagementPath = location.pathname
+  //     .toLowerCase()
+  //     .includes("management");
+
+  //   const isTreasuryPath = location.pathname.toLowerCase().includes("treasury");
+
+  //   // Condition for Dealer user when Logged in
+  //   if (isDealerPath && isDealer && isConnected) {
+  //     // console.log("reaced here");
+  //     const topic1 = `SBL_TREASURY_DEALER_RATES_${Number(
+  //       localStorage.getItem("userID")
+  //     )}`;
+  //     const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${Number(
+  //       localStorage.getItem("userID")
+  //     )}`;
+  //     // topic for currency Crosses
+
+  //     const topic3 = "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY";
+  //     subscribeToTopics([topic1, topic2, topic3]);
+  //     return;
+  //   }
+  //   // 🛑 Wait until dealerValue is ready
+  //   if (!dealerValue && !isConnected) return;
+
+  //   const dealerId = dealerValue.value;
+
+  //   // Management Work
+  //   if (isManagementPath && isConnected) {
+  //     subscribeToTopics([
+  //       "SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT",
+  //       "SBL_REAL_TIME_STATIC_TREASURY_MANAGEMENT",
+  //     ]);
+  //   }
+  //   // Treasury Work
+  //   if (isTreasuryPath && isConnected) {
+  //     console.log("in treasury path");
+  //     subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"]);
+  //     console.log("SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT");
+  //   }
+
+  //   const topic1 = `SBL_TREASURY_DEALER_RATES_${dealerId}`;
+  //   const topic2 = `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerId}`;
+  //   const topic3 = "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY";
+
+  //   // const newTopics = [topic1, topic2, topic3];
+  //   subscribeToTopics([topic1, topic2, topic3]);
+  //   // return;
+  //   // const isSame =
+  //   //   JSON.stringify(prevTopicRef.current) === JSON.stringify(newTopics);
+
+  //   // if (!isSame) {
+  //   //   if (prevTopicRef.current?.length) {
+  //   //     unsubscribeFromTopics(prevTopicRef.current);
+  //   //     console.log("Unsubscribed (switch):", prevTopicRef.current);
+  //   //   }
+
+  //   //   subscribeToTopics(newTopics);
+  //   //   console.log("Subscribed:", newTopics);
+
+  //   //   prevTopicRef.current = newTopics;
+  //   // }
+  //   // ❌ If ANY required condition fails → unsubscribe
+  //   if (
+  //     !isTreasury ||
+  //     !isDealerPath ||
+  //     !dealerId ||
+  //     dealerId === 0 ||
+  //     !isManagementPath
+  //   ) {
+  //     if (prevTopicRef.current?.length) {
+  //       unsubscribeFromTopics(prevTopicRef.current);
+  //       console.log("Unsubscribed (condition failed):", prevTopicRef.current);
+  //       prevTopicRef.current = [];
+  //     }
+  //     return;
+  //   }
+  //   return () => {
+  //     if (prevTopicRef.current?.length) {
+  //       unsubscribeFromTopics(prevTopicRef.current);
+  //       console.log("Cleanup unsubscribe:", prevTopicRef.current);
+  //       prevTopicRef.current = [];
+  //     }
   //   };
+  // }, [dealerValue, location.pathname, isTreasury, isConnected]);
 
-  //   handlePathChange();
-  // }, [location.pathname]);
+  // useEffect(() => {
+  //   if (!isConnected) return;
 
+  //   const path = location.pathname.toLowerCase();
+
+  //   if (path.includes("treasury")) {
+  //     subscribeToTopics([
+  //       "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
+  //       "REAL_TIME_FEED_NEWS",
+  //     ]);
+
+  //     if (marketStatus) {
+  //       subscribeToTopics(["SBL_REAL_TIME_FEED_TREASURY"]);
+  //     }
+  //   } else if (path.includes("allnews")) {
+  //     subscribeToTopics(["REAL_TIME_FEED_NEWS"]);
+  //   } else {
+  //     unsubscribeFromTopics([
+  //       "SBL_REAL_TIME_FEED_TREASURY",
+  //       "SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY",
+  //       "REAL_TIME_FEED_NEWS",
+  //     ]);
+  //   }
+  // }, [location.pathname, isConnected, marketStatus]);
+  // End Here
+
+  //New Optimiized useEffect:
+  const location = useLocation(); // ✅ Add at top with other hooks
+
+  const prevTopicsRef = useRef([]); // Effect 1: dealer/treasury/management
+  const prevSecondaryTopicsRef = useRef([]); // Effect 2: rate sheet + news
+
+  // ✅ Replace the useCallback with a stable ref-based approach
+  const subscribeRef = useRef(subscribeToTopics);
+  const unsubscribeRef = useRef(unsubscribeFromTopics);
+
+  // Keep refs in sync without causing re-renders
+  useEffect(() => {
+    subscribeRef.current = subscribeToTopics;
+    unsubscribeRef.current = unsubscribeFromTopics;
+  }, [subscribeToTopics, unsubscribeFromTopics]);
+
+  // ✅ Now updateSubscriptions never changes reference
+  const updateSubscriptions = useCallback(
+    (prevTopics, newTopics, refSetter) => {
+      const isSame =
+        prevTopics.length === newTopics.length &&
+        prevTopics.every((t, i) => t === newTopics[i]);
+
+      if (isSame) return;
+
+      if (prevTopics.length) {
+        unsubscribeRef.current(prevTopics);
+        console.log("Unsubscribed:", prevTopics);
+      }
+      if (newTopics.length) {
+        subscribeRef.current(newTopics);
+        console.log("Subscribed:", newTopics);
+      }
+      refSetter(newTopics);
+    },
+    [] // ✅ empty deps — stable forever, uses refs internally
+  );
+
+  // ✅ Remove updateSubscriptions from both effects' dependency arrays
+  useEffect(() => {
+    // ... Effect 1 body
+  }, [isConnected, location.pathname, dealerValue, isDealer]); // ✅ no updateSubscriptions
+
+  useEffect(() => {
+    // ... Effect 2 body
+  }, [isConnected, location.pathname, activeTreasuryTab, activeDealerTab]); // ✅ no updateSubscriptions
+
+  // ─── Effect 1: Dealer / Treasury / Management ────────────────────────────────
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const path = location.pathname.toLowerCase();
+    const isDealerPath = path.includes("dealer");
+    const isTreasuryPath = path.includes("treasury");
+    const isManagementPath = path.includes("management");
+
+    let newTopics = [];
+
+    if (isDealerPath && isDealer) {
+      const userId = Number(localStorage.getItem("userID"));
+      newTopics = [
+        `SBL_TREASURY_DEALER_RATES_${userId}`,
+        `SBL_REAL_TIME_FEED_TREASURY_DEALER_${userId}`,
+        "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY",
+      ];
+    } else if (isDealerPath && dealerValue != null && dealerValue.value !== 0) {
+      newTopics = [
+        `SBL_TREASURY_DEALER_RATES_${dealerValue.value}`,
+        `SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerValue.value}`,
+        "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY",
+      ];
+    } else if (isManagementPath) {
+      newTopics = [
+        "SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT",
+        "SBL_REAL_TIME_STATIC_TREASURY_MANAGEMENT",
+      ];
+    } else if (isTreasuryPath) {
+      // newTopics = ["SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT"];
+      newTopics = [
+        "SBL_REAL_TIME_FEED_TREASURY",
+        "SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY",
+      ];
+    }
+
+    updateSubscriptions(
+      prevTopicsRef.current,
+      newTopics,
+      (t) => (prevTopicsRef.current = t)
+    );
+  }, [isConnected, location.pathname, dealerValue, isDealer]);
+
+  // ─── Effect 2: Rate Sheet + News (tab-based) ─────────────────────────────────
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const path = location.pathname.toLowerCase();
+    const isDealerPath = path.includes("dealer");
+    const isTreasuryPath = path.includes("treasury");
+    const isManagementPath = path.includes("management"); // ✅ added
+
+    let newTopics = [];
+
+    // ❌ removed isAllNewsPath — no MQTT on /allnews
+    if (isManagementPath) {
+      // ✅ Management always gets news feed
+      newTopics = ["REAL_TIME_FEED_NEWS"];
+    } else if (isTreasuryPath) {
+      if (activeTreasuryTab === 3) newTopics = ["REAL_TIME_FEED_NEWS"];
+      if (activeTreasuryTab === 4)
+        newTopics = ["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"];
+    } else if (isDealerPath) {
+      if (activeDealerTab === 3) newTopics = ["REAL_TIME_FEED_NEWS"];
+    }
+    // ✅ /allnews → no topics, no subscription
+
+    updateSubscriptions(
+      prevSecondaryTopicsRef.current,
+      newTopics,
+      (t) => (prevSecondaryTopicsRef.current = t)
+    );
+  }, [isConnected, location.pathname, activeTreasuryTab, activeDealerTab]);
+  //                                   ☝️ now reactive — re-runs on every tab change
+  // ✅ Single unmount cleanup — runs once when Dashboard unmounts
+  useEffect(() => {
+    return () => {
+      if (prevTopicsRef.current.length) {
+        unsubscribeRef.current(prevTopicsRef.current);
+        console.log("Unmount cleanup (primary):", prevTopicsRef.current);
+        prevTopicsRef.current = [];
+      }
+      if (prevSecondaryTopicsRef.current.length) {
+        unsubscribeRef.current(prevSecondaryTopicsRef.current);
+        console.log(
+          "Unmount cleanup (secondary):",
+          prevSecondaryTopicsRef.current
+        );
+        prevSecondaryTopicsRef.current = [];
+      }
+    };
+  }, []); // ✅ empty array = runs only on unmount
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -586,12 +740,6 @@ const Dashboard = () => {
     connectToMqtt({ subscribeID, userID });
     dispatch(getMarketStatusApi({ navigate }));
 
-    // if (IsCorporate || IsBranch) {
-    //   dispatch(GetAllNatureOfTransactionsApi({ navigate }));
-    //   if (IsBranch) {
-    //     dispatch(getAllActiveCorporatesApi({ navigate }));
-    //   }
-    // }
     if (isTreasury === "false") {
       dispatch(getAllInstrumentsApi({ navigate }));
     }

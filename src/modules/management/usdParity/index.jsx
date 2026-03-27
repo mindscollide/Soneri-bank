@@ -10,27 +10,30 @@ import { IndexCell } from "../../../shareComponents/commonComponents/elements/in
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import { shallowEqual, useSelector } from "react-redux";
+import { store } from "../../../store/store"; // ✅ import your redux store
 import styles from "../management.module.css";
 
-// Selectors — defined outside component to keep references stable
+// Selectors
 const selectUSDParity = (state) =>
   state.WatchListReducer.GetUSDParityForTreasury?.usdParityCurrencies || [];
+
 const selectSpotInstruments = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.spotInstruments;
+
 const selectUSDParityFeed = (state) =>
   state.RealtimeActionsSlice.usdParityForManagmentFeed;
 
 const USDParity = memo(() => {
-  const [processedData, setProcessedData] = useState([]);
+  // ✅ normalized state (object instead of array)
+  const [processedData, setProcessedData] = useState({});
 
-  // Refs
   const animationFrameRef = useRef(null);
-  const pendingFeedRef = useRef(null); // ✅ Only keep latest feed, no queue needed
+  const pendingFeedRef = useRef(null);
 
-  const fullFeed = useSelector(selectUSDParityFeed);
   const crossInstruments = useSelector(selectSpotInstruments, shallowEqual);
   const worldCrosses = useSelector(selectUSDParity, shallowEqual);
 
+  // ✅ Columns (unchanged but stable)
   const columns = useMemo(
     () => [
       { title: "Instrument", dataIndex: "instrumentName" },
@@ -43,7 +46,6 @@ const USDParity = memo(() => {
       {
         title: "Ask",
         dataIndex: "ask",
-        className: "offerCol",
         width: 90,
         render: (text) => text !== "-" && <IndexCell value={text} />,
       },
@@ -56,14 +58,12 @@ const USDParity = memo(() => {
       {
         title: "Low",
         dataIndex: "low",
-        className: "offerCol",
         width: 90,
         render: (text) => text !== "-" && <IndexCell value={text} />,
       },
       {
         title: "% Change",
         dataIndex: "percentageChange",
-        className: "offerCol",
         width: 120,
         render: (text) => {
           if (text === "-") return null;
@@ -83,97 +83,91 @@ const USDParity = memo(() => {
     []
   );
 
-  // ✅ Build base data from REST API response
-  const enrichedData = useMemo(() => {
-    if (!crossInstruments?.length || !worldCrosses?.length) return [];
-    try {
-      return crossInstruments.map((instrument) => {
-        const matchedCross = worldCrosses.find(
-          (wc) => Number(wc.instrumentID) === instrument.instrumentID
-        );
-        return {
-          instrumentID: Number(instrument.instrumentID),
-          instrumentName: instrument.instrumentName,
-          time: matchedCross?.time ?? "",
-          bid: Number(matchedCross?.bid ?? 0),
-          ask: Number(matchedCross?.ask ?? 0),
-          high: Number(matchedCross?.high ?? 0),
-          low: Number(matchedCross?.low ?? 0),
-          percentageChange: Number(matchedCross?.percentageChange ?? 0),
-          version: 0,
-        };
-      });
-    } catch (error) {
-      console.error("Error enriching data:", error);
-      return [];
-    }
+  // ✅ Build initial normalized data
+  useEffect(() => {
+    if (!crossInstruments?.length || !worldCrosses?.length) return;
+
+    const mappedData = {};
+
+    crossInstruments.forEach((instrument) => {
+      const matchedCross = worldCrosses.find(
+        (wc) => Number(wc.instrumentID) === instrument.instrumentID
+      );
+
+      mappedData[instrument.instrumentID] = {
+        instrumentID: Number(instrument.instrumentID),
+        instrumentName: instrument.instrumentName,
+        time: matchedCross?.time ?? "",
+        bid: Number(matchedCross?.bid ?? 0),
+        ask: Number(matchedCross?.ask ?? 0),
+        high: Number(matchedCross?.high ?? 0),
+        low: Number(matchedCross?.low ?? 0),
+        percentageChange: Number(matchedCross?.percentageChange ?? 0),
+      };
+    });
+
+    setProcessedData(mappedData);
   }, [crossInstruments, worldCrosses]);
 
-  // ✅ Sync base data into state only when REST data changes
-  useEffect(() => {
-    if (enrichedData.length > 0) {
-      setProcessedData(enrichedData);
-    }
-  }, [enrichedData]);
-
-  // ✅ Apply a single pending MQTT update via rAF (no infinite loop)
+  // ✅ Apply updates (O(1))
   const flushUpdate = useCallback(() => {
     animationFrameRef.current = null;
+
     const feed = pendingFeedRef.current;
     pendingFeedRef.current = null;
 
-    if (!feed) return;
+    if (!feed?.instrumentParitySpot) return;
 
-    const { instrumentParitySpot } = feed;
-    if (!instrumentParitySpot) return;
+    const update = feed.instrumentParitySpot;
+    const id = update.instrumentID;
 
-    setProcessedData((prevData) => {
-      let hasChanges = false;
+    setProcessedData((prev) => {
+      const existing = prev[id];
+      if (!existing) return prev;
 
-      const updatedData = prevData.map((item) => {
-        if (item.instrumentID !== instrumentParitySpot.instrumentID)
-          return item;
+      const changed =
+        Number(existing.bid) !== Number(update.bid) ||
+        Number(existing.ask) !== Number(update.ask) ||
+        Number(existing.high) !== Number(update.high) ||
+        Number(existing.low) !== Number(update.low) ||
+        Number(existing.percentageChange) !== Number(update.percentageChange) ||
+        existing.time !== update.time;
 
-        const changed =
-          Number(item.bid) !== Number(instrumentParitySpot.bid) ||
-          Number(item.ask) !== Number(instrumentParitySpot.ask) ||
-          Number(item.high) !== Number(instrumentParitySpot.high) ||
-          Number(item.low) !== Number(instrumentParitySpot.low) ||
-          Number(item.percentageChange) !==
-            Number(instrumentParitySpot.percentageChange) ||
-          item.time !== instrumentParitySpot.time;
+      if (!changed) return prev;
 
-        if (!changed) return item;
-
-        hasChanges = true;
-        return {
-          ...item,
-          bid: instrumentParitySpot.bid,
-          ask: instrumentParitySpot.ask,
-          high: instrumentParitySpot.high,
-          low: instrumentParitySpot.low,
-          percentageChange: instrumentParitySpot.percentageChange,
-          time: instrumentParitySpot.time,
-          version: item.version + 1,
-        };
-      });
-
-      return hasChanges ? updatedData : prevData;
+      return {
+        ...prev,
+        [id]: {
+          ...existing,
+          bid: update.bid,
+          ask: update.ask,
+          high: update.high,
+          low: update.low,
+          percentageChange: update.percentageChange,
+          time: update.time,
+        },
+      };
     });
   }, []);
 
-  // ✅ On new MQTT feed: store latest and schedule ONE rAF flush
+  // ✅ Subscribe to store manually (NO re-render on every tick)
   useEffect(() => {
-    if (!fullFeed) return;
+    const unsubscribe = store.subscribe(() => {
+      const feed = selectUSDParityFeed(store.getState());
 
-    pendingFeedRef.current = fullFeed; // always overwrite with latest
+      if (!feed) return;
 
-    if (!animationFrameRef.current) {
-      animationFrameRef.current = requestAnimationFrame(flushUpdate);
-    }
-  }, [fullFeed, flushUpdate]);
+      pendingFeedRef.current = feed;
 
-  // ✅ Cleanup on unmount
+      if (!animationFrameRef.current) {
+        animationFrameRef.current = requestAnimationFrame(flushUpdate);
+      }
+    });
+
+    return unsubscribe;
+  }, [flushUpdate]);
+
+  // ✅ Cleanup
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
@@ -182,20 +176,25 @@ const USDParity = memo(() => {
     };
   }, []);
 
+  // ✅ Convert to array only when needed
+  const tableData = useMemo(
+    () => Object.values(processedData),
+    [processedData]
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar}>USD Parity</span>
+
       <GlobalTable
         columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0
-            ? "managementTables"
-            : "managementTables_Empty"
-        }
-        rowKey={(record) => `${record.instrumentID}`} // ✅ Stable key
+        dataSource={tableData}
+        rowKey={(record) => record.instrumentID}
         pagination={false}
         scroll={{ y: 300, x: "max-content" }}
+        prefixCls={
+          tableData.length > 0 ? "managementTables" : "managementTables_Empty"
+        }
       />
     </>
   );

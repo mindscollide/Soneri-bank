@@ -57,10 +57,6 @@ const RateSheet = () => {
 
   useEffect(() => {
     if (getLastPublishRatesSheet && getLastPublishRatesSheet !== null) {
-      console.log(
-        getLastPublishRatesSheet,
-        "getLastPublishRatesSheetgetLastPublishRatesSheet"
-      );
       try {
         const {
           lastAsk,
