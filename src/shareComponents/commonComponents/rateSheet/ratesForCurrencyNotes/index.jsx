@@ -80,7 +80,6 @@ const RatesForCurrencyNotes = () => {
     }
   }, [currencyNotes, instrumnets]);
 
-  // console.log({ processedData, fullFeed }, "TotalData");
   // MQTT Work
   // ✅ Batch update function
   const processUpdateQueue = useCallback(() => {
