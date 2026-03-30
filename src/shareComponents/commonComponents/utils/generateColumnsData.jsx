@@ -71,7 +71,7 @@ export const buildDiscountingTable = (
           dataIndex: "discountDays",
           key: "discountingDays",
           align: "center",
-          width: 50,
+          width: 65,
         },
         ...applicableInstruments.map((inst) => ({
           title: inst.instrumentName,
