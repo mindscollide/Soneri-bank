@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setDealerValue } from "../../store/slicers/watchListSlicer/WatchListSlicer";
 import { setActiveDealerTab } from "../../store/slicers/tabSlicer/tabSlicer";
+import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 // import { setActiveDealerTab } from "../../store/slicers/tabSlice/tabSlice"; // ✅ new
 
 const LiveRates = lazy(() =>
@@ -53,7 +54,7 @@ const Dealer = () => {
       label: "Live Rates",
       key: "0",
       children: (
-        <Suspense fallback={<>...Loadings</>}>
+        <Suspense fallback={<SectionLoader />}>
           <LiveRates />
         </Suspense>
       ),
@@ -62,7 +63,7 @@ const Dealer = () => {
       label: "Forwards",
       key: "1",
       children: (
-        <Suspense fallback={<>...Loadings</>}>
+        <Suspense fallback={<SectionLoader />}>
           <Forwards />
         </Suspense>
       ),
@@ -71,7 +72,7 @@ const Dealer = () => {
       label: "Discounting",
       key: "2",
       children: (
-        <Suspense fallback={<>...Loadings</>}>
+        <Suspense fallback={<SectionLoader />}>
           <Discounting />
         </Suspense>
       ),
@@ -82,7 +83,7 @@ const Dealer = () => {
             label: "News",
             key: "3",
             children: (
-              <Suspense fallback={<>...Loadings</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <News />
               </Suspense>
             ),

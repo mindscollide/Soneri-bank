@@ -27,6 +27,7 @@ const Kibor = lazy(() => import("./kibor/index"));
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { formatTodayForRateSheet } from "../../../utils/timeFunction";
+import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 
 const RateSheet = () => {
   const dispatch = useDispatch();
@@ -142,19 +143,19 @@ const RateSheet = () => {
       <div ref={screenRef}>
         <Row className="mt-3">
           <Col sm={12} md={8} lg={8}>
-            <Suspense fallback={<>...Loading</>}>
+            <Suspense fallback={<SectionLoader />}>
               <SpotTTRates />
             </Suspense>
           </Col>
           <Col sm={12} md={4} lg={4}>
             <div>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <RatesForCurrencyNotes />
               </Suspense>
             </div>
 
             <div className="mt-3">
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <SbpConversionRates />
               </Suspense>
             </div>

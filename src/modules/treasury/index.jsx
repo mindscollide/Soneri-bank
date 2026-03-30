@@ -13,6 +13,7 @@ import {
 } from "../../store/actions/WatchlistAction";
 import { setActiveTab } from "../../store/slicers/watchListSlicer/WatchListSlicer";
 import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
+import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 const LiveRates = lazy(() => import("./liveRates/index"));
 const Forwards = lazy(() => import("./forwards/index"));
 const TreasuryDiscounting = lazy(() => import("./discounting/index"));
@@ -33,7 +34,7 @@ const Treasury = () => {
       label: `Live Rates`,
       key: "0",
       children: (
-        <Suspense fallback={<>...Loading Live Rates</>}>
+        <Suspense fallback={<SectionLoader />}>
           <LiveRates />
         </Suspense>
       ),
@@ -42,7 +43,7 @@ const Treasury = () => {
       label: `Forwards`,
       key: "1",
       children: (
-        <Suspense fallback={<>...Loading Forwards</>}>
+        <Suspense fallback={<SectionLoader />}>
           <Forwards />
         </Suspense>
       ),
@@ -51,7 +52,7 @@ const Treasury = () => {
       label: `Discounting`,
       key: "2",
       children: (
-        <Suspense fallback={<>...Loading Discountings</>}>
+        <Suspense fallback={<SectionLoader />}>
           <TreasuryDiscounting />
         </Suspense>
       ),
@@ -61,7 +62,7 @@ const Treasury = () => {
       label: `News`,
       key: "3",
       children: (
-        <Suspense fallback={<>...Loading News</>}>
+        <Suspense fallback={<SectionLoader />}>
           <News />
         </Suspense>
       ),
@@ -70,7 +71,7 @@ const Treasury = () => {
       label: `Rate Sheet`,
       key: "4",
       children: (
-        <Suspense fallback={<>...Loading Rate Sheet</>}>
+        <Suspense fallback={<SectionLoader />}>
           <RateSheet />
         </Suspense>
       ),

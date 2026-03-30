@@ -17,7 +17,6 @@ import {
 } from "../../store/actions/WatchlistAction";
 import { IsolatedBlock } from "../../shareComponents/commonComponents/utils/isolateBlock";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
-// import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -54,14 +53,14 @@ const Management = () => {
         <Row>
           <Col sm={12} md={6} lg={6} className="pe-0">
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <USDParityComponent />
               </Suspense>
             </IsolatedBlock>
           </Col>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <CurrencyCrosses />
               </Suspense>
             </IsolatedBlock>
@@ -70,14 +69,14 @@ const Management = () => {
         <Row className="mt-3">
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <Commodities />
               </Suspense>
             </IsolatedBlock>
           </Col>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <StockIndices />
               </Suspense>
             </IsolatedBlock>
@@ -86,14 +85,14 @@ const Management = () => {
         <Row className="mt-3">
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <KIBOR />
               </Suspense>
             </IsolatedBlock>
           </Col>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <SOFR />
               </Suspense>
             </IsolatedBlock>
@@ -102,14 +101,14 @@ const Management = () => {
         <Row className="mt-3">
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <SBPFXRevalRates />
               </Suspense>
             </IsolatedBlock>
           </Col>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <SwapsInUSD />
               </Suspense>
             </IsolatedBlock>
@@ -118,8 +117,7 @@ const Management = () => {
         <Row className="mt-2">
           <Col sm={12} md={12} lg={12}>
             <IsolatedBlock>
-              {/* <Suspense fallback={<SectionLoader />}> */}
-              <Suspense fallback={<>...Loading</>}>
+              <Suspense fallback={<SectionLoader />}>
                 <News />
               </Suspense>
             </IsolatedBlock>
