@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   GetAllInstrumentsRM,
-  GetAllNatureOfTransactionsRM,
   loginRequestMethod,
   LogoutRM,
 } from "../../common/api_config";
@@ -120,7 +119,7 @@ export const loginInApi = createAsyncThunk(
 
 export const LogoutApi = createAsyncThunk(
   "auth/Logout",
-  async ({ navigate }, { rejectWithValue }) => {
+  async ({ rejectWithValue }) => {
     try {
       const logoutUser = createPostAPI(authApi, LogoutRM.RequestMethod);
       const response = await logoutUser();
@@ -163,68 +162,9 @@ export const LogoutApi = createAsyncThunk(
   }
 );
 
-export const GetAllNatureOfTransactionsApi = createAsyncThunk(
-  "auth/GetAllNatureOfTransactions",
-  async ({ navigate }, { dispatch, rejectWithValue }) => {
-    try {
-      let getNatureOfTransactions = createPostAPI(
-        authApi,
-        GetAllNatureOfTransactionsRM.RequestMethod
-      );
-
-      const response = await getNatureOfTransactions();
-
-      if (response.data.responseCode === 200) {
-        const { isExecuted, responseMessage } = response.data.responseResult;
-        if (isExecuted) {
-          if (
-            responseMessage
-              .toLowerCase()
-              .includes(
-                "ERM_AuthService_CommonManager_GetAllNatureOfTransactions_01".toLowerCase()
-              )
-          ) {
-            return {
-              response: response.data.responseResult,
-              message: "",
-            };
-          } else if (
-            responseMessage
-              .toLowerCase()
-              .includes(
-                "ERM_AuthService_CommonManager_GetAllNatureOfTransactions_02".toLowerCase()
-              )
-          ) {
-            return rejectWithValue("");
-          } else if (
-            responseMessage
-              .toLowerCase()
-              .includes(
-                "ERM_AuthService_CommonManager_GetAllNatureOfTransactions_03".toLowerCase()
-              )
-          ) {
-            return rejectWithValue("Something went wrong");
-          } else {
-            return rejectWithValue("Something went wrong");
-          }
-        } else {
-          console.log("", response.data);
-          return rejectWithValue("Something went wrong");
-        }
-      } else {
-        return rejectWithValue("Something went wrong");
-      }
-    } catch (error) {
-      // Reject with error message
-      console.log("", error);
-      return rejectWithValue("Something went wrong");
-    }
-  }
-);
-
 export const getAllInstrumentsApi = createAsyncThunk(
   "auth/getAllInstruments",
-  async ({ navigate }, { dispatch, rejectWithValue }) => {
+  async ({ rejectWithValue }) => {
     try {
       let getInstruments = createPostAPI(
         authApi,

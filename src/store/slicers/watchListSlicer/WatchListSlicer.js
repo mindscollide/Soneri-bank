@@ -14,16 +14,10 @@ import {
   GetBankSpotForDealerApi,
   GetBankSpotForTreasuryApi,
   GetCommoditiesForTreasuryApi,
-  GetCorporateDailyVolumeAPI,
   GetCurrencyCrossesApi,
-  GetDashboardDataAPI,
   getDealerDashboardApi,
-  getDiscountingRatesAction,
-  GetDiscountingRatesForCounterPartyApi,
   GetDiscountingRatesForDealerApi,
   GetDiscountingRatesForTreasuryApi,
-  GetFEDiscountingTableApi,
-  GetForwardRatesForCounterPartyApi,
   GetIndicativeFBPRatesApi,
   GetIndicesForTreasuryApi,
   GetKiborDataForRateSheetApi,
@@ -31,10 +25,8 @@ import {
   GetLastAndCurrentPublishUSDRateSheetAction,
   getLastPublishRatesAction,
   getMarketStatusApi,
-  GetMisDataByRangeAPI,
   GetNewsDetailsByIDApi,
   GetNewsHeadlinesApi,
-  GetNonFEDiscountingTableApi,
   GetRatesForCurrencyNotesForRateSheetApi,
   GetRevalRatesForTreasuryApi,
   GetSBPConversionRatesForRateSheetApi,
@@ -43,16 +35,13 @@ import {
   GetSOFRDataForTreasuryApi,
   GetSpotTTRatesForRateSheetApi,
   GetSwapsInUSDForTreasuryApi,
-  getTenorWiseForwardsAction,
   GetUSDParityForTreasuryApi,
   marketOnOffAction,
   PublishCurrentUSDRateSheetAction,
-  publishDiscountingRatesAction,
   PublishFEDiscountingTableApi,
   PublishNewRatesAction,
   PublishNonFEDiscountingTableApi,
   PublishTenorWiseForwardsAction,
-  SaveUserDashboardAPI,
 } from "../../actions/WatchlistAction";
 
 const WatchListSlice = createSlice({
@@ -62,17 +51,11 @@ const WatchListSlice = createSlice({
     error: null,
 
     // 🎯 loader flags for each API
-    GetMisDataByRangeLoading: false,
-    GetDashboardDataLoading: false,
-    SaveUserDashboardLoading: false,
     GetAllTreasuryInstrumentsLoading: false,
-    GetForwardRatesForCounterPartyLoading: false,
-    GetDiscountingRatesForCounterPartyLoading: false,
     GetBankSpotForTreasuryLoading: false,
     GetBankForwardForTreasuryLoading: false,
     GetDiscountingRatesForTreasuryLoading: false,
     GetMarketStatusLoading: false,
-    GetCorporateDailyVolumeLoading: false,
 
     // Loader states taken from Dealer of BOP
     marketOnOffLoading: false,
@@ -81,11 +64,7 @@ const WatchListSlice = createSlice({
     publishNewRatesLoading: false,
     getAllTenorsLoading: false,
     createTenorLoading: false,
-    getTenorWiseForwardsLoading: false,
     publishTenorWiseForwardsLoading: false,
-    getDiscountingRatesLoading: false,
-    publishDiscountingRatesLoading: false,
-    getFeDiscountingLoading: false,
     publishFeDiscountingLoading: false,
     getNonFeDiscountingLoading: false,
     publishNonFeDiscountingLoading: false,
@@ -117,20 +96,11 @@ const WatchListSlice = createSlice({
     GetNewsDetailsByIDLoading: false,
 
     // data states
-    getAllInstrumentForCounterParties: null,
-    GetMisDataByRange: null,
-    SaveUserDashboardData: null,
-    allInstrumentForTreasury: null,
-    GetAllFowardsAndDiscountsRatesData: null,
-    GetForwardRatesForCounterParty: null,
-    GetDiscountingRatesForCounterParty: null,
     GetAllInstrumentForTreasury: null,
     GetBankSpotForTreasury: null,
     GetBankForwardForTreasury: null,
     GetDiscountingRatesForTreasury: null,
     getMarketStatus: null,
-    watchlistTableDataCopy: null,
-    GetCorporateDailyVolume: null,
 
     // Dealer from BOP
     // 🔄 Data states
@@ -140,26 +110,16 @@ const WatchListSlice = createSlice({
     getCurrentPublishRate: null,
     getAllTenors: null,
     createTenor: null,
-    getTenorWiseForwardsRates: null,
     publishTenorwiseForwardRates: null,
-    getDiscountingWiseRates: null,
-    publishDiscountRates: null,
-    getFeDiscounting: null,
     publishFeDiscounting: null,
     getNonFeDiscounting: null,
     publishNonFeDiscounting: null,
     getDealerDashboardData: null,
     forwardsForTreasuryBranch: [],
-    GetCategoryWiseSpotRates: null,
-    categoryValue: {
-      value: 0,
-      label: "",
-    },
     dealerValue: {
       value: 0,
       label: "",
     },
-    GetVoltMeterStatusRealtime: null,
     getLastPublishRatesSheet: null,
     PublishCurrentUSDRateSheet: null,
     GetBankSpotForDealer: null,
@@ -193,22 +153,8 @@ const WatchListSlice = createSlice({
     setMarketStatus: (state, action) => {
       state.getMarketStatus = action.payload;
     },
-    setWatchlistTableDataCopy(state, { payload }) {
-      state.watchlistTableDataCopy = payload;
-    },
-
-    // codeof dealer
-    setUpdateVolMeterRealtime: (state, action) => {
-      state.GetVoltMeterStatusRealtime = action.payload;
-    },
-    clearDealerResponseMessage: (state) => {
-      state.responseMessage = "";
-    },
     setForwardsForTreasuryBranch: (state, action) => {
       state.forwardsForTreasuryBranch = action.payload;
-    },
-    setCategoryValue: (state, action) => {
-      state.categoryValue = action.payload;
     },
     setDealerValue: (state, action) => {
       state.dealerValue = action.payload;
@@ -244,51 +190,6 @@ const WatchListSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // ------------------ GetMisDataByRange ------------------
-      .addCase(GetMisDataByRangeAPI.pending, (state) => {
-        state.GetMisDataByRangeLoading = true;
-        state.error = null;
-      })
-      .addCase(GetMisDataByRangeAPI.fulfilled, (state, { payload }) => {
-        state.GetMisDataByRangeLoading = false;
-        state.GetMisDataByRange = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(GetMisDataByRangeAPI.rejected, (state, { payload }) => {
-        state.GetMisDataByRangeLoading = false;
-        state.GetMisDataByRange = null;
-        state.error = payload;
-      })
-
-      // ------------------ GetDashboardData ------------------
-      .addCase(GetDashboardDataAPI.pending, (state) => {
-        state.GetDashboardDataLoading = true;
-      })
-      .addCase(GetDashboardDataAPI.fulfilled, (state, { payload }) => {
-        state.GetDashboardDataLoading = false;
-        state.getAllInstrumentForCounterParties = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(GetDashboardDataAPI.rejected, (state, { payload }) => {
-        state.GetDashboardDataLoading = false;
-        state.getAllInstrumentForCounterParties = null;
-        state.error = payload;
-      })
-
-      // ------------------ SaveUserDashboard ------------------
-      .addCase(SaveUserDashboardAPI.pending, (state) => {
-        state.SaveUserDashboardLoading = true;
-      })
-      .addCase(SaveUserDashboardAPI.fulfilled, (state, { payload }) => {
-        state.SaveUserDashboardLoading = false;
-        state.SaveUserDashboardData = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(SaveUserDashboardAPI.rejected, (state, { payload }) => {
-        state.SaveUserDashboardLoading = false;
-        state.SaveUserDashboardData = null;
-        state.error = payload;
-      })
 
       // ------------------ GetAllTreasuryInstruments ------------------
       .addCase(getAllTreasuryInstrumentsApi.pending, (state) => {
@@ -304,48 +205,6 @@ const WatchListSlice = createSlice({
         state.GetAllInstrumentForTreasury = null;
         state.error = payload;
       })
-
-      // ------------------ GetForwardRatesForCounterParty ------------------
-      .addCase(GetForwardRatesForCounterPartyApi.pending, (state) => {
-        state.GetForwardRatesForCounterPartyLoading = true;
-      })
-      .addCase(
-        GetForwardRatesForCounterPartyApi.fulfilled,
-        (state, { payload }) => {
-          state.GetForwardRatesForCounterPartyLoading = false;
-          state.GetForwardRatesForCounterParty = payload?.response;
-          state.responseMessage = payload?.message;
-        }
-      )
-      .addCase(
-        GetForwardRatesForCounterPartyApi.rejected,
-        (state, { payload }) => {
-          state.GetForwardRatesForCounterPartyLoading = false;
-          state.GetForwardRatesForCounterParty = null;
-          state.error = payload;
-        }
-      )
-
-      // ------------------ GetDiscountingRatesForCounterParty ------------------
-      .addCase(GetDiscountingRatesForCounterPartyApi.pending, (state) => {
-        state.GetDiscountingRatesForCounterPartyLoading = true;
-      })
-      .addCase(
-        GetDiscountingRatesForCounterPartyApi.fulfilled,
-        (state, { payload }) => {
-          state.GetDiscountingRatesForCounterPartyLoading = false;
-          state.GetDiscountingRatesForCounterParty = payload?.response;
-          state.responseMessage = payload?.message;
-        }
-      )
-      .addCase(
-        GetDiscountingRatesForCounterPartyApi.rejected,
-        (state, { payload }) => {
-          state.GetDiscountingRatesForCounterPartyLoading = false;
-          state.GetDiscountingRatesForCounterParty = null;
-          state.error = payload;
-        }
-      )
 
       // ------------------ GetBankSpotForTreasury ------------------
       .addCase(GetBankSpotForTreasuryApi.pending, (state) => {
@@ -410,21 +269,6 @@ const WatchListSlice = createSlice({
       .addCase(getMarketStatusApi.rejected, (state, { payload }) => {
         state.GetMarketStatusLoading = false;
         state.getMarketStatus = null;
-        state.error = payload;
-      })
-
-      //----------------GetCorporateDailyVolume------------------
-      .addCase(GetCorporateDailyVolumeAPI.pending, (state) => {
-        state.GetCorporateDailyVolumeLoading = true;
-      })
-      .addCase(GetCorporateDailyVolumeAPI.fulfilled, (state, { payload }) => {
-        state.GetCorporateDailyVolumeLoading = false;
-        state.GetCorporateDailyVolume = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(GetCorporateDailyVolumeAPI.rejected, (state, { payload }) => {
-        state.GetCorporateDailyVolumeLoading = false;
-        state.GetCorporateDailyVolume = null;
         state.error = payload;
       })
 
@@ -562,21 +406,6 @@ const WatchListSlice = createSlice({
         state.error = payload;
       })
 
-      // ✅ Get Tenor Wise Forwards
-      .addCase(getTenorWiseForwardsAction.pending, (state) => {
-        state.getTenorWiseForwardsLoading = true;
-      })
-      .addCase(getTenorWiseForwardsAction.fulfilled, (state, { payload }) => {
-        state.getTenorWiseForwardsLoading = false;
-        state.getTenorWiseForwardsRates = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(getTenorWiseForwardsAction.rejected, (state, { payload }) => {
-        state.getTenorWiseForwardsLoading = false;
-        state.getTenorWiseForwardsRates = null;
-        state.error = payload;
-      })
-
       // ✅ Publish Tenor Wise Forwards
       .addCase(PublishTenorWiseForwardsAction.pending, (state) => {
         state.publishTenorWiseForwardsLoading = true;
@@ -599,54 +428,6 @@ const WatchListSlice = createSlice({
         }
       )
 
-      // ✅ Get Discounting Rates
-      .addCase(getDiscountingRatesAction.pending, (state) => {
-        state.getDiscountingRatesLoading = true;
-      })
-      .addCase(getDiscountingRatesAction.fulfilled, (state, { payload }) => {
-        state.getDiscountingRatesLoading = false;
-        state.getDiscountingWiseRates = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(getDiscountingRatesAction.rejected, (state, { payload }) => {
-        state.getDiscountingRatesLoading = false;
-        state.getDiscountingWiseRates = null;
-        state.error = payload;
-      })
-
-      // ✅ Publish Discounting Rates
-      .addCase(publishDiscountingRatesAction.pending, (state) => {
-        state.publishDiscountingRatesLoading = true;
-      })
-      .addCase(
-        publishDiscountingRatesAction.fulfilled,
-        (state, { payload }) => {
-          state.publishDiscountingRatesLoading = false;
-          state.publishDiscountRates = payload?.response;
-          state.responseMessage = payload?.message;
-        }
-      )
-      .addCase(publishDiscountingRatesAction.rejected, (state, { payload }) => {
-        state.publishDiscountingRatesLoading = false;
-        state.publishDiscountRates = null;
-        state.error = payload;
-      })
-
-      // ✅ FE Discounting
-      .addCase(GetFEDiscountingTableApi.pending, (state) => {
-        state.getFeDiscountingLoading = true;
-      })
-      .addCase(GetFEDiscountingTableApi.fulfilled, (state, { payload }) => {
-        state.getFeDiscountingLoading = false;
-        state.getFeDiscounting = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(GetFEDiscountingTableApi.rejected, (state, { payload }) => {
-        state.getFeDiscountingLoading = false;
-        state.getFeDiscounting = null;
-        state.error = payload;
-      })
-
       .addCase(PublishFEDiscountingTableApi.pending, (state) => {
         state.publishFeDiscountingLoading = true;
       })
@@ -658,21 +439,6 @@ const WatchListSlice = createSlice({
       .addCase(PublishFEDiscountingTableApi.rejected, (state, { payload }) => {
         state.publishFeDiscountingLoading = false;
         state.publishFeDiscounting = null;
-        state.error = payload;
-      })
-
-      // ✅ Non-FE Discounting
-      .addCase(GetNonFEDiscountingTableApi.pending, (state) => {
-        state.getNonFeDiscountingLoading = true;
-      })
-      .addCase(GetNonFEDiscountingTableApi.fulfilled, (state, { payload }) => {
-        state.getNonFeDiscountingLoading = false;
-        state.getNonFeDiscounting = payload?.response;
-        state.responseMessage = payload?.message;
-      })
-      .addCase(GetNonFEDiscountingTableApi.rejected, (state, { payload }) => {
-        state.getNonFeDiscountingLoading = false;
-        state.getNonFeDiscounting = null;
         state.error = payload;
       })
 
@@ -883,7 +649,7 @@ const WatchListSlice = createSlice({
 
       // ✅ GetKiborDataForTreasury
       .addCase(GetKiborDataForTreasuryApi.pending, (state) => {
-        state.GetIndicesForTreasuryLoading = true;
+        state.GetKiborDataForTreasuryLoading = true;
       })
       .addCase(GetKiborDataForTreasuryApi.fulfilled, (state, { payload }) => {
         state.GetKiborDataForTreasuryLoading = false;
@@ -1025,9 +791,9 @@ const WatchListSlice = createSlice({
         state.error = payload;
       })
 
-      // ✅ GetIndicativeFBPRates
+      // ✅ GetSBPConversionRatesForRateSheet
       .addCase(GetSBPConversionRatesForRateSheetApi.pending, (state) => {
-        state.GetIndicativeFBPRatesLoading = true;
+        state.GetSBPConversionRatesForRateSheetLoading = true;
       })
       .addCase(
         GetSBPConversionRatesForRateSheetApi.fulfilled,
@@ -1085,11 +851,7 @@ const WatchListSlice = createSlice({
 export const {
   clearWatchListResponseMessage,
   setMarketStatus,
-  setWatchlistTableDataCopy,
-  setUpdateVolMeterRealtime,
-  clearDealerResponseMessage,
   setForwardsForTreasuryBranch,
-  setCategoryValue,
   setDealerValue,
   updateForwardItem,
   UpdatetDealerSpotRates,

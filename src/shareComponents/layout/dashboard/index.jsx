@@ -50,10 +50,12 @@ import {
 import { setMarketStatus } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import {
   getAllInstrumentsApi,
-  LogoutApi,
+  // LogoutApi,
 } from "../../../store/actions/authAction";
 import { useMqttClient } from "../../commonComponents/utils/mqttConnection";
 import { getMarketStatusApi } from "../../../store/actions/WatchlistAction";
+import { MqttContext } from "../../../context/MqttContext";
+// import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
 
 const Dashboard = () => {
   const { Content, Footer, Header } = Layout;
@@ -69,12 +71,12 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // const [isSoundOn, setIsSoundOn] = useState(false);
-  const audioRef = useRef(null);
-  const prevTopicRef = useRef(null);
-  const prevPathRef = useRef(null);
-  const marketStatus = useSelector(
-    (state) => state.WatchListReducer.getMarketStatus
-  );
+  // const audioRef = useRef(null);
+  // const prevTopicRef = useRef(null);
+  // const prevPathRef = useRef(null);
+  // const marketStatus = useSelector(
+  //   (state) => state.WatchListReducer.getMarketStatus
+  // );
   const activeTreasuryTab = useSelector(
     (state) => state.tabReducer.activeTreasuryTab
   );
@@ -353,6 +355,22 @@ const Dashboard = () => {
     isConnected,
   } = useMqttClient(mqttConfig);
 
+  // ✅ Expose unsubscribeAll so MainHeader can call it directly on click
+
+  // This is created to remove all the topics when path is changed, to opitimize and reduce the lag
+  const unsubscribeAll = useCallback(() => {
+    if (prevTopicsRef.current.length) {
+      unsubscribeRef.current(prevTopicsRef.current);
+      console.log("Instant unsub (primary):", prevTopicsRef.current);
+      prevTopicsRef.current = [];
+    }
+    if (prevSecondaryTopicsRef.current.length) {
+      unsubscribeRef.current(prevSecondaryTopicsRef.current);
+      console.log("Instant unsub (secondary):", prevSecondaryTopicsRef.current);
+      prevSecondaryTopicsRef.current = [];
+    }
+  }, []);
+
   // useEffect(() => {
   //   if (!isConnected) return;
   //   const isDealerPath = location.pathname.toLowerCase().includes("dealer");
@@ -630,14 +648,14 @@ const Dashboard = () => {
     [] // ✅ empty deps — stable forever, uses refs internally
   );
 
-  // ✅ Remove updateSubscriptions from both effects' dependency arrays
-  useEffect(() => {
-    // ... Effect 1 body
-  }, [isConnected, location.pathname, dealerValue, isDealer]); // ✅ no updateSubscriptions
+  // // ✅ Remove updateSubscriptions from both effects' dependency arrays
+  // useEffect(() => {
+  //   // ... Effect 1 body
+  // }, [isConnected, location.pathname, dealerValue, isDealer]); // ✅ no updateSubscriptions
 
-  useEffect(() => {
-    // ... Effect 2 body
-  }, [isConnected, location.pathname, activeTreasuryTab, activeDealerTab]); // ✅ no updateSubscriptions
+  // useEffect(() => {
+  //   // ... Effect 2 body
+  // }, [isConnected, location.pathname, activeTreasuryTab, activeDealerTab]); // ✅ no updateSubscriptions
 
   // ─── Effect 1: Dealer / Treasury / Management ────────────────────────────────
   useEffect(() => {
@@ -746,14 +764,16 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <Layout style={layoutStyle}>
-      <Header prefixCls="mainHeader">
-        <MainHeader />
-      </Header>
-      <Content className="my-2">
-        <Outlet />
-      </Content>
-    </Layout>
+    <MqttContext.Provider value={{ unsubscribeAll }}>
+      <Layout style={layoutStyle}>
+        <Header prefixCls="mainHeader">
+          <MainHeader />
+        </Header>
+        <Content className="my-2">
+          <Outlet />
+        </Content>
+      </Layout>
+    </MqttContext.Provider>
   );
 };
 

@@ -1,17 +1,28 @@
-import React from "react";
+import React, { useTransition } from "react";
 import SoneriLogo from "../../../assets/logo.png";
-import NavDropdown from "react-bootstrap/NavDropdown";
-import { Col, Dropdown, Nav, Navbar, Row } from "react-bootstrap";
+import { Col, Nav, Navbar, Row } from "react-bootstrap";
 import styles from "./header.module.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../../commonComponents/elements/profileDropdown/ProfileDropdown";
-import CustomButton from "../../commonComponents/elements/globalButton/button";
-import InputFIeld from "../../commonComponents/elements/inputField/InputField";
-import { NumericFormat } from "react-number-format";
 import PublshDealerSpreads from "../../../modules/dealer/publishDealerSpreads";
 import Management from "../../../modules/management";
+import { useMqtt } from "../../../context/MqttContext";
+import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
+import { useDispatch } from "react-redux";
 const MainHeader = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { unsubscribeAll } = useMqtt();
+  const [isPending, startTransition] = useTransition();
+  const handleNavigate = (to) => {
+    unsubscribeAll();
+
+    startTransition(() => {
+      dispatch(setMainLoader(true));
+      navigate(to);
+    });
+  };
 
   return (
     <Row>
@@ -27,49 +38,46 @@ const MainHeader = () => {
                 (import.meta.env.VITE_APP_INCLUDE_TREASURY === "true" ? (
                   <>
                     <Nav.Link
-                      as={Link}
                       className={
                         location.pathname.toLowerCase().includes("interbank")
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      to="interbank"
+                      // to="interbank"
+                      onClick={() => handleNavigate("interbank")}
                     >
                       Interbank
                     </Nav.Link>
 
                     <Nav.Link
-                      as={Link}
                       className={
                         location.pathname.toLowerCase().includes("dealer")
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      to="dealer"
+                      onClick={() => handleNavigate("dealer")}
                     >
                       Dealer
                     </Nav.Link>
 
                     <Nav.Link
-                      as={Link}
                       className={
                         location.pathname.toLowerCase().includes("management")
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      to="Management"
+                      onClick={() => handleNavigate("Management")}
                     >
                       Management
                     </Nav.Link>
 
                     <Nav.Link
-                      as={Link}
                       className={
                         location.pathname.toLowerCase().includes("treasury")
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      to="treasury"
+                      onClick={() => handleNavigate("treasury")}
                     >
                       Treasury
                     </Nav.Link>

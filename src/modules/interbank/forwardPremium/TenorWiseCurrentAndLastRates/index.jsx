@@ -254,15 +254,6 @@ const TenoreWiseCurrentAndLastRates = ({
       (item) => Number(item.currentAsk) < Number(item.currentBid)
     );
 
-    // if (!checkDoNotempty) {
-    //   const handleClick = () => {
-    //     showMessage("Bid and Ask fields cannot be 0 or empty");
-    //   };
-
-    // handleClick();
-    // return;
-    // }
-
     if (checkAskValue !== undefined) {
       const handleClick = () => {
         showMessage("Ask value must be greater than Bid value.");
@@ -319,10 +310,6 @@ const TenoreWiseCurrentAndLastRates = ({
   };
 
   const handleGetDataFromTresmark = () => {
-    console.log(
-      { treasuryFowardsTenorsChanges, getAllTenorsData },
-      "treasuryFowardsTenorsChangestreasuryFowardsTenorsChanges"
-    );
     if (!getAllTenorsData || !getAllTenorsData.tenors) {
       return;
     }

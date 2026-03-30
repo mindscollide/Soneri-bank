@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { isEqual } from "lodash";
+// import { isEqual } from "lodash";
 
 const RealtimeActionsSlice = createSlice({
   name: "realtimeActions",
@@ -160,10 +160,10 @@ const RealtimeActionsSlice = createSlice({
       state.TreasuryNonFeDiscounting = payload;
     },
     setTreasuryForwardRates: (state, { payload }) => {
-      state.TreasuryForwardRates = payload;
+      state.TreasuryForwardRates = { ...payload };
     },
     setTreasuryDealerForwardRates: (state, { payload }) => {
-      state.TreasuryDealerForwardRates = payload;
+      state.TreasuryDealerForwardRates = { ...payload };
     },
     setCategorySpotRates: (state, { payload }) => {
       state.CategorySpotRates = payload;

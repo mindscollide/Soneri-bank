@@ -64,9 +64,7 @@ export const getMarketStatusRM = {
 export const GetAllNatureOfTransactionsRM = {
   RequestMethod: "ServiceManager.GetAllNatureOfTransactions",
 };
-export const CreateCorporateUserForgotPassword = {
-  RequestMethod: "ServiceManager.CreateCorporateUserForgotPassword",
-};
+
 export const ResetPasswordCorporate = {
   RequestMethod: "ServiceManager.ResetPasswordCorporate",
 };
