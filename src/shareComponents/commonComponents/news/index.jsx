@@ -17,8 +17,7 @@ import {
 import GlobalModal from "../elements/globalModal/Modal";
 import { convertUTCToDateTime } from "../utils/timeFunction";
 import { clearGetNewsDetailsByID } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
-import Loader from "../../elements/soneriLoader";
-// import SectionLoader from "../../elements/soneriLoader/SectionLoader";
+import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 
 const News = () => {
   const dispatch = useDispatch();
@@ -52,7 +51,7 @@ const News = () => {
   const scrollRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [newsById, setNewsById] = useState("");
-  const [loadingNewsHeadline, setLoadingNewsHeadline] = useState(true);
+  // const [loadingNewsHeadline, setLoadingNewsHeadline] = useState(true);
 
   // GlobalState
   const GetNewsHeadlines = useSelector(
@@ -438,17 +437,17 @@ const News = () => {
                     </div>
                   ))
               )}
-              {
-                // loadingNewsHeadline === true ? (
-                //   <SectionLoader />
-                // ) :
-
-                getActiveSourceIds().length > 0 && newsList.length === 0 && (
+              {/* Initial / filter / search loader */}
+              {GetNewsHeadlinesLoading && sRow === 0 ? (
+                <SectionLoader />
+              ) : (
+                getActiveSourceIds().length > 0 &&
+                newsList.length === 0 && (
                   <div className="text-center p-3 text-muted">
                     No news available for selected sources
                   </div>
                 )
-              }
+              )}
             </div>
           </Col>
         </Row>
