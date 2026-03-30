@@ -95,6 +95,48 @@
   min-width: 120px;
 }
 
+/* DealerHeaderPublish Button */
+.publishBtnDealerHeader {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+  min-width: auto !important;
+  margin: 10px 15px 0 0;
+}
+.publishBtnDealerHeader:disabled {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  color: #fff !important;
+  pointer-events: none;
+  filter: grayscale(1);
+  -webkit-transition: all 0.3s ease-in !important;
+  /* border-color: #feac78 !important; */
+  font-family: "Poppins", sans-serif !important;
+  padding: 0px 10px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.publishBtnDealerHeader:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: auto !important;
+}
+
 /* Start Clear Rates Publish Button Dealer Bit Button */
 .clearRates {
   border-radius: 8px !important;
@@ -117,6 +159,31 @@
   color: #000 !important;
   min-width: 120px;
 }
+
+/* Start Clear Rates Publish Button Dealer Bit Button */
+.exportToPDF {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  min-width: 120px;
+  font-family: "Helvetica-Bold", sans-serif !important;
+}
+.exportToPDF:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: 120px;
+  font-family: "Helvetica-Bold", sans-serif !important;
+}
+
 /* End Clear Rates Publish Button Dealer Bit Button */
 
 /* View Deal Button  */
@@ -1008,4 +1075,28 @@
   -o-transition: all 0.3s ease-in !important;
   -ms-transition: all 0.3s ease-in !important;
   position: relative !important;
+}
+
+/* Start Clear Rates Publish Button Dealer Bit Button */
+.searchAllNews {
+  margin-left: 10px;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  position: relative !important;
+  transition: all 0.3s ease-in !important;
+  -webkit-transition: all 0.3s ease-in !important;
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+  padding: 0px 10px;
+  height: 35px !important;
+  font-family: "Poppins", sans-serif !important;
+  min-width: 120px;
+}
+.searchAllNews:hover {
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
+  color: #000 !important;
+  min-width: 120px;
 }

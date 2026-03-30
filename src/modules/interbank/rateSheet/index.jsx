@@ -3,41 +3,30 @@ import "./rateSheet.css";
 import { Col, Row } from "react-bootstrap";
 import moment from "moment";
 import { NumericFormat } from "react-number-format";
-import {
-  formatCurrencyInput,
-  isValidNumberUnderMaxNumber,
-} from "../../../utils/formatters";
+import { formatRateSheetInput } from "../../../utils/formatters";
 import { formatDateUTCToGMT } from "../../../utils/timeFunction";
 import GlobalModal from "../../../shareComponents/commonComponents/elements/globalModal/Modal";
 import CustomButton from "../../../shareComponents/commonComponents/elements/globalButton/button";
-import SwitchButton from "../../../shareComponents/commonComponents/elements/switchButton/SwitchBtn";
-import InputFIeld from "../../../shareComponents/commonComponents/elements/inputField/InputField";
 import { useDispatch, useSelector } from "react-redux";
 import { PublishCurrentUSDRateSheetAction } from "../../../store/actions/WatchlistAction";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../../../context/NotificationProvider";
 import { setPublishedSpotRateSheet } from "../../../store/slicers/modalSlicer/modalSlicer";
+import { setCurrentRateSheetRatesPublished } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 const RateSheet = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showMessage } = useNotification();
   const [isMarketOn, setIsMarketOn] = useState(false);
-  console.log(isMarketOn, "isMarketOnisMarketOn");
   const getLastPublishRatesSheet = useSelector(
     (state) => state.WatchListReducer.getLastPublishRatesSheet
   );
-  //   const currentUpdatedRates = useSelector(
-  //     (state) => state.RealtimeActionsSlice.currentRatesPublished
-  //   );
-
-  //   console.log({ currentUpdatedRates, getLastPublishRates }, "ratestoworkon");
 
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
 
-  //   console.log("marketStatus", marketStatus);
   const publishedSpotRateSheet = useSelector(
     (state) => state.modalReducer.publishedSpotRateSheet
   );
@@ -45,7 +34,9 @@ const RateSheet = () => {
   const PublishCurrentUSDRateSheetLoading = useSelector(
     (state) => state.WatchListReducer.PublishCurrentUSDRateSheetLoading
   );
-
+  const currentRateSheetRatesPublished = useSelector(
+    (state) => state.RealtimeActionsSlice.currentRateSheetRatesPublished
+  );
   const [currentRates, setCurrentRates] = useState({
     askValue: "",
     bidValue: "",
@@ -63,7 +54,6 @@ const RateSheet = () => {
     bidValue: "",
     dateTime: "",
   });
-  const [refreshInterval, setRefreshInterval] = useState(1);
 
   useEffect(() => {
     if (getLastPublishRatesSheet && getLastPublishRatesSheet !== null) {
@@ -71,10 +61,8 @@ const RateSheet = () => {
         const {
           lastAsk,
           lastBid,
-          refreshInterval,
           lastPublishDateTime,
           currentAsk,
-          // isMarketON,
           currentBid,
           currentValueDateTime,
         } = getLastPublishRatesSheet;
@@ -97,54 +85,54 @@ const RateSheet = () => {
           bidValue: currentBid,
           dateTime: currentValueDateTime,
         });
-        // dispatch(marketStatusUpdated(isMarketON));
-        // setRefreshInterval(refreshInterval);
       } catch (error) {
         console.log(error);
       }
     }
   }, [getLastPublishRatesSheet]);
 
-  //   useEffect(() => {
-  //     if (currentUpdatedRates !== null) {
-  //       try {
-  //         const {
-  //           lastAsk,
-  //           lastBid,
-  //           refreshInterval,
-  //           lastPublishDateTime,
-  //           currentAsk,
-  //           currentBid,
-  //           currentValueDateTime,
-  //           // eslint-disable-next-line no-unsafe-optional-chaining
-  //         } = currentUpdatedRates?.currentUSDRates;
-  //         // eslint-disable-next-line react-hooks/set-state-in-effect
-  //         setLastPublishRates({
-  //           ...lastPublishRates,
-  //           askValue: lastAsk,
-  //           bidValue: lastBid,
-  //           dateTime: lastPublishDateTime,
-  //         });
-  //         setCurrentRates({
-  //           ...currentRates,
-  //           askValue: currentAsk,
-  //           bidValue: currentBid,
-  //           dateTime: currentValueDateTime,
-  //         });
-  //         setCopyCurrentRates({
-  //           ...copyCurrentRates,
-  //           askValue: currentAsk,
-  //           bidValue: currentBid,
-  //           dateTime: currentValueDateTime,
-  //         });
-  //         setRefreshInterval(refreshInterval);
-  //         // dispatch(currentRatePublishedAction(null));
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //   }, [currentUpdatedRates]);
-  //   // console.log(getLastPublishRates, "getLastPublishRatesgetLastPublishRates");
+  useEffect(() => {
+    if (currentRateSheetRatesPublished !== null) {
+      console.log(
+        currentRateSheetRatesPublished,
+        "currentRateSheetRatesPublished"
+      );
+      try {
+        const {
+          lastAsk,
+          lastBid,
+          lastPublishDateTime,
+          currentAsk,
+          currentBid,
+          currentValueDateTime,
+          // eslint-disable-next-line no-unsafe-optional-chaining
+        } = currentRateSheetRatesPublished.currentRateSheetRates;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLastPublishRates({
+          ...lastPublishRates,
+          askValue: lastAsk,
+          bidValue: lastBid,
+          dateTime: lastPublishDateTime,
+        });
+        setCurrentRates({
+          ...currentRates,
+          askValue: currentAsk,
+          bidValue: currentBid,
+          dateTime: currentValueDateTime,
+        });
+        setCopyCurrentRates({
+          ...copyCurrentRates,
+          askValue: currentAsk,
+          bidValue: currentBid,
+          dateTime: currentValueDateTime,
+        });
+
+        dispatch(setCurrentRateSheetRatesPublished(null));
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [currentRateSheetRatesPublished]);
 
   useEffect(() => {
     if (marketStatus !== null) {
@@ -166,7 +154,6 @@ const RateSheet = () => {
             askValue: getLastPublishRatesSheet?.currentAsk,
             bidValue: getLastPublishRatesSheet?.currentBid,
           });
-          setRefreshInterval(getLastPublishRatesSheet.refreshInterval);
         }
       } catch (error) {
         console.log(error);
@@ -181,25 +168,20 @@ const RateSheet = () => {
     if (name === "bidValue") {
       setCurrentRates({
         ...currentRates,
-        bidValue: formatCurrencyInput(value),
+        bidValue: formatRateSheetInput(value),
       });
     } else if (name === "askValue") {
       setCurrentRates({
         ...currentRates,
-        askValue: formatCurrencyInput(value),
+        askValue: formatRateSheetInput(value),
       });
-    } else if (name === "refreshInterval") {
-      const validated = isValidNumberUnderMaxNumber(value, 30);
-      if (validated) {
-        setRefreshInterval(value);
-      }
     }
   };
 
   const handlePublishRates = () => {
     try {
       //Object destructuring
-      const { bidValue, askValue, dateTime } = currentRates;
+      const { bidValue, askValue } = currentRates;
       const { bidValue: copyBidVal, askValue: copyAskVal } = copyCurrentRates;
 
       const bid = Number(bidValue);
@@ -207,7 +189,7 @@ const RateSheet = () => {
       const lastBid = Number(lastPublishRates.bidValue);
       const lastAsk = Number(lastPublishRates.askValue);
       console.log("Check Value again", currentRates);
-      console.log("Check Value again", { bid, ask, lastBid, lastAsk });
+      console.log("Check Value again 1", { bid, ask, lastBid, lastAsk });
 
       // Step 1: Validate required fields
       if (!bid || !ask) {
@@ -233,26 +215,13 @@ const RateSheet = () => {
       }
 
       // Step 3: Format and compare current and last publish dates
-      const currentDate = moment(formatDateUTCToGMT(dateTime)).format(
-        "DD MMM YYYY"
-      );
-      const lastDate = moment(
-        formatDateUTCToGMT(lastPublishRates.dateTime)
-      ).format("DD MMM YYYY");
 
       // if copyBidVal and copyAskVal is 0 that means dealer or treasury update the first time rate in the morning
       const isFirstLogin2 =
         Number(copyBidVal) === 0 || Number(copyAskVal) === 0;
 
       // Step 4: Determine if it's the first time login (no last published data)
-      const isFirstLogin =
-        !copyBidVal || !copyAskVal || copyBidVal === 0 || copyAskVal === 0;
-
-      // Helper to get allowed bid/ask range based on percentage
-
       const getBidAskRange = (baseBid, baseAsk, percent) => {
-        console.log("Check Value again");
-
         const bidRange = baseBid * percent;
         const askRange = baseAsk * percent;
         return {
@@ -265,8 +234,6 @@ const RateSheet = () => {
 
       //Helper to check whether current values are out of range
       const checkOutOfRange = (minBid, maxBid, minAsk, maxAsk) => {
-        console.log("Check Value again", { minBid, maxBid, minAsk, maxAsk });
-
         return {
           isBidOutOfRange: bid < minBid || bid > maxBid,
           isAskOutOfRange: ask < minAsk || ask > maxAsk,
@@ -282,8 +249,6 @@ const RateSheet = () => {
       };
 
       if (isFirstLogin2) {
-        console.log("Checking");
-
         // we will compare the bid and ask rate from the last rate and the compare percentage will 2.5%
 
         // Step 5: Decide percentage range based on date match
@@ -314,7 +279,6 @@ const RateSheet = () => {
         dispatchPublishAction();
         return;
       } else {
-        console.log("Checking");
         // there will compare the values from the current and ask rate which is store in copyCurrentRates ask and bid from the 0.25%
 
         // === CASE: First Login (check from API's last published rates) ===
@@ -338,7 +302,7 @@ const RateSheet = () => {
 
           // Step 10: If out of range → show modal
           if (isBidOutOfRange || isAskOutOfRange) {
-            // dispatch(setPublishedSpotRates(true));
+            dispatch(setPublishedSpotRateSheet(true));
             return;
           }
 
@@ -372,8 +336,7 @@ const RateSheet = () => {
                         <CustomButton
                           value={"Publish"}
                           applyClass="publishBtn"
-                          // disabled={isMarketOn === true ? false : true}
-                          disabled={true}
+                          disabled={isMarketOn === true ? false : true}
                           onClick={handlePublishRates}
                           loading={PublishCurrentUSDRateSheetLoading}
                         />
@@ -443,7 +406,6 @@ const RateSheet = () => {
                     </div>
                   </div>
                 </div>
-                {/* last updated column Begin */}
                 {/* last updated column Begin */}
                 <div className="col-md-6 col-sm-12 ps-1 pe-1 rate-box">
                   <div className="rate box-header d-flex align-items-center px-2">
@@ -572,7 +534,7 @@ const RateSheet = () => {
                         dispatch(
                           PublishCurrentUSDRateSheetAction({ Data, navigate })
                         );
-                        dispatch(publishedSpotRateSheet(false));
+                        dispatch(setPublishedSpotRateSheet(false));
                       }}
                     />
                     <CustomButton

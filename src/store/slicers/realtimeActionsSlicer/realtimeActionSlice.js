@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { isEqual } from "lodash";
+// import { isEqual } from "lodash";
 
 const RealtimeActionsSlice = createSlice({
   name: "realtimeActions",
@@ -46,6 +46,7 @@ const RealtimeActionsSlice = createSlice({
 
     TransactionAssignedByTreasury: null,
     TreasurySpotRatesFeed: null,
+    CurrencyCrossesRatesFeed: null,
     CounterPartySpotRates: null,
     CategorySpotRates: null,
     CategoryForwardRates: null,
@@ -67,6 +68,32 @@ const RealtimeActionsSlice = createSlice({
     treasuryFowardsTenorsChanges: null,
     tradeRightsStatusUpdated: null,
     tresmarkCrossPremiumRates: null,
+    DealerSpotRatesFeed: null,
+    TreasuryDealerForwardRates: null,
+    TreasuryDealerFeDiscounting: null,
+    TreasuryDealerNonFeDiscounting: null,
+    spreadsForSingleUser: null,
+    dealerForwardTenorChanged: null,
+    DealerSpotClearRates: null,
+    DealerForwardClearRates: null,
+    DealerDiscountingClearRates: null,
+    usdParityForManagmentFeed: null,
+    currencyCrossesForManagmentFeed: null,
+    commoditiesForManagementFeed: null,
+    stockIndicesForManagementFeed: null,
+    kiborForManagementFeed: null,
+    sofrForManagementFeed: null,
+    sbpFXRevalRatesForManagementFeed: null,
+    swapsinUSDForManagementFeed: null,
+    treasuryRateSheetSpotTTRates: null,
+    // TREASURY_RATE_SHEET_CURRENCY_NOTES
+    treasuryRateSheetCurrencyNotes: null,
+    treasuryRateSheetConversionRate: null,
+    treasuryRateSheetKibor: null,
+    treasuryRateSheetSofr: null,
+    treasuryRateSheetIndicativeFBPRates: null,
+    currentRateSheetRatesPublished: null,
+    realTimeNewsFeed: null,
   },
   reducers: {
     setTradeRightsStatusUpdated: (state, { payload }) => {
@@ -75,8 +102,15 @@ const RealtimeActionsSlice = createSlice({
     clearCategoryForwardClearRates: (state) => {
       state.CategoryForwardClearRates = null;
     },
-    clearCategorySpotClearRates: (state) => {
-      state.CategorySpotClearRates = null;
+
+    clearDealerSpotClearRates: (state) => {
+      state.DealerSpotClearRates = null;
+    },
+    clearDealerForwardClearRates: (state) => {
+      state.DealerForwardClearRates = null;
+    },
+    clearDealerDiscountingClearRates: (state) => {
+      state.DealerDiscountingClearRates = null;
     },
     clearCategoryDiscountingClearRates: (state) => {
       state.CategoryDiscountingClearRates = null;
@@ -96,6 +130,10 @@ const RealtimeActionsSlice = createSlice({
       state.CategorySpotClearRates = payload;
       state.CategoryForwardClearRates = payload;
       state.CategoryDiscountingClearRates = payload;
+      // New Work
+      state.DealerSpotClearRates = payload;
+      state.DealerForwardClearRates = payload;
+      state.DealerDiscountingClearRates = payload;
     },
     setCategoryNonFeDiscounting: (state, { payload }) => {
       state.CategoryNonFeDiscouting = payload;
@@ -122,7 +160,10 @@ const RealtimeActionsSlice = createSlice({
       state.TreasuryNonFeDiscounting = payload;
     },
     setTreasuryForwardRates: (state, { payload }) => {
-      state.TreasuryForwardRates = payload;
+      state.TreasuryForwardRates = { ...payload };
+    },
+    setTreasuryDealerForwardRates: (state, { payload }) => {
+      state.TreasuryDealerForwardRates = { ...payload };
     },
     setCategorySpotRates: (state, { payload }) => {
       state.CategorySpotRates = payload;
@@ -134,9 +175,15 @@ const RealtimeActionsSlice = createSlice({
       state.CounterPartySpotRates = payload;
     },
     setTreasurySpotRatesFeed: (state, { payload }) => {
-      if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
-        state.TreasurySpotRatesFeed = payload;
-      }
+      // if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
+      state.TreasurySpotRatesFeed = payload;
+      // }
+    },
+    setDealerSpotRatesFeed: (state, { payload }) => {
+      state.DealerSpotRatesFeed = payload;
+    },
+    setCurrencyCrossesRatesFeed: (state, { payload }) => {
+      state.CurrencyCrossesRatesFeed = payload;
     },
     setDealBoxData(state, { payload }) {
       state.dealBoxData = payload;
@@ -242,6 +289,75 @@ const RealtimeActionsSlice = createSlice({
     setTresmarkCrossPremiumRates(state, { payload }) {
       state.tresmarkCrossPremiumRates = payload;
     },
+    setTreasuryDealerFeDiscounting: (state, { payload }) => {
+      state.TreasuryDealerFeDiscounting = payload;
+    },
+    setTreasuryDealerNonFeDiscounting: (state, { payload }) => {
+      state.TreasuryDealerNonFeDiscounting = payload;
+    },
+    setSpreadsForSingleUser: (state, { payload }) => {
+      state.spreadsForSingleUser = payload;
+    },
+    setDealerForwardTenorChanged: (state, { payload }) => {
+      state.dealerForwardTenorChanged = payload;
+    },
+    setUSDParityForManagementFeed: (state, { payload }) => {
+      state.usdParityForManagmentFeed = payload;
+    },
+    setCurrencyCrossesForManagementFeed: (state, { payload }) => {
+      state.currencyCrossesForManagmentFeed = payload;
+    },
+
+    setCommoditiesForManagmentFeed: (state, { payload }) => {
+      state.commoditiesForManagementFeed = payload;
+    },
+    setStockIndicesForManagmentFeed: (state, { payload }) => {
+      state.stockIndicesForManagementFeed = payload;
+    },
+
+    setKiborForManagmentFeed: (state, { payload }) => {
+      state.kiborForManagementFeed = {
+        ...payload,
+        kibor: Array.isArray(payload.kibor)
+          ? [...payload.kibor]
+          : { ...payload.kibor },
+      };
+    },
+
+    setSofrForManagmentFeed: (state, { payload }) => {
+      state.sofrForManagementFeed = payload;
+    },
+    setSbpFXRevalRatesForManagmentFeed: (state, { payload }) => {
+      state.sbpFXRevalRatesForManagementFeed = payload;
+    },
+    setSwapsinUSDForManagementFeed: (state, { payload }) => {
+      state.swapsinUSDForManagementFeed = payload;
+    },
+    setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
+      state.treasuryRateSheetSpotTTRates = payload;
+    },
+    setTreasuryRateSheetCurrencyNotes: (state, { payload }) => {
+      state.treasuryRateSheetCurrencyNotes = payload;
+    },
+
+    setTreasuryRateSheetConversionRate: (state, { payload }) => {
+      state.treasuryRateSheetConversionRate = payload;
+    },
+    setTreasuryRateSheetKibor: (state, { payload }) => {
+      state.treasuryRateSheetKibor = payload;
+    },
+    setTreasuryRateSheetSofr: (state, { payload }) => {
+      state.treasuryRateSheetSofr = payload;
+    },
+    setTreasuryRateSheetIndicativeFBPRates: (state, { payload }) => {
+      state.treasuryRateSheetIndicativeFBPRates = payload;
+    },
+    setCurrentRateSheetRatesPublished: (state, { payload }) => {
+      state.currentRateSheetRatesPublished = payload;
+    },
+    setRealTimeNewsFeed: (state, { payload }) => {
+      state.realTimeNewsFeed = payload;
+    },
   },
 });
 
@@ -301,6 +417,32 @@ export const {
   clearCategoryForwardClearRates,
   clearCategorySpotClearRates,
   setTresmarkCrossPremiumRates,
+  setCurrencyCrossesRatesFeed,
+  setDealerSpotRatesFeed,
+  setTreasuryDealerForwardRates,
+  setTreasuryDealerFeDiscounting,
+  setTreasuryDealerNonFeDiscounting,
+  setSpreadsForSingleUser,
+  setDealerForwardTenorChanged,
+  clearDealerSpotClearRates,
+  clearDealerForwardClearRates,
+  clearDealerDiscountingClearRates,
+  setUSDParityForManagementFeed,
+  setCurrencyCrossesForManagementFeed,
+  setCommoditiesForManagmentFeed,
+  setStockIndicesForManagmentFeed,
+  setKiborForManagmentFeed,
+  setSofrForManagmentFeed,
+  setSbpFXRevalRatesForManagmentFeed,
+  setSwapsinUSDForManagementFeed,
+  setTreasuryRateSheetSpotTTRates,
+  setTreasuryRateSheetCurrencyNotes,
+  setTreasuryRateSheetConversionRate,
+  setTreasuryRateSheetKibor,
+  setTreasuryRateSheetSofr,
+  setTreasuryRateSheetIndicativeFBPRates,
+  setCurrentRateSheetRatesPublished,
+  setRealTimeNewsFeed,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

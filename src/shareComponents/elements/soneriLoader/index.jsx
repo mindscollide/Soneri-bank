@@ -1,37 +1,46 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./Loader.css";
 import SoneriLoader from "../../../assets/img/logo-main-loader.png";
+import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
 
 const Loader = () => {
   const [isLoader, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
 
   const WatchListReducerLoader = useSelector(
     (state) => state.WatchListReducer.Loader
   );
   const AuthLoader = useSelector((state) => state.authReducer.Loader);
+  const mainLoader = useSelector((state) => state.authReducer.mainLoader);
 
-  const isLoading = [WatchListReducerLoader, AuthLoader].some(
-    (loading) => loading
-  );
+  // ✅ Remove mainLoader from isLoading — it was causing circular dependency
+  const isLoading = [WatchListReducerLoader, AuthLoader].some(Boolean);
 
   useEffect(() => {
     let timeout;
 
     if (isLoading) {
-      setIsLoading(true); // Show loader
+      setIsLoading(true);
     } else {
-      // Hide loader after a short delay when loading completes
       timeout = setTimeout(() => {
         setIsLoading(false);
-      }, 1000);
+        dispatch(setMainLoader(false)); // ✅ now safely set to false
+      }, 300);
     }
 
     return () => clearTimeout(timeout);
-  }, [isLoading]);
+  }, [isLoading, mainLoader]);
+
+  // ✅ Also handle mainLoader separately — show loader if mainLoader is true
+  // regardless of the API loaders
+  useEffect(() => {
+    if (mainLoader) {
+      setIsLoading(true);
+    }
+  }, [mainLoader]);
 
   return (
-    // !location.pathname.toLowerCase().includes("Soneri".toLowerCase()) && (
     isLoader && (
       <div className="body-loader">
         <div className="body-loader-inner">
@@ -47,7 +56,6 @@ const Loader = () => {
         </div>
       </div>
     )
-    // )
   );
 };
 

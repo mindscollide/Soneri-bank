@@ -16,6 +16,22 @@ export const formatCurrencyInput = (value) => {
   return cleanVal;
 };
 
+export const formatRateSheetInput = (value) => {
+  if (!value) return ""; // Return empty string if no value
+
+  // Remove non-numeric characters
+  let cleanVal = value.replace(/[^0-9]/g, "");
+
+  // Automatically add decimal if length is greater than 3
+  if (cleanVal.length > 4) {
+    let integerPart = cleanVal.slice(0, 4); // First 3 digits
+    let decimalPart = cleanVal.slice(4, 6) || "00"; // Next 2 digits or default "00"
+    return `${integerPart}.${decimalPart}`;
+  }
+
+  return cleanVal;
+};
+
 export const formatCurrencyInputForNegativeValAlso = (value) => {
   if (!value) return "";
 

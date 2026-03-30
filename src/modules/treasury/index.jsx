@@ -1,36 +1,102 @@
-import React from "react";
+import React, { lazy, Suspense, useEffect, useRef } from "react";
 import GlobalTabs from "../../shareComponents/elements/tabs";
-import LiveRates from "../../shareComponents/commonComponents/liveRates/index1";
-import Discounting from "../../shareComponents/commonComponents/discounting";
-import Forwards from "../../shareComponents/commonComponents/forwards";
-import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
-import News from "../../shareComponents/commonComponents/news";
-import RateSheet from "../../shareComponents/commonComponents/rateSheet";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import {
+  GetAllOtherInstrumentsApi,
+  getAllTenorsAction,
+  getAllTreasuryInstrumentsApi,
+  GetBankForwardForTreasuryApi,
+  GetBankSpotForTreasuryApi,
+  GetCurrencyCrossesApi,
+  GetDiscountingRatesForTreasuryApi,
+} from "../../store/actions/WatchlistAction";
+import { setActiveTab } from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
+import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+const LiveRates = lazy(() => import("./liveRates/index"));
+const Forwards = lazy(() => import("./forwards/index"));
+const TreasuryDiscounting = lazy(() => import("./discounting/index"));
 
+const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+const RateSheet = lazy(() =>
+  import("../../shareComponents/commonComponents/rateSheet")
+);
 const Treasury = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleTabChange = (tabTitle) => {
+    dispatch(setActiveTab(tabTitle)); // ✅ keep existing logic
+    dispatch(setActiveTreasuryTab(Number(tabTitle))); // ✅ reactive for Dashboard subscriptions
+  };
   const tabs = [
-    { label: `Live Rates`, key: 0, children: <LiveRates /> },
-    { label: `Fowards`, key: 1, children: <Forwards /> },
-    { label: `Discounting`, key: 2, children: <Discounting /> },
-    { label: `News`, key: 3, children: <News /> },
-    { label: `Rate Sheet`, key: 4, children: <RateSheet /> },
+    {
+      label: `Live Rates`,
+      key: "0",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <LiveRates />
+        </Suspense>
+      ),
+    },
+    {
+      label: `Forwards`,
+      key: "1",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <Forwards />
+        </Suspense>
+      ),
+    },
+    {
+      label: `Discounting`,
+      key: "2",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <TreasuryDiscounting />
+        </Suspense>
+      ),
+    },
+
+    {
+      label: `News`,
+      key: "3",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <News />
+        </Suspense>
+      ),
+    },
+    {
+      label: `Rate Sheet`,
+      key: "4",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <RateSheet />
+        </Suspense>
+      ),
+    },
   ];
-  // const dealerDropdown = (
-  //   <SelectDropdown
-  //     isSearchable={true}
-  //     defaultValue="Dealer 2"
-  //     style={{ width: 150, background: "#0326b3", color: "#ffffff" }}
-  //     classNamePrefix="treasuryInterbankSelectDealer"
-  //     options={[
-  //       { value: "Dealer 1", label: "Dealer 1" },
-  //       { value: "Dealer 2", label: "Dealer 2" },
-  //       { value: "Dealer 3", label: "Dealer 3" },
-  //     ]}
-  //   />
-  // );
+  const hasFetched = useRef(false);
+  useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    dispatch(getAllTreasuryInstrumentsApi({ navigate }));
+    dispatch(getAllTenorsAction({ navigate }));
+    dispatch(GetAllOtherInstrumentsApi({ navigate }));
+    dispatch(GetBankSpotForTreasuryApi({ navigate }));
+    dispatch(GetCurrencyCrossesApi({ navigate }));
+    dispatch(GetBankForwardForTreasuryApi({ navigate }));
+    dispatch(GetDiscountingRatesForTreasuryApi({ navigate }));
+  }, []);
+
   return (
-    <div className="mt-2">
-      <GlobalTabs items={tabs} />
+    <div>
+      <GlobalTabs
+        items={tabs}
+        defaultActiveKey={"0"}
+        onChange={handleTabChange}
+      />
     </div>
   );
 };

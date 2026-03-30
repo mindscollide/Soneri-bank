@@ -1,14 +1,20 @@
-import styles from "./bankSpotAndUSDParity.module.css";
 import GlobalTable from "../../elements/table/GlobalTable";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { shallowEqual, useSelector } from "react-redux";
-import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import {
+  convertUTCTimeToLocalTime,
+  extractTimeFromCompactDate,
+  formatDateUTCToGMT,
+} from "../../../../utils/timeFunction";
+import { IndexCell } from "../../elements/inputField/IndexCell";
+import { clearDealerSpotClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import { UpdatetDealerSpotRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
 
 // // ✅ Pure selectors (no object creation here)
 const selectGetAllInstrumentForTreasury = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
-// const selectTreasurySpotRatesFeed = (state) =>
-//   state.RealtimeActionsSlice.TreasurySpotRatesFeed;
+const selectDealerSpotRatesFeed = (state) =>
+  state.RealtimeActionsSlice.DealerSpotRatesFeed;
 const selectWorldCrosses = (state) =>
   state.WatchListReducer.GetBankSpotForDealer?.worldCrosses || [];
 const selectWorldCurrencies = (state) =>
@@ -18,62 +24,61 @@ const SelectGetCurrencyCrosses = (state) =>
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
 const BankSpotAndUSDParity = memo(() => {
+  const dispatch = useDispatch();
   const crossInstruments = useSelector(
     selectGetAllInstrumentForTreasury,
     shallowEqual
   );
-  // const fullFeed = useSelector(selectTreasurySpotRatesFeed);
+
+  // Checklist
+  const GetBankSpotForDealer = useSelector(
+    (state) => state.WatchListReducer.GetBankSpotForDealer
+  );
+
+  const ClearRatesData = useSelector(
+    (state) => state.RealtimeActionsSlice.DealerSpotClearRates
+  );
+
+  const fullFeed = useSelector(selectDealerSpotRatesFeed);
   const marketStatus = useSelector(selectMarketStatus);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
 
-  const GetCurrencyCrosses = useSelector(
-    SelectGetCurrencyCrosses,
-    shallowEqual
-  );
+  // ✅ Memoized essential feed values
+  const feedEssentials = useMemo(() => {
+    if (!fullFeed) return null;
 
-  console.log(
-    { crossInstruments, marketStatus, worldCrosses, worldCurrencies },
-    "fullFeedfullFeedfullFeed"
-  );
+    return {
+      crossBid: fullFeed.instrumentCrossRate?.bid,
+      crossAsk: fullFeed.instrumentCrossRate?.ask,
+      crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
+      crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
+      crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
+      spotBid: fullFeed.instrumentParitySpot?.bid,
+      spotAsk: fullFeed.instrumentParitySpot?.ask,
+      spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
+    };
+  }, [
+    fullFeed?.instrumentCrossRate?.bid,
+    fullFeed?.instrumentCrossRate?.ask,
+    fullFeed?.instrumentCrossRate?.updateDateTime,
+    fullFeed?.instrumentCrossRate?.instrumentID,
+    fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
+    fullFeed?.instrumentParitySpot?.bid,
+    fullFeed?.instrumentParitySpot?.ask,
+    fullFeed?.instrumentParitySpot?.instrumentID,
+  ]);
 
-  // // ✅ Memoized essential feed values
-  // const feedEssentials = useMemo(() => {
-  //   if (!fullFeed) return null;
-
-  //   return {
-  //     crossBid: fullFeed.instrumentCrossRate?.bid,
-  //     crossAsk: fullFeed.instrumentCrossRate?.ask,
-  //     crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
-  //     crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
-  //     crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
-  //     spotBid: fullFeed.instrumentParitySpot?.bid,
-  //     spotAsk: fullFeed.instrumentParitySpot?.ask,
-  //     spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
-  //   };
-  // }, [
-  //   fullFeed?.instrumentCrossRate?.bid,
-  //   fullFeed?.instrumentCrossRate?.ask,
-  //   fullFeed?.instrumentCrossRate?.updateDateTime,
-  //   fullFeed?.instrumentCrossRate?.instrumentID,
-  //   fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
-  //   fullFeed?.instrumentParitySpot?.bid,
-  //   fullFeed?.instrumentParitySpot?.ask,
-  //   fullFeed?.instrumentParitySpot?.instrumentID,
-  // ]);
-
-  // // Local state for processed data
+  // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
 
-  console.log(processedData, "processedDataprocessedData");
-
-  // // Refs for batching updates
+  // Refs for batching updates
   const dataRef = useRef([]);
-  // const lastUpdateRef = useRef(0);
-  // const updateQueueRef = useRef([]);
-  // const animationFrameRef = useRef(null);
+  const lastUpdateRef = useRef(0);
+  const updateQueueRef = useRef([]);
+  const animationFrameRef = useRef(null);
 
-  // // ✅ Enriched base data
+  // ✅ Enriched base data
   const enrichedData = useMemo(() => {
     if (!crossInstruments || !worldCrosses || !worldCurrencies) return [];
 
@@ -124,119 +129,168 @@ const BankSpotAndUSDParity = memo(() => {
     }
   }, [enrichedData]);
 
-  // // ✅ Batch update function
-  // const processUpdateQueue = useCallback(() => {
-  //   if (updateQueueRef.current.length === 0) {
-  //     animationFrameRef.current = null;
-  //     return;
-  //   }
+  // ✅ Batch update function
+  const processUpdateQueue = useCallback(() => {
+    if (updateQueueRef.current.length === 0) {
+      animationFrameRef.current = null;
+      return;
+    }
 
-  //   const updates = updateQueueRef.current;
-  //   updateQueueRef.current = [];
+    const updates = updateQueueRef.current;
+    updateQueueRef.current = [];
 
-  //   setProcessedData((prevData) => {
-  //     let hasChanges = false;
-  //     const updatedData = prevData.map((item) => {
-  //       let updatedItem = { ...item };
-  //       let changed = false;
+    setProcessedData((prevData) => {
+      let hasChanges = false;
+      const updatedData = prevData.map((item) => {
+        let updatedItem = { ...item };
+        let changed = false;
 
-  //       updates.forEach((update) => {
-  //         const { instrumentCrossRate, instrumentParitySpot } = update;
+        updates.forEach((update) => {
+          const { instrumentCrossRate, instrumentParitySpot } = update;
 
-  //         if (
-  //           instrumentCrossRate &&
-  //           item.instrumentID === instrumentCrossRate.instrumentID &&
-  //           item.secondaryInstrumentID ===
-  //             instrumentCrossRate.secondaryInstrumentID
-  //         ) {
-  //           if (item.worldCrossBid !== instrumentCrossRate.bid) {
-  //             updatedItem = {
-  //               ...updatedItem,
-  //               worldCrossBid: instrumentCrossRate.bid,
-  //               worldCrossOffer: instrumentCrossRate.ask,
-  //               time: instrumentCrossRate.updateDateTime,
-  //               version: updatedItem.version + 1,
-  //             };
-  //             changed = true;
-  //           }
+          if (
+            instrumentCrossRate &&
+            item.instrumentID === instrumentCrossRate.instrumentID &&
+            item.secondaryInstrumentID ===
+              instrumentCrossRate.secondaryInstrumentID
+          ) {
+            if (item.worldCrossBid !== instrumentCrossRate.bid) {
+              updatedItem = {
+                ...updatedItem,
+                worldCrossBid: instrumentCrossRate.bid,
+                worldCrossOffer: instrumentCrossRate.ask,
+                time: instrumentCrossRate.updateDateTime,
+                version: updatedItem.version + 1,
+              };
+              changed = true;
+            }
 
-  //           if (item.instrumentID === 21) {
-  //             updatedItem = {
-  //               ...updatedItem,
-  //               worldCurBid: instrumentCrossRate.bid,
-  //               worldCurOffer: instrumentCrossRate.ask,
-  //               version: updatedItem.version + 1,
-  //             };
-  //             changed = true;
-  //           }
-  //         }
+            if (item.instrumentID === 21) {
+              updatedItem = {
+                ...updatedItem,
+                worldCurBid: instrumentCrossRate.bid,
+                worldCurOffer: instrumentCrossRate.ask,
+                version: updatedItem.version + 1,
+              };
+              changed = true;
+            }
+          }
 
-  //         if (
-  //           instrumentParitySpot &&
-  //           item.instrumentID === instrumentParitySpot.instrumentID &&
-  //           item.instrumentID !== 21
-  //         ) {
-  //           if (
-  //             Number(updatedItem.worldCurBid) !==
-  //               Number(instrumentParitySpot.bid) ||
-  //             Number(updatedItem.worldCurOffer) !==
-  //               Number(instrumentParitySpot.ask)
-  //           ) {
-  //             updatedItem = {
-  //               ...updatedItem,
-  //               worldCurBid: instrumentParitySpot.bid,
-  //               worldCurOffer: instrumentParitySpot.ask,
-  //               version: updatedItem.version + 1,
-  //             };
-  //             changed = true;
-  //           }
-  //         }
-  //       });
+          if (
+            instrumentParitySpot &&
+            item.instrumentID === instrumentParitySpot.instrumentID &&
+            item.instrumentID !== 21
+          ) {
+            if (
+              Number(updatedItem.worldCurBid) !==
+                Number(instrumentParitySpot.bid) ||
+              Number(updatedItem.worldCurOffer) !==
+                Number(instrumentParitySpot.ask)
+            ) {
+              updatedItem = {
+                ...updatedItem,
+                worldCurBid: instrumentParitySpot.bid,
+                worldCurOffer: instrumentParitySpot.ask,
+                version: updatedItem.version + 1,
+              };
+              changed = true;
+            }
+          }
+        });
 
-  //       return changed ? updatedItem : item;
-  //     });
+        return changed ? updatedItem : item;
+      });
 
-  //     hasChanges = updatedData.some(
-  //       (newItem, index) => newItem !== prevData[index]
-  //     );
+      hasChanges = updatedData.some(
+        (newItem, index) => newItem !== prevData[index]
+      );
 
-  //     return hasChanges ? updatedData : prevData;
-  //   });
-  // }, []);
+      return hasChanges ? updatedData : prevData;
+    });
 
-  // // ✅ Queue update
-  // const queueUpdate = useCallback(
-  //   (feed) => {
-  //     if (!feed) return;
+    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+  }, []);
 
-  //     const now = Date.now();
-  //     if (now - lastUpdateRef.current < 16) return; // ~60fps
-  //     lastUpdateRef.current = now;
+  // ✅ Queue update
+  const queueUpdate = useCallback(
+    (feed) => {
+      if (!feed) return;
 
-  //     updateQueueRef.current.push(feed);
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 16) return; // ~60fps
+      lastUpdateRef.current = now;
 
-  //     if (!animationFrameRef.current) {
-  //       animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-  //     }
-  //   },
-  //   [processUpdateQueue]
-  // );
+      updateQueueRef.current.push(feed);
 
-  // // ✅ Feed update effect
-  // useEffect(() => {
-  //   if (!feedEssentials || !fullFeed) return;
-  //   queueUpdate(fullFeed);
-  // }, [feedEssentials, fullFeed, queueUpdate]);
+      if (!animationFrameRef.current) {
+        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      }
+    },
+    [processUpdateQueue]
+  );
+  // console.log(processedData, "ProcessedData");
+  // ✅ Feed update effect
+  useEffect(() => {
+    if (!feedEssentials || !fullFeed) return;
+    queueUpdate(fullFeed);
+  }, [feedEssentials, fullFeed, queueUpdate]);
 
-  // // Cleanup
-  // useEffect(() => {
-  //   return () => {
-  //     if (animationFrameRef.current) {
-  //       cancelAnimationFrame(animationFrameRef.current);
-  //     }
-  //   };
-  // }, []);
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
+  useEffect(() => {
+    if (marketStatus === false) {
+      setProcessedData((prevData) =>
+        prevData.map((data) => ({
+          ...data,
+          worldCrossBid: 0,
+          worldCrossOffer: 0,
+          worldCurBid: 0,
+          worldCurOffer: 0,
+        }))
+      );
+
+      setProcessedData((prevData) =>
+        prevData.map((data) => ({
+          ...data,
+          bid: 0,
+          offer: 0,
+        }))
+      );
+    }
+  }, [marketStatus]);
+
+  useEffect(() => {
+    if (ClearRatesData?.areRatesClear && GetBankSpotForDealer) {
+      console.log(ClearRatesData, "ClearRatesDataClearRatesData");
+      const clearedData = {
+        ...GetBankSpotForDealer,
+        worldCurrencies:
+          GetBankSpotForDealer.worldCurrencies?.map((item) => ({
+            ...item,
+            bid: 0,
+            offer: 0,
+          })) || [],
+        worldCrosses:
+          GetBankSpotForDealer.worldCrosses?.map((item) => ({
+            ...item,
+            bid: 0,
+            offer: 0,
+          })) || [],
+      };
+
+      dispatch(UpdatetDealerSpotRates(clearedData));
+
+      // optional reset so it doesn't re-trigger
+      dispatch(clearDealerSpotClearRates());
+    }
+  }, [ClearRatesData, GetBankSpotForDealer, dispatch]);
   // Columns
   const columns = useMemo(
     () => [
@@ -256,13 +310,19 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Bid",
             dataIndex: "worldCrossBid",
             className: "bidCol",
-            width: 80,
+            width: 120,
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
           },
           {
             title: "Offer",
             dataIndex: "worldCrossOffer",
             className: "offerCol",
-            width: 80,
+            width: 120,
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
           },
           {
             title: "Time",
@@ -282,13 +342,19 @@ const BankSpotAndUSDParity = memo(() => {
             title: "Bid",
             dataIndex: "worldCurBid",
             className: "bidCol",
-            width: 80,
+            width: 120,
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
           },
           {
             title: "Offer",
             dataIndex: "worldCurOffer",
             className: "offerCol",
-            width: 80,
+            width: 120,
+            render: (text) => {
+              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
+            },
           },
           {
             title: "Time",
@@ -308,8 +374,10 @@ const BankSpotAndUSDParity = memo(() => {
     <GlobalTable
       columns={columns}
       dataSource={processedData}
+      rowKey={(record) =>
+        `${record.instrumentID}-${record.secondaryInstrumentID}`
+      }
       prefixCls={"LiveRatesTable"}
-      //   className={"LiveRatesTable"}
       pagination={false}
       scroll={{ x: "max-content", y: 500 }}
     />

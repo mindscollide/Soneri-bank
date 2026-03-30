@@ -1,13 +1,3 @@
-// import { PublishTenorWiseForwardsAction } from "@/container/pages/mainDealer/dealerActions";
-// import {
-//   setForwardsForTreasuryBranch,
-//   updateForwardItem,
-// } from "@/store/dealerReducer/dealerSlicer";
-// import {
-//   setCategoryFowardsTenorsChanges,
-//   setTreasuryFowardsTenorsChanges,
-//   tenorWiseFowardsRatesPublishedActions,
-// } from "@/store/realtimeActionsSlicer/realtimeActionSlice";
 import React, { Suspense, useEffect, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
@@ -28,6 +18,8 @@ import {
   updateForwardItem,
 } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
 import { PublishTenorWiseForwardsAction } from "../../../../store/actions/WatchlistAction";
+import styles from "./TenorWifeCurrent.module.css";
+import { Tooltip } from "antd";
 
 // Define condition to include components
 
@@ -73,399 +65,6 @@ const TenoreWiseCurrentAndLastRates = ({
   const forwardsForTreasuryBranch = useSelector(
     (state) => state.WatchListReducer.forwardsForTreasuryBranch
   );
-  // const forwardsForTreasuryBranch = [
-  //   {
-  //     tenorID: 67,
-  //     tenorName: "half month",
-  //     tenorDays: 16,
-  //     currentBid: "12",
-  //     currentAsk: "13",
-  //     lastBid: "",
-  //     lastAsk: "",
-  //     dateTime: "20260203080904",
-  //   },
-  //   {
-  //     tenorID: 55,
-  //     tenorName: "hasnain T",
-  //     currentBid: "",
-  //     currentAsk: "",
-  //     tenorDays: 2,
-  //     lastAsk: "",
-  //     lastBid: "",
-  //     DateTime: "2026-02-03T09:03:48.734Z",
-  //   },
-  //   {
-  //     tenorID: 43,
-  //     tenorName: "4",
-  //     currentBid: "",
-  //     currentAsk: "",
-  //     tenorDays: 4,
-  //     lastAsk: "",
-  //     lastBid: "",
-  //     DateTime: "2026-02-03T09:03:55.414Z",
-  //   },
-  // ];
-
-  // // const getDashboardForwards = useSelector(
-  // //   (state) => state.dealerReducer.getDealerDashboardData
-  // // );
-
-  // const getDashboardForwards = {
-  //   currentTenorWiseForwardRates: [
-  //     {
-  //       tenorID: 67,
-  //       tenorName: "half month",
-  //       bid: "12",
-  //       ask: "13",
-  //       dateTime: "20260203080904",
-  //     },
-  //   ],
-  //   lastTenorWiseForwardRates: [
-  //     {
-  //       tenorID: 9,
-  //       tenorName: "half month",
-  //       bid: "11",
-  //       ask: "12",
-  //       dateTime: "20260203080813",
-  //     },
-  //     {
-  //       tenorID: 45,
-  //       tenorName: "ON",
-  //       bid: "",
-  //       ask: "",
-  //       dateTime: "20260203080813",
-  //     },
-  //     {
-  //       tenorID: 54,
-  //       tenorName: "And",
-  //       bid: "21",
-  //       ask: "22",
-  //       dateTime: "20260203080813",
-  //     },
-  //     {
-  //       tenorID: 57,
-  //       tenorName: "Code",
-  //       bid: "21",
-  //       ask: "22",
-  //       dateTime: "20260203080813",
-  //     },
-  //     {
-  //       tenorID: 66,
-  //       tenorName: "4 WEEK",
-  //       bid: "",
-  //       ask: "",
-  //       dateTime: "20260203080813",
-  //     },
-  //     {
-  //       tenorID: 67,
-  //       tenorName: "tesst",
-  //       bid: "",
-  //       ask: "",
-  //       dateTime: "20260203080813",
-  //     },
-  //   ],
-  //   feDiscountingRates: [
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "20",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "30",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "45",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "60",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "10",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 22,
-  //       instrumentName: "EUR",
-  //       rate: "30",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 22,
-  //       instrumentName: "EUR",
-  //       rate: "5",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 22,
-  //       instrumentName: "EUR",
-  //       rate: "5",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 22,
-  //       instrumentName: "EUR",
-  //       rate: "5",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 22,
-  //       instrumentName: "EUR",
-  //       rate: "5",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 22,
-  //       instrumentName: "EUR",
-  //       rate: "20",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 23,
-  //       instrumentName: "GBP",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 23,
-  //       instrumentName: "GBP",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 23,
-  //       instrumentName: "GBP",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 23,
-  //       instrumentName: "GBP",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 23,
-  //       instrumentName: "GBP",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 23,
-  //       instrumentName: "GBP",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 24,
-  //       instrumentName: "JPY",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 24,
-  //       instrumentName: "JPY",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 24,
-  //       instrumentName: "JPY",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 24,
-  //       instrumentName: "JPY",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 24,
-  //       instrumentName: "JPY",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 24,
-  //       instrumentName: "JPY",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 25,
-  //       instrumentName: "CNY",
-  //       rate: "60",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 25,
-  //       instrumentName: "CNY",
-  //       rate: "60",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 25,
-  //       instrumentName: "CNY",
-  //       rate: "5",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 25,
-  //       instrumentName: "CNY",
-  //       rate: "60",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 25,
-  //       instrumentName: "CNY",
-  //       rate: "60",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 25,
-  //       instrumentName: "CNY",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 40,
-  //       instrumentName: "CHF",
-  //       rate: "70",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 40,
-  //       instrumentName: "CHF",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 40,
-  //       instrumentName: "CHF",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 40,
-  //       instrumentName: "CHF",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 40,
-  //       instrumentName: "CHF",
-  //       rate: "50",
-  //       dateTime: "20260203061001",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 40,
-  //       instrumentName: "CHF",
-  //       rate: "40",
-  //       dateTime: "20260203061001",
-  //     },
-  //   ],
-  //   nonFEDiscountingRates: [
-  //     {
-  //       tenorID: 5,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "10.36",
-  //       dateTime: "20260203061024",
-  //     },
-  //     {
-  //       tenorID: 6,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "10.76",
-  //       dateTime: "20260203061024",
-  //     },
-  //     {
-  //       tenorID: 1,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "10.78",
-  //       dateTime: "20260203061024",
-  //     },
-  //     {
-  //       tenorID: 2,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "10.78",
-  //       dateTime: "20260203061024",
-  //     },
-  //     {
-  //       tenorID: 3,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "10.78",
-  //       dateTime: "20260203061024",
-  //     },
-  //     {
-  //       tenorID: 4,
-  //       instrumentID: 21,
-  //       instrumentName: "USD",
-  //       rate: "1.12",
-  //       dateTime: "20260203061024",
-  //     },
-  //   ],
-  //   responseMessage:
-  //     "UploadRate_UploadRateServiceManager_GetDealerDashboardData_01",
-  //   isExecuted: true,
-  // };
 
   const getDashboardForwards = useSelector(
     (state) => state.WatchListReducer.getDealerDashboardData
@@ -489,8 +88,6 @@ const TenoreWiseCurrentAndLastRates = ({
   useEffect(() => {
     if (getAllTenorsData !== null) {
       try {
-        console.log(getAllTenorsData, "Filtered Applicable Tenors");
-
         const {
           currentTenorWiseForwardRates = [],
           lastTenorWiseForwardRates = [],
@@ -525,7 +122,6 @@ const TenoreWiseCurrentAndLastRates = ({
             dateTime: current?.dateTime ?? "",
           };
         });
-        console.log(newDataMap[0]?.dateTime, "newDataMapnewDataMap");
         setDate(newDataMap[0]?.dateTime);
         dispatch(setForwardsForTreasuryBranch(newDataMap));
       } catch (error) {
@@ -658,15 +254,6 @@ const TenoreWiseCurrentAndLastRates = ({
       (item) => Number(item.currentAsk) < Number(item.currentBid)
     );
 
-    // if (!checkDoNotempty) {
-    //   const handleClick = () => {
-    //     showMessage("Bid and Ask fields cannot be 0 or empty");
-    //   };
-
-    // handleClick();
-    // return;
-    // }
-
     if (checkAskValue !== undefined) {
       const handleClick = () => {
         showMessage("Ask value must be greater than Bid value.");
@@ -722,6 +309,37 @@ const TenoreWiseCurrentAndLastRates = ({
     dispatch(setForwardsForTreasuryBranch(updatedData));
   };
 
+  const handleGetDataFromTresmark = () => {
+    if (!getAllTenorsData || !getAllTenorsData.tenors) {
+      return;
+    }
+
+    const { tenors = [] } = getAllTenorsData;
+
+    if (tenors.length === 0) return;
+
+    // Update ONLY tenorDays
+    const updatedData = forwardsForTreasuryBranch.map((row) => {
+      const matchingTenor = tenors.find(
+        (tenor) => tenor.tenorID === row.tenorID
+      );
+
+      console.log(matchingTenor, "matchingTenormatchingTenor");
+      return {
+        ...row,
+        tenorDays:
+          matchingTenor !== undefined ? matchingTenor.tenorDays : row.tenorDays,
+      };
+    });
+
+    // Optional: re-sort by tenorDays like your useEffect does
+    const sortedData = updatedData.sort(
+      (a, b) => (a.tenorDays || 0) - (b.tenorDays || 0)
+    );
+
+    dispatch(setForwardsForTreasuryBranch(sortedData));
+  };
+
   const columns = [
     {
       title: "",
@@ -732,6 +350,21 @@ const TenoreWiseCurrentAndLastRates = ({
           key: "tenorName",
           width: 250,
         },
+      ],
+    },
+    {
+      title: (
+        <div className={styles["refresh-nodays"]}>
+          <Tooltip title="Data From Tresmark">
+            <i
+              className="icon-refresh icn-refreshdays fw-bold"
+              onClick={handleGetDataFromTresmark} // optional
+              style={{ cursor: "pointer" }}
+            />
+          </Tooltip>
+        </div>
+      ),
+      children: [
         {
           title: "No. of Days",
           dataIndex: "tenorDays",
@@ -753,6 +386,7 @@ const TenoreWiseCurrentAndLastRates = ({
         },
       ],
     },
+
     {
       title: "Current",
       children: [

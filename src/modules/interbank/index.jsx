@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import SpotRates from "./spotRates";
 import styles from "./interbank.module.css";
 import RateSheet from "./rateSheet";
@@ -14,18 +14,19 @@ import {
   getDealerDashboardApi,
   GetLastAndCurrentPublishUSDRateSheetAction,
   getLastPublishRatesAction,
-  getMarketStatusApi,
 } from "../../store/actions/WatchlistAction";
 
 const Interbank = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const hasFetched = useRef(false);
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(getLastPublishRatesAction({ navigate }));
     dispatch(getAllTenorsAction({ navigate }));
     dispatch(getDealerDashboardApi({ navigate }));
-    dispatch(getMarketStatusApi({ navigate }));
     dispatch(GetLastAndCurrentPublishUSDRateSheetAction({ navigate }));
   }, []);
   return (

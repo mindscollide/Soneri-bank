@@ -241,3 +241,96 @@
 .selectTransactionNatureList__menu-portal {
   z-index: 999999 !important;
 }
+/* Start Dealer Tenor Dropdown  */
+.SelectTenorDropDown__indicator-separator {
+  display: none !important;
+}
+.SelectTenorDropDown__placeholder {
+  color: #000 !important;
+}
+.SelectTenorDropDown__option {
+  border-bottom: 1px solid #ccc;
+  color: #000 !important;
+}
+.SelectTenorDropDown__menu {
+  background-color: #fff8e5 !important;
+}
+
+.SelectTenorDropDown__option--is-focused {
+  background-color: #ffc530 !important;
+  color: #000 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 1px !important;
+}
+.SelectTenorDropDown__control {
+  border-radius: 1px !important;
+  color: #000 !important;
+  min-width: 240px !important;
+  box-shadow: none !important;
+  border: 1px solid #ccc !important;
+}
+
+.SelectTenorDropDown__option.SelectTenorDropDown__option--is-selected {
+  background-color: #ddd;
+}
+
+/* Start Dealer Tenor Dropdown  */
+.treasuryInterbankSelectDealer {
+  border-radius: 4px !important;
+  color: #fff;
+}
+
+.treasuryInterbankSelectDealer__control.treasuryInterbankSelectDealer__control--is-focused.css-t3ipsp-control {
+  background-color: #0326b3;
+  color: white !important;
+}
+.treasuryInterbankSelectDealer__control.css-13cymwt-control {
+  background-color: #0326b3;
+  color: white !important;
+}
+
+/* Selected value inside the control */
+.treasuryInterbankSelectDealer__single-value {
+  background-color: #0326b3 !important;
+  color: #ffffff !important;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.treasuryInterbankSelectDealer__input-container.css-1cfo1cf {
+  color: #ffffff !important;
+}
+.treasuryInterbankSelectDealer__indicator.treasuryInterbankSelectDealer__dropdown-indicator.css-15lsz6c-indicatorContainer {
+  color: white;
+}
+.treasuryInterbankSelectDealer__placeholder {
+  color: #000 !important;
+}
+.treasuryInterbankSelectDealer__option {
+  border-bottom: 1px solid #ccc;
+  color: #000 !important;
+}
+.treasuryInterbankSelectDealer__menu {
+  background-color: #fff8e5 !important;
+}
+.treasuryInterbankSelectDealer__menu-list {
+  height: 210px;
+}
+
+.treasuryInterbankSelectDealer__option--is-focused {
+  background-color: #ffc530 !important;
+  color: #000 !important;
+  border: 1px solid #ccc !important;
+  border-radius: 1px !important;
+}
+.treasuryInterbankSelectDealer__control {
+  border-radius: 4px !important;
+  color: #000 !important;
+  min-width: 240px !important;
+  box-shadow: none !important;
+  border: 1px solid #ccc !important;
+  left: 20px !important;
+}
+
+.treasuryInterbankSelectDealer__option.treasuryInterbankSelectDealer__option--is-selected {
+  background-color: #ddd;
+}

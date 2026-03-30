@@ -64,9 +64,7 @@ export const getMarketStatusRM = {
 export const GetAllNatureOfTransactionsRM = {
   RequestMethod: "ServiceManager.GetAllNatureOfTransactions",
 };
-export const CreateCorporateUserForgotPassword = {
-  RequestMethod: "ServiceManager.CreateCorporateUserForgotPassword",
-};
+
 export const ResetPasswordCorporate = {
   RequestMethod: "ServiceManager.ResetPasswordCorporate",
 };
@@ -152,4 +150,73 @@ export const GetAllDealersSpread = {
 
 export const GetCurrencyCrosses = {
   RequestMethod: "ServiceManager.GetCurrencyCrosses",
+};
+
+export const AddDealerSpread = {
+  RequestMethod: "ServiceManager.AddDealerSpread",
+};
+export const GetSingleDealersSpread = {
+  RequestMethod: "ServiceManager.GetSingleDealersSpread",
+};
+
+export const GetAllOtherInstruments = {
+  RequestMethod: "ServiceManager.GetAllOtherInstruments",
+};
+
+export const GetUSDParityForTreasury = {
+  RequestMethod: "ServiceManager.GetUSDParityForTreasury",
+};
+
+export const GetCommoditiesForTreasury = {
+  RequestMethod: "ServiceManager.GetCommoditiesForTreasury",
+};
+
+export const GetIndicesForTreasury = {
+  RequestMethod: "ServiceManager.GetIndicesForTreasury",
+};
+
+export const GetKiborDataForTreasury = {
+  RequestMethod: "ServiceManager.GetKiborDataForTreasury",
+};
+
+export const GetSOFRDataForTreasury = {
+  RequestMethod: "ServiceManager.GetSOFRDataForTreasury",
+};
+
+export const GetSwapsInUSDForTreasury = {
+  RequestMethod: "ServiceManager.GetSwapsInUSDForTreasury",
+};
+
+export const GetRevalRatesForTreasury = {
+  RequestMethod: "ServiceManager.GetRevalRatesForTreasury",
+};
+
+export const GetSpotTTRatesForRateSheet = {
+  RequestMethod: "ServiceManager.GetSpotTTRatesForRateSheet",
+};
+
+export const GetRatesForCurrencyNotesForRateSheet = {
+  RequestMethod: "ServiceManager.GetRatesForCurrencyNotesForRateSheet",
+};
+
+export const GetKiborDataForRateSheet = {
+  RequestMethod: "ServiceManager.GetKiborDataForRateSheet",
+};
+export const GetSOFRDataForRateSheet = {
+  RequestMethod: "ServiceManager.GetSOFRDataForRateSheet",
+};
+export const GetIndicativeFBPRates = {
+  RequestMethod: "ServiceManager.GetIndicativeFBPRates",
+};
+
+export const GetSBPConversionRatesForRateSheet = {
+  RequestMethod: "ServiceManager.GetSBPConversionRatesForRateSheet",
+};
+
+export const GetNewsHeadlines = {
+  RequestMethod: "ServiceManager.GetNewsHeadlines",
+};
+
+export const GetNewsDetailsByID = {
+  RequestMethod: "ServiceManager.GetNewsDetails",
 };

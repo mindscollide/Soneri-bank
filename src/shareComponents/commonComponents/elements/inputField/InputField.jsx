@@ -24,27 +24,29 @@ const InputFIeld = ({
   onKeyDown,
   onBlur,
 }) => (
-  <input
-    value={value}
-    type={type}
-    onChange={onChange}
-    defaultValue={defaultValue}
-    pattern={pattern}
-    placeholder={placeholder}
-    className={`${styles[applyClass]} ${className}`}
-    checked={checked}
-    disabled={disabled}
-    maxLength={maxLength}
-    minLength={minLength}
-    max={max}
-    min={min}
-    name={name}
-    required={required}
-    onFocus={onFocus}
-    accept={accept}
-    onClick={onClick}
-    onKeyDown={onKeyDown}
-    onBlur={onBlur}
-  />
+  <>
+    <input
+      value={value}
+      type={type}
+      onChange={onChange}
+      defaultValue={defaultValue}
+      pattern={pattern}
+      placeholder={placeholder}
+      className={`${styles[applyClass]} ${className}`}
+      checked={checked}
+      disabled={disabled}
+      maxLength={maxLength}
+      minLength={minLength}
+      max={max}
+      min={min}
+      name={name}
+      required={required}
+      onFocus={onFocus}
+      accept={accept}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      onBlur={onBlur}
+    />
+  </>
 );
 export default InputFIeld;

@@ -33,9 +33,9 @@ const NonFeDiscountingTable = () => {
   const [date, setDate] = useState("");
   const { showMessage } = useNotification();
 
-  // const marketStatus = useSelector(
-  //   (state) => state.RealtimeActionsSlice.marketStatus
-  // );
+  const marketStatus = useSelector(
+    (state) => state.RealtimeActionsSlice.marketStatus
+  );
 
   const [tableData, setTableData] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
@@ -188,7 +188,7 @@ const NonFeDiscountingTable = () => {
           applyClass="publishForwardsBtn"
           value={"Publish Non FE Discounting"}
           onClick={handlePublishDiscount}
-          // disabled={marketStatus === false ? true : false}
+          disabled={marketStatus === false ? true : false}
           loading={publishNonFeDiscountingLoading}
         />
       </span>

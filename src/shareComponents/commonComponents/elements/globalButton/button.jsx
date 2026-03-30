@@ -6,6 +6,7 @@ const CustomButton = ({
   type = "primary",
   shape,
   iconPosition,
+
   value,
   onClick,
   rootClassName = null,
@@ -30,8 +31,9 @@ const CustomButton = ({
         prefixCls={prefixCls}
         size={size}
         onClick={onClick}
-        iconPosition={iconPosition}
+        // iconPosition={iconPosition}
         loading={loading}
+        iconPlacement={iconPosition}
       >
         {value}
       </Button>

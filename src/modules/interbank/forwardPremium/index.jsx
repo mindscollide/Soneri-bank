@@ -30,11 +30,6 @@ const ForwardsPremium = () => {
     (state) => state.WatchListReducer.forwardsForTreasuryBranch
   );
 
-  console.log(forwardsForTreasuryBranch, "forwardsForTreasuryBranch");
-  const treasuryFowardsTenorsChanges = useSelector(
-    (state) => state.RealtimeActionsSlice.treasuryFowardsTenorsChanges
-  );
-
   const createTenorLoading = useSelector(
     (state) => state.WatchListReducer.createTenorLoading
   );
@@ -42,6 +37,7 @@ const ForwardsPremium = () => {
   const getAllTenorsData = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
+
   const [getAllTenorsList, setAllTenorsList] = useState([]);
   const [createTenor, setCreateTenor] = useState({
     tenorName: "",
@@ -55,9 +51,7 @@ const ForwardsPremium = () => {
   });
 
   // state for NotificationSnackbar
-  const [snackbarData, setSnackbarData] = useState({
-    message: "",
-  });
+  const [snackbarData, setSnackbarData] = useState([]);
   useEffect(() => {
     if (snackbarData.message !== "") {
       const timer = setTimeout(() => {
@@ -102,7 +96,6 @@ const ForwardsPremium = () => {
     }
     setCreateTenor({ ...createTenor, [name]: value });
   };
-  console.log(getAllTenorsList, "getAllTenorsListgetAllTenorsList");
   const handleCreateTenor = () => {
     const { tenorName, noOfDays } = createTenor;
 
@@ -116,16 +109,22 @@ const ForwardsPremium = () => {
         );
 
         if (isExistTenorName) {
-          setSnackbarData({
-            message: "Tenor name already exists",
-          });
+          setSnackbarData([
+            {
+              id: Date.now(),
+              message: "Tenor name already exists",
+            },
+          ]);
           return;
         }
 
         if (isExistTenorDays) {
-          setSnackbarData({
-            message: "No of days already exists",
-          });
+          setSnackbarData([
+            {
+              id: Date.now(),
+              message: "No of days already exists",
+            },
+          ]);
           return;
         }
       }
@@ -189,7 +188,6 @@ const ForwardsPremium = () => {
       console.log(error);
     }
   };
-  console.log(getAllTenorsData, "getAllTenorsDatagetAllTenorsData");
 
   useEffect(() => {
     if (getAllTenorsData?.tenors?.length) {
@@ -203,11 +201,13 @@ const ForwardsPremium = () => {
           }));
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setTenorValue({
-          value: tenorsList[0].value,
-          label: tenorsList[0].label,
-        });
-
+        // setTenorValue({
+        //   value: tenorsList[0].value,
+        //   label: tenorsList[0].label,
+        // });
+        if (tenorsList.length > 0) {
+          setTenorValue(tenorsList[0]);
+        }
         setAllTenorsList(tenorsList);
       } catch (error) {
         console.error("Error processing tenors", error);
@@ -230,7 +230,6 @@ const ForwardsPremium = () => {
             label: tenor.tenorName,
           };
           setAllTenorsList([...getAllTenorsList, newObj]);
-          // dispatch(setTenorsCreated(null));
         }
       } catch (error) {
         console.log(error);
@@ -265,11 +264,12 @@ const ForwardsPremium = () => {
                 {SelectDropdown && (
                   <Suspense fallback={<div>Loading dropdown...</div>}>
                     <SelectDropdown
+                      isSearchable={true}
                       value={tenorValue}
                       menuPosition="bottom"
                       onChange={handleChangeTenors}
                       options={getAllTenorsList}
-                      classNamePrefix={"DealerDropDown"}
+                      classNamePrefix={"SelectTenorDropDown"}
                     />
                   </Suspense>
                 )}
@@ -407,7 +407,7 @@ const ForwardsPremium = () => {
           </>
         }
       />
-      <NotificationSnackbar message={snackbarData.message} />
+      <NotificationSnackbar messages={snackbarData} />
     </>
   );
 };

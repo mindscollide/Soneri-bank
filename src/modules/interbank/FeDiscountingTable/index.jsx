@@ -61,13 +61,6 @@ const FeDiscountingTable = () => {
     (state) => state.WatchListReducer.getAllTenors
   );
 
-  // console.log(
-  //   getDashboardForwards,
-  //   getAllTenorsData,
-  //   GetAllInstrumentForTreasury,
-  //   GetAllInstrumentForTreasury,
-  //   "getDashboardForwardsgetDashboardForwards"
-  // );
   const onInputChange = (record, instrumentName, value) => {
     const previousValue = record[instrumentName]; // Get previous value from record
     const validated = isValidMaxFourNumberAfterPoint(value, previousValue, 100);
@@ -118,10 +111,6 @@ const FeDiscountingTable = () => {
         );
 
         if (rowData.length > 0) {
-          console.log(
-            feDiscountingRates,
-            "feDiscountingRatesfeDiscountingRates"
-          );
           setRowData(rowData);
           setColumnsData(columnsData);
           setDate(feDiscountingRates[0]?.dateTime);

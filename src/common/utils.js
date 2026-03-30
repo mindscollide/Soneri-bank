@@ -63,7 +63,7 @@ const roleBasedNavigation = (navigate, roleID) => {
   } else if (roleID === 6) {
     ("");
   } else if (roleID === 7) {
-    navigate("/BOP/dealer");
+    navigate("/SONERI/dealer");
   } else if (roleID === 8) {
     navigate("/SONERI/treasury");
   } else if (roleID === 9) {

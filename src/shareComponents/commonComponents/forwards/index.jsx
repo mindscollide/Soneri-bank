@@ -7,202 +7,21 @@ import { throttle } from "lodash";
 import { useDispatch } from "react-redux";
 import { buildForwardsTable } from "../utils/generateColumnsData";
 import {
-  clearCategoryForwardClearRates,
-  setCategoryFowardsTenorsChanges,
+  clearDealerForwardClearRates,
+  setDealerForwardTenorChanged,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { IndexCell } from "../elements/inputField/IndexCell";
 import GlobalTable from "../elements/table/GlobalTable";
+import { UpdateDealerForwardRates } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 
 const Forwards = () => {
   const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
-  // const dataSource = [
-  //   {
-  //     tenorID: 67,
-  //     tenorName: "half month",
-  //     tenorDays: 16,
-  //     bid_USD: 0,
-  //     ask_USD: 0,
-  //     InstrumentID_USD: 21,
-  //     InstrumentName_USD: "USD",
-  //     bid_EUR: 0,
-  //     ask_EUR: 0,
-  //     InstrumentID_EUR: 22,
-  //     InstrumentName_EUR: "EUR",
-  //     bid_GBP: 0,
-  //     ask_GBP: 0,
-  //     InstrumentID_GBP: 23,
-  //     InstrumentName_GBP: "GBP",
-  //     bid_JPY: 0,
-  //     ask_JPY: 0,
-  //     InstrumentID_JPY: 24,
-  //     InstrumentName_JPY: "JPY",
-  //     bid_CNY: 0,
-  //     ask_CNY: 0,
-  //     InstrumentID_CNY: 25,
-  //     InstrumentName_CNY: "CNY",
-  //     bid_CHF: 0,
-  //     ask_CHF: 0,
-  //     InstrumentID_CHF: 40,
-  //     InstrumentName_CHF: "CHF",
-  //   },
-  // ];
-
-  // const [columnsData, setColumnsData] = useState([]);
-
-  // const columnsData = [
-  //   {
-  //     title: "",
-  //     key: "tenorName",
-  //     width: 60,
-  //     children: [
-  //       {
-  //         title: "Tenor",
-  //         dataIndex: "tenorName",
-  //         key: "tenorName",
-  //         width: 120,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "USD",
-  //     key: "group_USD",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_USD",
-  //         key: "bid_USD",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_USD",
-  //         key: "ask_USD",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "EUR",
-  //     key: "group_EUR",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_EUR",
-  //         key: "bid_EUR",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_EUR",
-  //         key: "ask_EUR",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "GBP",
-  //     key: "group_GBP",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_GBP",
-  //         key: "bid_GBP",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_GBP",
-  //         key: "ask_GBP",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "JPY",
-  //     key: "group_JPY",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_JPY",
-  //         key: "bid_JPY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_JPY",
-  //         key: "ask_JPY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "CNY",
-  //     key: "group_CNY",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_CNY",
-  //         key: "bid_CNY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_CNY",
-  //         key: "ask_CNY",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "CHF",
-  //     key: "group_CHF",
-  //     align: "center",
-  //     width: 180,
-  //     children: [
-  //       {
-  //         title: "Bid",
-  //         dataIndex: "bid_CHF",
-  //         key: "bid_CHF",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //       {
-  //         title: "Ask",
-  //         dataIndex: "ask_CHF",
-  //         key: "ask_CHF",
-  //         width: 60,
-  //         align: "center",
-  //       },
-  //     ],
-  //   },
-  // ];
-  // const GetCategoryWiseForwardRatesData = useSelector(
-  //   (state) => state.categoryReducer.GetCategoryWiseForwardRates
-  // );
+  const TreasuryDealerForwardRates = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
+  );
   // const GetCategoryWiseForwardRatesData = null;
   // console.log(
   //   GetCategoryWiseForwardRatesData,
@@ -211,10 +30,7 @@ const Forwards = () => {
   const GetBankForwardForTreasuryDealer = useSelector(
     (state) => state.WatchListReducer.GetBankForwardForTreasuryDealer
   );
-  console.log(
-    GetBankForwardForTreasuryDealer,
-    "GetBankForwardForTreasuryDealerGetBankForwardForTreasuryDealer"
-  );
+
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
@@ -223,24 +39,25 @@ const Forwards = () => {
     (state) => state.WatchListReducer.getAllTenors
   );
 
-  console.log({ getAllTenorsRecords, allInstrumentForTreasuryData }, "AllData");
-
   // const CategoryForwardRates = useSelector(
   //   (state) => state.RealtimeActionsSlice.CategoryForwardRates
   // );
 
+  // const TreasuryDealerForwardRates = useSelector(
+  //   (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
+  // );
+
+  const dealerForwardTenorChanged = useSelector(
+    (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged
+  );
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
 
-  // const ClearRatesData = useSelector(
-  //   (state) => state.RealtimeActionsSlice.CategoryForwardClearRates
-  // );
-  // const categoryFowardsTenorsChanges = useSelector(
-  //   (state) => state.RealtimeActionsSlice.categoryFowardsTenorsChanges
-  // );
+  const ClearRatesData = useSelector(
+    (state) => state.RealtimeActionsSlice.DealerForwardClearRates
+  );
 
-  // Define the columns structure for the Ant Design Table
   // Define the data source for the Ant Design Table
   useEffect(() => {
     if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
@@ -253,6 +70,7 @@ const Forwards = () => {
         const { forwardRates = [] } =
           GetBankForwardForTreasuryDealer !== null &&
           GetBankForwardForTreasuryDealer;
+
         const { rowData, columnsData } = buildForwardsTable(
           3,
           forwardRates,
@@ -329,13 +147,13 @@ const Forwards = () => {
   const throttledCategoryForwardUpdate = useMemo(
     () =>
       throttle((forwardRatesUpdate) => {
-        const { instrumentForwardsData } = forwardRatesUpdate;
+        const { forwardRates } = forwardRatesUpdate;
 
         setDataSource((prevData) =>
           prevData.map((row) => {
             let updatedRow = { ...row };
 
-            instrumentForwardsData.forEach((d) => {
+            forwardRates.forEach((d) => {
               Object.keys(row).forEach((key) => {
                 if (
                   key.startsWith("InstrumentID_") &&
@@ -356,11 +174,11 @@ const Forwards = () => {
     []
   );
 
-  // useEffect(() => {
-  //   if (CategoryForwardRates) {
-  //     throttledCategoryForwardUpdate(CategoryForwardRates);
-  //   }
-  // }, [CategoryForwardRates, throttledCategoryForwardUpdate]);
+  useEffect(() => {
+    if (TreasuryDealerForwardRates) {
+      throttledCategoryForwardUpdate(TreasuryDealerForwardRates);
+    }
+  }, [TreasuryDealerForwardRates, throttledCategoryForwardUpdate]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {
@@ -378,7 +196,99 @@ const Forwards = () => {
     }
   }, [marketStatus]);
 
+  useEffect(() => {
+    if (
+      dealerForwardTenorChanged !== null &&
+      getAllTenorsRecords !== null &&
+      allInstrumentForTreasuryData !== null
+    ) {
+      try {
+        const { newIsForwardtenorList = [], removedtenorList = [] } =
+          dealerForwardTenorChanged;
+        const allTenors = [...(getAllTenorsRecords.tenors || [])];
+
+        // Convert arrays of objects to Set of IDs
+        const removedSet = new Set(
+          removedtenorList.map((item) => item.tenorID)
+        );
+
+        // Update each tenor's isForwardingApplicable field
+        const updatedTenors = allTenors.map((tenor) => ({
+          ...tenor,
+          isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
+        }));
+        let getAllTenorsData = { tenors: updatedTenors };
+        let getAllInstrument = {
+          instruments: allInstrumentForTreasuryData.forwardInstruments,
+        };
+
+        const { forwardRates = [] } =
+          GetBankForwardForTreasuryDealer !== null &&
+          GetBankForwardForTreasuryDealer;
+
+        const { rowData, columnsData } = buildForwardsTable(
+          3,
+          forwardRates,
+          getAllTenorsData,
+          getAllInstrument,
+          IndexCell
+        );
+
+        if (rowData.length > 0) {
+          setDataSource(rowData);
+          setColumnsData(columnsData);
+        }
+        dispatch(setDealerForwardTenorChanged(null));
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [
+    dealerForwardTenorChanged,
+    getAllTenorsRecords,
+    allInstrumentForTreasuryData,
+  ]);
+  GetBankForwardForTreasuryDealer;
+
   // For clear Forward Rates
+  useEffect(() => {
+    if (!ClearRatesData?.areRatesClear) return;
+
+    if (GetBankForwardForTreasuryDealer?.forwardRates) {
+      // ✅ Clear bid/ask values
+      const clearedForwardRates =
+        GetBankForwardForTreasuryDealer.forwardRates.map((item) => ({
+          ...item,
+          bid: 0,
+          ask: 0,
+        }));
+
+      const newGetCategoryWiseForwardRatesData = {
+        ...GetBankForwardForTreasuryDealer,
+        forwardRates: clearedForwardRates,
+      };
+
+      dispatch(UpdateDealerForwardRates(newGetCategoryWiseForwardRatesData));
+    } else {
+      // ✅ Fallback: clear current local dataSource if Redux data missing
+      setDataSource((prevData) =>
+        prevData.map((row) => {
+          const updatedRow = { ...row };
+          Object.keys(row).forEach((key) => {
+            if (key.startsWith("bid_") || key.startsWith("ask_")) {
+              updatedRow[key] = 0;
+            }
+          });
+          return updatedRow;
+        })
+      );
+    }
+
+    // ✅ Reset ClearRatesData flag in Redux
+    dispatch(clearDealerForwardClearRates());
+  }, [ClearRatesData, GetBankForwardForTreasuryDealer, dispatch]);
+
+  // // For clear Forward Rates
   // useEffect(() => {
   //   if (!ClearRatesData?.areRatesClear) return;
 
@@ -418,11 +328,6 @@ const Forwards = () => {
   //   dispatch(clearCategoryForwardClearRates());
   // }, [ClearRatesData, GetCategoryWiseForwardRatesData, dispatch]);
 
-  console.log(
-    { dataSource, columnsData },
-    "dataSourcedataSourcedataSource for Clear Rates"
-  );
-
   return (
     <>
       <div className={styles["mainForwardTable"]}>
@@ -431,9 +336,10 @@ const Forwards = () => {
         </span>
         <GlobalTable
           columns={columnsData}
-          className="Dealer_Forwards_Treasury"
+          prefixCls={"Dealer_Forwards_Treasury"}
           dataSource={dataSource}
           pagination={false}
+          scroll={{ x: "scroll" }}
         />
       </div>
     </>

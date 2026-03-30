@@ -72,7 +72,8 @@ export function extractTimeFromCompactDate(input) {
     .toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true,
+      second: "2-digit",
+      hour12: false,
     })
     .toLowerCase();
 }
@@ -94,4 +95,94 @@ export const convertUTCToLocalDateWithToday = (timeStr) => {
   const localDate = new Date(utcDate);
 
   return localDate;
+};
+
+export const formatCompactDate = (input) => {
+  if (!input || input.length < 8) return "";
+
+  const day = input.slice(0, 2);
+  const month = input.slice(2, 4);
+  const year = input.slice(4, 8);
+
+  const date = new Date(`${year}-${month}-${day}T00:00:00`);
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  return `${day}-${monthNames[date.getUTCMonth()]}-${date.getUTCFullYear()}`;
+};
+
+export function convertUTCTimeToLocalTime(timeStr) {
+  try {
+    if (!timeStr || timeStr.length !== 6) return "";
+
+    const hour = parseInt(timeStr.slice(0, 2));
+    const minute = parseInt(timeStr.slice(2, 4));
+    const second = parseInt(timeStr.slice(4, 6));
+
+    const now = new Date();
+
+    // Create UTC date
+    const utcDate = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        hour,
+        minute,
+        second
+      )
+    );
+
+    // Format to HH:MM:SS
+    return utcDate.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const formatTodayForRateSheet = (date = new Date()) => {
+  const day = date.toLocaleDateString("en-GB", { day: "2-digit" });
+  const month = date.toLocaleDateString("en-GB", { month: "short" });
+  const year = date.getFullYear();
+  const weekday = date.toLocaleDateString("en-GB", { weekday: "long" });
+
+  return `${day}-${month}-${year} - ${weekday}`;
+};
+
+export const formatDateTimeForNews = (dateTime) => {
+  const year = dateTime.slice(0, 4);
+  const month = dateTime.slice(4, 6);
+  const day = dateTime.slice(6, 8);
+  const hour = dateTime.slice(8, 10);
+  const minute = dateTime.slice(10, 12);
+
+  const dateObj = new Date(`${year}-${month}-${day}`);
+
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+  });
+
+  return {
+    date: formattedDate,
+    time: `${hour}:${minute}`,
+  };
 };

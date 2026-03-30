@@ -401,19 +401,24 @@ tr.Treasury_Forwards-row.Treasury_Forwards-row-level-0.striped-design:first-chil
   margin-left: -15px !important;
 }
 .ForwardsForTreasuryAndBranchTable-thead tr:nth-child(1) th {
-  background-color: transparent !important;
+  background-color: #f6f4ef !important;
   text-align: center !important;
-  color: #f26522;
+  color: #000;
   font-weight: 700;
   font-size: 14px;
+  border-right: 1px solid #837c66;
+}
+.ForwardsForTreasuryAndBranchTable-thead tr:nth-child(1) th:last-child {
+  background-color: transparent !important;
+  border-right: none !important;
 }
 .ForwardsForTreasuryAndBranchTable-thead tr:nth-child(1) th:nth-child(1) {
   background-color: transparent !important;
-  text-align: center !important;
+  /* text-align: center !important;
   color: #f26522;
   font-weight: 700;
   font-size: 14px;
-  border-left: 0px !important;
+  border-left: 0px !important; */
 }
 .ForwardsForTreasuryAndBranchTable-thead tr:nth-child(2) th {
   background-color: #000 !important;
@@ -1551,53 +1556,6 @@ tr.OutStanding_Table-cell-scrollbar {
   background-color: #ffeeec !important;
 }
 
-/* Daily Trade Table */
-.DailyTrade-table {
-  /* max-height: 45vh !important; */
-  /* height: 45vh; */
-  /* max-width: 76vw; */
-  width: 100%;
-  box-sizing: border-box !important;
-  /* overflow-x: auto !important; */
-  border-radius: 0px !important;
-}
-
-.DailyTrade-table .ant-table-cell-scrollbar {
-  box-shadow: none !important;
-}
-
-.DailyTrade-table th.ant-table-cell {
-  color: #ffffff !important;
-  border-radius: 0% !important;
-  position: sticky !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  /* top: 0 !important; */
-  z-index: 10;
-  background: #f26522 !important;
-}
-
-.DailyTrade-table::-webkit-scrollbar {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 20px;
-  background-color: #ffffff;
-}
-
-.DailyTrade-table::-webkit-scrollbar-thumb {
-  border-radius: 20px;
-  background: #ccc;
-  margin-left: -15px;
-}
-
-.DailyTrade-table .ant-table-thead > tr > th {
-  height: 40px;
-  line-height: 30px;
-  padding: 0;
-  overflow: hidden !important;
-}
-
 /* Comapny List Table */
 .CompanyList-table {
   /* max-height: 45vh !important; */
@@ -1652,66 +1610,6 @@ tr.OutStanding_Table-cell-scrollbar {
   padding: 5px 12px;
 }
 
-/* For Live Rates */
-/* .Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(1) > th {
-  color: #fff;
-  text-align: center;
-  font-family: "Helvetica-Bold", sans-serif !important;
-  background: var(--color-light) !important;
-  color: var(--color-black) !important;
-  padding: 5px 10px !important;
-  border-right: 1px solid #837c66 !important;
-}
-
-.Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(2) > th {
-  background: #000;
-  color: #fff;
-  text-align: center;
-  padding: 5px 10px !important;
-  border: none !important;
-  font-family: "Helvetica-Bold", sans-serif;
-  font-size: 14px;
-}
-.Dealer_Forwards_Treasury
-  .ant-table-thead
-  > tr:nth-child(1)
-  > th.ant-table-cell-scrollbar {
-  display: none !important;
-}
-
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(1) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-Yorange-gray);
-  color: var(--color-black);
-  font-family: "Helvetica-Bold", sans-serif !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(2) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-yellow);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(3) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-gray2);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-}
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(4) {
-  text-align: center;
-  padding: 5px 10px !important;
-  background: var(--color-white);
-  color: var(--color-black);
-  font-family: Helvetica !important;
-  border-bottom: 1px solid #837c66;
-} */
-
 .Tresuary_Discounting-wrapper::-webkit-scrollbar {
   width: 0.3rem !important;
   border-radius: 20px !important;
@@ -1726,7 +1624,26 @@ tr.OutStanding_Table-cell-scrollbar {
 }
 
 /* FIRST COLUMN (fixed style) */
-.Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(1) > th {
+
+.Dealer_Forwards_Treasury-thead {
+  border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+.Dealer_Forwards_Treasury-measure-row {
+  visibility: collapse !important;
+  border-radius: 0 !important;
+}
+
+.Dealer_Forwards_Treasury
+  .Dealer_Forwards_Treasury-thead
+  > tr:nth-child(1)
+  > th {
+  border-radius: 0 !important;
+}
+.Dealer_Forwards_Treasury-content {
+  border-radius: 0 !important;
+}
+.Dealer_Forwards_Treasury tr:nth-child(1) > th {
   color: #fff;
   text-align: center;
   font-family: "Helvetica-Bold", sans-serif !important;
@@ -1736,7 +1653,7 @@ tr.OutStanding_Table-cell-scrollbar {
   border-right: 1px solid #837c66 !important;
 }
 
-.Dealer_Forwards_Treasury .ant-table-thead > tr:nth-child(2) > th {
+.Dealer_Forwards_Treasury tr:nth-child(2) > th {
   background: #000;
   color: #fff;
   text-align: center;
@@ -1745,7 +1662,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: "Helvetica-Bold", sans-serif;
   font-size: 14px;
 }
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:first-child {
+.Dealer_Forwards_Treasury tr > td:first-child {
   font-size: 14px;
   text-align: center;
   padding: 5px 10px !important;
@@ -1753,31 +1670,28 @@ tr.OutStanding_Table-cell-scrollbar {
   color: var(--color-black);
   font-family: "Helvetica-Bold", sans-serif !important;
   border-bottom: 1px solid #837c66;
+  min-width: 120px;
 }
 
 /* ALTERNATE COLUMNS AFTER FIRST */
-.Dealer_Forwards_Treasury
-  .ant-table-tbody
-  > tr
-  > td:not(:first-child):nth-child(even) {
+.Dealer_Forwards_Treasury tr > td:not(:first-child):nth-child(even) {
   background: #ffd567;
   font-family: "Helvetica", sans-serif !important;
   font-size: 14px;
   font-weight: 500;
+  min-width: 120px;
 }
 
-.Dealer_Forwards_Treasury
-  .ant-table-tbody
-  > tr
-  > td:not(:first-child):nth-child(odd) {
+.Dealer_Forwards_Treasury tr > td:not(:first-child):nth-child(odd) {
   background: var(--color-gray2);
   font-family: "Helvetica", sans-serif !important;
   font-size: 14px;
   font-weight: 500;
+  min-width: 120px;
 }
 
 /* Common styles for all other columns */
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:not(:first-child) {
+.Dealer_Forwards_Treasury tr > td:not(:first-child) {
   text-align: center;
   padding: 5px 10px !important;
   color: var(--color-black);
@@ -1787,7 +1701,7 @@ tr.OutStanding_Table-cell-scrollbar {
 
 /* USD Parity */
 
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(5) {
+.Dealer_Forwards_Treasury tr > td:nth-child(5) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-Yorange-gray);
@@ -1795,7 +1709,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: "Helvetica-Bold", sans-serif !important;
   border-bottom: 1px solid #837c66;
 }
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(6) {
+.Dealer_Forwards_Treasury tr > td:nth-child(6) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-yellow);
@@ -1803,7 +1717,7 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
 }
-.Dealer_Forwards_Treasury .ant-table-tbody > tr > td:nth-child(7) {
+.Dealer_Forwards_Treasury tr > td:nth-child(7) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-gray2);
@@ -1811,13 +1725,16 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
 }
-.Dealer_Forwards_Treasury.ant-table-tbody > tr > td:nth-child(8) {
+.Dealer_Forwards_Treasury tr > td:nth-child(8) {
   text-align: center;
   padding: 5px 10px !important;
   background: var(--color-white);
   color: var(--color-black);
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
+}
+.Dealer_Forwards_Treasury-cell::before {
+  display: none !important;
 }
 
 /* Currency Crosses */
@@ -1854,15 +1771,13 @@ tr.OutStanding_Table-cell-scrollbar {
   font-family: Helvetica !important;
   border-bottom: 1px solid #837c66;
 }
-.ant-table-measure-row {
-  visibility: collapse !important;
-}
 
 .ant-table-measure-row {
   visibility: collapse !important;
 }
 .LiveRatesTable-measure-row {
   visibility: collapse !important;
+  /* border-radius: 0; */
 }
 /* ================= HEADER ROW 1 ================= */
 
@@ -1873,6 +1788,7 @@ tr.OutStanding_Table-cell-scrollbar {
   color: var(--color-black) !important;
   padding: 5px 10px !important;
   border-right: 1px solid #837c66 !important;
+  border-radius: 0px !important;
 }
 
 /* ================= HEADER ROW 2 ================= */
@@ -1956,4 +1872,623 @@ tr.OutStanding_Table-cell-scrollbar {
   border-radius: 20px !important;
   background: #ccc !important;
   margin-left: -15px !important;
+}
+
+.LiveRatesTable-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.LiveRatesTable-wrapper
+  .LiveRatesTable-tbody
+  > tr.LiveRatesTable-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+/* LiveRates_empty */
+.LiveRatesTable_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.LiveRatesTable_Empty {
+  border-radius: 0px !important;
+}
+.LiveRatesTable_Empty .LiveRatesTable_Empty-thead > tr:nth-child(1) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  /* border-right: 1px solid #837c66 !important; */
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.LiveRatesTable_Empty .LiveRatesTable_Empty-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+}
+.LiveRatesTable_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
+  display: none;
+}
+.LiveRatesTable-header {
+  border-radius: 0px !important;
+}
+.LiveRatesTable-cell::before {
+  display: none !important;
+}
+
+/* managementTables] */
+.managementTables-wrapper .managementTables-container {
+  position: relative;
+  /* min-height: 332px !important; */
+}
+
+.managementTables-measure-row {
+  visibility: collapse !important;
+}
+.managementTables-cell::before {
+  display: none !important;
+}
+.managementTables-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables .managementTables-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+
+/* Hide Scrollbar Column */
+.managementTables
+  .managementTables-thead
+  > tr:nth-child(1)
+  > th.managementTables-cell-scrollbar {
+  /* display: none !important; */
+  border: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.managementTables .managementTables-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.managementTables .managementTables-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+}
+
+.managementTables .managementTables-tbody > tr > td:nth-child(2) {
+  background: var(--color-yellow);
+}
+
+.managementTables .managementTables-tbody > tr > td:nth-child(3) {
+  background: var(--color-gray2);
+}
+
+.managementTables-wrapper .managementTables {
+  scrollbar-color: auto !important;
+}
+.managementTables-wrapper .managementTables table {
+  padding-right: 5px;
+}
+
+.managementTables-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.managementTables-wrapper
+  .managementTables-tbody
+  > tr.managementTables-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.managementTables_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.managementTables_Empty {
+  border-radius: 0px !important;
+  min-height: 332px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+.managementTables_Empty .managementTables_Empty-header {
+  border-radius: 0px !important;
+}
+.managementTables_Empty .managementTables_Empty-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTables_Empty-cell::before {
+  display: none !important;
+}
+
+/* SOFR */
+.managementTables_sofr-wrapper .managementTables_sofr-container {
+  position: relative;
+  /* min-height: 332px !important; */
+}
+
+.managementTables_sofr-measure-row {
+  visibility: collapse !important;
+}
+.managementTables_sofr-cell::before {
+  display: none !important;
+}
+.managementTables_sofr-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables_sofr .managementTables_sofr-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  margin: 0;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0 !important;
+}
+
+/* Hide Scrollbar Column */
+.managementTables_sofr
+  .managementTables_sofr-thead
+  > tr:nth-child(1)
+  > th.managementTables_sofr-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.managementTables_sofr .managementTables_sofr-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.managementTables_sofr .managementTables_sofr-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+  /* width: 150px !important; */
+}
+
+.managementTables_sofr-wrapper .managementTables_sofr {
+  scrollbar-color: auto !important;
+}
+.managementTables_sofr-wrapper .managementTables_sofr table {
+  padding-right: 5px;
+}
+
+.managementTables_sofr-empty {
+  background: none !important;
+}
+.managementTables_sofr-wrapper
+  .managementTables_sofr-tbody
+  > tr.managementTables_sofr-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.managementTables_sofr_Empty-empty {
+  background: none !important;
+}
+
+.managementTables_sofr_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.managementTables_sofr_Empty {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTables_sofr_Empty
+  .managementTable_Swaps_Empty-thead
+  > tr:nth-child(1)
+  > th {
+  background: #000 !important;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTables_sofr_Empty-cell::before {
+  display: none !important;
+}
+.managementTables_sofr_Empty-thead {
+  background: #000;
+  border-radius: 0;
+}
+.managementTables_Empty-wrapper {
+  border-collapse: none;
+}
+
+/* managementTable_Swaps] */
+.managementTable_Swaps-wrapper .managementTables-container {
+  position: relative;
+  min-height: 332px !important;
+}
+
+.managementTable_Swaps-measure-row {
+  visibility: collapse !important;
+}
+.managementTable_Swaps-cell::before {
+  display: none !important;
+}
+.managementTable_Swaps-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTable_Swaps .managementTable_Swaps-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTable_Swaps .managementTable_Swaps-thead > tr:nth-child(2) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+
+/* Hide Scrollbar Column */
+.managementTable_Swaps
+  .managementTable_Swaps-thead
+  > tr:nth-child(1)
+  > th.managementTable_Swaps-cell-scrollbar {
+  /* display: none !important; */
+  border: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.managementTable_Swaps .managementTable_Swaps-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.managementTable_Swaps .managementTable_Swaps-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+}
+
+.managementTable_Swaps-wrapper .managementTable_Swaps {
+  scrollbar-color: auto !important;
+}
+.managementTable_Swaps-wrapper .managementTable_Swaps table {
+  padding-right: 5px;
+}
+
+.managementTable_Swaps-empty .LiveRatesTable-tbody {
+  background: none !important;
+}
+.managementTable_Swaps-wrapper
+  .managementTable_Swaps-tbody
+  > tr.managementTables-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.managementTable_Swaps_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.managementTable_Swaps_Empty {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.managementTable_Swaps_Empty
+  .managementTable_Swaps_Empty-thead
+  > tr:nth-child(1)
+  > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.managementTable_Swaps_Empty-cell.LiveRatesTable_Empty-cell-scrollbar {
+  display: none;
+}
+
+/* ================= HEADER ROW 1 ================= */
+
+.Dealer_FE_Discounting-content {
+  border-radius: 0 !important;
+}
+
+.Dealer_FE_Discounting .Dealer_FE_Discounting-thead > tr:nth-child(1) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important; /* light header bg */
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  border-right: 1px solid #837c66 !important;
+  border-radius: 0 !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-thead > tr:nth-child(2) > th {
+  text-align: center;
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: #000 !important; /* black header */
+  color: #fff !important;
+  padding: 5px 10px !important;
+}
+
+/* ================= BODY ROWS ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody > tr:nth-child(odd) {
+  background-color: #ffd966; /* yellow row */
+}
+
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody > tr:nth-child(even) {
+  background-color: #d9d9d9; /* grey row */
+}
+
+/* ================= BODY CELLS ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody td {
+  text-align: center;
+  font-family: "Helvetica", sans-serif !important;
+  border-right: 1px solid #837c66 !important;
+  padding: 5px 10px !important;
+}
+
+/* ================= REMOVE EXTRA BORDER AT TABLE END ================= */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody td:last-child,
+.Dealer_FE_Discounting .Dealer_FE_Discounting-thead th:last-child {
+  border-right: none !important;
+}
+
+/* Optional: Add subtle border-bottom to separate rows */
+.Dealer_FE_Discounting .Dealer_FE_Discounting-tbody > tr td {
+  border-bottom: 1px solid #837c66 !important;
+}
+
+/* Table wrapper scroll if needed */
+.Dealer_FE_Discounting-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.Dealer_FE_Discounting-cell::before {
+  display: none !important;
+}
+
+/* rateSheetTable */
+/* SOFR */
+.rateSheetTable-wrapper .rateSheetTable-container {
+  position: relative;
+  /* min-height: 332px !important; */
+}
+
+.rateSheetTable-measure-row {
+  visibility: collapse !important;
+}
+.rateSheetTable-cell::before {
+  display: none !important;
+}
+.rateSheetTable-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.rateSheetTable .rateSheetTable-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  margin: 0;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0 !important;
+}
+
+/* Hide Scrollbar Column */
+.rateSheetTable
+  .rateSheetTable-thead
+  > tr:nth-child(1)
+  > th.rateSheetTable-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.rateSheetTable .rateSheetTable-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.rateSheetTable .rateSheetTable-tbody > tr > td:nth-child(1) {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif !important;
+  text-align: left;
+  /* width: 150px !important; */
+}
+
+.rateSheetTable-wrapper .rateSheetTable {
+  scrollbar-color: auto !important;
+}
+.rateSheetTable-wrapper .rateSheetTable table {
+  padding-right: 5px;
+}
+
+.rateSheetTable-empty {
+  background: none !important;
+}
+.rateSheetTable-wrapper
+  .rateSheetTable-tbody
+  > tr.rateSheetTable-placeholder:hover
+  > td {
+  background: none !important;
+}
+
+.rateSheetTable_Empty-empty {
+  background: none !important;
+}
+
+.rateSheetTable_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.rateSheetTable_Empty {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.rateSheetTable_Empty .rateSheetTable_Empty-thead > tr:nth-child(1) > th {
+  background: #000 !important;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0px !important;
+}
+.rateSheetTable_Empty-cell::before {
+  display: none !important;
+}
+.rateSheetTable_Empty-thead {
+  background: #000;
+  border-radius: 0;
+}
+
+.rateSheetTable_Empty-measure-row {
+  visibility: collapse !important;
+}
+/* ================= HEADER ROW 1 ================= */
+.rateSheetTable_Empty {
+  border-radius: 0px !important;
+  min-height: 332px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+.rateSheetTable_Empty .rateSheetTable_Empty-header {
+  border-radius: 0px !important;
+}
+.rateSheetTable_Empty .rateSheetTable_Empty-thead > tr:nth-child(1) > th {
+  display: none !important;
+}
+.rateSheetTable_Empty-cell::before {
+  display: none !important;
+}
+
+/* RateSheetSoftAndKIBOR */
+.RateSheetSoftAndKIBOR-wrapper .RateSheetSoftAndKIBOR-container {
+  position: relative;
+}
+.RateSheetSoftAndKIBOR-measure-row {
+  visibility: collapse !important;
+}
+.RateSheetSoftAndKIBOR-cell::before {
+  display: none !important;
+}
+.RateSheetSoftAndKIBOR-header {
+  border-radius: 0px !important;
+}
+
+/* ================= HEADER ROW 2 ================= */
+
+.RateSheetSoftAndKIBOR .RateSheetSoftAndKIBOR-thead > tr:nth-child(1) > th {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 5px 10px !important;
+  margin: 0;
+  border: none !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 14px;
+  border-radius: 0 !important;
+}
+
+.RateSheetSoftAndKIBOR .RateSheetSoftAndKIBOR-tbody > tr > td:nth-child(1) {
+  font-weight: 700 !important;
+  /* width: 150px !important; */
+}
+
+/* Hide Scrollbar Column */
+.RateSheetSoftAndKIBOR
+  .RateSheetSoftAndKIBOR-thead
+  > tr:nth-child(1)
+  > th.RateSheetSoftAndKIBOR-cell-scrollbar {
+  display: none !important;
+}
+
+/* ================= BODY COMMON ================= */
+
+.RateSheetSoftAndKIBOR .RateSheetSoftAndKIBOR-tbody > tr > td {
+  text-align: center;
+  padding: 5px 10px !important;
+  border-bottom: 1px solid #837c66;
+  font-family: "Helvetica", sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+.RateSheetSoftAndKIBOR-wrapper .RateSheetSoftAndKIBOR {
+  scrollbar-color: auto !important;
 }

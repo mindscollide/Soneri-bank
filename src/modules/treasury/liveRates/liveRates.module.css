@@ -1,0 +1,19 @@
+.LiveRateMainCard {
+  margin: 6px 10px;
+  min-height: 50vh;
+}
+/*
+.innerCard {
+  font-weight: 700;
+  color: #000;
+  background-color: #f6f4ef;
+  display: flex;
+  justify-content: center;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-family: "Helvetica-Bold";
+  border: 2px solid #fff;
+}
+.headerCol {
+  padding: 0;
+} */

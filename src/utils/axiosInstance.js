@@ -62,8 +62,8 @@ api.interceptors.response.use(
 
     // 🚫 Unauthorized
     if (data?.responseCode === 401) {
-      // localStorage.clear();
-      // window.location.href = "/";
+      localStorage.clear();
+      window.location.href = "/";
       return Promise.reject("Unauthorized");
     }
 
@@ -71,8 +71,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // localStorage.clear();
-      // window.location.href = "/";
+      localStorage.clear();
+      window.location.href = "/";
     }
     return Promise.reject(error);
   }
