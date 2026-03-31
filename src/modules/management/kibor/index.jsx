@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import styles from "../management.module.css";
+import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 
 const GetKiborDataForTreasury = (state) =>
   state.WatchListReducer.GetKiborDataForTreasury?.kiborList;
@@ -30,12 +31,18 @@ const KIBOR = memo(() => {
         dataIndex: "bid",
         className: "bidCol",
         width: 120,
+        render: (text) => {
+          return text !== "-" && <IndexCell value={text.toFixed(2)} />;
+        },
       },
       {
         title: "Ask",
         dataIndex: "ask",
         className: "offerCol",
         width: 120,
+        render: (text) => {
+          return text !== "-" && <IndexCell value={text.toFixed(2)} />;
+        },
       },
       {
         title: "Applicable Date",
