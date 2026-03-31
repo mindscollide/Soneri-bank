@@ -13,10 +13,8 @@ const sbpFXRevalRatesForManagementFeed = (state) =>
 const SBPFXRevalRates = memo(() => {
   const animationFrameRef = useRef(null);
   const pendingFeedRef = useRef(null); // ✅ Always keep latest feed only (no queue, no throttle)
-
   const revalRatesList = useSelector(GetRevalRatesForTreasury);
   const fullFeed = useSelector(sbpFXRevalRatesForManagementFeed);
-
   const [processedData, setProcessedData] = useState([]);
   const [latestDate, setLatestDate] = useState("");
 

@@ -4,7 +4,6 @@ import GlobalTable from "../../../shareComponents/commonComponents/elements/tabl
 import styles from "../management.module.css";
 const GetSwapsInUSDForTreasury = (state) =>
   state.WatchListReducer.GetSwapsInUSDForTreasury;
-
 const swapsinUSDForManagementFeed = (state) =>
   state.RealtimeActionsSlice.swapsinUSDForManagementFeed;
 
@@ -14,10 +13,12 @@ const SwapsInUSD = memo(() => {
   const animationFrameRef = useRef(null);
   const swapsinUSDList = useSelector(GetSwapsInUSDForTreasury);
   const fullFeed = useSelector(swapsinUSDForManagementFeed);
+  // const [latestDate, setLatestDate] = useState("");
 
   // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
 
+  // console.log(swapsinUSDList, "swapsinUSDListswapsinUSDList");
   const { tableData, currencyList } = useMemo(() => {
     if (!swapsinUSDList?.swapsinUSDList)
       return { tableData: [], currencyList: [] };
@@ -217,7 +218,14 @@ const SwapsInUSD = memo(() => {
   }, [tableData, processedData]);
   return (
     <>
-      <span className={styles.tableheaderbar}>Swaps in USD</span>
+      <span
+        className={`${styles.tableheaderbar} d-flex justify-content-between`}
+      >
+        <span>Swaps in USD</span>
+        {/* <span className={styles.management_date}>
+          {formatCompactDate(latestDate)}
+        </span> */}
+      </span>
 
       <GlobalTable
         columns={columns}
