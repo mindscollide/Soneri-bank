@@ -189,7 +189,7 @@ export const formatDateTimeForNews = (dateTime) => {
   const formattedTime = dateObj.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: true, // change to false if you want 24-hour
+    hour12: false, // change to false if you want 24-hour
   });
 
   return {
