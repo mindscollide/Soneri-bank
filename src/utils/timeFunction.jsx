@@ -173,16 +173,27 @@ export const formatDateTimeForNews = (dateTime) => {
   const day = dateTime.slice(6, 8);
   const hour = dateTime.slice(8, 10);
   const minute = dateTime.slice(10, 12);
+  const second = dateTime.slice(12, 14);
 
-  const dateObj = new Date(`${year}-${month}-${day}`);
+  // ✅ Create UTC date correctly
+  const dateObj = new Date(
+    Date.UTC(year, month - 1, day, hour, minute, second)
+  );
 
+  // ✅ Convert to local automatically
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
   });
 
+  const formattedTime = dateObj.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true, // change to false if you want 24-hour
+  });
+
   return {
     date: formattedDate,
-    time: `${hour}:${minute}`,
+    time: formattedTime,
   };
 };
