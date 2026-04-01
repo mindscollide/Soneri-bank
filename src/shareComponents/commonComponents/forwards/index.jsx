@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from "./forwards.module.css";
-
 import { throttle } from "lodash";
-
 import { useDispatch } from "react-redux";
 import { buildForwardsTable } from "../utils/generateColumnsData";
 import {
@@ -13,8 +11,22 @@ import {
 import { IndexCell } from "../elements/inputField/IndexCell";
 import GlobalTable from "../elements/table/GlobalTable";
 import { UpdateDealerForwardRates } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
+import { useMqttTopics } from "../../../hook/useMqttTopics";
 
-const Forwards = () => {
+const Forwards = ({ dealerIdForMQTT }) => {
+  // ✅ Calculate topics here. Log to see what is being passed to the hook.
+  const mqttTopics = useMemo(() => {
+    const topics = [`SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerIdForMQTT}`];
+    console.log(
+      "%c[LiveRates] Calculated Topics:",
+      "color: #00ff00; font-weight: bold;",
+      topics
+    );
+    return topics;
+  }, [dealerIdForMQTT]);
+
+  // 2. Call the hook at the top level
+  useMqttTopics(mqttTopics);
   const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
@@ -22,11 +34,7 @@ const Forwards = () => {
   const TreasuryDealerForwardRates = useSelector(
     (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
   );
-  // const GetCategoryWiseForwardRatesData = null;
-  // console.log(
-  //   GetCategoryWiseForwardRatesData,
-  //   "GetCategoryWiseForwardRatesDataGetCategoryWiseForwardRatesData"
-  // );
+
   const GetBankForwardForTreasuryDealer = useSelector(
     (state) => state.WatchListReducer.GetBankForwardForTreasuryDealer
   );
@@ -38,14 +46,6 @@ const Forwards = () => {
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
-
-  // const CategoryForwardRates = useSelector(
-  //   (state) => state.RealtimeActionsSlice.CategoryForwardRates
-  // );
-
-  // const TreasuryDealerForwardRates = useSelector(
-  //   (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
-  // );
 
   const dealerForwardTenorChanged = useSelector(
     (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged
@@ -92,58 +92,6 @@ const Forwards = () => {
     GetBankForwardForTreasuryDealer,
   ]);
 
-  // useEffect(() => {
-  //   if (
-  //     categoryFowardsTenorsChanges !== null &&
-  //     getAllTenorsRecords !== null &&
-  //     allInstrumentForTreasuryData !== null
-  //   ) {
-  //     try {
-  //       const { newIsForwardtenorList = [], removedtenorList = [] } =
-  //         categoryFowardsTenorsChanges;
-  //       const allTenors = [...(getAllTenorsRecords.tenors || [])];
-
-  //       // Convert arrays of objects to Set of IDs
-  //       const removedSet = new Set(
-  //         removedtenorList.map((item) => item.tenorID)
-  //       );
-
-  //       // Update each tenor's isForwardingApplicable field
-  //       const updatedTenors = allTenors.map((tenor) => ({
-  //         ...tenor,
-  //         isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
-  //       }));
-
-  //       let getAllTenorsData = { tenors: updatedTenors };
-  //       let getAllInstrument = {
-  //         instruments: allInstrumentForTreasuryData.forwardInstruments,
-  //       };
-
-  //       const { forwardRates = [] } =
-  //         GetCategoryWiseForwardRatesData !== null &&
-  //         GetCategoryWiseForwardRatesData;
-  //       const { rowData, columnsData } = buildForwardsTable(
-  //         forwardRates,
-  //         getAllTenorsData,
-  //         getAllInstrument,
-  //         IndexCell
-  //       );
-  //       if (rowData.length > 0) {
-  //         setDataSource(rowData);
-  //         setColumnsData(columnsData);
-  //       }
-  //       dispatch(setCategoryFowardsTenorsChanges(null));
-  //       console.log(updatedTenors, "updatedTenorsupdatedTenors");
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // }, [
-  //   categoryFowardsTenorsChanges,
-  //   getAllTenorsRecords,
-  //   allInstrumentForTreasuryData,
-  // ]);
-
   const throttledCategoryForwardUpdate = useMemo(
     () =>
       throttle((forwardRatesUpdate) => {
@@ -178,7 +126,7 @@ const Forwards = () => {
     if (TreasuryDealerForwardRates) {
       throttledCategoryForwardUpdate(TreasuryDealerForwardRates);
     }
-  }, [TreasuryDealerForwardRates, throttledCategoryForwardUpdate]);
+  }, [TreasuryDealerForwardRates]);
 
   useEffect(() => {
     if (marketStatus !== null && marketStatus === false) {
@@ -287,46 +235,6 @@ const Forwards = () => {
     // ✅ Reset ClearRatesData flag in Redux
     dispatch(clearDealerForwardClearRates());
   }, [ClearRatesData, GetBankForwardForTreasuryDealer, dispatch]);
-
-  // // For clear Forward Rates
-  // useEffect(() => {
-  //   if (!ClearRatesData?.areRatesClear) return;
-
-  //   if (GetCategoryWiseForwardRatesData?.forwardRates) {
-  //     // ✅ Clear bid/ask values
-  //     const clearedForwardRates =
-  //       GetCategoryWiseForwardRatesData.forwardRates.map((item) => ({
-  //         ...item,
-  //         bid: 0,
-  //         ask: 0,
-  //       }));
-
-  //     const newGetCategoryWiseForwardRatesData = {
-  //       ...GetCategoryWiseForwardRatesData,
-  //       forwardRates: clearedForwardRates,
-  //     };
-
-  //     dispatch(
-  //       UpdateGetCategoryWiseForwardRates(newGetCategoryWiseForwardRatesData)
-  //     );
-  //   } else {
-  //     // ✅ Fallback: clear current local dataSource if Redux data missing
-  //     setDataSource((prevData) =>
-  //       prevData.map((row) => {
-  //         const updatedRow = { ...row };
-  //         Object.keys(row).forEach((key) => {
-  //           if (key.startsWith("bid_") || key.startsWith("ask_")) {
-  //             updatedRow[key] = 0;
-  //           }
-  //         });
-  //         return updatedRow;
-  //       })
-  //     );
-  //   }
-
-  //   // ✅ Reset ClearRatesData flag in Redux
-  //   dispatch(clearCategoryForwardClearRates());
-  // }, [ClearRatesData, GetCategoryWiseForwardRatesData, dispatch]);
 
   return (
     <>

@@ -41,7 +41,6 @@ export const useMqttClient = ({
   const unsubscribeFromTopics = useCallback((topics = []) => {
     const client = clientRef.current;
 
-    // 🔐 Real safety check
     if (!client || !client.isConnected()) return;
 
     topics.forEach((topic) => {
@@ -61,7 +60,6 @@ export const useMqttClient = ({
     (message) => {
       try {
         const parsed = JSON.parse(message.payloadString);
-        // console.log("MQTT message arrived:", parsed);
         if (parsed.payload.message === "TREASURY_MANAGEMENT_KIBOR")
           console.log("MQTT message arrived:", parsed);
         if (onMessageArrivedCallback) onMessageArrivedCallback(parsed);
@@ -77,7 +75,6 @@ export const useMqttClient = ({
       console.warn("MQTT connection lost:", resObj);
       setIsConnected(false);
       setSubscribedTopics([]);
-      // if (onConnectionLostCallback) onConnectionLostCallback(resObj);
     },
     [onConnectionLostCallback]
   );
@@ -106,7 +103,6 @@ export const useMqttClient = ({
       clientRef.current.onConnected = () => {
         console.log("MQTT connected successfully");
         setIsConnected(true);
-
         subscribeToTopics([subscribeID]);
       };
 
@@ -115,10 +111,8 @@ export const useMqttClient = ({
         onFailure: (err) => {
           console.log("Connection failed:", err.errorMessage);
           setIsConnected(false);
-          // setTimeout(() => connectToMqtt({ subscribeID, userID }), 6000);
         },
-        // keepAliveInterval: 300,
-        reconnect: false,
+        reconnect: true,
         userName: import.meta.env.VITE_MQTT_USERNAME,
         password: import.meta.env.VITE_MQTT_PASSWORD,
         cleanSession: true,
@@ -127,6 +121,10 @@ export const useMqttClient = ({
     },
     [onMessageArrived, onConnectionLost, randomString, subscribeToTopics]
   );
+
+  // ✅ Derive activeTopics as a Set from the existing subscribedTopics array.
+  // This is what useMqttTopics reads via context to know what's currently live.
+  const activeTopics = new Set(subscribedTopics);
 
   return {
     client: clientRef,
@@ -137,5 +135,6 @@ export const useMqttClient = ({
     onMessageArrived,
     onConnectionLost,
     setSubscribedTopics,
+    activeTopics, // ✅ added — always a Set, never undefined
   };
 };

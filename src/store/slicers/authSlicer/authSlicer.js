@@ -1,25 +1,7 @@
-import {
-  // createAsyncThunk,
-  createSlice,
-} from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-// import { resetAndForgotPassword } from "../../container/loginScreens/forgetPassword/forgotPassword_Actions";
-// import { setCustomHeaders } from "@/common/utils";
-
-import { resetAndForgotPassword } from "../../actions/forgotPassword_Actions";
-// import {
-//   getAllActiveCorporatesApi,
-//   getAllCategoriesAction,
-//   // getAllInstrumentsApi,
-//   GetUsersEmailApi,
-// } from "../../../shareComponents/commonComponents/utils/globalApis";
-// import {
-//   createCorporateCreatePasswordApi,
-//   validateLinkForCorporateCreatePasswordApi,
-// } from "../../actions/createPassword_Action";
 import {
   getAllInstrumentsApi,
-  // GetAllNatureOfTransactionsApi,
   loginInApi,
   LogoutApi,
 } from "../../actions/authAction";
@@ -35,7 +17,6 @@ const authSlice = createSlice({
     refreshTokenResponse: null,
     logout: null,
     getAllInstruments: null,
-    GetUsersEmail: null,
     mainLoader: false,
   },
   reducers: {
@@ -66,24 +47,6 @@ const authSlice = createSlice({
         state.Loader = false;
         state.responseMessage = action.payload;
         state.user = null;
-      })
-
-      .addCase(resetAndForgotPassword.pending, (state) => {
-        state.Loader = true;
-      })
-      .addCase(resetAndForgotPassword.fulfilled, (state, { payload }) => {
-        console.log(payload, "payloadpayload");
-        state.Loader = false;
-        state.error = null;
-        state.responseMessage = payload?.message;
-        state.resetPasswordResponse = payload?.response;
-      })
-      .addCase(resetAndForgotPassword.rejected, (state, { payload }) => {
-        console.log(payload, "payloadpayload");
-        state.Loader = false;
-        state.error = null;
-        state.responseMessage = payload;
-        state.resetPasswordResponse = null;
       })
 
       .addCase(LogoutApi.pending, (state) => {

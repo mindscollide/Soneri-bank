@@ -1,4 +1,11 @@
-import React, { lazy, Suspense, useEffect, useRef } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import GlobalTabs from "../../shareComponents/elements/tabs";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +21,7 @@ import {
 import { setActiveTab } from "../../store/slicers/watchListSlicer/WatchListSlicer";
 import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../hook/useMqttTopics";
 const LiveRates = lazy(() => import("./liveRates/index"));
 const Forwards = lazy(() => import("./forwards/index"));
 const TreasuryDiscounting = lazy(() => import("./discounting/index"));
@@ -25,9 +33,36 @@ const RateSheet = lazy(() =>
 const Treasury = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // 1. Local state to track active tab for the hook
+  const [activeTabId, setActiveTabId] = useState(0);
+
+  // 2. Define which topics belong to which tab
+  const topicMap = {
+    0: [
+      `SBL_REAL_TIME_FEED_TREASURY`,
+      `SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY`,
+    ], // Live Rates
+    1: ["SBL_REAL_TIME_FEED_TREASURY"], // Forwards
+    2: ["SBL_REAL_TIME_FEED_TREASURY"], // Discounting
+    3: [`REAL_TIME_FEED_NEWS`], // News
+    4: [], // Rate Sheet
+  };
+  // 3. Get the topics for the current tab
+  // We use useMemo to prevent the hook from re-subscribing on every render
+  // unless the activeTabId actually changes.
+  const currentTopics = useMemo(
+    () => topicMap[activeTabId] || [],
+    [activeTabId]
+  );
+
+  // 4. Call the hook at the TOP LEVEL
+  useMqttTopics(currentTopics);
+
   const handleTabChange = (tabTitle) => {
-    dispatch(setActiveTab(tabTitle)); // ✅ keep existing logic
-    dispatch(setActiveTreasuryTab(Number(tabTitle))); // ✅ reactive for Dashboard subscriptions
+    setActiveTabId(tabTitle); // Update local state to trigger hook update
+    dispatch(setActiveTab(tabTitle));
+    dispatch(setActiveTreasuryTab(Number(tabTitle)));
   };
   const tabs = [
     {

@@ -1,16 +1,30 @@
-import React from "react";
-import TreasuryFeDiscountingTable from "./TreasuryFEDiscounting";
-import TreasuryNonFeDiscountingTable from "./TreasuryNonFEDiscounting";
+import React, { lazy, Suspense } from "react";
+import { useMqttTopics } from "../../../hook/useMqttTopics";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+
+// 🔹 Lazy load components
+const TreasuryFeDiscountingTable = lazy(() =>
+  import("./TreasuryFEDiscounting")
+);
+const TreasuryNonFeDiscountingTable = lazy(() =>
+  import("./TreasuryNonFEDiscounting")
+);
 
 const TreasuryDiscounting = () => {
+  useMqttTopics([`SBL_REAL_TIME_FEED_TREASURY`]);
+
   return (
     <>
-      <div>
-        <TreasuryFeDiscountingTable />
-      </div>
-      <div>
-        <TreasuryNonFeDiscountingTable />
-      </div>
+      <Suspense fallback={<SectionLoader />}>
+        <div>
+          <TreasuryFeDiscountingTable />
+        </div>
+      </Suspense>
+      <Suspense fallback={<SectionLoader />}>
+        <div>
+          <TreasuryNonFeDiscountingTable />
+        </div>
+      </Suspense>
     </>
   );
 };

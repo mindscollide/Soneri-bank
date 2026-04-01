@@ -2,30 +2,12 @@ export const loginRequestMethod = {
   RequestMethod: "ServiceManager.Login",
 };
 
-export const corporateUserRequestMethod = {
-  RequestMethod: "ServiceManager.CorporateUserLogin",
-};
-
-export const sendEmailForResetPaswordRM = {
-  RequestMethod: "ServiceManager.SendEmailForResetPasword",
-};
-
 export const refreshTokenRM = {
   RequestMethod: "ServiceManager.RefreshToken",
 };
 
-export const getAllCategoriesRM = {
-  RequestMethod: "ServiceManager.GetAllCategories",
-};
-
 export const GetAllInstrumentsRM = {
   RequestMethod: "ServiceManager.GetAllInstruments",
-};
-export const GetActiveCorporatesRM = {
-  RequestMethod: "ServiceManager.GetActiveCorporates",
-};
-export const GetUsersEmail = {
-  RequestMethod: "ServiceManager.GetUsersEmail",
 };
 
 export const GetAllInstrumentForTreasuryRM = {
@@ -37,43 +19,15 @@ export const GetBankForwardForTreasury = {
 export const GetBankSpotForTreasury = {
   RequestMethod: "ServiceManager.GetBankSpotForTreasury",
 };
-export const GetCorporateDailyVolume = {
-  RequestMethod: "ServiceManager.GetCorporateDailyVolume",
-};
-export const GetDashboardData = {
-  RequestMethod: "ServiceManager.GetFXTradingSectionAndApplicableInstrument",
-};
-export const GetDiscountingRatesForCounterParty = {
-  RequestMethod: "ServiceManager.GetDiscountingRatesForCounterParty",
-};
+
 export const GetDiscountingRatesForTreasury = {
   RequestMethod: "ServiceManager.GetDiscountingRatesForTreasury",
 };
-export const GetForwardRatesForCounterParty = {
-  RequestMethod: "ServiceManager.GetForwardRatesForCounterParty",
-};
-export const GetMisDataByRange = {
-  RequestMethod: "ServiceManager.GetMisDataByRange",
-};
-export const SaveUserDashboardRM = {
-  RequestMethod: "ServiceManager.SaveUserDashboard",
-};
+
 export const getMarketStatusRM = {
   RequestMethod: "ServiceManager.GetMarketStatus",
 };
-export const GetAllNatureOfTransactionsRM = {
-  RequestMethod: "ServiceManager.GetAllNatureOfTransactions",
-};
 
-export const ResetPasswordCorporate = {
-  RequestMethod: "ServiceManager.ResetPasswordCorporate",
-};
-export const validateLinkForCorporatePasswordRM = {
-  RequestMethod: "ServiceManager.ValidateLinkForCorporatePassword",
-};
-export const createCorporateUserPasswordRM = {
-  RequestMethod: "ServiceManager.CreateCorporateUserPassword",
-};
 export const LogoutRM = {
   RequestMethod: "ServiceManager.LogOut",
 };

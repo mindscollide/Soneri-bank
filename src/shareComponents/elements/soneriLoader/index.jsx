@@ -16,7 +16,7 @@ const Loader = () => {
 
   // ✅ Remove mainLoader from isLoading — it was causing circular dependency
   const isLoading = [WatchListReducerLoader, AuthLoader].some(Boolean);
-
+  console.log(isLoading, "isLoadingisLoading");
   useEffect(() => {
     let timeout;
 
@@ -25,12 +25,11 @@ const Loader = () => {
     } else {
       timeout = setTimeout(() => {
         setIsLoading(false);
-        dispatch(setMainLoader(false)); // ✅ now safely set to false
       }, 300);
     }
 
     return () => clearTimeout(timeout);
-  }, [isLoading, mainLoader]);
+  }, [isLoading, AuthLoader, WatchListReducerLoader]);
 
   // ✅ Also handle mainLoader separately — show loader if mainLoader is true
   // regardless of the API loaders

@@ -1,10 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import {
-  convertUTCTimeToLocalTime,
-  formatDateUTCToGMT,
-} from "../../../utils/timeFunction";
+import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
 
@@ -54,7 +51,6 @@ const StockIndices = memo(() => {
         className: "offerCol",
         ellipsis: true,
         width: 90,
-
         render: (text) => {
           return text !== "-" && <IndexCell value={text} />;
         },
@@ -66,7 +62,6 @@ const StockIndices = memo(() => {
         ellipsis: true,
         render: (text) => {
           if (text === "-") return null;
-
           const value = Number(text);
 
           let cellClassName =
@@ -78,7 +73,6 @@ const StockIndices = memo(() => {
       {
         title: "High",
         dataIndex: "high",
-        // width: 90,
         render: (text) => {
           return text !== "-" && <IndexCell value={text} />;
         },
@@ -87,7 +81,6 @@ const StockIndices = memo(() => {
         title: "Low",
         dataIndex: "low",
         className: "offerCol",
-        // width: 90,
 
         render: (text) => {
           return text !== "-" && <IndexCell value={text} />;
@@ -97,7 +90,6 @@ const StockIndices = memo(() => {
         title: "Volume",
         dataIndex: "volume",
         className: "offerCol",
-        // width: 90,
 
         render: (text) => {
           return text !== "-" && <IndexCell value={text} />;
@@ -106,7 +98,6 @@ const StockIndices = memo(() => {
       {
         title: "Time",
         dataIndex: "time",
-        // width: 90,
 
         render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
       },

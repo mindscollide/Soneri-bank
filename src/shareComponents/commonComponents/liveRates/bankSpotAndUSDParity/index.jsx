@@ -1,11 +1,7 @@
 import GlobalTable from "../../elements/table/GlobalTable";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import {
-  convertUTCTimeToLocalTime,
-  extractTimeFromCompactDate,
-  formatDateUTCToGMT,
-} from "../../../../utils/timeFunction";
+import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
 import { IndexCell } from "../../elements/inputField/IndexCell";
 import { clearDealerSpotClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { UpdatetDealerSpotRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
@@ -19,8 +15,8 @@ const selectWorldCrosses = (state) =>
   state.WatchListReducer.GetBankSpotForDealer?.worldCrosses || [];
 const selectWorldCurrencies = (state) =>
   state.WatchListReducer.GetBankSpotForDealer?.worldCurrencies || [];
-const SelectGetCurrencyCrosses = (state) =>
-  state.WatchListReducer.GetCurrencyCrosses;
+// const SelectGetCurrencyCrosses = (state) =>
+//   state.WatchListReducer.GetCurrencyCrosses;
 const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
 const BankSpotAndUSDParity = memo(() => {

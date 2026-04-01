@@ -17,6 +17,7 @@ import {
 } from "../../store/actions/WatchlistAction";
 import { IsolatedBlock } from "../../shareComponents/commonComponents/utils/isolateBlock";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../hook/useMqttTopics";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -27,13 +28,20 @@ const SOFR = lazy(() => import("./sofr/index"));
 const StockIndices = lazy(() => import("./stockIndices/index"));
 const SwapsInUSD = lazy(() => import("./swapsInUSD/index"));
 const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+
 const Management = () => {
+  useMqttTopics([
+    "SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT",
+    "SBL_REAL_TIME_STATIC_TREASURY_MANAGEMENT",
+    "REAL_TIME_FEED_NEWS",
+  ]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // Inital UseEffect as soon as user Clicks on Management Tab
   const hasFetched = useRef(false);
   useEffect(() => {
     if (hasFetched.current) return;
+
     hasFetched.current = true;
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(GetAllOtherInstrumentsApi({ navigate }));
