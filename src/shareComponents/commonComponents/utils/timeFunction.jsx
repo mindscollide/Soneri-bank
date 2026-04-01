@@ -141,6 +141,36 @@ export function convertUTCToDateTime(input) {
   return `${dayFormatted}-${monthFormatted}-${yearFormatted} ${hourFormatted}:${minuteFormatted} ${ampm}`;
 }
 
+export const convertCurrentTimeZone = (dateTime) => {
+  try {
+    if (dateTime !== null && dateTime !== undefined) {
+      if (!dateTime || dateTime.length < 14) {
+        return "Invalid date";
+      }
+    }
+    let fullDateYear =
+      dateTime.slice(0, 4) +
+      "-" +
+      dateTime.slice(4, 6) +
+      "-" +
+      dateTime.slice(6, 8) +
+      "T" +
+      dateTime.slice(8, 10) +
+      ":" +
+      dateTime.slice(10, 12) +
+      ":" +
+      dateTime.slice(12, 14) +
+      ".000Z";
+
+    let convertTime = new Date(fullDateYear);
+
+    return convertTime;
+  } catch (error) {
+    console.error("Error converting date:", error);
+    return "Invalid date";
+  }
+};
+
 export const formatToUTCString = (date, type) => {
   if (!date) return "";
 

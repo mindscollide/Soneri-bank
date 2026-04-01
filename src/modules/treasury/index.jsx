@@ -39,12 +39,9 @@ const Treasury = () => {
 
   // 2. Define which topics belong to which tab
   const topicMap = {
-    0: [
-      `SBL_REAL_TIME_FEED_TREASURY`,
-      `SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY`,
-    ], // Live Rates
-    1: ["SBL_REAL_TIME_FEED_TREASURY"], // Forwards
-    2: ["SBL_REAL_TIME_FEED_TREASURY"], // Discounting
+    0: [], // Live Rates
+    1: [], // Forwards
+    2: [], // Discounting
     3: [`REAL_TIME_FEED_NEWS`], // News
     4: [], // Rate Sheet
   };

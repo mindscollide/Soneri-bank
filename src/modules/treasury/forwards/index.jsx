@@ -11,7 +11,7 @@ import { useMqttTopics } from "../../../hook/useMqttTopics";
 
 const Forwards = () => {
   // 2. Call the hook at the top level
-  // useMqttTopics([`SBL_REAL_TIME_FEED_TREASURY`]);
+  useMqttTopics([`SBL_REAL_TIME_FEED_TREASURY`]);
   const dispatch = useDispatch();
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
