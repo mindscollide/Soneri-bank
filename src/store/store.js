@@ -13,4 +13,6 @@ export const store = configureStore({
     tabReducer: tabSlicer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+  // 👇 Enable Redux DevTools
+  devTools: true,
 });

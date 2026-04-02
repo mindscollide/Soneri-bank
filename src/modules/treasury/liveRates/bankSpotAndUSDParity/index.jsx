@@ -310,9 +310,9 @@ const BankSpotAndUSDParity = memo(() => {
       columns={columns}
       dataSource={processedData}
       prefixCls={"LiveRatesTable"}
-      rowKey={(record) =>
-        `${record.instrumentID}-${record.secondaryInstrumentID}`
-      }
+      rowKey={(record) => {
+        `${record.instrumentID}-${record.secondaryInstrumentID}-${record.version}`;
+      }}
       pagination={false}
       scroll={{ x: "max-content", y: 500 }}
     />

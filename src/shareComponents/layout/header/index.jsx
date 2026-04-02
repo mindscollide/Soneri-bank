@@ -6,22 +6,40 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../../commonComponents/elements/profileDropdown/ProfileDropdown";
 import PublshDealerSpreads from "../../../modules/dealer/publishDealerSpreads";
 import Management from "../../../modules/management";
-import { useMqtt } from "../../../context/MqttContext";
 import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
 import { useDispatch } from "react-redux";
+import {
+  clearGetCommoditiesForTreasury,
+  clearGetCurrencyCrosses,
+  clearGetIndicesForTreasury,
+  clearGetKiborDataForTreasury,
+  clearGetRevalRatesForTreasury,
+  clearGetSOFRDataForTreasury,
+  clearGetSwapsInUSDForTreasury,
+  clearGetUSDParityForTreasury,
+} from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 const MainHeader = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { unsubscribeAll } = useMqtt();
+  // const { unsubscribeAll } = useMqtt();
   const [isPending, startTransition] = useTransition();
-  const handleNavigate = (to) => {
-    unsubscribeAll();
+  // const handleNavigate = (to) => {
+  //   startTransition(() => {
+  //     dispatch(setMainLoader(true));
+  //     navigate(to);
+  //   });
+  // };
+  const handleClickTreasury = () => {
+    dispatch(clearGetUSDParityForTreasury());
+    dispatch(clearGetCurrencyCrosses());
 
-    startTransition(() => {
-      dispatch(setMainLoader(true));
-      navigate(to);
-    });
+    dispatch(clearGetCommoditiesForTreasury());
+    dispatch(clearGetIndicesForTreasury());
+    dispatch(clearGetKiborDataForTreasury());
+    dispatch(clearGetSOFRDataForTreasury());
+    dispatch(clearGetRevalRatesForTreasury());
+    dispatch(clearGetSwapsInUSDForTreasury());
   };
 
   return (
@@ -43,8 +61,10 @@ const MainHeader = () => {
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      // to="interbank"
-                      onClick={() => handleNavigate("interbank")}
+                      to="interbank"
+                      as={Link}
+                      // onClick={() => handleNavigate("interbank")}
+                      // onClick={handleClickInterbank}
                     >
                       Interbank
                     </Nav.Link>
@@ -55,7 +75,9 @@ const MainHeader = () => {
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      onClick={() => handleNavigate("dealer")}
+                      to="dealer"
+                      as={Link}
+                      // onClick={() => handleNavigate("dealer")}
                     >
                       Dealer
                     </Nav.Link>
@@ -66,7 +88,9 @@ const MainHeader = () => {
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      onClick={() => handleNavigate("Management")}
+                      to="Management"
+                      as={Link}
+                      // onClick={() => handleNavigate("Management")}
                     >
                       Management
                     </Nav.Link>
@@ -77,7 +101,9 @@ const MainHeader = () => {
                           ? styles.navItemAcitve
                           : styles.navItem
                       }
-                      onClick={() => handleNavigate("treasury")}
+                      to="treasury"
+                      as={Link}
+                      onClick={handleClickTreasury}
                     >
                       Treasury
                     </Nav.Link>

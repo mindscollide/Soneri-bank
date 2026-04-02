@@ -15,11 +15,20 @@ import {
   GetNewsHeadlinesApi,
 } from "../../../store/actions/WatchlistAction";
 import GlobalModal from "../elements/globalModal/Modal";
-import { convertUTCToDateTime } from "../utils/timeFunction";
+import {
+  convertCurrentTimeZone,
+  convertUTCToDateTime,
+} from "../utils/timeFunction";
 import { clearGetNewsDetailsByID } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../../hook/useMqttTopics";
+import dayjs from "dayjs";
 
 const News = () => {
+  // ✅ This is the ONLY change needed in News.jsx
+  // On mount: unsubscribes all other topics, subscribes REAL_TIME_FEED_NEWS
+  // On unmount: unsubscribes REAL_TIME_FEED_NEWS
+  // useMqttTopics(["REAL_TIME_FEED_NEWS"]);
   const dispatch = useDispatch();
 
   // Map icons to their source IDs
@@ -467,9 +476,10 @@ const News = () => {
               <Col sm={12} md={6} lg={6}>
                 <div className={`${styles.headerRow}`}>News</div>
                 <span className={styles.modalDateStyle}>
-                  {newsById.createdOn
-                    ? convertUTCToDateTime(newsById.createdOn)
-                    : ""}
+                  {newsById.createdOn &&
+                    dayjs(convertCurrentTimeZone(newsById.createdOn)).format(
+                      "DD-MMM-YYYY h:mm A"
+                    )}
                 </span>
               </Col>
               <Col

@@ -17,13 +17,14 @@ import GlobalModal from "../../shareComponents/commonComponents/elements/globalM
 import CustomButton from "../../shareComponents/commonComponents/elements/globalButton/button";
 import { DatePicker, Input } from "antd";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+// import utc from "dayjs/plugin/utc";
 import {
+  convertCurrentTimeZone,
   convertUTCToDateTime,
   formatToUTCString,
 } from "../../shareComponents/commonComponents/utils/timeFunction";
 import { clearGetNewsDetailsByID } from "../../store/slicers/watchListSlicer/WatchListSlicer";
-dayjs.extend(utc);
+// dayjs.extend(utc);
 
 const News = () => {
   const dispatch = useDispatch();
@@ -553,9 +554,10 @@ const News = () => {
               <Col sm={12} md={6} lg={6}>
                 <div className={`${styles.headerRow}`}>News</div>
                 <span className={styles.modalDateStyle}>
-                  {newsById.createdOn
-                    ? convertUTCToDateTime(newsById.createdOn)
-                    : ""}
+                  {newsById.createdOn &&
+                    dayjs(convertCurrentTimeZone(newsById.createdOn)).format(
+                      "DD-MMM-YYYY h:mm A"
+                    )}
                 </span>
               </Col>
               <Col

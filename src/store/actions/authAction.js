@@ -125,8 +125,6 @@ export const LogoutApi = createAsyncThunk(
       const response = await logoutUser();
       const { responseCode } = response.data;
 
-      console.log(responseCode, response, "responseCoderesponseCode");
-
       if (responseCode === 200) {
         const { isExecuted, responseMessage } = response.data.responseResult;
         if (isExecuted) {

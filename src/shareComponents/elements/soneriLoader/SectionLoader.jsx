@@ -1,18 +1,3 @@
-// import React from "react";
-// import SectionLoaderImage from "@/assets/Bop-Loader.svg";
-
-// const SectionLoader = () => {
-//   return (
-//     <div className="Treasury_Spot_Spinner">
-//       <div className="d-flex justify-content-center">
-//         <img src={SectionLoaderImage} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SectionLoader;
-
 import React from "react";
 import "./SectionLoader.css";
 import LoaderImage from "../../../assets/Soneri-Loader.svg";

@@ -15,8 +15,10 @@ import {
   GetLastAndCurrentPublishUSDRateSheetAction,
   getLastPublishRatesAction,
 } from "../../store/actions/WatchlistAction";
+import { useMqttTopics } from "../../hook/useMqttTopics";
 
 const Interbank = () => {
+  useMqttTopics(["SBL_DEALER", "SBL_TREASURY"]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const hasFetched = useRef(false);
@@ -44,7 +46,6 @@ const Interbank = () => {
           <NonFeDiscountingTable />
         </Col>
       </div>
-      {/* <ForwardsForTreasuryAndDealer /> */}
     </>
   );
 };

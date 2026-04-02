@@ -2,6 +2,12 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import styles from "../management.module.css";
+import { formatCompactDate } from "../../../utils/timeFunction";
+import {
+  convertCurrentTimeZone,
+  convertUTCToDateTime,
+} from "../../../shareComponents/commonComponents/utils/timeFunction";
+import dayjs from "dayjs";
 const GetSwapsInUSDForTreasury = (state) =>
   state.WatchListReducer.GetSwapsInUSDForTreasury;
 const swapsinUSDForManagementFeed = (state) =>
@@ -17,11 +23,14 @@ const SwapsInUSD = memo(() => {
 
   // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
+  const [latestDate, setLatestDate] = useState("");
 
   // console.log(swapsinUSDList, "swapsinUSDListswapsinUSDList");
   const { tableData, currencyList } = useMemo(() => {
     if (!swapsinUSDList?.swapsinUSDList)
-      return { tableData: [], currencyList: [] };
+      return { tableData: [], currencyList: [], latestDate: "" };
+
+    setLatestDate(swapsinUSDList?.datetime);
 
     const data = swapsinUSDList.swapsinUSDList;
 
@@ -68,6 +77,7 @@ const SwapsInUSD = memo(() => {
       currencyList,
     };
   }, [swapsinUSDList]);
+
   const columns = useMemo(() => {
     if (!currencyList.length) return [];
 
@@ -222,11 +232,13 @@ const SwapsInUSD = memo(() => {
         className={`${styles.tableheaderbar} d-flex justify-content-between`}
       >
         <span>Swaps in USD</span>
-        {/* <span className={styles.management_date}>
-          {formatCompactDate(latestDate)}
-        </span> */}
+        <span className={styles.management_date}>
+          {/* {convertUTCToDateTime(latestDate)} */}
+          {dayjs(convertCurrentTimeZone(latestDate)).format(
+            "DD-MMM-YYYY h:mm A"
+          )}
+        </span>
       </span>
-
       <GlobalTable
         columns={columns}
         dataSource={mergedTableData}

@@ -1,10 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import {
-  convertUTCTimeToLocalTime,
-  formatDateUTCToGMT,
-} from "../../../utils/timeFunction";
+import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
 
@@ -12,7 +9,7 @@ const commoditiesForManagementFeed = (state) =>
   state.RealtimeActionsSlice.commoditiesForManagementFeed;
 const GetCommoditiesForTreasury = (state) =>
   state.WatchListReducer.GetCommoditiesForTreasury?.commodityList;
-const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
+// const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 const GetAllOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.commodities;
 

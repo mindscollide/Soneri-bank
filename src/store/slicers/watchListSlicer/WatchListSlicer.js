@@ -184,6 +184,74 @@ const WatchListSlice = createSlice({
     UpdateDealerDiscountingRates: (state) => {
       state.GetDiscountingRatesForDealer = null;
     },
+
+    // Individual Clear Reducers
+    clearGetBankSpotForDealer: (state) => {
+      state.GetBankSpotForDealer = null;
+    },
+    clearGetCurrencyCrosses: (state) => {
+      state.GetCurrencyCrosses = null;
+    },
+    clearGetBankForwardForTreasuryDealer: (state) => {
+      state.GetBankForwardForTreasuryDealer = null;
+    },
+    clearGetDiscountingRatesForDealer: (state) => {
+      state.GetDiscountingRatesForDealer = null;
+    },
+    clearGetAllDealersSpread: (state) => {
+      state.GetAllDealersSpread = null;
+    },
+    clearAddDealerSpread: (state) => {
+      state.AddDealerSpread = null;
+    },
+    clearGetSingleDealersSpread: (state) => {
+      state.GetSingleDealersSpread = null;
+    },
+    clearGetAllOtherInstruments: (state) => {
+      state.GetAllOtherInstruments = null;
+    },
+    clearGetUSDParityForTreasury: (state) => {
+      state.GetUSDParityForTreasury = null;
+    },
+    clearGetCommoditiesForTreasury: (state) => {
+      state.GetCommoditiesForTreasury = null;
+    },
+    clearGetIndicesForTreasury: (state) => {
+      state.GetIndicesForTreasury = null;
+    },
+    clearGetKiborDataForTreasury: (state) => {
+      state.GetKiborDataForTreasury = null;
+    },
+    clearGetSOFRDataForTreasury: (state) => {
+      state.GetSOFRDataForTreasury = null;
+    },
+    clearGetRevalRatesForTreasury: (state) => {
+      state.GetRevalRatesForTreasury = null;
+    },
+    clearGetSwapsInUSDForTreasury: (state) => {
+      state.GetSwapsInUSDForTreasury = null;
+    },
+    clearGetSpotTTRatesForRateSheet: (state) => {
+      state.GetSpotTTRatesForRateSheet = null;
+    },
+    clearGetRatesForCurrencyNotesForRateSheet: (state) => {
+      state.GetRatesForCurrencyNotesForRateSheet = null;
+    },
+    clearGetKiborDataForRateSheet: (state) => {
+      state.GetKiborDataForRateSheet = null;
+    },
+    clearGetSOFRDataForRateSheet: (state) => {
+      state.GetSOFRDataForRateSheet = null;
+    },
+    clearGetIndicativeFBPRates: (state) => {
+      state.GetIndicativeFBPRates = null;
+    },
+    clearGetSBPConversionRatesForRateSheet: (state) => {
+      state.GetSBPConversionRatesForRateSheet = null;
+    },
+    clearGetNewsHeadlines: (state) => {
+      state.GetNewsHeadlines = null;
+    },
     clearGetNewsDetailsByID: (state) => {
       state.GetNewsDetailsByID = null;
     },
@@ -849,7 +917,7 @@ const WatchListSlice = createSlice({
 });
 
 export const {
-  clearWatchListResponseMessage,
+  // Standard Market/Dealer Actions
   setMarketStatus,
   setForwardsForTreasuryBranch,
   setDealerValue,
@@ -857,6 +925,33 @@ export const {
   UpdatetDealerSpotRates,
   UpdateDealerForwardRates,
   UpdateDealerDiscountingRates,
+
+  // Treasury Field Clear Actions
+  clearGetBankSpotForDealer,
+  clearGetCurrencyCrosses,
+  clearGetBankForwardForTreasuryDealer,
+  clearGetDiscountingRatesForDealer,
+  clearGetAllDealersSpread,
+  clearAddDealerSpread,
+  clearGetSingleDealersSpread,
+  clearGetAllOtherInstruments,
+  clearGetUSDParityForTreasury,
+  clearGetCommoditiesForTreasury,
+  clearGetIndicesForTreasury,
+  clearGetKiborDataForTreasury,
+  clearGetSOFRDataForTreasury,
+  clearGetRevalRatesForTreasury,
+  clearGetSwapsInUSDForTreasury,
+  clearGetSpotTTRatesForRateSheet,
+  clearGetRatesForCurrencyNotesForRateSheet,
+  clearGetKiborDataForRateSheet,
+  clearGetSOFRDataForRateSheet,
+  clearGetIndicativeFBPRates,
+  clearGetSBPConversionRatesForRateSheet,
+
+  // News and Misc Clear Actions
+  clearGetNewsHeadlines,
   clearGetNewsDetailsByID,
+  clearWatchListResponseMessage,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;

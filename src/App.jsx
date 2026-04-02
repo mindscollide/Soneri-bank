@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <RouterProvider router={router} />
-      <Loader />
+      {/* <Loader /> */}
       <ResponseMessage />
     </>
   );

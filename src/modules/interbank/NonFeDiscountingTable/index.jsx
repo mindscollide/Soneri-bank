@@ -9,10 +9,10 @@ import {
 } from "../../../shareComponents/commonComponents/utils/generateColumnsData";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import useNotification from "antd/es/notification/useNotification";
 import { PublishNonFEDiscountingTableApi } from "../../../store/actions/WatchlistAction";
 import moment from "moment";
 import { formatDateUTCToGMT } from "../../../utils/timeFunction";
+import { NonFeDiscountingPublishedAction } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 /**
  * NonFeDiscountingTable component renders a table for displaying and managing
@@ -31,14 +31,13 @@ const NonFeDiscountingTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [date, setDate] = useState("");
-  const { showMessage } = useNotification();
 
   const marketStatus = useSelector(
     (state) => state.RealtimeActionsSlice.marketStatus
   );
 
-  const [tableData, setTableData] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
+  const [tableData, setTableData] = useState([]);
   const getDashboardForwards = useSelector(
     (state) => state.WatchListReducer.getDealerDashboardData
   );
@@ -114,43 +113,50 @@ const NonFeDiscountingTable = () => {
     }
   }, [getDashboardForwards, getAllTenorsData, GetAllInstrumentForTreasury]);
 
-  // useEffect(() => {
-  //   if (getAllTenorsData !== null && GetAllInstrumentForTreasury !== null) {
-  //     try {
-  //       const { rates } =
-  //         NonFeDiscountingPublishedData !== null &&
-  //         NonFeDiscountingPublishedData !== undefined &&
-  //         NonFeDiscountingPublishedData;
-  //       const DiscountingInstruments =
-  //         GetAllInstrumentForTreasury.nonFEDiscountingInstruments;
-  //       const getAllInstrument = { instruments: DiscountingInstruments };
-  //       const { rowData, columnsData } = buildDiscountingTable(
-  //         5,
-  //         rates,
-  //         getAllTenorsData,
-  //         getAllInstrument,
-  //         InputCell,
-  //         onInputChange
-  //       );
+  useEffect(() => {
+    if (
+      NonFeDiscountingPublishedData !== null &&
+      getAllTenorsData !== null &&
+      GetAllInstrumentForTreasury !== null
+    ) {
+      try {
+        const { rates } = NonFeDiscountingPublishedData;
 
-  //       if (rowData.length > 0) {
-  //         setTableData(rowData);
-  //         setColumnsData(columnsData);
-  //         setDate(rates[0]?.dateTime);
-  //         dispatch(NonFeDiscountingPublishedAction(null));
-  //       }
-  //     } catch (error) {
-  //       console.log(error, "Error while building discounting table");
-  //     }
-  //   }
-  //   return () => {
-  //     dispatch(NonFeDiscountingPublishedAction(null));
-  //   };
-  // }, [
-  //   NonFeDiscountingPublishedData,
-  //   getAllTenorsData,
-  //   GetAllInstrumentForTreasury,
-  // ]);
+        console.log(
+          { rates, getAllTenorsData, GetAllInstrumentForTreasury, InputCell },
+          "buildDiscountingTable"
+        );
+        const DiscountingInstruments =
+          GetAllInstrumentForTreasury?.nonFEDiscountingInstruments;
+
+        const getAllInstrument = { instruments: DiscountingInstruments };
+        const { rowData, columnsData } = buildDiscountingTable(
+          5,
+          rates,
+          getAllTenorsData,
+          getAllInstrument,
+          InputCell,
+          onInputChange
+        );
+
+        if (rowData.length > 0) {
+          setTableData(rowData);
+          setColumnsData(columnsData);
+          setDate(rates[0]?.dateTime);
+          dispatch(NonFeDiscountingPublishedAction(null));
+        }
+      } catch (error) {
+        console.log(error, "Error while building discounting table");
+      }
+    }
+    return () => {
+      dispatch(NonFeDiscountingPublishedAction(null));
+    };
+  }, [
+    NonFeDiscountingPublishedData,
+    getAllTenorsData,
+    GetAllInstrumentForTreasury,
+  ]);
 
   const handlePublishDiscount = () => {
     const payloadData = buildCurrentRatesPayload(tableData);

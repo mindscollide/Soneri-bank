@@ -1,4 +1,11 @@
-import React, { lazy, Suspense, useEffect, useRef, useState } from "react"; // ✅ added useRef
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"; // ✅ added useRef
 import GlobalTabs from "../../shareComponents/elements/tabs";
 import SelectDropdown from "../../shareComponents/commonComponents/elements/selectDropdown/SelectDropdown";
 import {
@@ -14,9 +21,19 @@ import {
 } from "../../store/actions/WatchlistAction";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setDealerValue } from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import {
+  clearGetAllDealersSpread,
+  clearGetAllOtherInstruments,
+  clearGetBankForwardForTreasuryDealer,
+  clearGetBankSpotForDealer,
+  clearGetCurrencyCrosses,
+  clearGetDiscountingRatesForDealer,
+  clearGetSingleDealersSpread,
+  setDealerValue,
+} from "../../store/slicers/watchListSlicer/WatchListSlicer";
 import { setActiveDealerTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../hook/useMqttTopics";
 // import { setActiveDealerTab } from "../../store/slicers/tabSlice/tabSlice"; // ✅ new
 
 const LiveRates = lazy(() =>
@@ -37,6 +54,28 @@ const Dealer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // 1. Local state to track active tab for the hook
+  const [activeTabId, setActiveTabId] = useState(0);
+
+  // 2. Define which topics belong to which tab
+  const topicMap = {
+    0: [], // Live Rates
+    1: [], // Forwards
+    2: [], // Discounting
+    3: [`REAL_TIME_FEED_NEWS`], // News
+  };
+  // 3. Get the topics for the current tab
+  // We use useMemo to prevent the hook from re-subscribing on every render
+  // unless the activeTabId actually changes.
+  const currentTopics = useMemo(
+    () => topicMap[activeTabId] || [],
+    [activeTabId]
+  );
+
+  // 4. Call the hook at the TOP LEVEL
+  useMqttTopics(currentTopics);
+
+  const [dealerIdForMQTT, setDealerIdForMQTT] = useState(0);
   const GetAllDealersSpread = useSelector(
     (state) => state.WatchListReducer.GetAllDealersSpread
   );
@@ -46,16 +85,18 @@ const Dealer = () => {
 
   // ✅ Tab change handler — mirrors Treasury pattern
   const handleTabChange = (tabTitle) => {
+    setActiveTabId(tabTitle); // Update local state to trigger hook update
     dispatch(setActiveDealerTab(Number(tabTitle)));
   };
 
+  console.log(dealerIdForMQTT, "selectedDealerselectedDealer");
   const tabs = [
     {
       label: "Live Rates",
       key: "0",
       children: (
         <Suspense fallback={<SectionLoader />}>
-          <LiveRates />
+          <LiveRates dealerIdForMQTT={dealerIdForMQTT} />
         </Suspense>
       ),
     },
@@ -64,7 +105,7 @@ const Dealer = () => {
       key: "1",
       children: (
         <Suspense fallback={<SectionLoader />}>
-          <Forwards />
+          <Forwards dealerIdForMQTT={dealerIdForMQTT} />
         </Suspense>
       ),
     },
@@ -73,7 +114,7 @@ const Dealer = () => {
       key: "2",
       children: (
         <Suspense fallback={<SectionLoader />}>
-          <Discounting />
+          <Discounting dealerIdForMQTT={dealerIdForMQTT} />
         </Suspense>
       ),
     },
@@ -98,6 +139,7 @@ const Dealer = () => {
 
     dispatch(setDealerValue(obj));
     setSelectedDealer(event);
+    setDealerIdForMQTT(event.value);
     dispatch(GetBankSpotForDealerApi({ navigate, Data }));
     dispatch(GetCurrencyCrossesApi({ navigate }));
     dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
@@ -120,6 +162,7 @@ const Dealer = () => {
 
     if (isDealer) {
       const dealerId = localStorage.getItem("userID");
+      setDealerIdForMQTT(dealerId);
       const Data = { DealerId: Number(dealerId) };
       dispatch(GetSingleDealersSpreadApi({ Data }));
       dispatch(GetBankSpotForDealerApi({ navigate, Data }));
@@ -127,6 +170,19 @@ const Dealer = () => {
       dispatch(GetBankForwardForTreasuryDealerApi({ navigate, Data }));
       dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
     }
+
+    // ✅ CLEANUP ON UNMOUNT
+    return () => {
+      dispatch(clearGetBankSpotForDealer());
+      dispatch(clearGetCurrencyCrosses());
+      dispatch(clearGetBankForwardForTreasuryDealer());
+      dispatch(clearGetDiscountingRatesForDealer());
+      dispatch(clearGetAllDealersSpread());
+      dispatch(clearGetAllOtherInstruments());
+      dispatch(clearGetSingleDealersSpread());
+      // Reset ref so if they come back, it fetches fresh
+      hasFetched.current = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -153,6 +209,7 @@ const Dealer = () => {
       );
 
       setSelectedDealer(firstDealer);
+      setDealerIdForMQTT(firstDealer.value);
       setDealerOptions(mappedDealers);
     } catch (error) {
       console.error("Error mapping dealers:", error);

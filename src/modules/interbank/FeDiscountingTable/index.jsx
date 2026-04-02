@@ -9,7 +9,6 @@ import { InputCell } from "../../../shareComponents/commonComponents/elements/in
 import { isValidMaxFourNumberAfterPoint } from "../../../utils/formatters";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useNotification } from "../../../context/NotificationProvider";
 import { PublishFEDiscountingTableApi } from "../../../store/actions/WatchlistAction";
 import moment from "moment";
 import { formatDateUTCToGMT } from "../../../utils/timeFunction";
@@ -32,7 +31,6 @@ const FeDiscountingTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [date, setDate] = useState("");
-  const { showMessage } = useNotification();
   const marketStatus = useSelector(
     (state) => state.RealtimeActionsSlice.marketStatus
   );

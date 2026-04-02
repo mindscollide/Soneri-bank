@@ -28,8 +28,10 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { formatTodayForRateSheet } from "../../../utils/timeFunction";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../../hook/useMqttTopics";
 
 const RateSheet = () => {
+  useMqttTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const screenRef = useRef(null);
