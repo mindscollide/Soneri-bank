@@ -56,7 +56,7 @@ import {
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const getAllTreasuryInstrumentsApi = createAsyncThunk(
   "watchlist/getAllTreasuryInstruments", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getAllInstruments = createPostAPI(
         watchListApi,
@@ -127,7 +127,7 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
 
 export const GetBankSpotForTreasuryApi = createAsyncThunk(
   "watchlist/GetBankSpotForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetBankSpotForTreasuryData = createPostAPI(
         watchListApi,
@@ -196,7 +196,7 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
 
 export const GetBankForwardForTreasuryApi = createAsyncThunk(
   "watchlist/GetBankForwardForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetBankForwardForTreasuryData = createPostAPI(
         watchListApi,
@@ -266,7 +266,7 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
 // Define the GetDiscountingRatesForTreasury async thunk
 export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
   "watchlist/GetDiscountingRatesForTreasury", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetDiscountingRatesForTreasuryData = createPostAPI(
         watchListApi,
@@ -337,7 +337,7 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
 
 export const getMarketStatusApi = createAsyncThunk(
   "watchlist/getMarketStatus",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getMarketStatusPost = createPostAPI(
         watchListApi,
@@ -451,7 +451,7 @@ export const clearRatesAction = createAsyncThunk(
 // Define the login async thunk
 export const getLastPublishRatesAction = createAsyncThunk(
   "watchlist/getLastPublishRates", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getLastPublishRates = createPostAPI(
         watchListApi,
@@ -596,7 +596,7 @@ export const PublishNewRatesAction = createAsyncThunk(
 // Define the login async thunk
 export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
   "watchlist/GetLastAndCurrentPublishUSDRateSheet", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetLastAndCurrentPublishUSDRateSheetData = createPostAPI(
         watchListApi,
@@ -816,7 +816,7 @@ export const marketOnOffAction = createAsyncThunk(
 // Define the login async thunk
 export const getAllTenorsAction = createAsyncThunk(
   "watchlist/getAllTenors", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getAllTenors = createPostAPI(authApi, getAllTenorsRM.RequestMethod);
 
@@ -1044,7 +1044,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
 
 export const getDealerDashboardApi = createAsyncThunk(
   "watchlist/getDashboardApi",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let DealerDashboardApi = createPostAPI(
         watchListApi,
@@ -1458,7 +1458,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
 // const response = await publishDiscountingRates(Data);
 export const GetAllDealersSpreadApi = createAsyncThunk(
   "watchlist/GetAllDealersSpread",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       const GetAllDealersSpreadData = createPostAPI(
         watchListApi,
@@ -1522,7 +1522,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
 
 export const GetCurrencyCrossesApi = createAsyncThunk(
   "watchlist/GetCurrencyCrosses",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       const GetCurrencyCrossesData = createPostAPI(
         watchListApi,
@@ -1715,7 +1715,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const GetAllOtherInstrumentsApi = createAsyncThunk(
   "watchlist/GetAllOtherInstruments", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetAllOtherInstrumentsData = createPostAPI(
         watchListApi,
@@ -1787,7 +1787,7 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
 //GetUSDParityForTreasury
 export const GetUSDParityForTreasuryApi = createAsyncThunk(
   "watchlist/GetUSDParityForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetUSDParityForTreasuryData = createPostAPI(
         watchListApi,
@@ -1857,7 +1857,7 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
 //GetCommoditiesForTreasury
 export const GetCommoditiesForTreasuryApi = createAsyncThunk(
   "watchlist/GetCommoditiesForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetCommoditiesForTreasuryData = createPostAPI(
         watchListApi,
@@ -1927,7 +1927,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
 //GetIndicesForTreasury
 export const GetIndicesForTreasuryApi = createAsyncThunk(
   "watchlist/GetIndicesForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetIndicesForTreasuryData = createPostAPI(
         watchListApi,
@@ -1997,7 +1997,7 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
 //GetKiborDataForTreasury
 export const GetKiborDataForTreasuryApi = createAsyncThunk(
   "watchlist/GetKiborDataForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetKiborDataForTreasuryData = createPostAPI(
         watchListApi,
@@ -2067,7 +2067,7 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
 //GetSOFRDataForTreasury
 export const GetSOFRDataForTreasuryApi = createAsyncThunk(
   "watchlist/GetSOFRDataForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSOFRDataForTreasuryData = createPostAPI(
         watchListApi,
@@ -2137,7 +2137,7 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
 //GetRevalRatesForTreasury
 export const GetRevalRatesForTreasuryApi = createAsyncThunk(
   "watchlist/GetRevalRatesForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetRevalRatesForTreasuryData = createPostAPI(
         watchListApi,
@@ -2207,7 +2207,7 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
 //GetRevalRatesForTreasury
 export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
   "watchlist/GetSwapsInUSDForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSwapsInUSDForTreasuryData = createPostAPI(
         watchListApi,
@@ -2277,7 +2277,7 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
 //GetSpotTTRatesForRateSheet
 export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
   "watchlist/GetSpotTTRatesForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSpotTTRatesForRateSheetData = createPostAPI(
         watchListApi,
@@ -2347,7 +2347,7 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
 //GetRatesForCurrencyNotesForRateSheet
 export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
   "watchlist/GetRatesForCurrencyNotesForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetRatesForCurrencyNotesForRateSheetData = createPostAPI(
         watchListApi,
@@ -2417,7 +2417,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
 //GetKiborDataForRateSheet
 export const GetKiborDataForRateSheetApi = createAsyncThunk(
   "watchlist/GetKiborDataForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetKiborDataForRateSheetData = createPostAPI(
         watchListApi,
@@ -2487,7 +2487,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
 //GetSOFRDataForRateSheet
 export const GetSOFRDataForRateSheetApi = createAsyncThunk(
   "watchlist/GetSOFRDataForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSOFRDataForRateSheetData = createPostAPI(
         watchListApi,
@@ -2557,7 +2557,7 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
 //GetIndicativeFBPRates
 export const GetIndicativeFBPRatesApi = createAsyncThunk(
   "watchlist/GetIndicativeFBPRates",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetIndicativeFBPRatesData = createPostAPI(
         watchListApi,
@@ -2627,7 +2627,7 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
 //GetSBPConversionRatesForRateSheet
 export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
   "watchlist/GetSBPConversionRatesForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSBPConversionRatesForRateSheetData = createPostAPI(
         watchListApi,

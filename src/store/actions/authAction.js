@@ -119,7 +119,7 @@ export const loginInApi = createAsyncThunk(
 
 export const LogoutApi = createAsyncThunk(
   "auth/Logout",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       const logoutUser = createPostAPI(authApi, LogoutRM.RequestMethod);
       const response = await logoutUser();
@@ -162,7 +162,7 @@ export const LogoutApi = createAsyncThunk(
 
 export const getAllInstrumentsApi = createAsyncThunk(
   "auth/getAllInstruments",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getInstruments = createPostAPI(
         authApi,

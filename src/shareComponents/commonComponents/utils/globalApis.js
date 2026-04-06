@@ -5,7 +5,7 @@ import { GetAllInstrumentsRM } from "../../../common/api_config";
 
 export const getAllInstrumentsApi = createAsyncThunk(
   "auth/getAllInstruments",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getInstruments = createPostAPI(
         authApi,

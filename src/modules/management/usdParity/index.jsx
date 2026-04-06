@@ -189,7 +189,7 @@ const USDParity = memo(() => {
       <GlobalTable
         columns={columns}
         dataSource={tableData}
-        rowKey={(record) => record.instrumentID}
+        rowKey={(record) => record.key}
         pagination={false}
         scroll={{ y: 300, x: "max-content" }}
         prefixCls={
