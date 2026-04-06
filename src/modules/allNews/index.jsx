@@ -22,6 +22,7 @@ import {
   formatToUTCString,
 } from "../../shareComponents/commonComponents/utils/timeFunction";
 import { clearGetNewsDetailsByID } from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 
 const NEWS_SOURCES = {
   cnbc: { id: 3, img: cnbcImg, icon: cnbcIcon },
@@ -31,6 +32,10 @@ const NEWS_SOURCES = {
 
 const News = () => {
   const dispatch = useDispatch();
+
+  const GetNewsHeadlinesLoading = useSelector(
+    (state) => state.WatchListReducer.GetNewsHeadlinesLoading
+  );
 
   // ── Filters ─────────────────────────────────────────────────────────────
   const [searchVal, setSearchVal] = useState("");
@@ -284,6 +289,8 @@ const News = () => {
   const activeIds = getActiveSourceIds();
   const noSourceSelected = activeIds.length === 0;
 
+  // if(GetNewsHeadlinesLoading && )
+
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <>
@@ -294,7 +301,8 @@ const News = () => {
             sm={12}
             md={6}
             lg={6}
-            className={`d-flex justify-content-start align-items-center ${styles.newsHeadingStyles}`}>
+            className={`d-flex justify-content-start align-items-center ${styles.newsHeadingStyles}`}
+          >
             All News
           </Col>
         </Row>
@@ -302,9 +310,9 @@ const News = () => {
         {/* Search & Filters */}
         <Row className={styles.searchRow}>
           {/* Text search */}
-          <Col sm={12} md={2} lg={2} className='d-flex align-items-center'>
+          <Col sm={12} md={2} lg={2} className="d-flex align-items-center">
             <Input
-              placeholder='Search News'
+              placeholder="Search News"
               className={styles.SearchBoxStyle}
               value={searchVal}
               onChange={handleSearchChange}
@@ -314,7 +322,7 @@ const News = () => {
           </Col>
 
           {/* Source toggles */}
-          <Col sm={12} md={2} lg={2} className='d-flex align-items-center'>
+          <Col sm={12} md={2} lg={2} className="d-flex align-items-center">
             {Object.entries(NEWS_SOURCES).map(([key, src]) => (
               <button
                 key={key}
@@ -322,7 +330,8 @@ const News = () => {
                   sources[key] ? "active" : "inactive"
                 }`}
                 onClick={() => handleSourceToggle(key)}
-                title={`Toggle ${key} News`}>
+                title={`Toggle ${key} News`}
+              >
                 <img src={src.icon} alt={key} />
               </button>
             ))}
@@ -333,11 +342,12 @@ const News = () => {
             lg={8}
             md={8}
             sm={12}
-            className='d-flex align-items-center justify-content-end pe-4 gap-2'>
-            <span className='fs-normal fw-bold nowrap'>Search by date:</span>
+            className="d-flex align-items-center justify-content-end pe-4 gap-2"
+          >
+            <span className="fs-normal fw-bold nowrap">Search by date:</span>
 
             <DatePicker
-              placeholder='Start date'
+              placeholder="Start date"
               value={dateFrom}
               onChange={handleDateFromChange}
               disabledDate={(current) =>
@@ -352,7 +362,7 @@ const News = () => {
             <label className={styles["Tradecount-date-to"]}>to</label>
 
             <DatePicker
-              placeholder='End date'
+              placeholder="End date"
               value={dateTo}
               onChange={handleDateToChange}
               disabledDate={(current) =>
@@ -365,8 +375,8 @@ const News = () => {
             />
 
             <CustomButton
-              value='Search'
-              applyClass='searchAllNews'
+              value="Search"
+              applyClass="searchAllNews"
               onClick={handleSearchClick}
             />
           </Col>
@@ -378,14 +388,17 @@ const News = () => {
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className={styles.newsScrollArea}>
+              className={styles.newsScrollArea}
+            >
               {noSourceSelected ? (
-                <div className='text-center p-3 text-muted'>
+                <div className="text-center p-3 text-muted">
                   Please select at least one news source
                 </div>
+              ) : GetNewsHeadlinesLoading && newsList.length === 0 ? (
+                <SectionLoader />
               ) : newsList.length === 0 ? (
-                <div className='text-center p-3 text-muted'>
-                  No news available for selected sources
+                <div className="text-center p-3 text-muted">
+                  No news available
                 </div>
               ) : (
                 Object.keys(groupedNews)
@@ -406,12 +419,13 @@ const News = () => {
                                   )
                                 ]?.img ?? tresmarkImg
                               }
-                              alt='source'
+                              alt="source"
                             />
                           </div>
                           <div
                             className={styles.newsHeadline}
-                            onClick={() => handleNewsClick(item.newsID)}>
+                            onClick={() => handleNewsClick(item.newsID)}
+                          >
                             {item.headline}
                           </div>
                         </div>
@@ -421,10 +435,21 @@ const News = () => {
               )}
 
               {isLoading && (
-                <div className='text-center p-2 text-muted'>
-                  Loading more news...
+                <div className="text-center p-2 text-muted">
+                  <SectionLoader />
                 </div>
               )}
+
+              {/* {GetNewsHeadlinesLoading && sRow === 0 ? (
+                <SectionLoader />
+              ) : (
+                getActiveSourceIds().length > 0 &&
+                newsList.length === 0 && (
+                  <div className="text-center p-3 text-muted">
+                    No news available
+                  </div>
+                )
+              )} */}
             </div>
           </Col>
         </Row>
@@ -433,10 +458,10 @@ const News = () => {
       {/* News Detail Modal */}
       <GlobalModal
         show={modalOpen}
-        size='lg'
+        size="lg"
         centered
-        footerClassName='d-block border-0'
-        bodyClassName='newsModal'
+        footerClassName="d-block border-0"
+        bodyClassName="newsModal"
         onHide={handleCloseModal}
         modalBody={
           newsDetail && (
@@ -454,17 +479,19 @@ const News = () => {
                   sm={12}
                   md={6}
                   lg={6}
-                  className='d-flex justify-content-end align-items-center'>
+                  className="d-flex justify-content-end align-items-center"
+                >
                   <div
-                    className='cursor-pointer fw-bold'
-                    onClick={handleCloseModal}>
+                    className="cursor-pointer fw-bold"
+                    onClick={handleCloseModal}
+                  >
                     X
                   </div>
                 </Col>
               </Row>
 
-              <Row className='mt-3'>
-                <Col className='d-flex align-items-center gap-2'>
+              <Row className="mt-3">
+                <Col className="d-flex align-items-center gap-2">
                   <img
                     src={
                       NEWS_SOURCES[
@@ -473,7 +500,7 @@ const News = () => {
                         )
                       ]?.img ?? tresmarkImg
                     }
-                    alt='source'
+                    alt="source"
                     style={{ width: 40, height: 40 }}
                   />
                   <span className={styles.modalTitle}>
@@ -482,7 +509,7 @@ const News = () => {
                 </Col>
               </Row>
 
-              <Row className='mt-3'>
+              <Row className="mt-3">
                 <Col sm={12} className={styles.modalDetailWithScroll}>
                   {newsDetail.content}
                 </Col>
