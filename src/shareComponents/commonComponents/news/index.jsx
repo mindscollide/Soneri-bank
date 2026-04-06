@@ -8,7 +8,7 @@ import cnbcIcon from "../../../assets/icons/cnbc-news.png";
 import tresmarkImg from "../../../assets/img/tresmarkImg.png";
 import cnbcImg from "../../../assets/img/cnbcImg.png";
 import dowjonesImg from "../../../assets/img/dowjonesImg.png";
-import { formatDateTimeForNews } from "../../../utils/timeFunction";
+import { formatDateTimeForNews, formatISOToYYYMMDDHHMMss } from "../../../utils/timeFunction";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetNewsDetailsByIDApi,
@@ -19,6 +19,7 @@ import { convertCurrentTimeZone } from "../utils/timeFunction";
 import { clearGetNewsDetailsByID } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import dayjs from "dayjs";
+import { setClearNewsMQTT } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 const News = () => {
   // ✅ This is the ONLY change needed in News.jsx
@@ -298,23 +299,23 @@ const News = () => {
   useEffect(() => {
     if (realTimeNewsFeed !== null) {
       try {
-        const incomingNews = realTimeNewsFeed.News;
+        const incomingNews = realTimeNewsFeed?.news;
 
         setNewsList((prev) => {
           // ❌ duplicate
           const alreadyExists = prev.some(
-            (item) => item.newsID === incomingNews.NewsID
+            (item) => item.newsID === incomingNews.newsID
           );
 
           if (alreadyExists) return prev;
 
           // ✅ normalize incoming structure to match your UI
           const formattedNews = {
-            newsID: incomingNews.NewsID,
-            newsSourceID: incomingNews.NewsSourceID,
-            headline: incomingNews.Headline,
-            content: incomingNews.Content,
-            newsDateTime: incomingNews.NewsDateTime,
+            newsID: incomingNews.newsID,
+            newsSourceID: incomingNews.newsSourceID,
+            headline: incomingNews.headline,
+            content: incomingNews.content,
+            newsDateTime: formatISOToYYYMMDDHHMMss(incomingNews.newsDateTime),
           };
 
           // ✅ add on top

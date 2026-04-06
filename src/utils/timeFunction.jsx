@@ -225,3 +225,6 @@ export const formatDateTimeForNews = (dateTime) => {
   };
 };
 
+export const formatISOToYYYMMDDHHMMss = (dateStr) => {
+  return dateStr.replace(/[T:\-Z]/g, "");
+};
