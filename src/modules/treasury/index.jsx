@@ -42,7 +42,7 @@ const Treasury = () => {
     0: [], // Live Rates
     1: [], // Forwards
     2: [], // Discounting
-    3: [`REAL_TIME_FEED_NEWS`], // News
+    3: [`SBL_REAL_TIME_FEED_NEWS`], // News
     4: [], // Rate Sheet
   };
   // 3. Get the topics for the current tab

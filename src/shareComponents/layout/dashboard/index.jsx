@@ -278,6 +278,8 @@ const Dashboard = () => {
             break;
 
           case "REAL_TIME_NEWS_FEED":
+
+          console.log("Received REAL_TIME_NEWS_FEED:", payload);
             startTransition(() => {
               dispatch(setRealTimeNewsFeed(payload));
             });

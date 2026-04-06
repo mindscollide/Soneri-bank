@@ -33,7 +33,7 @@ const Management = () => {
   useMqttTopics([
     "SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT",
     "SBL_REAL_TIME_STATIC_TREASURY_MANAGEMENT",
-    "REAL_TIME_FEED_NEWS",
+    "SBL_REAL_TIME_FEED_NEWS",
   ]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
