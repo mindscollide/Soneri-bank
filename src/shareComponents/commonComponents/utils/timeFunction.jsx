@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export function formatDateTimeToUTCTime(dateTimeStr) {
   try {
     // Extract year, month, day, hour, minute, second from the string
@@ -174,13 +176,21 @@ export const convertCurrentTimeZone = (dateTime) => {
 export const formatToUTCString = (date, type) => {
   if (!date) return "";
 
+  const m = moment(date).utcOffset(0); // don't mutate original
+
   if (type === "start") {
-    return date.startOf("day").utc().format("YYYYMMDDHHmmss");
+    return m
+      .clone()
+      .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+      .format("YYYYMMDDHHmmss");
   }
 
   if (type === "end") {
-    return date.endOf("day").utc().format("YYYYMMDDHHmmss");
+    return m
+      .clone()
+      .set({ hour: 23, minute: 59, second: 59, millisecond: 999 })
+      .format("YYYYMMDDHHmmss");
   }
 
-  return date.utc().format("YYYYMMDDHHmmss");
+  return m.format("YYYYMMDDHHmmss");
 };

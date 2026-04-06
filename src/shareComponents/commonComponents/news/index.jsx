@@ -303,29 +303,34 @@ const News = () => {
 
   // Realtime work
   useEffect(() => {
-    if (realTimeNewsFeed?.News) {
-      const incomingNews = realTimeNewsFeed.News;
+    if (realTimeNewsFeed !== null) {
+      try {
+        const incomingNews = realTimeNewsFeed.News;
 
-      setNewsList((prev) => {
-        // ❌ duplicate
-        const alreadyExists = prev.some(
-          (item) => item.newsID === incomingNews.NewsID
-        );
+        setNewsList((prev) => {
+          // ❌ duplicate
+          const alreadyExists = prev.some(
+            (item) => item.newsID === incomingNews.NewsID
+          );
 
-        if (alreadyExists) return prev;
+          if (alreadyExists) return prev;
 
-        // ✅ normalize incoming structure to match your UI
-        const formattedNews = {
-          newsID: incomingNews.NewsID,
-          newsSourceID: incomingNews.NewsSourceID,
-          headline: incomingNews.Headline,
-          content: incomingNews.Content,
-          newsDateTime: incomingNews.NewsDateTime,
-        };
+          // ✅ normalize incoming structure to match your UI
+          const formattedNews = {
+            newsID: incomingNews.NewsID,
+            newsSourceID: incomingNews.NewsSourceID,
+            headline: incomingNews.Headline,
+            content: incomingNews.Content,
+            newsDateTime: incomingNews.NewsDateTime,
+          };
 
-        // ✅ add on top
-        return [formattedNews, ...prev];
-      });
+          // ✅ add on top
+          return [formattedNews, ...prev];
+        });
+        dispatch(setClearNewsMQTT());
+      } catch (error) {
+        console.log(error)
+      }
     }
   }, [realTimeNewsFeed]);
 
@@ -337,18 +342,16 @@ const News = () => {
             sm={12}
             md={6}
             lg={6}
-            className={`d-flex justify-content-start align-items-center ${styles.newsHeadingStyles}`}
-          >
+            className={`d-flex justify-content-start align-items-center ${styles.newsHeadingStyles}`}>
             News
           </Col>
           <Col
             sm={12}
             md={6}
             lg={6}
-            className={`d-flex justify-content-end align-items-center `}
-          >
+            className={`d-flex justify-content-end align-items-center `}>
             <div className={styles.newsViewAll} onClick={handleClickViewAll}>
-              <i className="icon-external-link color-blue fs-6 pe-2"></i>
+              <i className='icon-external-link color-blue fs-6 pe-2'></i>
               View All
             </div>
           </Col>
@@ -358,10 +361,9 @@ const News = () => {
             sm={12}
             md={6}
             lg={6}
-            className={`d-flex justify-content-start align-items-center`}
-          >
+            className={`d-flex justify-content-start align-items-center`}>
             <Input
-              placeholder="Search News"
+              placeholder='Search News'
               className={styles.SearchBoxStyle}
               onChange={handleSearchChange}
               onKeyDown={handleKeyPress}
@@ -370,33 +372,30 @@ const News = () => {
             />
           </Col>
           <Col sm={12} md={6} lg={6} className={`d-flex justify-content-end `}>
-            <div className="d-flex align-items-center">
+            <div className='d-flex align-items-center'>
               <button
                 className={`news-toggle-button ${
                   activeStates.tresmark ? "active" : "inactive"
                 }`}
                 onClick={() => toggleActive("tresmark")}
-                title="Toggle Tresmark News"
-              >
-                <img src={tresmarkIcon} alt="Tresmark" />
+                title='Toggle Tresmark News'>
+                <img src={tresmarkIcon} alt='Tresmark' />
               </button>
               <button
                 className={`news-toggle-button ${
                   activeStates.dowjones ? "active" : "inactive"
                 }`}
                 onClick={() => toggleActive("dowjones")}
-                title="Toggle Dow Jones News"
-              >
-                <img src={dowjhonesIcon} alt="Dow Jhones" />
+                title='Toggle Dow Jones News'>
+                <img src={dowjhonesIcon} alt='Dow Jhones' />
               </button>
               <button
                 onClick={() => toggleActive("cnbc")}
                 className={`news-toggle-button ${
                   activeStates.cnbc ? "active" : "inactive"
                 }`}
-                title="Toggle CNBC News"
-              >
-                <img src={cnbcIcon} alt="SNBC" />
+                title='Toggle CNBC News'>
+                <img src={cnbcIcon} alt='SNBC' />
               </button>
             </div>
           </Col>
@@ -406,10 +405,9 @@ const News = () => {
             <div
               onScroll={handleScroll}
               ref={scrollRef}
-              className={styles.newsScrollArea}
-            >
+              className={styles.newsScrollArea}>
               {getActiveSourceIds().length === 0 ? (
-                <div className="text-center p-3 text-muted">
+                <div className='text-center p-3 text-muted'>
                   Please select at least one news source
                 </div>
               ) : (
@@ -425,20 +423,19 @@ const News = () => {
 
                           <div className={styles.newsIcon}>
                             {item.newsSourceID === 3 ? (
-                              <img src={cnbcImg} alt="CNBC Icon" />
+                              <img src={cnbcImg} alt='CNBC Icon' />
                             ) : item.newsSourceID === 4 ? (
-                              <img src={tresmarkImg} alt="Tresmark Icon" />
+                              <img src={tresmarkImg} alt='Tresmark Icon' />
                             ) : item.newsSourceID === 8 ? (
-                              <img src={dowjonesImg} alt="Dowjones Icon" />
+                              <img src={dowjonesImg} alt='Dowjones Icon' />
                             ) : (
-                              <img src={tresmarkImg} alt="Tresmark Icon" />
+                              <img src={tresmarkImg} alt='Tresmark Icon' />
                             )}
                           </div>
 
                           <div
                             className={styles.newsHeadline}
-                            onClick={() => handleClickNewsHeading(item.newsID)}
-                          >
+                            onClick={() => handleClickNewsHeading(item.newsID)}>
                             {item.headline}
                           </div>
                         </div>
@@ -452,7 +449,7 @@ const News = () => {
               ) : (
                 getActiveSourceIds().length > 0 &&
                 newsList.length === 0 && (
-                  <div className="text-center p-3 text-muted">
+                  <div className='text-center p-3 text-muted'>
                     No news available for selected sources
                   </div>
                 )
@@ -486,23 +483,21 @@ const News = () => {
                 sm={12}
                 md={6}
                 lg={6}
-                className="d-flex justify-content-end align-items-center"
-              >
+                className='d-flex justify-content-end align-items-center'>
                 <div
-                  className="cursor-pointer fw-bold"
-                  onClick={handleCloseModal}
-                >
+                  className='cursor-pointer fw-bold'
+                  onClick={handleCloseModal}>
                   X
                 </div>
               </Col>
             </Row>
-            <Row className="mt-3">
-              <Col className="d-flex align-items-center gap-2">
+            <Row className='mt-3'>
+              <Col className='d-flex align-items-center gap-2'>
                 <span>
                   {newsById.newsSourceID && (
                     <img
                       src={newsSourceIconMap[newsById.newsSourceID]}
-                      alt="source"
+                      alt='source'
                       style={{ width: "40px", height: "40px" }}
                     />
                   )}
@@ -510,13 +505,12 @@ const News = () => {
                 <span className={styles.modalTitle}>{newsById.headline}</span>
               </Col>
             </Row>
-            <Row className="mt-3">
+            <Row className='mt-3'>
               <Col
                 sm={12}
                 md={12}
                 lg={12}
-                className={styles.modalDetailWithScroll}
-              >
+                className={styles.modalDetailWithScroll}>
                 {newsById.content}
               </Col>
             </Row>
@@ -524,7 +518,7 @@ const News = () => {
         }
       />
       {isLoading && (
-        <div className="text-center p-2 text-muted">Loading more news...</div>
+        <div className='text-center p-2 text-muted'>Loading more news...</div>
       )}
     </>
   );

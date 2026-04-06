@@ -316,7 +316,7 @@ const Dashboard = () => {
             break;
 
           case "REAL_TIME_NEWS_FEED":
-            console.log("REAL_TIME_NEWS_FEED");
+            console.log("REAL_TIME_NEWS_FEED", payload);
             startTransition(() => {
               dispatch(setRealTimeNewsFeed(payload));
             });
@@ -763,10 +763,10 @@ const Dashboard = () => {
   return (
     <MqttContext.Provider value={{ unsubscribeAll }}>
       <Layout style={layoutStyle}>
-        <Header prefixCls="mainHeader">
+        <Header prefixCls='mainHeader'>
           <MainHeader />
         </Header>
-        <Content className="my-2">
+        <Content className='my-2'>
           <Outlet />
         </Content>
       </Layout>

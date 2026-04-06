@@ -224,3 +224,4 @@ export const formatDateTimeForNews = (dateTime) => {
     time: formattedTime,
   };
 };
+

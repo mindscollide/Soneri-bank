@@ -200,7 +200,11 @@ const RealtimeActionsSlice = createSlice({
       state.currentRateSheetRatesPublished = payload;
     },
     setRealTimeNewsFeed: (state, { payload }) => {
+      
       state.realTimeNewsFeed = payload;
+    },
+    setClearNewsMQTT: (state, { payload }) => {
+      state.realTimeNewsFeed = null;
     },
   },
 });
@@ -246,6 +250,7 @@ export const {
   setTreasuryRateSheetIndicativeFBPRates,
   setCurrentRateSheetRatesPublished,
   setRealTimeNewsFeed,
+  setClearNewsMQTT
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;
