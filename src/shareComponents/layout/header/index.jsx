@@ -46,73 +46,72 @@ const MainHeader = () => {
     <Row>
       <Col sm={12} md={12} lg={12}>
         <>
-          <Navbar className={styles.mainNavbar} expand="lg">
+          <Navbar className={styles.mainNavbar} expand='lg'>
             <Navbar.Brand>
-              <img src={SoneriLogo} width="195" alt="" />
+              <img src={SoneriLogo} width='195' alt='' />
             </Navbar.Brand>
-            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Nav className="ms-auto align-items-center justify-content-end">
-              {!location.pathname.toLowerCase().includes("allnews") &&
-                (import.meta.env.VITE_APP_INCLUDE_TREASURY === "true" ? (
-                  <>
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("interbank")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      to="interbank"
-                      as={Link}
-                      // onClick={() => handleNavigate("interbank")}
-                      // onClick={handleClickInterbank}
-                    >
-                      Interbank
-                    </Nav.Link>
+            <Navbar.Toggle aria-controls='responsive-navbar-nav' />
+            <Nav className='ms-auto align-items-center justify-content-end'>
+              {location.pathname
+                .toLowerCase()
+                .includes("allnews") ? null : import.meta.env
+                  .VITE_APP_INCLUDE_TREASURY === "true" ? (
+                <>
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("interbank")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to='interbank'
+                    as={Link}
+                    // onClick={() => handleNavigate("interbank")}
+                    // onClick={handleClickInterbank}
+                  >
+                    Interbank
+                  </Nav.Link>
 
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("dealer")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      to="dealer"
-                      as={Link}
-                      // onClick={() => handleNavigate("dealer")}
-                    >
-                      Dealer
-                    </Nav.Link>
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("dealer")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to='dealer'
+                    as={Link}
+                    // onClick={() => handleNavigate("dealer")}
+                  >
+                    Dealer
+                  </Nav.Link>
 
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("management")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      to="Management"
-                      as={Link}
-                      // onClick={() => handleNavigate("Management")}
-                    >
-                      Management
-                    </Nav.Link>
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("management")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to='Management'
+                    as={Link}
+                    // onClick={() => handleNavigate("Management")}
+                  >
+                    Management
+                  </Nav.Link>
 
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("treasury")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      to="treasury"
-                      as={Link}
-                      onClick={handleClickTreasury}
-                    >
-                      Treasury
-                    </Nav.Link>
-                  </>
-                ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
-                  <PublshDealerSpreads />
-                ) : import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true" ? (
-                  <Management />
-                ) : null)}
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("treasury")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to='treasury'
+                    as={Link}
+                    onClick={handleClickTreasury}>
+                    Treasury
+                  </Nav.Link>
+                </>
+              ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
+                <PublshDealerSpreads />
+              ) : null}
 
               <ProfileDropdown />
             </Nav>

@@ -24,11 +24,6 @@ const loadRoutes = async () => {
     children: [],
   };
 
-  dashboardRoute.children.push({
-    path: "allnews",
-    element: withErrorBoundary(<PrivateRoute element={<AllNews />} />),
-  });
-
   if (import.meta.env.VITE_APP_INCLUDE_TREASURY === "true") {
     const Interbank = (await import("../modules/interbank")).default;
     const Dealer = (await import("../modules/dealer")).default;
@@ -50,6 +45,17 @@ const loadRoutes = async () => {
       path: "management",
       element: withErrorBoundary(<PrivateRoute element={<Management />} />),
     });
+    dashboardRoute.children.push({
+      path: "allnews",
+      element: withErrorBoundary(<PrivateRoute element={<AllNews />} />),
+    });
+  }
+  if (import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true") {
+    const Management = (await import("../modules/management")).default;
+    dashboardRoute.children.push({
+      path: "management",
+      element: withErrorBoundary(<PrivateRoute element={<Management />} />),
+    });
   }
 
   if (import.meta.env.VITE_APP_INCLUDE_DEALER === "true") {
@@ -58,6 +64,10 @@ const loadRoutes = async () => {
     dashboardRoute.children.push({
       path: "dealer",
       element: withErrorBoundary(<PrivateRoute element={<Dealer />} />),
+    });
+    dashboardRoute.children.push({
+      path: "allnews",
+      element: withErrorBoundary(<PrivateRoute element={<AllNews />} />),
     });
   }
 
@@ -69,7 +79,7 @@ const loadRoutes = async () => {
     dashboardRoute,
     {
       path: "*",
-      element: <Navigate to="/" />,
+      element: <Navigate to='/' />,
     },
   ];
 };
