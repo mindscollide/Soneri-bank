@@ -1,15 +1,17 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import GlobalTable from "../../elements/table/GlobalTable";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
-import { IndexCell } from "../../elements/inputField/IndexCell";
 import {
   clearDealerSpotClearRates,
   clearDealerSpotRatesFeed,
 } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import { UpdatetDealerSpotRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
 
-// Selectors
+// ─── Selectors ───────────────────────────────
 const selectCrossInstruments = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
 
@@ -26,6 +28,10 @@ const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 const BankSpotAndUSDParity = memo(() => {
   const dispatch = useDispatch();
 
+  const gridRef = useRef();
+  const pendingRef = useRef([]);
+  const rafRef = useRef(null);
+
   const crossInstruments = useSelector(selectCrossInstruments, shallowEqual);
   const fullFeed = useSelector(selectFeed);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
@@ -40,10 +46,68 @@ const BankSpotAndUSDParity = memo(() => {
     (state) => state.RealtimeActionsSlice.DealerSpotClearRates
   );
 
-  const [processedData, setProcessedData] = useState([]);
+  const [rowData, setRowData] = useState([]);
 
-  const pendingRef = useRef([]);
-  const rafRef = useRef(null);
+  // ─────────────────────────────────────────────
+  // Columns (AG Grid)
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Bank Spot",
+        children: [
+          {
+            headerName: "Instrument",
+            valueGetter: (p) =>
+              `${p.data.instrumentName} / ${p.data.secondaryInstrumentName}`,
+            width: 180,
+          },
+          {
+            headerName: "Bid",
+            field: "worldCrossBid",
+            valueFormatter: (p) => Number(p.value).toFixed(4),
+          },
+          {
+            headerName: "Offer",
+            field: "worldCrossOffer",
+            valueFormatter: (p) => Number(p.value).toFixed(4),
+          },
+          {
+            headerName: "Time",
+            field: "time",
+            valueFormatter: (p) =>
+              p.value
+                ? formatDateUTCToGMT(p.value).toTimeString().substring(0, 8)
+                : "--:--:--",
+          },
+        ],
+      },
+      {
+        headerName: "USD Parity",
+        children: [
+          { headerName: "Instrument", field: "instrumentName" },
+          {
+            headerName: "Bid",
+            field: "worldCurBid",
+            valueFormatter: (p) => Number(p.value).toFixed(4),
+          },
+          {
+            headerName: "Offer",
+            field: "worldCurOffer",
+            valueFormatter: (p) => Number(p.value).toFixed(4),
+          },
+          {
+            headerName: "Time",
+            field: "time",
+            valueFormatter: (p) =>
+              p.value
+                ? formatDateUTCToGMT(p.value).toTimeString().substring(0, 8)
+                : "--:--:--",
+          },
+        ],
+      },
+    ],
+    []
+  );
 
   // ─────────────────────────────────────────────
   // Initial Data
@@ -67,29 +131,22 @@ const BankSpotAndUSDParity = memo(() => {
         instrumentName: inst.instrumentName,
         secondaryInstrumentName: inst.secondaryInstrumentName,
         time: cross?.time ?? "",
-
         worldCrossBid: cross?.bid ?? 0,
         worldCrossOffer: cross?.offer ?? 0,
-
         worldCurBid:
           inst.instrumentID === 21 ? cross?.bid ?? 0 : currency?.bid ?? 0,
-
         worldCurOffer:
           inst.instrumentID === 21 ? cross?.offer ?? 0 : currency?.offer ?? 0,
-
-        version: 0,
       };
     });
   }, [crossInstruments, worldCrosses, worldCurrencies]);
 
   useEffect(() => {
-    if (enrichedData.length) {
-      setProcessedData(enrichedData);
-    }
+    setRowData(enrichedData);
   }, [enrichedData]);
 
   // ─────────────────────────────────────────────
-  // 🚀 RAF BATCH PROCESSOR
+  // 🚀 REAL-TIME UPDATE (AG GRID)
   const processQueue = useCallback(() => {
     const pending = pendingRef.current;
     if (!pending.length) {
@@ -97,87 +154,57 @@ const BankSpotAndUSDParity = memo(() => {
       return;
     }
 
-    const crossMap = new Map();
-    const parityMap = new Map();
+    if (!gridRef.current?.api) return;
 
-    for (const feed of pending) {
+    pending.forEach((feed) => {
       const cross = feed?.instrumentCrossRate;
       const parity = feed?.instrumentParitySpot;
 
       if (cross) {
-        const key = `${cross.instrumentID}_${cross.secondaryInstrumentID}`;
-        crossMap.set(key, cross);
+        const id = `${cross.instrumentID}_${cross.secondaryInstrumentID}`;
+        const rowNode = gridRef.current.api.getRowNode(id);
+
+        if (rowNode) {
+          const updated = {
+            ...rowNode.data,
+            worldCrossBid: cross.bid,
+            worldCrossOffer: cross.ask,
+            time: cross.updateDateTime,
+          };
+
+          if (cross.instrumentID === 21) {
+            updated.worldCurBid = cross.bid;
+            updated.worldCurOffer = cross.ask;
+          }
+
+          gridRef.current.api.applyTransaction({ update: [updated] });
+        }
       }
 
       if (parity) {
-        parityMap.set(parity.instrumentID, parity);
+        const nodes = gridRef.current.api.getRenderedNodes();
+
+        nodes.forEach((node) => {
+          if (node.data.instrumentID === parity.instrumentID) {
+            const updated = {
+              ...node.data,
+              worldCurBid: parity.bid,
+              worldCurOffer: parity.ask,
+            };
+
+            gridRef.current.api.applyTransaction({ update: [updated] });
+          }
+        });
       }
-    }
-
-    pendingRef.current = [];
-
-    setProcessedData((prev) => {
-      let changed = false;
-
-      const updated = prev.map((row) => {
-        let newRow = { ...row };
-        let rowChanged = false;
-
-        const crossKey = `${row.instrumentID}_${row.secondaryInstrumentID}`;
-        const cross = crossMap.get(crossKey);
-
-        if (cross) {
-          if (
-            row.worldCrossBid !== cross.bid ||
-            row.worldCrossOffer !== cross.ask ||
-            row.time !== cross.updateDateTime
-          ) {
-            newRow.worldCrossBid = cross.bid;
-            newRow.worldCrossOffer = cross.ask;
-            newRow.time = cross.updateDateTime;
-            rowChanged = true;
-          }
-
-          if (row.instrumentID === 21) {
-            newRow.worldCurBid = cross.bid;
-            newRow.worldCurOffer = cross.ask;
-            rowChanged = true;
-          }
-        }
-
-        const parity = parityMap.get(row.instrumentID);
-
-        if (parity && row.instrumentID !== 21) {
-          if (
-            row.worldCurBid !== parity.bid ||
-            row.worldCurOffer !== parity.ask
-          ) {
-            newRow.worldCurBid = parity.bid;
-            newRow.worldCurOffer = parity.ask;
-            rowChanged = true;
-          }
-        }
-
-        if (rowChanged) {
-          newRow.version = row.version + 1;
-          changed = true;
-          return newRow;
-        }
-
-        return row;
-      });
-
-      return changed ? updated : prev;
     });
 
+    pendingRef.current = [];
     rafRef.current = null;
   }, []);
 
   // ─────────────────────────────────────────────
   const queueUpdate = useCallback(
     (feed) => {
-      if (!feed) return;
-
       pendingRef.current.push(feed);
 
       if (!rafRef.current) {
@@ -187,34 +214,32 @@ const BankSpotAndUSDParity = memo(() => {
     [processQueue]
   );
 
-  // ─────────────────────────────────────────────
-  // Consume Redux buffer
+  // Feed consumer
   useEffect(() => {
     if (!fullFeed?.length) return;
 
-    fullFeed.forEach((f) => queueUpdate(f));
-
+    fullFeed.forEach(queueUpdate);
     dispatch(clearDealerSpotRatesFeed());
   }, [fullFeed, queueUpdate, dispatch]);
 
-  // ─────────────────────────────────────────────
   // Market close
   useEffect(() => {
-    if (marketStatus === false) {
-      setProcessedData((prev) =>
-        prev.map((row) => ({
-          ...row,
-          worldCrossBid: 0,
-          worldCrossOffer: 0,
-          worldCurBid: 0,
-          worldCurOffer: 0,
-        }))
-      );
+    if (marketStatus === false && gridRef.current?.api) {
+      const nodes = gridRef.current.api.getRenderedNodes();
+
+      const updates = nodes.map((n) => ({
+        ...n.data,
+        worldCrossBid: 0,
+        worldCrossOffer: 0,
+        worldCurBid: 0,
+        worldCurOffer: 0,
+      }));
+
+      gridRef.current.api.applyTransaction({ update: updates });
     }
   }, [marketStatus]);
 
-  // ─────────────────────────────────────────────
-  // Clear rates
+  // Clear rates (same logic)
   useEffect(() => {
     if (!ClearRatesData?.areRatesClear || !GetBankSpotForDealer) return;
 
@@ -246,76 +271,20 @@ const BankSpotAndUSDParity = memo(() => {
   }, []);
 
   // ─────────────────────────────────────────────
-  // Columns
-  const columns = useMemo(
-    () => [
-      {
-        title: "Bank Spot",
-        children: [
-          {
-            title: "Instrument",
-            render: (_, r) =>
-              `${r.instrumentName} / ${r.secondaryInstrumentName}`,
-          },
-          {
-            title: "Bid",
-            dataIndex: "worldCrossBid",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
-          },
-          {
-            title: "Offer",
-            dataIndex: "worldCrossOffer",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
-          },
-          {
-            title: "Time",
-            dataIndex: "time",
-            render: (t) =>
-              t
-                ? formatDateUTCToGMT(t).toTimeString().substring(0, 8)
-                : "--:--:--",
-          },
-        ],
-      },
-      {
-        title: "USD Parity",
-        children: [
-          { title: "Instrument", dataIndex: "instrumentName" },
-          {
-            title: "Bid",
-            dataIndex: "worldCurBid",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
-          },
-          {
-            title: "Offer",
-            dataIndex: "worldCurOffer",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
-          },
-          {
-            title: "Time",
-            dataIndex: "time",
-            render: (t) =>
-              t
-                ? formatDateUTCToGMT(t).toTimeString().substring(0, 8)
-                : "--:--:--",
-          },
-        ],
-      },
-    ],
-    []
-  );
-
   return (
-    <GlobalTable
-      columns={columns}
-      dataSource={processedData}
-      rowKey={(r) =>
-        `${r.instrumentID}-${r.secondaryInstrumentID}-${r.version}`
-      }
-      prefixCls="LiveRatesTable"
-      pagination={false}
-      scroll={{ x: "max-content", y: 500 }}
-    />
+    <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
+      <AgGridReact
+        ref={gridRef}
+        rowData={rowData}
+        columnDefs={columnDefs}
+        // 🔥 CRITICAL
+        getRowId={(params) =>
+          `${params.data.instrumentID}_${params.data.secondaryInstrumentID}`
+        }
+        deltaRowDataMode={true}
+        animateRows={false}
+      />
+    </div>
   );
 });
 

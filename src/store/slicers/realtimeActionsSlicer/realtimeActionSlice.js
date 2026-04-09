@@ -215,6 +215,9 @@ const RealtimeActionsSlice = createSlice({
         state.usdParityForManagmentFeed = payload;
       }
     },
+    clearUSDParityForManagementFeed: (state) => {
+      state.usdParityForManagmentFeed = null;
+    },
     // setCurrencyCrossesForManagementFeed: (state, { payload }) => {
     //   if (!isEqual(state.currencyCrossesForManagmentFeed, payload)) {
     //     state.currencyCrossesForManagmentFeed = payload;
@@ -227,16 +230,26 @@ const RealtimeActionsSlice = createSlice({
         payload,
       ];
     },
+    clearCurrencyCrossesForManagementFeed: (state) => {
+      state.currencyCrossesForManagmentFeed = [];
+    },
 
     setCommoditiesForManagmentFeed: (state, { payload }) => {
       if (!isEqual(state.commoditiesForManagementFeed, payload)) {
         state.commoditiesForManagementFeed = payload;
       }
     },
+    clearCommoditiesForManagmentFeed: (state) => {
+      state.commoditiesForManagementFeed = [];
+    },
     setStockIndicesForManagmentFeed: (state, { payload }) => {
       if (!isEqual(state.stockIndicesForManagementFeed, payload)) {
         state.stockIndicesForManagementFeed = payload;
       }
+    },
+
+    clearStockIndicesForManagmentFeed: (state) => {
+      state.stockIndicesForManagementFeed = null;
     },
 
     setKiborForManagmentFeed: (state, { payload }) => {
@@ -247,15 +260,27 @@ const RealtimeActionsSlice = createSlice({
           : { ...payload.kibor },
       };
     },
+    clearKiborForManagmentFeed: (state) => {
+      state.kiborForManagementFeed = null;
+    },
 
     setSofrForManagmentFeed: (state, { payload }) => {
       state.sofrForManagementFeed = payload;
     },
+    clearSofrForManagmentFeed: (state) => {
+      state.sofrForManagementFeed = null;
+    },
     setSbpFXRevalRatesForManagmentFeed: (state, { payload }) => {
       state.sbpFXRevalRatesForManagementFeed = payload;
     },
+    clearSbpFXRevalRatesForManagmentFeed: (state) => {
+      state.sbpFXRevalRatesForManagementFeed = null;
+    },
     setSwapsinUSDForManagementFeed: (state, { payload }) => {
       state.swapsinUSDForManagementFeed = payload;
+    },
+    clearSwapsinUSDForManagementFeed: (state) => {
+      state.swapsinUSDForManagementFeed = null;
     },
     // setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
     //   state.treasuryRateSheetSpotTTRates = payload;
@@ -371,6 +396,14 @@ export const {
   clearDealerSpotRatesFeed,
   clearTreasuryRateSheetSpotTTRates,
   clearTreasuryRateSheetCurrencyNotes,
+  clearSwapsinUSDForManagementFeed,
+  clearSbpFXRevalRatesForManagmentFeed,
+  clearSofrForManagmentFeed,
+  clearKiborForManagmentFeed,
+  clearStockIndicesForManagmentFeed,
+  clearCommoditiesForManagmentFeed,
+  clearCurrencyCrossesForManagementFeed,
+  clearUSDParityForManagementFeed,
 } = RealtimeActionsSlice.actions;
 
 export default RealtimeActionsSlice.reducer;

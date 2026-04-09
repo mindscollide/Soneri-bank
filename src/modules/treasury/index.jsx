@@ -22,7 +22,9 @@ import { setActiveTab } from "../../store/slicers/watchListSlicer/WatchListSlice
 import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../hook/useMqttTopics";
-const LiveRates = lazy(() => import("./liveRates/index"));
+const LiveRates = lazy(() =>
+  import("../../shareComponents/commonComponents/liveRates/index")
+);
 const Forwards = lazy(() => import("./forwards/index"));
 const TreasuryDiscounting = lazy(() => import("./discounting/index"));
 
@@ -67,7 +69,7 @@ const Treasury = () => {
       key: "0",
       children: (
         <Suspense fallback={<SectionLoader />}>
-          <LiveRates />
+          <LiveRates dealerIdForMQTT={null} />
         </Suspense>
       ),
     },

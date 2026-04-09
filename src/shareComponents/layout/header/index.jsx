@@ -24,34 +24,23 @@ const MainHeader = () => {
   const navigate = useNavigate();
   // const { unsubscribeAll } = useMqtt();
   const [isPending, startTransition] = useTransition();
-  // const handleNavigate = (to) => {
-  //   startTransition(() => {
-  //     dispatch(setMainLoader(true));
-  //     navigate(to);
-  //   });
-  // };
-  const handleClickTreasury = () => {
-    dispatch(clearGetUSDParityForTreasury());
-    dispatch(clearGetCurrencyCrosses());
-
-    dispatch(clearGetCommoditiesForTreasury());
-    dispatch(clearGetIndicesForTreasury());
-    dispatch(clearGetKiborDataForTreasury());
-    dispatch(clearGetSOFRDataForTreasury());
-    dispatch(clearGetRevalRatesForTreasury());
-    dispatch(clearGetSwapsInUSDForTreasury());
+  const handleNavigate = (e, to) => {
+    e.preventDefault(); // Stop the default Link behavior
+    startTransition(() => {
+      navigate(to);
+    });
   };
 
   return (
     <Row>
       <Col sm={12} md={12} lg={12}>
         <>
-          <Navbar className={styles.mainNavbar} expand='lg'>
+          <Navbar className={styles.mainNavbar} expand="lg">
             <Navbar.Brand>
-              <img src={SoneriLogo} width='195' alt='' />
+              <img src={SoneriLogo} width="195" alt="" />
             </Navbar.Brand>
-            <Navbar.Toggle aria-controls='responsive-navbar-nav' />
-            <Nav className='ms-auto align-items-center justify-content-end'>
+            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+            <Nav className="ms-auto align-items-center justify-content-end">
               {location.pathname
                 .toLowerCase()
                 .includes("allnews") ? null : import.meta.env
@@ -63,9 +52,9 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to='interbank'
+                    to="interbank"
                     as={Link}
-                    // onClick={() => handleNavigate("interbank")}
+                    onClick={(e) => handleNavigate(e, "interbank")}
                     // onClick={handleClickInterbank}
                   >
                     Interbank
@@ -77,9 +66,9 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to='dealer'
+                    to="dealer"
                     as={Link}
-                    // onClick={() => handleNavigate("dealer")}
+                    onClick={(e) => handleNavigate(e, "dealer")}
                   >
                     Dealer
                   </Nav.Link>
@@ -90,9 +79,9 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to='Management'
+                    to="Management"
                     as={Link}
-                    // onClick={() => handleNavigate("Management")}
+                    onClick={(e) => handleNavigate(e, "Management")}
                   >
                     Management
                   </Nav.Link>
@@ -103,9 +92,10 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to='treasury'
+                    to="treasury"
                     as={Link}
-                    onClick={handleClickTreasury}>
+                    onClick={(e) => handleNavigate(e, "treasury")}
+                  >
                     Treasury
                   </Nav.Link>
                 </>

@@ -173,6 +173,11 @@ const Dealer = () => {
 
     // ✅ CLEANUP ON UNMOUNT
     return () => {
+      let defaultData = {
+        value: 0,
+        label: "",
+      };
+      dispatch(setDealerValue(defaultData));
       dispatch(clearGetBankSpotForDealer());
       dispatch(clearGetCurrencyCrosses());
       dispatch(clearGetBankForwardForTreasuryDealer());

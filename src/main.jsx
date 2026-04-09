@@ -7,6 +7,9 @@ import App from "./App.jsx";
 import { NotificationProvider } from "./context/NotificationProvider.jsx";
 import { store } from "./store/store.js"; // adjust path if needed
 import Loader from "./shareComponents/elements/soneriLoader/index.jsx";
+import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>

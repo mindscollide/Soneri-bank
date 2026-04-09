@@ -18,6 +18,26 @@ import {
 import { IsolatedBlock } from "../../shareComponents/commonComponents/utils/isolateBlock";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../hook/useMqttTopics";
+import {
+  clearGetCommoditiesForTreasury,
+  clearGetCurrencyCrosses,
+  clearGetIndicesForTreasury,
+  clearGetKiborDataForTreasury,
+  clearGetRevalRatesForTreasury,
+  clearGetSOFRDataForTreasury,
+  clearGetSwapsInUSDForTreasury,
+  clearGetUSDParityForTreasury,
+} from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import {
+  clearCommoditiesForManagmentFeed,
+  clearCurrencyCrossesForManagementFeed,
+  clearKiborForManagmentFeed,
+  clearSbpFXRevalRatesForManagmentFeed,
+  clearSofrForManagmentFeed,
+  clearStockIndicesForManagmentFeed,
+  clearSwapsinUSDForManagementFeed,
+  clearUSDParityForManagementFeed,
+} from "../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -53,6 +73,25 @@ const Management = () => {
     dispatch(GetSOFRDataForTreasuryApi({ navigate }));
     dispatch(GetRevalRatesForTreasuryApi({ navigate }));
     dispatch(GetSwapsInUSDForTreasuryApi({ navigate }));
+
+    return () => {
+      dispatch(clearGetUSDParityForTreasury());
+      dispatch(clearGetCurrencyCrosses());
+      dispatch(clearGetCommoditiesForTreasury());
+      dispatch(clearGetIndicesForTreasury());
+      dispatch(clearGetKiborDataForTreasury());
+      dispatch(clearGetSOFRDataForTreasury());
+      dispatch(clearGetRevalRatesForTreasury());
+      dispatch(clearGetSwapsInUSDForTreasury());
+      dispatch(clearSwapsinUSDForManagementFeed());
+      dispatch(clearSbpFXRevalRatesForManagmentFeed());
+      dispatch(clearSofrForManagmentFeed());
+      dispatch(clearKiborForManagmentFeed());
+      dispatch(clearStockIndicesForManagmentFeed());
+      dispatch(clearCommoditiesForManagmentFeed());
+      dispatch(clearCurrencyCrossesForManagementFeed());
+      dispatch(clearUSDParityForManagementFeed());
+    };
   }, []);
 
   const layout = useMemo(

@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "ag-grid-community": "^35.2.1",
+    "ag-grid-react": "^35.2.1",
     "antd": "^6.2.3",
     "axios": "^1.13.4",
     "bootstrap": "^5.3.8",

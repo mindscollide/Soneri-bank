@@ -1,7 +1,11 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { shallowEqual, useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import "./style.css";
+
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
-import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
@@ -25,13 +29,13 @@ const BankSpotAndUSDParity = memo(() => {
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
 
-  const [processedData, setProcessedData] = useState([]);
+  const [rowData, setRowData] = useState([]);
 
   const pendingRef = useRef([]);
   const rafRef = useRef(null);
 
-  // ─────────────────────────────────────────────
-  // Initial Data
+  // ─────────────────────────────
+  // Initial enrichment
   const enrichedData = useMemo(() => {
     if (!crossInstruments || !worldCrosses || !worldCurrencies) return [];
 
@@ -69,12 +73,12 @@ const BankSpotAndUSDParity = memo(() => {
 
   useEffect(() => {
     if (enrichedData.length) {
-      setProcessedData(enrichedData);
+      setRowData(enrichedData);
     }
   }, [enrichedData]);
 
-  // ─────────────────────────────────────────────
-  // 🚀 FAST RAF PROCESSOR
+  // ─────────────────────────────
+  // RAF processor (same logic)
   const processQueue = useCallback(() => {
     const pending = pendingRef.current;
     if (!pending.length) {
@@ -82,7 +86,6 @@ const BankSpotAndUSDParity = memo(() => {
       return;
     }
 
-    // Build maps
     const crossMap = new Map();
     const parityMap = new Map();
 
@@ -102,12 +105,12 @@ const BankSpotAndUSDParity = memo(() => {
 
     pendingRef.current = [];
 
-    setProcessedData((prev) => {
+    setRowData((prev) => {
       let changed = false;
 
       const updated = prev.map((row) => {
-        let rowChanged = false;
         let newRow = { ...row };
+        let rowChanged = false;
 
         const crossKey = `${row.instrumentID}_${row.secondaryInstrumentID}`;
         const cross = crossMap.get(crossKey);
@@ -125,7 +128,6 @@ const BankSpotAndUSDParity = memo(() => {
           }
 
           if (row.instrumentID === 21) {
-            console.log(row, cross, "crosscrosscrosscrosscross");
             newRow.worldCurBid = cross.bid;
             newRow.worldCurOffer = cross.ask;
             rowChanged = true;
@@ -160,7 +162,6 @@ const BankSpotAndUSDParity = memo(() => {
     rafRef.current = null;
   }, []);
 
-  // ─────────────────────────────────────────────
   const queueUpdate = useCallback(
     (feed) => {
       if (!feed) return;
@@ -174,75 +175,131 @@ const BankSpotAndUSDParity = memo(() => {
     [processQueue]
   );
 
-  // ─────────────────────────────────────────────
-  // Consume Redux feed
   useEffect(() => {
     if (!fullFeed?.length) return;
 
-    fullFeed.forEach((f) => queueUpdate(f));
-
+    fullFeed.forEach(queueUpdate);
     dispatch(clearTreasurySpotRatesFeed());
-  }, [fullFeed, queueUpdate]);
+  }, [fullFeed, queueUpdate, dispatch]);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
-  // ─────────────────────────────────────────────
-  // Columns
-  const columns = useMemo(
+  const getColumnStyle = (
+    params,
+    darkColor,
+    lightColor,
+    textColor = "black",
+    value = false,
+    center = true
+  ) => {
+    const isEven = params.node.rowIndex % 2 === 0;
+    return {
+      backgroundColor: isEven ? darkColor : lightColor,
+      color: textColor,
+      display: "flex",
+      justifyContent: center ? "center" : "flex-start",
+      alignItems: "center",
+      fontSize: "14px",
+      fontFamily: value ? "Helvetica" : "Helvetica-Bold",
+      fontWeight: value ? "normal" : "bold",
+      textAlign: center ? "center" : "left",
+      // This is the padding you requested
+      padding: "5px 10px",
+    };
+  };
+
+  const columnDefs = useMemo(
     () => [
       {
-        title: "Bank Spot",
+        headerName: "Bank Spot",
+        headerClass: "header-group-white",
+
         children: [
           {
-            title: "Instrument",
-            render: (_, r) =>
-              `${r.instrumentName} / ${r.secondaryInstrumentName}`,
+            headerName: "Instrument",
+            headerClass: "header-cell-black",
+            valueGetter: (p) =>
+              `${p.data.instrumentName} / ${p.data.secondaryInstrumentName}`,
+            cellStyle: (p) => getColumnStyle(p, "#e9e2dc", "#e9e2dc", "black"),
           },
           {
-            title: "Bid",
-            dataIndex: "worldCrossBid",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
+            headerName: "Bid",
+            field: "worldCrossBid",
+            headerClass: "header-cell-black",
+            cellStyle: (p) =>
+              getColumnStyle(p, "#ffd567", "#ffd567", "black", true), // Gold tones
+            cellRenderer: (p) => (
+              <IndexCell value={Number(p.value).toFixed(4)} />
+            ),
           },
           {
-            title: "Offer",
-            dataIndex: "worldCrossOffer",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
+            headerName: "Offer",
+            field: "worldCrossOffer",
+            headerClass: "header-cell-black",
+            cellStyle: (p) =>
+              getColumnStyle(p, "#ceccc8", "#ceccc8", "black", true),
+
+            cellRenderer: (p) => (
+              <IndexCell value={Number(p.value).toFixed(4)} />
+            ),
           },
           {
-            title: "Time",
-            dataIndex: "time",
-            render: (t) =>
-              t
-                ? formatDateUTCToGMT(t).toTimeString().substring(0, 8)
+            headerName: "Time",
+            field: "time",
+            headerClass: "header-cell-black",
+            cellStyle: (p) =>
+              getColumnStyle(p, "#ffffff", "#fffff", "black", true), // White tones
+            valueFormatter: (p) =>
+              p.value
+                ? formatDateUTCToGMT(p.value).toTimeString().substring(0, 8)
                 : "--:--:--",
           },
         ],
       },
       {
-        title: "USD Parity",
+        headerName: "USD Parity",
+        headerClass: "header-group-white",
         children: [
-          { title: "Instrument", dataIndex: "instrumentName" },
           {
-            title: "Bid",
-            dataIndex: "worldCurBid",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
+            headerName: "Instrument",
+            headerClass: "header-cell-black",
+            valueGetter: (p) => p.data.instrumentName,
+            cellStyle: (p) =>
+              getColumnStyle(p, "#e9e2dc", "#e9e2dc", "black", false),
           },
           {
-            title: "Offer",
-            dataIndex: "worldCurOffer",
-            render: (v) => <IndexCell value={Number(v).toFixed(4)} />,
+            headerName: "Bid",
+            field: "worldCurBid",
+            headerClass: "header-cell-black",
+            cellStyle: (p) =>
+              getColumnStyle(p, "#ffd567", "#ffd567", "black", true), // Gold tones
+            cellRenderer: (p) => (
+              <IndexCell value={Number(p.value).toFixed(4)} />
+            ),
           },
           {
-            title: "Time",
-            dataIndex: "time",
-            render: (t) =>
-              t
-                ? formatDateUTCToGMT(t).toTimeString().substring(0, 8)
+            headerName: "Offer",
+            field: "worldCurOffer",
+            headerClass: "header-cell-black",
+            cellStyle: (p) =>
+              getColumnStyle(p, "#ceccc8", "#ceccc8", "black", true),
+            cellRenderer: (p) => (
+              <IndexCell value={Number(p.value).toFixed(4)} />
+            ),
+          },
+          {
+            headerName: "Time",
+            field: "time",
+            headerClass: "header-cell-black ",
+            cellStyle: (p) =>
+              getColumnStyle(p, "#ffffff", "#fffff", "black", true), // White tones,
+            valueFormatter: (p) =>
+              p.value
+                ? formatDateUTCToGMT(p.value).toTimeString().substring(0, 8)
                 : "--:--:--",
           },
         ],
@@ -251,17 +308,40 @@ const BankSpotAndUSDParity = memo(() => {
     []
   );
 
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      sortable: false,
+      suppressMovable: true,
+      flex: 1,
+      minWidth: 120,
+    }),
+    []
+  );
+
+  const getRowId = useCallback(
+    (params) =>
+      `${params.data.instrumentID}-${params.data.secondaryInstrumentID}-${params.data.version}`,
+    []
+  );
+
   return (
-    <GlobalTable
-      columns={columns}
-      dataSource={processedData}
-      prefixCls="LiveRatesTable"
-      rowKey={(r) =>
-        `${r.instrumentID}-${r.secondaryInstrumentID}-${r.version}`
-      }
-      pagination={false}
-      scroll={{ x: "max-content", y: 500 }}
-    />
+    <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
+      <AgGridReact
+        rowData={rowData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={getRowId}
+        groupHeaderHeight={35} // This controls "Bank Spot" & "USD Parity"
+        headerHeight={35} // This controls "Instrument", "Bid", etc.
+        rowHeight={35} // Adjust this number (in pixels) to fit your 5px 10px padding comfortably
+        animateRows={false}
+        suppressRowTransform={true}
+        allowDragFromColumnsToolPanel={false}
+        allowContextMenuWithControlKey={false}
+        allowShowChangeAfterFilter={false}
+      />
+    </div>
   );
 });
 
