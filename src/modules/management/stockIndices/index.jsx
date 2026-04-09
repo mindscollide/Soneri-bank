@@ -5,6 +5,7 @@ import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
 
+// selectors
 const stockIndicesForManagementFeed = (state) =>
   state.RealtimeActionsSlice.stockIndicesForManagementFeed;
 
@@ -15,19 +16,20 @@ const GetAllOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.stockIndices;
 
 const StockIndices = memo(() => {
-  const dataRef = useRef([]);
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
-  const animationFrameRef = useRef(null);
-  const otherInstruments = useSelector(GetAllOtherInstruments);
-  const stockIndexList = useSelector(GetIndicesForTreasury);
-
-  const fullFeed = useSelector(stockIndicesForManagementFeed);
-
-  // // Local state for processed data
   const [processedData, setProcessedData] = useState([]);
 
-  // Columns
+  const dataRef = useRef([]);
+  const updateQueueRef = useRef([]);
+  const animationFrameRef = useRef(null);
+  const lastUpdateRef = useRef(0);
+
+  const otherInstruments = useSelector(GetAllOtherInstruments);
+  const stockIndexList = useSelector(GetIndicesForTreasury);
+  const fullFeed = useSelector(stockIndicesForManagementFeed);
+
+  // =========================
+  // COLUMNS
+  // =========================
   const columns = useMemo(
     () => [
       {
@@ -41,192 +43,176 @@ const StockIndices = memo(() => {
         dataIndex: "current",
         className: "bidCol",
         width: 90,
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
+        render: (text) => text !== "-" && <IndexCell value={Number(text)} />,
       },
       {
         title: "Change",
         dataIndex: "change",
         className: "offerCol",
-        ellipsis: true,
         width: 90,
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
+        render: (text) => text !== "-" && <IndexCell value={Number(text)} />,
       },
       {
         title: "% Change",
         dataIndex: "percentageChange",
         className: "offerCol",
-        ellipsis: true,
         render: (text) => {
           if (text === "-") return null;
-          const value = Number(text);
 
-          let cellClassName =
+          const value = Number(text);
+          const className =
             value < 0 ? "color-red" : value > 0 ? "color-green" : "color-blue";
 
-          return <IndexCell value={value} CellClassName={cellClassName} />;
+          return <IndexCell value={value} CellClassName={className} />;
         },
       },
       {
         title: "High",
         dataIndex: "high",
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
+        render: (text) => text !== "-" && <IndexCell value={Number(text)} />,
       },
       {
         title: "Low",
         dataIndex: "low",
-        className: "offerCol",
-
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
+        render: (text) => text !== "-" && <IndexCell value={Number(text)} />,
       },
       {
         title: "Volume",
         dataIndex: "volume",
-        className: "offerCol",
-
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
+        render: (text) => text !== "-" && <IndexCell value={Number(text)} />,
       },
       {
         title: "Time",
         dataIndex: "time",
-
         render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
       },
     ],
     []
   );
-  // ✅ Enriched base data
+
+  // =========================
+  // INITIAL DATA BUILD (OPTIMIZED)
+  // =========================
   const enrichedData = useMemo(() => {
     if (!otherInstruments || !stockIndexList) return [];
-    try {
-      return otherInstruments.map((instrument) => {
-        const matchedCross = stockIndexList.find(
-          (wc) => Number(wc.instrumentId) === instrument.instrumentId
-        );
 
-        return {
-          instrumentName: instrument.name,
-          change: Number(matchedCross?.change ?? 0),
-          current: Number(matchedCross?.current ?? 0),
-          high: Number(matchedCross?.high ?? 0),
-          instrumentID: Number(instrument.instrumentId),
-          low: Number(matchedCross?.low ?? 0),
-          percentageChange: Number(matchedCross?.percentChange ?? 0),
-          time: matchedCross?.time ?? "",
-          volume: Number(matchedCross?.change ?? 0),
-          version: 0,
-        };
-      });
-    } catch (error) {
-      console.error("Error enriching data:", error);
-      return [];
-    }
+    const map = new Map(
+      stockIndexList.map((item) => [Number(item.instrumentId), item])
+    );
+
+    return otherInstruments.map((instrument) => {
+      const matched = map.get(Number(instrument.instrumentId));
+
+      return {
+        instrumentID: Number(instrument.instrumentId),
+        instrumentName: instrument.name,
+
+        current: Number(matched?.current ?? 0),
+        change: Number(matched?.change ?? 0),
+        percentageChange: Number(matched?.percentChange ?? 0),
+
+        high: Number(matched?.high ?? 0),
+        low: Number(matched?.low ?? 0),
+        volume: Number(matched?.volume ?? 0),
+
+        time: matched?.time ?? "",
+        version: 0,
+      };
+    });
   }, [otherInstruments, stockIndexList]);
 
-  // Initialize processed data when enriched data changes
   useEffect(() => {
-    if (enrichedData.length > 0) {
-      dataRef.current = enrichedData;
-      setProcessedData(enrichedData);
-    }
+    if (!enrichedData.length) return;
+
+    dataRef.current = enrichedData;
+    setProcessedData(enrichedData);
   }, [enrichedData]);
 
-  // MQTT Work
-  // ✅ Batch update function
-  const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
+  // =========================
+  // REALTIME UPDATE ENGINE (FIXED)
+  // =========================
+  const processQueue = useCallback(() => {
+    const updates = updateQueueRef.current;
+
+    if (!updates.length) {
       animationFrameRef.current = null;
       return;
     }
 
-    const updates = updateQueueRef.current;
     updateQueueRef.current = [];
 
-    setProcessedData((prevData) => {
-      let hasChanges = false;
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
+    const flatUpdates = updates.map((u) => u?.stocK_INDICES).filter(Boolean);
 
-        updates.forEach((update) => {
-          const { stocK_INDICES } = update;
+    if (!flatUpdates.length) {
+      animationFrameRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
 
-          if (
-            stocK_INDICES &&
-            item.instrumentID === stocK_INDICES.instrumentId
-          ) {
-            if (
-              Number(updatedItem.current) !== Number(stocK_INDICES.current) ||
-              Number(updatedItem.ask) !== Number(stocK_INDICES.ask) ||
-              Number(updatedItem.high) !== Number(stocK_INDICES.high) ||
-              Number(updatedItem.low) !== Number(stocK_INDICES.low) ||
-              Number(updatedItem.percentageChange) !==
-                Number(stocK_INDICES.percentChange) ||
-              Number(updatedItem.time) !== Number(stocK_INDICES.time)
-            ) {
-              updatedItem = {
-                ...updatedItem,
-                current: stocK_INDICES.current,
-                change: stocK_INDICES.change,
-                percentageChange: stocK_INDICES.percentChange,
-                high: stocK_INDICES.high,
-                low: stocK_INDICES.low,
-                ask: stocK_INDICES.ask,
-                volume: stocK_INDICES.volume,
-                time: stocK_INDICES.time,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
-          }
-        });
+    const updateMap = new Map(
+      flatUpdates.map((u) => [Number(u.instrumentId), u])
+    );
 
-        return changed ? updatedItem : item;
-      });
+    const updated = dataRef.current.map((item) => {
+      const u = updateMap.get(item.instrumentID);
+      if (!u) return item;
 
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
+      const hasChange =
+        Number(item.current) !== Number(u.current) ||
+        Number(item.change) !== Number(u.change) ||
+        Number(item.high) !== Number(u.high) ||
+        Number(item.low) !== Number(u.low) ||
+        Number(item.percentageChange) !== Number(u.percentChange) ||
+        Number(item.volume) !== Number(u.volume) ||
+        item.time !== u.time;
 
-      return hasChanges ? updatedData : prevData;
+      if (!hasChange) return item;
+
+      return {
+        ...item,
+        current: u.current,
+        change: u.change,
+        percentageChange: u.percentChange,
+        high: u.high,
+        low: u.low,
+        volume: u.volume,
+        time: u.time,
+        version: (item.version || 0) + 1,
+      };
     });
 
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+    dataRef.current = updated;
+    setProcessedData(updated);
+
+    animationFrameRef.current = requestAnimationFrame(processQueue);
   }, []);
 
-  // ✅ Queue update
+  // =========================
+  // QUEUE FEED (60fps throttle)
+  // =========================
   const queueUpdate = useCallback(
     (feed) => {
       if (!feed) return;
 
       const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
+      if (now - lastUpdateRef.current < 16) return;
+
       lastUpdateRef.current = now;
 
       updateQueueRef.current.push(feed);
 
       if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+        animationFrameRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processUpdateQueue]
+    [processQueue]
   );
-  // ✅ Feed update effect
+
   useEffect(() => {
     if (!fullFeed) return;
     queueUpdate(fullFeed);
   }, [fullFeed, queueUpdate]);
 
-  // Cleanup
+  // cleanup
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) {
@@ -238,6 +224,7 @@ const StockIndices = memo(() => {
   return (
     <>
       <span className={styles.tableheaderbar}>Stock Indices</span>
+
       <GlobalTable
         columns={columns}
         dataSource={processedData}

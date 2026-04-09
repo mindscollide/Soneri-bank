@@ -26,6 +26,7 @@ const GlobalTable = ({
   onRow, // Add this line to accept the onRow prop
   loading,
   ref,
+  key,
 }) => {
   return (
     <Table
@@ -55,6 +56,7 @@ const GlobalTable = ({
       rowKey={rowKey}
       loading={loading}
       ref={ref}
+      key={key}
     />
   );
 };

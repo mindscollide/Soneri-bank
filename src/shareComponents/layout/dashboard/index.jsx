@@ -105,6 +105,7 @@ const Dashboard = () => {
             break;
 
           case "NONFE_DISCOUNTING_RATES_PUBLISHED":
+            console.log("NONFE_DISCOUNTING_RATES_PUBLISHED", payload);
             startTransition(() => {
               dispatch(NonFeDiscountingPublishedAction(payload));
             });
@@ -135,6 +136,29 @@ const Dashboard = () => {
             break;
 
           case "DISPATCHER_DEALER_SPOT_RATES":
+            // {
+            //   payload.instrumentCrossRate.instrumentID === 21 &&
+            //     console.log("DISPATCHER_DEALER_SPOT_RATES", payload);
+            // }
+
+            // console.log(
+            //   payload.instrumentCrossRate.instrumentID,
+            //   payload.instrumentParitySpot.instrumentID,
+            //   "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+            // );
+            // if (payload?.instrumentCrossRate?.instrumentID === 21) {
+            //   console.log(
+            //     payload,
+            //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+            //   );
+            // }
+            // if (payload?.instrumentParitySpot?.instrumentID === 21) {
+            //   console.log(
+            //     payload,
+            //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+            //   );
+            // }
+
             startTransition(() => {
               dispatch(setDealerSpotRatesFeed(payload));
             });
@@ -147,6 +171,23 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_SPOT_RATES_FEED":
+            // console.log(
+            //   payload.instrumentCrossRate.instrumentID,
+            //   payload.instrumentParitySpot.instrumentID,
+            //   "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+            // );
+            // if (payload?.instrumentCrossRate?.instrumentID === 21) {
+            //   console.log(
+            //     payload,
+            //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+            //   );
+            // }
+            // if (payload?.instrumentParitySpot?.instrumentID === 21) {
+            //   console.log(
+            //     payload,
+            //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+            //   );
+            // }
             startTransition(() => {
               dispatch(setTreasurySpotRatesFeed(payload));
             });
@@ -159,6 +200,10 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_DEALER_FORWARD_RATES_FEED":
+            // if (payload.forwardRates[0].instrumentID === 21) {
+            //   console.log("TREASURY_DEALER_FORWARD_RATES_FEED", payload);
+            // }
+
             startTransition(() => {
               dispatch(setTreasuryDealerForwardRates(payload));
             });
@@ -278,8 +323,7 @@ const Dashboard = () => {
             break;
 
           case "REAL_TIME_NEWS_FEED":
-
-          console.log("Received REAL_TIME_NEWS_FEED:", payload);
+            console.log("Received REAL_TIME_NEWS_FEED:", payload);
             startTransition(() => {
               dispatch(setRealTimeNewsFeed(payload));
             });

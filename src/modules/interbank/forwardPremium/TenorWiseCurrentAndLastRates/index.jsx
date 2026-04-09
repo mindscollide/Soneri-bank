@@ -220,7 +220,6 @@ const TenoreWiseCurrentAndLastRates = ({
     setConfirmationModal(false);
   };
   const handleChangeCurrentForwards = (record, view, event) => {
-    console.log({ record, view, event }, "handleChangeCurrentForwards");
     const { value } = event.target;
     console.log(value, "checkerValue");
     try {

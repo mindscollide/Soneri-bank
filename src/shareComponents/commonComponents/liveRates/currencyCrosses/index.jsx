@@ -1,28 +1,40 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { convertUTCTimeToLocalTime } from "../../../../utils/timeFunction";
 import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
 import { IndexCell } from "../../elements/inputField/IndexCell";
+import { clearCurrencyCrossesForManagmentFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
+// ─────────────────────────────────────────────
+// Selectors
+// ─────────────────────────────────────────────
 const currencyCrossesRatesFeed = (state) =>
   state.RealtimeActionsSlice.currencyCrossesForManagmentFeed;
+
 const SelectGetCurrencyCrosses = (state) =>
   state.WatchListReducer.GetCurrencyCrosses?.currencyCrossList;
 
 const GetAllOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.currencyCrosses;
+
+// ─────────────────────────────────────────────
 const CurrencyCrosses = memo(() => {
+  const dispatch = useDispatch();
+
+  // Refs (no re-render)
   const dataRef = useRef([]);
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
-  const animationFrameRef = useRef(null);
+  const pendingRef = useRef([]);
+  const rafRef = useRef(null);
+
+  // Redux
   const otherInstruments = useSelector(GetAllOtherInstruments);
   const fullFeed = useSelector(currencyCrossesRatesFeed);
   const currencyCrosses = useSelector(SelectGetCurrencyCrosses);
 
-  // // Local state for processed data
+  // State
   const [processedData, setProcessedData] = useState([]);
 
+  // ─────────────────────────────────────────────
   // Columns
   const columns = useMemo(
     () => [
@@ -41,27 +53,21 @@ const CurrencyCrosses = memo(() => {
             dataIndex: "bid",
             className: "bidCol",
             width: 90,
-
-            render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
-            },
+            render: (text) =>
+              text !== "-" && <IndexCell value={Number(text).toFixed(4)} />,
           },
           {
             title: "Ask",
             dataIndex: "ask",
             className: "offerCol",
             width: 90,
-
-            render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
-            },
+            render: (text) =>
+              text !== "-" && <IndexCell value={Number(text).toFixed(4)} />,
           },
-
           {
             title: "Time",
             dataIndex: "time",
             width: 90,
-
             render: (text) =>
               text ? convertUTCTimeToLocalTime(text) : "--:--:--",
           },
@@ -71,26 +77,26 @@ const CurrencyCrosses = memo(() => {
     []
   );
 
-  // ✅ Enriched base data
+  // ─────────────────────────────────────────────
+  // Initial Data
   const enrichedData = useMemo(() => {
     if (!otherInstruments || !currencyCrosses) return [];
 
     try {
       return otherInstruments.map((instrument) => {
-        const matchedCross = currencyCrosses.find(
+        const match = currencyCrosses.find(
           (wc) => Number(wc.instrumentId) === instrument.instrumentId
         );
+
         return {
           instrumentID: Number(instrument.instrumentId),
           instrumentName: instrument.name,
-          time: matchedCross?.time ?? "",
-
-          bid: Number(matchedCross?.bid ?? 0),
-          ask: Number(matchedCross?.ask ?? 0),
-          high: Number(matchedCross?.high ?? 0),
-          low: Number(matchedCross?.low ?? 0),
-          percentageChange: Number(matchedCross?.percentChange ?? 0),
-
+          time: match?.time ?? "",
+          bid: Number(match?.bid ?? 0),
+          ask: Number(match?.ask ?? 0),
+          high: Number(match?.high ?? 0),
+          low: Number(match?.low ?? 0),
+          percentageChange: Number(match?.percentChange ?? 0),
           version: 0,
         };
       });
@@ -100,7 +106,7 @@ const CurrencyCrosses = memo(() => {
     }
   }, [otherInstruments, currencyCrosses]);
 
-  // Initialize processed data when enriched data changes
+  // Initialize table
   useEffect(() => {
     if (enrichedData.length > 0) {
       dataRef.current = enrichedData;
@@ -108,91 +114,100 @@ const CurrencyCrosses = memo(() => {
     }
   }, [enrichedData]);
 
-  // MQTT Work
-  // ✅ Batch update function
-  const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
+  // ─────────────────────────────────────────────
+  // 🚀 RAF Batch Processor
+  const processQueue = useCallback(() => {
+    const pending = pendingRef.current;
+
+    if (!pending.length) {
+      rafRef.current = null;
       return;
     }
 
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
+    // Latest update per instrument
+    const latestMap = new Map();
 
-    setProcessedData((prevData) => {
+    for (const p of pending) {
+      const data = p?.currencyCrosses;
+      if (!data) continue;
+      latestMap.set(data.instrumentId, data);
+    }
+
+    // Clear queue
+    pendingRef.current = [];
+
+    setProcessedData((prev) => {
       let hasChanges = false;
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
 
-        updates.forEach((update) => {
-          const { currencyCrosses } = update;
+      const updated = prev.map((row) => {
+        const update = latestMap.get(row.instrumentID);
+        if (!update) return row;
 
-          if (
-            currencyCrosses &&
-            item.instrumentID === currencyCrosses.instrumentId
-          ) {
-            if (
-              Number(updatedItem.bid) !== Number(currencyCrosses.bid) ||
-              Number(updatedItem.ask) !== Number(currencyCrosses.ask) ||
-              Number(updatedItem.time) !== Number(currencyCrosses.time)
-            ) {
-              updatedItem = {
-                ...updatedItem,
-                bid: currencyCrosses.bid,
-                ask: currencyCrosses.ask,
-                time: currencyCrosses.time,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
-          }
-        });
+        if (
+          row.bid !== update.bid ||
+          row.ask !== update.ask ||
+          row.time !== update.time
+        ) {
+          hasChanges = true;
 
-        return changed ? updatedItem : item;
+          return {
+            ...row,
+            bid: update.bid,
+            ask: update.ask,
+            time: update.time,
+            version: row.version + 1,
+          };
+        }
+
+        return row;
       });
 
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
-
-      return hasChanges ? updatedData : prevData;
+      return hasChanges ? updated : prev;
     });
 
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+    rafRef.current = null;
   }, []);
-  // ✅ Queue update
+
+  // ─────────────────────────────────────────────
+  // Queue updates
   const queueUpdate = useCallback(
     (feed) => {
       if (!feed) return;
 
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
-      lastUpdateRef.current = now;
+      pendingRef.current.push(feed);
 
-      updateQueueRef.current.push(feed);
-
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processUpdateQueue]
+    [processQueue]
   );
-  // ✅ Feed update effect
-  useEffect(() => {
-    if (!fullFeed) return;
-    queueUpdate(fullFeed);
-  }, [fullFeed, queueUpdate]);
 
+  // ─────────────────────────────────────────────
+  // Consume Redux buffer safely
+  useEffect(() => {
+    if (!fullFeed?.length) return;
+
+    // push each payload individually
+    fullFeed.forEach((feed) => {
+      queueUpdate(feed);
+    });
+
+    // ✅ clear Redux buffer after consuming
+    dispatch(clearCurrencyCrossesForManagmentFeed());
+  }, [fullFeed, queueUpdate, dispatch]);
+
+  // ─────────────────────────────────────────────
   // Cleanup
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
       }
     };
   }, []);
 
+  // ─────────────────────────────────────────────
   return (
     <GlobalTable
       columns={columns}

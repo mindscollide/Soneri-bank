@@ -1,53 +1,83 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { throttle } from "lodash";
 import { buildDiscountingTable } from "../../utils/generateColumnsData";
 import { IndexCell } from "../../elements/inputField/IndexCell";
-import { throttle } from "lodash";
 import GlobalTable from "../../elements/table/GlobalTable";
-import { Col, Row } from "react-bootstrap";
 import styles from "./dealerNonFEDiscountingTable.module.css";
 import { UpdateDealerDiscountingRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
-import { clearDealerDiscountingClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import {
+  clearDealerDiscountingClearRates,
+  clearTreasuryDealerNonFeDiscounting,
+} from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
+// ─────────────────────────────────────────────
+// Constants
+const THROTTLE_MS = 100;
+
+const zeroRates = (rows) =>
+  rows.map((row) => {
+    const updated = { ...row };
+    Object.keys(updated).forEach((key) => {
+      if (key.startsWith("rate_")) {
+        updated[key] = 0;
+      }
+    });
+    return updated;
+  });
+
+// ─────────────────────────────────────────────
 const DealerNonFeDiscountingTable = () => {
   const dispatch = useDispatch();
+
+  // Local State
   const [dataSource, setDataSource] = useState([]);
   const [columnsData, setColumnsData] = useState([]);
 
+  // Performance Refs
+  const dataSourceRef = useRef([]);
+  const pendingRatesRef = useRef([]);
+  const isTableInitialized = useRef(false);
+
+  // Redux Selectors
   const GetDiscountingRatesForDealer = useSelector(
     (state) => state.WatchListReducer.GetDiscountingRatesForDealer
   );
-
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
   const allInstrumentForTreasuryData = useSelector(
     (state) => state.WatchListReducer.GetAllInstrumentForTreasury
   );
-
   const TreasuryDealerNonFeDiscounting = useSelector(
     (state) => state.RealtimeActionsSlice.TreasuryDealerNonFeDiscounting
   );
-
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
-
   const ClearRatesData = useSelector(
     (state) => state.RealtimeActionsSlice.DealerDiscountingClearRates
   );
 
+  // ─────────────────────────────────────────────
+  // Core Updater
+  const applyRows = useCallback((rows) => {
+    dataSourceRef.current = rows;
+    setDataSource(rows);
+  }, []);
+
+  // 1. Initial Table Build
   useEffect(() => {
-    if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
+    if (getAllTenorsRecords && allInstrumentForTreasuryData) {
       try {
         const { nonFEDiscountingRates = [] } =
-          GetDiscountingRatesForDealer !== null && GetDiscountingRatesForDealer;
-        let getAllInstrument = {
+          GetDiscountingRatesForDealer || {};
+        const getAllInstrument = {
           instruments: allInstrumentForTreasuryData.nonFEDiscountingInstruments,
         };
-        let getAllTenorsData = { tenors: getAllTenorsRecords.tenors };
+        const getAllTenorsData = { tenors: getAllTenorsRecords.tenors };
 
-        const { columnsData, rowData } = buildDiscountingTable(
+        const { columnsData: cols, rowData } = buildDiscountingTable(
           3,
           nonFEDiscountingRates,
           getAllTenorsData,
@@ -56,119 +86,124 @@ const DealerNonFeDiscountingTable = () => {
         );
 
         if (rowData.length > 0) {
-          setDataSource(rowData);
-          setColumnsData(columnsData);
+          applyRows(rowData);
+          setColumnsData(cols);
+          isTableInitialized.current = true;
         }
       } catch (error) {
-        console.log(error);
+        console.error("Non-FE Table Build Error:", error);
       }
     }
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
     GetDiscountingRatesForDealer,
+    applyRows,
   ]);
 
-  const throttledUpdate = useMemo(
-    () =>
-      throttle((discountingUpdate) => {
-        const { nonFeDiscountingRates } = discountingUpdate;
-        setDataSource((prevData) =>
-          prevData.map((row) => {
-            let updatedRow = { ...row };
+  // 2. Throttled Batch Processor (Optimized Logic)
+  const throttledUpdateRef = useRef(
+    throttle(() => {
+      const pending = pendingRatesRef.current;
+      if (!pending.length) return;
 
-            nonFeDiscountingRates.forEach((d) => {
-              Object.keys(row).forEach((key) => {
-                if (
-                  key.startsWith("InstrumentID_") &&
-                  row[key] === d.instrumentID &&
-                  row.TenorID === d.tenorID
-                ) {
-                  const currency = key.split("_")[1];
-                  updatedRow[`rate_${currency}`] = d.bidWithSpread;
-                }
-              });
-            });
+      // Flatten multiple updates into one rate list
+      const allRates = pending.flatMap((p) => p.nonFeDiscountingRates ?? []);
+      if (!allRates.length) return;
 
-            return updatedRow;
-          })
-        );
-      }, 20),
-    []
+      // O(1) Lookup: "tenorID|instrumentID"
+      const rateMap = new Map(
+        allRates.map((d) => [`${d.tenorID}|${d.instrumentID}`, d])
+      );
+
+      // Identify which tenors actually need a re-render
+      const affectedTenors = new Set(allRates.map((d) => String(d.tenorID)));
+
+      const updated = dataSourceRef.current.map((row) => {
+        const currentTenorId = String(row.TenorID || row.tenorID);
+
+        if (!affectedTenors.has(currentTenorId)) return row;
+
+        const updatedRow = { ...row };
+        Object.keys(row).forEach((key) => {
+          if (!key.startsWith("InstrumentID_")) return;
+
+          const instrumentID = row[key];
+          const rate = rateMap.get(`${currentTenorId}|${instrumentID}`);
+
+          if (!rate) return;
+
+          const currency = key.split("_")[1];
+          updatedRow[`rate_${currency}`] = rate.bidWithSpread;
+        });
+
+        return updatedRow;
+      });
+
+      applyRows(updated);
+
+      // Clear buffer and sync Redux
+      pendingRatesRef.current = [];
+      dispatch(clearTreasuryDealerNonFeDiscounting());
+    }, THROTTLE_MS)
   );
 
+  // 3. Receive Realtime Buffer Updates
   useEffect(() => {
-    if (TreasuryDealerNonFeDiscounting) {
-      throttledUpdate(TreasuryDealerNonFeDiscounting);
-    }
-  }, [TreasuryDealerNonFeDiscounting, throttledUpdate]);
+    if (
+      !TreasuryDealerNonFeDiscounting ||
+      TreasuryDealerNonFeDiscounting.length === 0
+    )
+      return;
 
+    pendingRatesRef.current = [
+      ...pendingRatesRef.current,
+      ...TreasuryDealerNonFeDiscounting,
+    ];
+    throttledUpdateRef.current();
+  }, [TreasuryDealerNonFeDiscounting]);
+
+  // 4. Handle Market Closed
   useEffect(() => {
-    if (marketStatus !== null && marketStatus === false) {
-      // Market closed: set all rates to 0
-      setDataSource((prevData) =>
-        prevData.map((row) => {
-          const updatedRow = { ...row };
-          Object.keys(updatedRow).forEach((key) => {
-            if (key.startsWith("rate_")) {
-              updatedRow[key] = 0;
-            }
-          });
-          return updatedRow;
-        })
-      );
+    if (marketStatus === false && isTableInitialized.current) {
+      applyRows(zeroRates(dataSourceRef.current));
     }
-  }, [marketStatus]);
+  }, [marketStatus, applyRows]);
 
-  // ✅ For clear FE Discounting Rates
+  // 5. Global Clear Rates
   useEffect(() => {
     if (!ClearRatesData?.areRatesClear) return;
 
     try {
       if (GetDiscountingRatesForDealer?.nonFEDiscountingRates?.length) {
-        // 🔹 Reset Redux rates to "0"
-        const clearedDiscountingRates =
+        const clearedRates =
           GetDiscountingRatesForDealer.nonFEDiscountingRates.map((item) => ({
             ...item,
             rate: "0",
           }));
 
-        const updatedData = {
-          ...GetDiscountingRatesForDealer,
-          nonFEDiscountingRates: clearedDiscountingRates,
-        };
-
-        dispatch(UpdateDealerDiscountingRates(updatedData));
-
-        console.log(
-          clearedDiscountingRates,
-          "✅ Cleared FE Discounting Rates in Redux"
-        );
-      } else {
-        // 🔹 Fallback: Clear only local dataSource
-        setDataSource((prevData) =>
-          prevData.map((row) => {
-            const updatedRow = { ...row };
-            for (const key in updatedRow) {
-              if (key.startsWith("rate_")) {
-                updatedRow[key] = "0";
-              }
-            }
-            return updatedRow;
+        dispatch(
+          UpdateDealerDiscountingRates({
+            ...GetDiscountingRatesForDealer,
+            nonFEDiscountingRates: clearedRates,
           })
         );
-        console.log("✅ Cleared FE Discounting Rates in local dataSource");
+      } else {
+        applyRows(zeroRates(dataSourceRef.current));
       }
-
-      // 🔹 Always reset clear flag
       dispatch(clearDealerDiscountingClearRates());
     } catch (error) {
-      console.error("❌ Error while clearing FE Discounting Rates:", error);
+      console.error("Clear Non-FE Rates Error:", error);
     }
-  }, [ClearRatesData, GetDiscountingRatesForDealer, dispatch]);
+  }, [ClearRatesData, GetDiscountingRatesForDealer, dispatch, applyRows]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => throttledUpdateRef.current.cancel();
+  }, []);
 
   return (
-    <div className={styles["mainDiscountingTable"]}>
+    <div className={styles.mainDiscountingTable}>
       <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
         Non FE Discounting
       </span>
