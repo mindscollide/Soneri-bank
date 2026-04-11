@@ -6,6 +6,7 @@ import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
 import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const selectCrossInstruments = (state) =>
@@ -295,7 +296,7 @@ const BankSpotAndUSDParity = memo(() => {
             flex: 1,
             cellClass: "bid-cell",
             cellRenderer: (p) => (
-              <IndexCell value={Number(p.value).toFixed(4)} />
+              <IndexCell value={Number(p.value)} />
             ),
           },
           {
@@ -304,7 +305,7 @@ const BankSpotAndUSDParity = memo(() => {
             flex: 1,
             cellClass: "offer-cell",
             cellRenderer: (p) => (
-              <IndexCell value={Number(p.value).toFixed(4)} />
+              <IndexCell value={Number(p.value)} />
             ),
           },
           {
@@ -334,7 +335,7 @@ const BankSpotAndUSDParity = memo(() => {
             flex: 1,
             cellClass: "bid-cell",
             cellRenderer: (p) => (
-              <IndexCell value={Number(p.value).toFixed(4)} />
+              <IndexCell value={Number(p.value)} />
             ),
           },
           {
@@ -343,7 +344,7 @@ const BankSpotAndUSDParity = memo(() => {
             flex: 1,
             cellClass: "offer-cell",
             cellRenderer: (p) => (
-              <IndexCell value={Number(p.value).toFixed(4)} />
+              <IndexCell value={Number(p.value)} />
             ),
           },
           {
@@ -390,7 +391,7 @@ const BankSpotAndUSDParity = memo(() => {
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
         suppressCellSelection={true}
-        
+        loadingOverlayComponent={SectionLoader}
       />
     </div>
   );

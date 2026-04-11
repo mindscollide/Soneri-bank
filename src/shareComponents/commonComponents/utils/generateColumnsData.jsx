@@ -526,7 +526,7 @@ export const buildForwardsAgGridTable = (
             width: 90,
             cellClass: "bid-cell",
             cellRenderer: (params) => (
-              <IndexCell value={params.value} record={params.data} type='bid' />
+              <IndexCell value={params.value}  />
             ),
           },
           {
@@ -535,7 +535,7 @@ export const buildForwardsAgGridTable = (
             width: 90,
             cellClass: "offer-cell",
             cellRenderer: (params) => (
-              <IndexCell value={params.value} record={params.data} type='ask' />
+              <IndexCell value={params.value}  />
             ),
           },
         ],

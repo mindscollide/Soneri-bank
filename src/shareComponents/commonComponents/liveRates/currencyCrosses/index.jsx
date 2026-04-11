@@ -232,7 +232,7 @@ const CurrencyCrosses = memo(() => {
             flex: 1,
             cellClass: "bid-cell",
             valueFormatter: (p) =>
-              p.value != null ? Number(p.value).toFixed(4) : "-",
+              p.value != null ? Number(p.value) : "-",
           },
           {
             headerName: "Ask",
@@ -240,7 +240,7 @@ const CurrencyCrosses = memo(() => {
             flex: 1,
             cellClass: "offer-cell",
             valueFormatter: (p) =>
-              p.value != null ? Number(p.value).toFixed(4) : "-",
+              p.value != null ? Number(p.value) : "-",
           },
           {
             headerName: "Time",

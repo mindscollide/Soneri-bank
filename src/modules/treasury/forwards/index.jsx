@@ -216,45 +216,123 @@ const Forwards = memo(() => {
     return () => clearTimeout(clearId);
   }, [TreasuryForwardRates, allInstrumentForTreasuryData, dispatch, updateNodeMap]);
 
-  // 5. Detect rowData changes (add/remove rows)
   useEffect(() => {
     const api = gridRef.current?.api;
-    if (!api || !rowData) return;
-
-    const prevRowData = currentRowDataRef.current;
-    const hasChanged = 
-      !prevRowData || 
-      prevRowData.length !== rowData.length ||
-      JSON.stringify(prevRowData.map(r => r.tenorID)) !== JSON.stringify(rowData.map(r => r.tenorID));
-
-    if (hasChanged) {
-      console.log('🔄 RowData changed:', {
-        previous: prevRowData?.length || 0,
-        current: rowData.length,
-        tenorIDs: rowData.map(r => r.tenorID)
+    if (
+      !api ||
+      !dealerForwardTenorChanged ||
+      !getAllTenorsRecords?.tenors
+    )
+      return;
+  
+    try {
+      const {
+        newIsForwardtenorList = [],
+        removedtenorList = [],
+      } = dealerForwardTenorChanged;
+  
+      const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
+      const addedSet = new Set(newIsForwardtenorList.map((t) => t.tenorID));
+  
+      if (!removedSet.size && !addedSet.size) {
+        dispatch(setDealerForwardTenorChanged(null));
+        return;
+      }
+  
+      // 🔥 Get current rows from grid
+      const existingRows = [];
+      api.forEachNode((node) => {
+        if (node.data) existingRows.push(node.data);
       });
-
-      // Update the grid with new row data
-      api.setGridOption("rowData", rowData);
-      
-      // Store current rowData for next comparison
-      currentRowDataRef.current = rowData;
-
-      // Rebuild node map after grid updates
-      setTimeout(() => {
-        updateNodeMap();
-        console.log('✅ Grid updated with new rows');
-      }, 100);
-    }
-  }, [rowData, updateNodeMap]);
-
-  // 6. Handle dealerForwardTenorChanged flag (legacy support)
-  useEffect(() => {
-    if (dealerForwardTenorChanged) {
-      console.log('⚡ dealerForwardTenorChanged flag detected');
+  
+      const existingMap = new Map(
+        existingRows.map((r) => [String(r.tenorID), r])
+      );
+  
+      // ---------------- REMOVE ----------------
+      const toRemove = existingRows.filter((row) =>
+        removedSet.has(row.tenorID)
+      );
+  
+      // ---------------- ADD ----------------
+      const referenceRow = existingRows[0] || null;
+  
+      const toAdd = [];
+  
+      newIsForwardtenorList.forEach((addedTenor) => {
+        if (existingMap.has(String(addedTenor.tenorID))) return;
+  
+        const fullTenor =
+          getAllTenorsRecords.tenors.find(
+            (t) => t.tenorID === addedTenor.tenorID
+          ) || addedTenor;
+  
+        const previousRow = existingMap.get(
+          String(addedTenor.tenorID)
+        );
+  
+        // 🔥 Build row (same logic as your reference)
+        const newRow = {
+          tenorID: fullTenor.tenorID,
+          tenorName: fullTenor.tenorName,
+          tenorDays: fullTenor.tenorDays,
+        };
+  
+        // Copy instrument columns from reference row
+        if (referenceRow) {
+          Object.keys(referenceRow).forEach((key) => {
+            if (
+              key.startsWith("InstrumentID_") ||
+              key.startsWith("InstrumentName_") ||
+              key.startsWith("bid_") ||
+              key.startsWith("ask_")
+            ) {
+              newRow[key] =
+                previousRow?.[key] !== undefined
+                  ? previousRow[key]
+                  : null;
+            }
+          });
+        }
+  
+        toAdd.push(newRow);
+      });
+  
+      // ---------------- APPLY TRANSACTION ----------------
+      if (toAdd.length || toRemove.length) {
+        console.log("⚡ Tenor Transaction", {
+          add: toAdd.length,
+          remove: toRemove.length,
+        });
+  
+        api.applyTransaction({
+          add: toAdd,
+          remove: toRemove,
+        });
+  
+        // 🔥 rebuild node map after change
+        setTimeout(() => {
+          updateNodeMap();
+  
+          // process MQTT updates after structure change
+          if (pendingUpdates.current.size > 0 && !rafRef.current) {
+            rafRef.current = requestAnimationFrame(() =>
+              processQueueRef.current?.()
+            );
+          }
+        }, 50);
+      }
+  
       dispatch(setDealerForwardTenorChanged(null));
+    } catch (error) {
+      console.error("Tenor sync error:", error);
     }
-  }, [dealerForwardTenorChanged, dispatch]);
+  }, [
+    dealerForwardTenorChanged,
+    getAllTenorsRecords,
+    updateNodeMap,
+    dispatch,
+  ]);
 
   // 7. Grid Events
   const onGridReady = useCallback(
@@ -310,7 +388,6 @@ const Forwards = memo(() => {
         Bank Forwards
       </span>
 
-      <div style={{ width: "100%" }}>
         <AgGridTable
           ref={gridRef}
           columnDefs={columnDefs}
@@ -330,7 +407,6 @@ const Forwards = memo(() => {
           suppressAnimationFrame={false}
         />
       </div>
-    </div>
   );
 });
 

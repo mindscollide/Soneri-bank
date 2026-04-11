@@ -26,6 +26,16 @@
   font-weight: bold;
   color: #000000 !important;
   text-align: center;
+  border-right: 1px solid #a37c66 !important;
+}
+/* Group Headers (Bank Spot / USD Parity) */
+.liveRates-grid .ag-header-group-cell:first-child {
+  background-color: #fff !important;
+  font-weight: bold;
+  color: #000000 !important;
+  text-align: center;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .liveRates-grid .ag-header-group-cell-label {
@@ -35,7 +45,7 @@
 }
 
 /* Column Headers */
-.liveRates-grid .ag-header:nth-child(1) {
+.liveRates-grid .ag-header {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
@@ -43,6 +53,7 @@
 .liveRates-grid .ag-header-cell {
   color: #ffffff !important;
   text-align: center;
+  padding: 0 !important;
 }
 
 .liveRates-grid .ag-header-cell-label {
@@ -65,17 +76,24 @@
 
 .liveRates-grid .ag-cell.instrument-cell {
   padding-left: 10px !important;
-  }
+}
 /* Bid Column */
-.liveRates-grid .bid-cell {
+.liveRates-grid .ag-cell.bid-cell {
   background-color: #ffd567 !important;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Offer Column */
-.liveRates-grid .offer-cell {
+.liveRates-grid .ag-cell.offer-cell {
   background: #ceccc8 !important;
   text-align: center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* ==============================================
@@ -171,7 +189,6 @@
   background-color: #ffffff !important;
 }
 
-
 /* USD ParityTable */
 
 /* ==============================================
@@ -181,7 +198,7 @@
 /* Container & Root */
 .usdParityManagement-grid {
   width: 100%;
-  max-height:350px; /* Adjust as needed */
+  max-height: 350px; /* Adjust as needed */
   height: 100%;
   overflow-y: auto;
   border: none !important;
@@ -221,7 +238,6 @@
   color: #ffffff !important;
   text-align: center;
   padding: 0 !important;
-
 }
 
 .usdParityManagement-grid .ag-header-cell-label {
@@ -243,9 +259,8 @@
 }
 /* Instrument Column */
 .usdParityManagement-grid .ag-cell.instrument-cell {
-padding-left: 10px !important;
+  padding-left: 10px !important;
 }
-
 
 /* Bid Column */
 .usdParityManagement-grid .bid-cell {
@@ -264,7 +279,7 @@ padding-left: 10px !important;
 .usdParityManagement-grid .highLow-cell {
   text-align: center;
 }
-.usdParityManagement-grid .value-cell{
+.usdParityManagement-grid .value-cell {
   text-align: center;
 }
 
@@ -370,7 +385,7 @@ padding-left: 10px !important;
 /* Container & Root */
 .swapsInUSDManagement-grid {
   width: 100%;
-  max-height:350px; /* Adjust as needed */
+  max-height: 350px; /* Adjust as needed */
   height: 100%;
   overflow-y: auto;
   border: none !important;
@@ -410,7 +425,6 @@ padding-left: 10px !important;
   color: #ffffff !important;
   text-align: center;
   padding: 0 !important;
-
 }
 
 .swapsInUSDManagement-grid .ag-header-cell-label {
@@ -431,7 +445,7 @@ padding-left: 10px !important;
 }
 /* Instrument Column */
 .swapsInUSDManagement-grid .ag-cell.instrument-cell {
-padding-left: 10px !important;
+  padding-left: 10px !important;
 }
 
 /* Bid Column */
@@ -449,14 +463,14 @@ padding-left: 10px !important;
   text-align: center;
 }
 
-.swapsInUSDManagement-grid .ag-grid.tenor-cell{
+.swapsInUSDManagement-grid .ag-grid.tenor-cell {
   text-align: center;
   padding-left: 10px !important;
 }
 .swapsInUSDManagement-grid .highLow-cell {
   text-align: center;
 }
-.swapsInUSDManagement-grid .value-cell{
+.swapsInUSDManagement-grid .value-cell {
   text-align: center;
 }
 
