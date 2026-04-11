@@ -451,3 +451,100 @@ export const buildTresmarkCrossPremiumTable = (
     return { rowData: [], columnsData: [] };
   }
 };
+
+export const buildForwardsAgGridTable = (
+  value,
+  Data,
+  getAllTenorsData,
+  getAllInstrument,
+  IndexCell // Aapka React Component
+) => {
+  if (!Data || !getAllTenorsData || !getAllInstrument) {
+    return { rowData: [], columnDefs: [] };
+  }
+
+  try {
+    const { tenors } = getAllTenorsData;
+    const { instruments } = getAllInstrument;
+
+    // Filter Tenors and Instruments
+    const applicableInstruments = instruments || [];
+    const applicableTenors =
+      tenors?.filter((tenor) => tenor.isForwardingApplicable) || [];
+
+    // Step 1: Create rateMap for initial data
+    const rateMap = {};
+    Data.forEach((entry) => {
+      const key = `${entry.instrumentID}-${entry.tenorID}`;
+      rateMap[key] = {
+        bid: entry.bid ?? 0,
+        ask: value === 3 ? entry.offer : entry.ask ?? 0,
+      };
+    });
+
+    // Step 2: Build Row Data
+    const rowData = applicableTenors.map((tenor) => {
+      const row = {
+        tenorID: tenor.tenorID,
+        tenorName: tenor.tenorName,
+        tenorDays: tenor.tenorDays,
+      };
+
+      applicableInstruments.forEach((inst) => {
+        const key = `${inst.instrumentID}-${tenor.tenorID}`;
+        const rates = rateMap[key] || { bid: 0, ask: 0 };
+
+        row[`bid_${inst.instrumentName}`] = rates.bid;
+        row[`ask_${inst.instrumentName}`] = rates.ask;
+        // Meta data for easy access
+        row[`id_${inst.instrumentName}`] = inst.instrumentID;
+      });
+
+      return row;
+    });
+
+    // Step 3: Build Column Definitions (AG Grid Structure)
+    const columnDefs = [
+      {
+        headerName: "",
+        children: [
+          {
+            headerName: "Tenor",
+            field: "tenorName",
+            width: 170,
+            suppressMovable: false,
+            cellClass: "instrument-cell",
+          },
+        ],
+      },
+      ...applicableInstruments.map((inst) => ({
+        headerName: inst.instrumentName,
+        children: [
+          {
+            headerName: "Bid",
+            field: `bid_${inst.instrumentName}`,
+            width: 90,
+            cellClass: "bid-cell",
+            cellRenderer: (params) => (
+              <IndexCell value={params.value} record={params.data} type='bid' />
+            ),
+          },
+          {
+            headerName: "Ask",
+            field: `ask_${inst.instrumentName}`,
+            width: 90,
+            cellClass: "offer-cell",
+            cellRenderer: (params) => (
+              <IndexCell value={params.value} record={params.data} type='ask' />
+            ),
+          },
+        ],
+      })),
+    ];
+
+    return { rowData, columnDefs };
+  } catch (error) {
+    console.error("Error in buildForwardsAgGridTable:", error);
+    return { rowData: [], columnDefs: [] };
+  }
+};

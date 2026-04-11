@@ -1,17 +1,11 @@
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { shallowEqual, useSelector } from "react-redux";
+import { store } from "../../../store/store";
+import styles from "../management.module.css";
+
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
-import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import { shallowEqual, useSelector } from "react-redux";
-import { store } from "../../../store/store"; // ✅ import your redux store
-import styles from "../management.module.css";
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 
 // Selectors
 const selectUSDParity = (state) =>
@@ -24,180 +18,297 @@ const selectUSDParityFeed = (state) =>
   state.RealtimeActionsSlice.usdParityForManagmentFeed;
 
 const USDParity = memo(() => {
-  // ✅ normalized state (object instead of array)
-  const [processedData, setProcessedData] = useState({});
-
-  const animationFrameRef = useRef(null);
-  const pendingFeedRef = useRef(null);
+  const gridRef = useRef(null);
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map());
+  const rafRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const isGridReadyRef = useRef(false); // ✅ NEW
+  const lastProcessTime = useRef(0);
+  const processQueueRef = useRef(null);
+  const lastFeedRef = useRef(null);
 
   const crossInstruments = useSelector(selectSpotInstruments, shallowEqual);
   const worldCrosses = useSelector(selectUSDParity, shallowEqual);
 
-  // ✅ Columns (unchanged but stable)
-  const columns = useMemo(
+  // --- Cell Renderers ---
+  const IndexCellRenderer = useCallback((params) => {
+    if (!params.value || params.value === "-") return null;
+    return <IndexCell value={params.value} />;
+  }, []);
+
+  const PercentChangeCellRenderer = useCallback((params) => {
+    // if (params.value || params.value === "-") return null;
+    const value = Number(params.value);
+    const cellClassName =
+      value < 0
+        ? "color-red justify-center"
+        : value > 0
+        ? "color-green justify-center"
+        : "color-blue justify-center";
+    return <IndexCell value={value} CellClassName={cellClassName} />;
+  }, []);
+
+  const TimeCellRenderer = useCallback((params) => {
+    // if (!params.value) return "--:--:--";
+    return convertUTCTimeToLocalTime(params.value);
+  }, []);
+
+  // --- Columns ---
+  const columnDefs = useMemo(
     () => [
-      { title: "Instrument", dataIndex: "instrumentName" },
       {
-        title: "Bid",
-        dataIndex: "bid",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
+        headerName: "Instrument",
+        field: "instrumentName",
+        flex: 1,
+        cellClass: "instrument-cell",
       },
       {
-        title: "Ask",
-        dataIndex: "ask",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
+        headerName: "Bid",
+        field: "bid",
+        flex: 1,
+        cellClass: "bid-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
       },
       {
-        title: "High",
-        dataIndex: "high",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
+        headerName: "Ask",
+        field: "ask",
+        flex: 1,
+        cellClass: "offer-cell",
+        cellRenderer: IndexCellRenderer,
       },
       {
-        title: "Low",
-        dataIndex: "low",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
+        headerName: "High",
+        field: "high",
+        flex: 1,
+        cellClass: "highLow-cell",
+        cellRenderer: IndexCellRenderer,
       },
       {
-        title: "% Change",
-        dataIndex: "percentageChange",
-        width: 120,
-        render: (text) => {
-          if (text === "-") return null;
-          const value = Number(text);
-          const cellClassName =
-            value < 0 ? "color-red" : value > 0 ? "color-green" : "color-blue";
-          return <IndexCell value={value} CellClassName={cellClassName} />;
-        },
+        headerName: "Low",
+        field: "low",
+        flex: 1,
+        cellClass: "highLow-cell",
+        cellRenderer: IndexCellRenderer,
       },
       {
-        title: "Time",
-        dataIndex: "time",
-        width: 90,
-        render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
+        headerName: "% Change",
+        field: "percentageChange",
+        flex: 1,
+        cellClass: "percentage-cell",
+        cellRenderer: PercentChangeCellRenderer,
+      },
+      {
+        headerName: "Time",
+        field: "time",
+        flex: 1,
+        cellRenderer: TimeCellRenderer,
       },
     ],
-    []
+    [IndexCellRenderer, PercentChangeCellRenderer, TimeCellRenderer]
   );
 
-  // ✅ Build initial normalized data
-  useEffect(() => {
-    if (!crossInstruments?.length || !worldCrosses?.length) return;
+  // --- Row Data ---
+  const rowData = useMemo(() => {
+    if (!crossInstruments?.length || !worldCrosses?.length) return [];
 
-    const mappedData = {};
-
-    crossInstruments.forEach((instrument) => {
-      const matchedCross = worldCrosses.find(
-        (wc) => Number(wc.instrumentID) === instrument.instrumentID
+    return crossInstruments.map((instrument) => {
+      const matched = worldCrosses.find(
+        (wc) => Number(wc.instrumentID) === Number(instrument.instrumentID)
       );
 
-      mappedData[instrument.instrumentID] = {
+      return {
         instrumentID: Number(instrument.instrumentID),
         instrumentName: instrument.instrumentName,
-        time: matchedCross?.time ?? "",
-        bid: Number(matchedCross?.bid ?? 0),
-        ask: Number(matchedCross?.ask ?? 0),
-        high: Number(matchedCross?.high ?? 0),
-        low: Number(matchedCross?.low ?? 0),
-        percentageChange: Number(matchedCross?.percentageChange ?? 0),
+        time: matched?.time ?? "",
+        bid: Number(matched?.bid ?? 0),
+        ask: Number(matched?.ask ?? 0),
+        high: Number(matched?.high ?? 0),
+        low: Number(matched?.low ?? 0),
+        percentageChange: Number(matched?.percentageChange ?? 0),
       };
     });
-
-    setProcessedData(mappedData);
   }, [crossInstruments, worldCrosses]);
 
-  // ✅ Apply updates (O(1))
-  const flushUpdate = useCallback(() => {
-    animationFrameRef.current = null;
+  // --- Map Nodes ---
+  const updateNodeMap = useCallback(() => {
+    const api = gridRef.current?.api;
+    if (!api) return;
 
-    const feed = pendingFeedRef.current;
-    pendingFeedRef.current = null;
-
-    if (!feed?.instrumentParitySpot) return;
-
-    const update = feed.instrumentParitySpot;
-    const id = update.instrumentID;
-
-    setProcessedData((prev) => {
-      const existing = prev[id];
-      if (!existing) return prev;
-
-      const changed =
-        Number(existing.bid) !== Number(update.bid) ||
-        Number(existing.ask) !== Number(update.ask) ||
-        Number(existing.high) !== Number(update.high) ||
-        Number(existing.low) !== Number(update.low) ||
-        Number(existing.percentageChange) !== Number(update.percentageChange) ||
-        existing.time !== update.time;
-
-      if (!changed) return prev;
-
-      return {
-        ...prev,
-        [id]: {
-          ...existing,
-          bid: update.bid,
-          ask: update.ask,
-          high: update.high,
-          low: update.low,
-          percentageChange: update.percentageChange,
-          time: update.time,
-        },
-      };
+    rowNodeMap.current.clear();
+    api.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(Number(node.data.instrumentID), node);
+      }
     });
   }, []);
 
-  // ✅ Subscribe to store manually (NO re-render on every tick)
+  // --- Process Queue ---
+  const processQueue = useCallback(() => {
+    const api = gridRef.current?.api;
+
+    if (!isMountedRef.current || !api || !isGridReadyRef.current) {
+      rafRef.current = null;
+      return;
+    }
+
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastProcessTime.current < 50) {
+      rafRef.current = requestAnimationFrame(() => processQueueRef.current?.());
+      return;
+    }
+
+    lastProcessTime.current = now;
+
+    pendingUpdates.current.forEach((update, instrumentID) => {
+      const node = rowNodeMap.current.get(Number(instrumentID));
+
+      if (node && node.data) {
+        node.setDataValue("bid", update.bid);
+        node.setDataValue("ask", update.ask);
+        node.setDataValue("high", update.high);
+        node.setDataValue("low", update.low);
+        node.setDataValue("percentageChange", update.percentageChange);
+        node.setDataValue("time", update.time);
+
+        // ✅ remove only after success
+        pendingUpdates.current.delete(instrumentID);
+      }
+    });
+
+    if (pendingUpdates.current.size > 0) {
+      rafRef.current = requestAnimationFrame(() => processQueueRef.current?.());
+    } else {
+      rafRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    processQueueRef.current = processQueue;
+  }, [processQueue]);
+
+  // --- Store Subscription ---
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
+      if (!isMountedRef.current) return;
+
       const feed = selectUSDParityFeed(store.getState());
+      if (!feed || feed === lastFeedRef.current) return;
 
-      if (!feed) return;
+      lastFeedRef.current = feed;
 
-      pendingFeedRef.current = feed;
+      const update = feed.instrumentParitySpot;
+      if (!update) return;
 
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(flushUpdate);
+      const id = Number(update.instrumentID);
+
+      pendingUpdates.current.set(id, {
+        bid: update.bid,
+        ask: update.ask,
+        high: update.high,
+        low: update.low,
+        percentageChange: update.percentageChange,
+        time: update.time,
+      });
+
+      // ✅ Only schedule (no force mapping here)
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(() =>
+          processQueueRef.current?.()
+        );
       }
     });
 
     return unsubscribe;
-  }, [flushUpdate]);
+  }, []);
 
-  // ✅ Cleanup
+  // --- Grid Ready ---
+  const onGridReady = useCallback(() => {
+    isGridReadyRef.current = true;
+
+    setTimeout(() => {
+      updateNodeMap();
+
+      if (pendingUpdates.current.size > 0 && !rafRef.current) {
+        rafRef.current = requestAnimationFrame(() =>
+          processQueueRef.current?.()
+        );
+      }
+    }, 100);
+  }, [updateNodeMap]);
+
+  const onFirstDataRendered = useCallback(() => {
+    updateNodeMap();
+  }, [updateNodeMap]);
+
+  // --- RowData Change ---
+  useEffect(() => {
+    if (gridRef.current?.api && rowData?.length > 0) {
+      setTimeout(() => {
+        updateNodeMap();
+
+        if (pendingUpdates.current.size > 0 && !rafRef.current) {
+          rafRef.current = requestAnimationFrame(() =>
+            processQueueRef.current?.()
+          );
+        }
+      }, 50);
+    }
+  }, [rowData, updateNodeMap]);
+
+  // --- Cleanup ---
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      isMountedRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
     };
   }, []);
 
-  // ✅ Convert to array only when needed
-  const tableData = useMemo(
-    () => Object.values(processedData),
-    [processedData]
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
   );
 
   return (
     <>
       <span className={styles.tableheaderbar}>USD Parity</span>
 
-      <GlobalTable
-        columns={columns}
-        dataSource={tableData}
-        rowKey={(record) => record.key}
-        pagination={false}
-        scroll={{ y: 300, x: "max-content" }}
-        prefixCls={
-          tableData.length > 0 ? "managementTables" : "managementTables_Empty"
-        }
-      />
+      <div style={{ width: "100%", height: "300px" }}>
+        <AgGridTable
+          ref={gridRef}
+          columnDefs={columnDefs}
+          rowData={rowData}
+          getRowId={(params) => String(params.data.instrumentID)}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          animateRows={false}
+          headerHeight={35}
+          rowHeight={32}
+          domLayout='normal'
+          theme='legacy'
+          defaultColDef={defaultColDef}
+          className='usdParityManagement-grid'
+        />
+      </div>
     </>
   );
 });
+
+USDParity.displayName = "USDParity";
 
 export default USDParity;

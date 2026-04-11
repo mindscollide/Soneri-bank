@@ -1,11 +1,9 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 
 import { convertUTCTimeToLocalTime } from "../../../../utils/timeFunction";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import AgGridTable from "../../elements/globalAgGridTable";
 
 // ─── Selectors ───────────────────────────────
 const selectFeed = (state) =>
@@ -17,53 +15,27 @@ const selectCurrencyCrosses = (state) =>
 const selectOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.currencyCrosses;
 
-// ─── Component ───────────────────────────────
 const CurrencyCrosses = memo(() => {
   const dispatch = useDispatch();
 
+  const gridApiRef = useRef(null);
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map()); // ✅ Use Map to deduplicate updates
   const rafRef = useRef(null);
-  const pendingRef = useRef([]);
-  const gridRef = useRef();
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
-  const otherInstruments = useSelector(selectOtherInstruments);
-  const fullFeed = useSelector(selectFeed);
-  const currencyCrosses = useSelector(selectCurrencyCrosses);
+  const otherInstruments = useSelector(selectOtherInstruments, shallowEqual);
+  const fullFeed = useSelector(selectFeed, shallowEqual);
+  const currencyCrosses = useSelector(selectCurrencyCrosses, shallowEqual);
 
-  const [rowData, setRowData] = useState([]);
-
-  // ─── Columns ───────────────────────────────
-  const columnDefs = useMemo(
-    () => [
-      { headerName: "Instrument", field: "instrumentName", width: 120 },
-      {
-        headerName: "Bid",
-        field: "bid",
-        width: 100,
-        valueFormatter: (p) => (p.value ? Number(p.value).toFixed(4) : "-"),
-      },
-      {
-        headerName: "Ask",
-        field: "ask",
-        width: 100,
-        valueFormatter: (p) => (p.value ? Number(p.value).toFixed(4) : "-"),
-      },
-      {
-        headerName: "Time",
-        field: "time",
-        width: 120,
-        valueFormatter: (p) =>
-          p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
-      },
-    ],
-    []
-  );
-
-  // ─── Initial Data ───────────────────────────
-  const enrichedData = useMemo(() => {
-    if (!otherInstruments?.length || !currencyCrosses?.length) return [];
+  // ─────────────────────────────
+  const buildRowData = useCallback(() => {
+    if (!otherInstruments?.length) return [];
 
     return otherInstruments.map((instrument) => {
-      const match = currencyCrosses.find(
+      const match = currencyCrosses?.find(
         (wc) => Number(wc.instrumentId) === instrument.instrumentId
       );
 
@@ -77,88 +49,249 @@ const CurrencyCrosses = memo(() => {
     });
   }, [otherInstruments, currencyCrosses]);
 
-  useEffect(() => {
-    setRowData(enrichedData);
-  }, [enrichedData]);
+  // ─────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
 
-  // ─── REAL-TIME UPDATE (AG GRID MAGIC) ───────
+      gridApiRef.current = params.api;
+      const rowData = buildRowData();
+
+      if (rowData.length > 0) {
+        params.api.setGridOption("rowData", rowData);
+      }
+    },
+    [buildRowData]
+  );
+
+  // ─────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
+
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, []);
+
+  // ─────────────────────────────
+  // ✅ THROTTLED PROCESSOR - Max 20 updates per second
   const processQueue = useCallback(() => {
-    const pending = pendingRef.current;
-    if (!pending.length) {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
       rafRef.current = null;
       return;
     }
 
-    const updates = [];
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime.current;
 
-    if (gridRef.current?.api) {
-      pending.forEach((item) => {
-        if (item?.instrumentId != null) {
-          const rowNode = gridRef.current.api.getRowNode(
-            String(item.instrumentId)
-          );
-
-          if (rowNode) {
-            // ✅ Merge existing + new data
-            updates.push({
-              ...rowNode.data,
-              bid: item.bid,
-              ask: item.ask,
-              time: item.time,
-            });
-          }
-        }
-      });
-
-      gridRef.current.api.applyTransaction({
-        update: updates,
-      });
+    // ✅ Throttle: minimum 50ms between updates (20fps max)
+    if (timeSinceLastProcess < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
     }
 
-    pendingRef.current = [];
-    rafRef.current = null;
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
+
+    try {
+      // ✅ Process in small batches to prevent blocking
+      let batchCount = 0;
+      const MAX_BATCH_SIZE = 10; // Process max 10 items per frame
+
+      for (const [key, update] of pendingUpdates.current.entries()) {
+        if (batchCount >= MAX_BATCH_SIZE) break;
+
+        const node = rowNodeMap.current.get(key);
+        if (!node) {
+          pendingUpdates.current.delete(key);
+          continue;
+        }
+
+        const data = node.data;
+        const hasChanges =
+          data.bid !== update.bid ||
+          data.ask !== update.ask ||
+          data.time !== update.time;
+
+        if (hasChanges) {
+          // ✅ Batch set data values
+          node.setDataValue("bid", update.bid);
+          node.setDataValue("ask", update.ask);
+          node.setDataValue("time", update.time);
+        }
+
+        pendingUpdates.current.delete(key);
+        batchCount++;
+      }
+
+      // ✅ If there are still pending updates, schedule next frame
+      if (pendingUpdates.current.size > 0) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      } else {
+        rafRef.current = null;
+      }
+    } catch (error) {
+      console.error("Error processing queue:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
   }, []);
 
-  // ─── Consume MQTT Feed ──────────────────────
-  useEffect(() => {
-    if (!fullFeed?.length) return;
+  // ─────────────────────────────
+  // ✅ Queue updates with deduplication
+  const queueFeed = useCallback(
+    (feed) => {
+      if (!feed?.currencyCrosses || !isMountedRef.current) return;
 
-    for (const feed of fullFeed) {
-      if (feed?.currencyCrosses) {
-        pendingRef.current.push(feed.currencyCrosses);
+      const cross = feed.currencyCrosses;
+      const key = String(cross.instrumentId);
+
+      // ✅ Deduplicate: only keep the latest update for each instrument
+      pendingUpdates.current.set(key, {
+        bid: cross.bid,
+        ask: cross.ask,
+        time: cross.time,
+      });
+
+      // ✅ Schedule processing if not already scheduled
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
       }
-    }
+    },
+    [processQueue]
+  );
 
-    if (!rafRef.current) {
-      rafRef.current = requestAnimationFrame(processQueue);
-    }
-
-    dispatch(clearCurrencyCrossesForManagmentFeed());
-  }, [fullFeed, processQueue, dispatch]);
-
-  // ─── Cleanup ───────────────────────────────
+  // ─────────────────────────────
+  // ✅ Debounced feed processing
   useEffect(() => {
+    if (!fullFeed || !Array.isArray(fullFeed) || fullFeed.length === 0) {
+      return;
+    }
+
+    // ✅ Process all feeds
+    fullFeed.forEach(queueFeed);
+
+    // ✅ Clear Redux state after a delay
+    const clearTimeoutId = setTimeout(() => {
+      if (isMountedRef.current) {
+        dispatch(clearCurrencyCrossesForManagmentFeed());
+      }
+    }, 200); // Increased delay
+
+    return () => clearTimeout(clearTimeoutId);
+  }, [fullFeed, queueFeed, dispatch]);
+
+  // ─────────────────────────────
+  // ✅ Cleanup
+  useEffect(() => {
+    isMountedRef.current = true;
+
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      isMountedRef.current = false;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
     };
   }, []);
 
-  // ─── Render ────────────────────────────────
+  // ─────────────────────────────
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Currency Crosses",
+        children: [
+          {
+            headerName: "Instrument",
+            field: "instrumentName",
+            flex: 1,
+            cellClass: "instrument-cell",
+          },
+          {
+            headerName: "Bid",
+            field: "bid",
+            flex: 1,
+            cellClass: "bid-cell",
+            valueFormatter: (p) =>
+              p.value != null ? Number(p.value).toFixed(4) : "-",
+          },
+          {
+            headerName: "Ask",
+            field: "ask",
+            flex: 1,
+            cellClass: "offer-cell",
+            valueFormatter: (p) =>
+              p.value != null ? Number(p.value).toFixed(4) : "-",
+          },
+          {
+            headerName: "Time",
+            field: "time",
+            flex: 1,
+            cellClass: "section-divider",
+            valueFormatter: (p) =>
+              p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
+          },
+        ],
+      },
+    ],
+    []
+  );
+
+  const getRowId = useCallback(
+    (params) => String(params.data.instrumentID),
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
+
   return (
-    <div className="ag-theme-alpine" style={{ height: 500, width: "100%" }}>
-      <AgGridReact
-        ref={gridRef}
-        rowData={rowData}
+    <div style={{ height: "600px", width: "100%" }}>
+      <AgGridTable
+        ref={gridApiRef}
         columnDefs={columnDefs}
-        // 🔥 CRITICAL FOR REALTIME
-        getRowId={(params) => params.data.instrumentID}
-        deltaRowDataMode={true}
-        // Performance
-        animateRows={false}
-        rowBuffer={10}
+        className='liveRates-grid'
+        getRowId={getRowId}
+        onGridReady={onGridReady}
+        onFirstDataRendered={onFirstDataRendered}
+        domLayout='normal'
+        theme='legacy'
+        defaultColDef={defaultColDef}
+        suppressScrollOnNewData={true}
+        suppressAnimationFrame={false}
+        suppressColumnVirtualisation={false}
+        suppressRowVirtualisation={false}
       />
     </div>
   );
 });
+
+CurrencyCrosses.displayName = "CurrencyCrosses";
 
 export default CurrencyCrosses;

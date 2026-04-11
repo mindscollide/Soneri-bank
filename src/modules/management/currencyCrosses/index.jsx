@@ -1,10 +1,10 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 
 // Selectors
 const currencyCrossesForManagementFeed = (state) =>
@@ -19,86 +19,25 @@ const GetAllOtherInstruments = (state) =>
 const CurrencyCrosses = memo(() => {
   const dispatch = useDispatch();
 
-  const dataRef = useRef([]);
-  const pendingRef = useRef([]);
+  const gridApiRef = useRef(null);
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
-  const otherInstruments = useSelector(GetAllOtherInstruments);
-  const currencyCrosses = useSelector(SelectGetCurrencyCrosses);
-  const fullFeed = useSelector(currencyCrossesForManagementFeed);
+  const otherInstruments = useSelector(GetAllOtherInstruments, shallowEqual);
+  const currencyCrosses = useSelector(SelectGetCurrencyCrosses, shallowEqual);
+  const fullFeed = useSelector(currencyCrossesForManagementFeed, shallowEqual);
 
-  const [processedData, setProcessedData] = useState([]);
-
-  // ─────────────────────────────────────────────
-  // Columns
-  const columns = useMemo(
-    () => [
-      {
-        title: "Instrument",
-        dataIndex: "instrumentName",
-        ellipsis: true,
-        width: 90,
-      },
-      {
-        title: "Bid",
-        dataIndex: "bid",
-        width: 90,
-        render: (text) =>
-          text !== "-" && <IndexCell value={Number(text).toFixed(4)} />,
-      },
-      {
-        title: "Ask",
-        dataIndex: "ask",
-        width: 90,
-        render: (text) =>
-          text !== "-" && <IndexCell value={Number(text).toFixed(4)} />,
-      },
-      {
-        title: "High",
-        dataIndex: "high",
-        width: 90,
-        render: (text) =>
-          text !== "-" && <IndexCell value={Number(text).toFixed(4)} />,
-      },
-      {
-        title: "Low",
-        dataIndex: "low",
-        width: 90,
-        render: (text) =>
-          text !== "-" && <IndexCell value={Number(text).toFixed(4)} />,
-      },
-      {
-        title: "% Change",
-        dataIndex: "percentageChange",
-        width: 120,
-        render: (text) => {
-          if (text === "-") return null;
-
-          const value = Number(text);
-
-          const cellClassName =
-            value < 0 ? "color-red" : value > 0 ? "color-green" : "color-blue";
-
-          return <IndexCell value={value} CellClassName={cellClassName} />;
-        },
-      },
-      {
-        title: "Time",
-        dataIndex: "time",
-        width: 90,
-        render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
-      },
-    ],
-    []
-  );
-
-  // ─────────────────────────────────────────────
-  // Initial Data
-  const enrichedData = useMemo(() => {
-    if (!otherInstruments || !currencyCrosses) return [];
+  // ─────────────────────────────
+  // Build initial row data
+  const buildRowData = useCallback(() => {
+    if (!otherInstruments?.length) return [];
 
     return otherInstruments.map((instrument) => {
-      const match = currencyCrosses.find(
+      const match = currencyCrosses?.find(
         (wc) => Number(wc.instrumentId) === instrument.instrumentId
       );
 
@@ -111,85 +50,134 @@ const CurrencyCrosses = memo(() => {
         high: Number(match?.high ?? 0),
         low: Number(match?.low ?? 0),
         percentageChange: Number(match?.percentChange ?? 0),
-        version: 0,
       };
     });
   }, [otherInstruments, currencyCrosses]);
 
-  useEffect(() => {
-    if (enrichedData.length) {
-      dataRef.current = enrichedData;
-      setProcessedData(enrichedData);
-    }
-  }, [enrichedData]);
+  // ─────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
 
-  // ─────────────────────────────────────────────
-  // 🚀 Optimized RAF Processor
+      gridApiRef.current = params.api;
+      const rowData = buildRowData();
+
+      if (rowData.length > 0) {
+        params.api.setGridOption("rowData", rowData);
+      }
+    },
+    [buildRowData]
+  );
+
+  // ─────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
+
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, []);
+
+  // ─────────────────────────────
+  // ✅ THROTTLED PROCESSOR
   const processQueue = useCallback(() => {
-    const pending = pendingRef.current;
-
-    if (!pending.length) {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
       rafRef.current = null;
       return;
     }
 
-    // Latest update per instrument
-    const latestMap = new Map();
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime.current;
 
-    for (const p of pending) {
-      const data = p?.currencyCrosses;
-      if (!data) continue;
-
-      latestMap.set(data.instrumentId, data);
+    // ✅ Throttle: minimum 50ms between updates (20fps max)
+    if (timeSinceLastProcess < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
     }
 
-    pendingRef.current = [];
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
 
-    setProcessedData((prev) => {
-      let hasChanges = false;
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
 
-      const updated = prev.map((row) => {
-        const update = latestMap.get(row.instrumentID);
-        if (!update) return row;
+    try {
+      // ✅ Process in small batches
+      let batchCount = 0;
+      const MAX_BATCH_SIZE = 10;
 
-        if (
-          row.bid !== update.bid ||
-          row.ask !== update.ask ||
-          row.high !== update.high ||
-          row.low !== update.low ||
-          row.percentageChange !== update.percentChange ||
-          row.time !== update.time
-        ) {
-          hasChanges = true;
+      for (const [key, update] of pendingUpdates.current.entries()) {
+        if (batchCount >= MAX_BATCH_SIZE) break;
 
-          return {
-            ...row,
-            bid: update.bid,
-            ask: update.ask,
-            high: update.high,
-            low: update.low,
-            percentageChange: update.percentChange,
-            time: update.time,
-            version: row.version + 1,
-          };
+        const node = rowNodeMap.current.get(key);
+        if (!node) {
+          pendingUpdates.current.delete(key);
+          continue;
         }
 
-        return row;
-      });
+        const data = node.data;
+        const hasChanges =
+          data.bid !== update.bid ||
+          data.ask !== update.ask ||
+          data.high !== update.high ||
+          data.low !== update.low ||
+          data.percentageChange !== update.percentChange ||
+          data.time !== update.time;
 
-      return hasChanges ? updated : prev;
-    });
+        if (hasChanges) {
+          node.setDataValue("bid", update.bid);
+          node.setDataValue("ask", update.ask);
+          node.setDataValue("high", update.high);
+          node.setDataValue("low", update.low);
+          node.setDataValue("percentageChange", update.percentageChange);
+          node.setDataValue("time", update.time);
+        }
 
-    rafRef.current = null;
+        pendingUpdates.current.delete(key);
+        batchCount++;
+      }
+
+      // ✅ Schedule next frame if needed
+      if (pendingUpdates.current.size > 0) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      } else {
+        rafRef.current = null;
+      }
+    } catch (error) {
+      console.error("Error processing queue:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
   }, []);
 
-  // ─────────────────────────────────────────────
-  // Queue updates
+  // ─────────────────────────────
+  // ✅ Queue with deduplication
   const queueUpdate = useCallback(
     (feed) => {
-      if (!feed) return;
+      if (!feed?.currencyCrosses || !isMountedRef.current) return;
 
-      pendingRef.current.push(feed);
+      const cross = feed.currencyCrosses;
+      const key = String(cross.instrumentId);
+
+      pendingUpdates.current.set(key, {
+        bid: cross.bid,
+        ask: cross.ask,
+        high: cross.high,
+        low: cross.low,
+        percentageChange: cross.percentChange,
+        time: cross.time,
+      });
 
       if (!rafRef.current) {
         rafRef.current = requestAnimationFrame(processQueue);
@@ -198,46 +186,164 @@ const CurrencyCrosses = memo(() => {
     [processQueue]
   );
 
-  // ─────────────────────────────────────────────
-  // Consume Redux buffer
+  // ─────────────────────────────
+  // ✅ Consume feed
   useEffect(() => {
-    if (!fullFeed?.length) return;
+    if (!fullFeed || !Array.isArray(fullFeed) || fullFeed.length === 0) {
+      return;
+    }
 
-    fullFeed.forEach((feed) => {
-      queueUpdate(feed);
-    });
+    fullFeed.forEach(queueUpdate);
 
-    // ✅ VERY IMPORTANT
-    dispatch(clearCurrencyCrossesForManagmentFeed());
+    const clearTimeoutId = setTimeout(() => {
+      if (isMountedRef.current) {
+        dispatch(clearCurrencyCrossesForManagmentFeed());
+      }
+    }, 200);
+
+    return () => clearTimeout(clearTimeoutId);
   }, [fullFeed, queueUpdate, dispatch]);
 
-  // Cleanup
+  // ─────────────────────────────
+  // ✅ Cleanup
   useEffect(() => {
+    isMountedRef.current = true;
+
     return () => {
+      isMountedRef.current = false;
+
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
       }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
     };
   }, []);
 
-  // ─────────────────────────────────────────────
+  // ─────────────────────────────
+  // Custom cell renderer for percentage change
+  const PercentageCellRenderer = useCallback((props) => {
+    const value = props.value;
+    if (value === undefined || value === null || value === "-") return null;
+
+    const numValue = Number(value);
+    const cellClassName =
+      numValue < 0 ? "color-red" : numValue > 0 ? "color-green" : "color-blue";
+
+    return <IndexCell value={numValue} CellClassName={cellClassName} />;
+  }, []);
+
+  // ─────────────────────────────
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Instrument",
+        field: "instrumentName",
+        flex: 1,
+        cellClass: "instrument-cell",
+      },
+      {
+        headerName: "Bid",
+        field: "bid",
+        flex: 1,
+        cellClass: "bid-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "Ask",
+        field: "ask",
+        flex: 1,
+        cellClass: "offer-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "High",
+        field: "high",
+        cellClass: "highLow-cell",
+        flex: 1,
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "Low",
+        field: "low",
+        cellClass: "highLow-cell",
+
+        flex: 1,
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "% Change",
+        field: "percentageChange",
+        flex: 1,
+        cellClass: "percentage-cell",
+
+        cellRenderer: PercentageCellRenderer,
+      },
+      {
+        headerName: "Time",
+        field: "time",
+        flex: 1,
+        valueFormatter: (p) =>
+          p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
+      },
+    ],
+    [PercentageCellRenderer]
+  );
+
+  const getRowId = useCallback(
+    (params) => String(params.data.instrumentID),
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar}>Currency Crosses</span>
 
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0
-            ? "managementTables"
-            : "managementTables_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 300, x: "max-content" }}
-      />
+      <div style={{ height: "300px", width: "100%" }}>
+        <AgGridTable
+          ref={gridApiRef}
+          columnDefs={columnDefs}
+          className='usdParityManagement-grid'
+          getRowId={getRowId}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          domLayout='normal'
+          theme='legacy'
+          defaultColDef={defaultColDef}
+          suppressScrollOnNewData={true}
+          suppressAnimationFrame={false}
+          suppressCellSelection={true}
+        />
+      </div>
     </>
   );
 });
+
+CurrencyCrosses.displayName = "CurrencyCrosses";
 
 export default CurrencyCrosses;

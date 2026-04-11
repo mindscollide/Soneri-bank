@@ -194,6 +194,11 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_FORWARD_RATES_FEED":
+            if (
+              payload.forwardRates[0].instrumentID === 21
+            ) {
+              console.log("TREASURY_FORWARD_RATES_FEED", payload);
+            }
             startTransition(() => {
               dispatch(setTreasuryForwardRates(payload));
             });
@@ -395,13 +400,12 @@ const Dashboard = () => {
         isConnected,
         activeTopics, // components read this inside useMqttTopics hook
         // unsubscribeAll, // MainHeader uses this
-      }}
-    >
+      }}>
       <Layout style={layoutStyle}>
-        <Header prefixCls="mainHeader">
+        <Header prefixCls='mainHeader'>
           <MainHeader />
         </Header>
-        <Content className="my-2">
+        <Content className='my-2'>
           <Outlet />
         </Content>
       </Layout>

@@ -1,5 +1,4 @@
 import { lazy, memo, Suspense, useMemo } from "react";
-
 import { Col, Row } from "react-bootstrap";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
@@ -9,16 +8,15 @@ const BankSpotAndUSDParity = lazy(() => import("./bankSpotAndUSDParity/index"));
 const BankSpotAndUSDParityForTreasury = lazy(() =>
   import("../../../modules/treasury/liveRates/bankSpotAndUSDParity/index")
 );
-
 const CurrencyCrosses = lazy(() => import("./currencyCrosses/index"));
 
 const LiveRates = memo(({ dealerIdForMQTT }) => {
   const dealerValue = useSelector(
-    (state) => state.WatchListReducer.dealerValue
+    (state) => state.WatchListReducer.dealerValue,
+    (prev, next) => prev?.value === next?.value // ✅ Add equality check
   );
 
-  console.log(dealerValue, "dealerValuedealerValue");
-  // ✅ Calculate topics here. Log to see what is being passed to the hook.
+  // ✅ Memoize topics properly
   const mqttTopics = useMemo(() => {
     const topics = [
       `SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY`,
@@ -27,16 +25,15 @@ const LiveRates = memo(({ dealerIdForMQTT }) => {
         : `SBL_TREASURY_DEALER_RATES_${dealerIdForMQTT}`,
     ];
     return topics;
-  }, [dealerValue]);
+  }, [dealerValue?.value, dealerIdForMQTT]); // ✅ Fixed dependencies
 
-  // 2. Call the hook at the top level
   useMqttTopics(mqttTopics);
 
   return (
     <Row className="mt-2 mb-4 px-2">
       <Col sm={12} md={8} lg={8} className="pe-0">
         <Suspense fallback={<SectionLoader />}>
-          {dealerValue.value === 0 ? (
+          {dealerValue?.value === 0 ? (
             <BankSpotAndUSDParityForTreasury />
           ) : (
             <BankSpotAndUSDParity />
@@ -51,5 +48,7 @@ const LiveRates = memo(({ dealerIdForMQTT }) => {
     </Row>
   );
 });
+
+LiveRates.displayName = 'LiveRates';
 
 export default LiveRates;
