@@ -363,7 +363,7 @@ const SwapsInUSD = memo(() => {
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
-          suppressCellSelection={true}
+          suppressCellFocus={true}
         />
       </div>
     </>

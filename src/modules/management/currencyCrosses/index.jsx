@@ -337,7 +337,7 @@ const CurrencyCrosses = memo(() => {
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
-          suppressCellSelection={true}
+          suppressCellFocus={true}
         />
       </div>
     </>

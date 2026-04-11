@@ -84,6 +84,7 @@ const Dashboard = () => {
     (data) => {
       const type = data?.payload?.message;
       const payload = data?.payload;
+      console.log(payload, "mqtt")
 
       try {
         switch (type) {
@@ -194,11 +195,8 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_FORWARD_RATES_FEED":
-            if (
-              payload.forwardRates[0].instrumentID === 21
-            ) {
+            
               console.log("TREASURY_FORWARD_RATES_FEED", payload);
-            }
             startTransition(() => {
               dispatch(setTreasuryForwardRates(payload));
             });

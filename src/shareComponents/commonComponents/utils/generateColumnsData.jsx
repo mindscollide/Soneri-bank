@@ -523,7 +523,7 @@ export const buildForwardsAgGridTable = (
           {
             headerName: "Bid",
             field: `bid_${inst.instrumentName}`,
-            width: 90,
+            width: 70,
             cellClass: "bid-cell",
             cellRenderer: (params) => (
               <IndexCell value={params.value}  />
@@ -532,7 +532,7 @@ export const buildForwardsAgGridTable = (
           {
             headerName: "Ask",
             field: `ask_${inst.instrumentName}`,
-            width: 90,
+            width: 70,
             cellClass: "offer-cell",
             cellRenderer: (params) => (
               <IndexCell value={params.value}  />
