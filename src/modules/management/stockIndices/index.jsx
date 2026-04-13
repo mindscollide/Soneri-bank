@@ -254,7 +254,7 @@ const StockIndices = memo(() => {
         headerName: "Instrument",
         field: "instrumentName",
         cellClass: "instrument-cell",
-        flex: 1,
+        width: 100,
       },
       {
         headerName: "Current",
@@ -316,6 +316,8 @@ const StockIndices = memo(() => {
         headerName: "Time",
         field: "time",
         flex: 1,
+        cellClass: "percentage-cell",
+
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
@@ -346,18 +348,17 @@ const StockIndices = memo(() => {
         <AgGridTable
           ref={gridApiRef}
           columnDefs={columnDefs}
-          className='usdParityManagement-grid'
+          className="usdParityManagement-grid"
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
-          domLayout='normal'
-          theme='legacy'
+          domLayout="normal"
+          theme="legacy"
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
-
         />
       </div>
     </>

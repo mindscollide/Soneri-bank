@@ -32,7 +32,7 @@ const KIBOR = memo(() => {
         className: "bidCol",
         width: 120,
         render: (text) => {
-          return text !== "-" && <IndexCell value={text.toFixed(2)} />;
+          return text !== "-" && <IndexCell value={text} />;
         },
       },
       {
@@ -41,7 +41,7 @@ const KIBOR = memo(() => {
         className: "offerCol",
         width: 120,
         render: (text) => {
-          return text !== "-" && <IndexCell value={text.toFixed(2)} />;
+          return text !== "-" && <IndexCell value={text} />;
         },
       },
       {

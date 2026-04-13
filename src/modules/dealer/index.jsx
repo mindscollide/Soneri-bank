@@ -89,7 +89,6 @@ const Dealer = () => {
     dispatch(setActiveDealerTab(Number(tabTitle)));
   };
 
-  console.log(dealerIdForMQTT, "selectedDealerselectedDealer");
   const tabs = [
     {
       label: "Live Rates",

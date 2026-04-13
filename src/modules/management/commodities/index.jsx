@@ -252,7 +252,7 @@ const Commodities = memo(() => {
       {
         headerName: "Instrument",
         field: "instrumentName",
-        flex: 1,
+        width: 175,
         cellClass: "instrument-cell",
       },
       {
@@ -263,17 +263,17 @@ const Commodities = memo(() => {
         cellClass: "bid-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
         headerName: "Ask",
         field: "ask",
-       flex: 1,
+        flex: 1,
         cellClass: "offer-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
@@ -283,30 +283,32 @@ const Commodities = memo(() => {
         cellClass: "highLow-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
         headerName: "Low",
         field: "low",
- flex: 1,
- cellClass: "highLow-cell",
+        flex: 1,
+        cellClass: "highLow-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
         headerName: "% Change",
         field: "percentageChange",
-     flex: 1,
-     cellClass: "percentage-cell",
+        flex: 1,
+        cellClass: "percentage-cell",
         cellRenderer: PercentageCellRenderer,
       },
       {
         headerName: "Time",
         field: "time",
         flex: 1,
+        cellClass: "percentage-cell",
+
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
@@ -338,12 +340,12 @@ const Commodities = memo(() => {
         <AgGridTable
           ref={gridApiRef}
           columnDefs={columnDefs}
-          className='usdParityManagement-grid'
+          className="usdParityManagement-grid"
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
-          domLayout='normal'
-          theme='legacy'
+          domLayout="normal"
+          theme="legacy"
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}

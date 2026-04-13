@@ -253,7 +253,7 @@ const CurrencyCrosses = memo(() => {
         cellClass: "bid-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
@@ -263,7 +263,7 @@ const CurrencyCrosses = memo(() => {
         cellClass: "offer-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
@@ -273,7 +273,7 @@ const CurrencyCrosses = memo(() => {
         flex: 1,
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
@@ -284,7 +284,7 @@ const CurrencyCrosses = memo(() => {
         flex: 1,
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} />
           ) : null,
       },
       {
@@ -299,6 +299,8 @@ const CurrencyCrosses = memo(() => {
         headerName: "Time",
         field: "time",
         flex: 1,
+        cellClass: "percentage-cell",
+
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
@@ -329,18 +331,17 @@ const CurrencyCrosses = memo(() => {
         <AgGridTable
           ref={gridApiRef}
           columnDefs={columnDefs}
-          className='usdParityManagement-grid'
+          className="usdParityManagement-grid"
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
-          domLayout='normal'
-          theme='legacy'
+          domLayout="normal"
+          theme="legacy"
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
-
         />
       </div>
     </>

@@ -27,7 +27,7 @@ const Forwards = memo(() => {
   const currentRowDataRef = useRef(null); // Track current rowData
   const isGridReadyRef = useRef(false);
 
-  console.log(gridRef.current?.api, "gridRefgridRefgridRefgridRef")
+  console.log(gridRef.current?.api, "gridRefgridRefgridRefgridRef");
 
   // --- Selectors ---
   const TreasuryForwardRates = useSelector(
@@ -35,7 +35,7 @@ const Forwards = memo(() => {
     shallowEqual
   );
 
-  console.log(TreasuryForwardRates, "TreasuryForwardRatesTreasuryForwardRates")
+  console.log(TreasuryForwardRates, "TreasuryForwardRatesTreasuryForwardRates");
   const GetBankForwardForTreasury = useSelector(
     (state) => state.WatchListReducer.GetBankForwardForTreasury,
     shallowEqual
@@ -71,27 +71,27 @@ const Forwards = memo(() => {
   ]);
 
   // 2. Map Row Nodes to Map for O(1) Access
-const updateNodeMap = useCallback(() => {
-  const api = gridRef.current?.api;
+  const updateNodeMap = useCallback(() => {
+    const api = gridRef.current?.api;
 
-  if (!api || !isGridReadyRef.current) {
-    return; // ✅ silently ignore (no warning spam)
-  }
-
-  rowNodeMap.current.clear();
-
-  api.forEachNode((node) => {
-    if (node.data?.tenorID) {
-      rowNodeMap.current.set(String(node.data.tenorID), node);
+    if (!api || !isGridReadyRef.current) {
+      return; // ✅ silently ignore (no warning spam)
     }
-  });
-}, []);
+
+    rowNodeMap.current.clear();
+
+    api.forEachNode((node) => {
+      if (node.data?.tenorID) {
+        rowNodeMap.current.set(String(node.data.tenorID), node);
+      }
+    });
+  }, []);
   // 3. Optimized Processor (20fps Throttle)
   const processQueue = useCallback(() => {
     const api = gridRef.current?.api;
 
     if (!isMountedRef.current || !api) {
-      console.warn('processQueue: Not mounted or API unavailable');
+      console.warn("processQueue: Not mounted or API unavailable");
       rafRef.current = null;
       return;
     }
@@ -127,19 +127,30 @@ const updateNodeMap = useCallback(() => {
           node.setDataValue(`ask_${instrumentName}`, update.ask);
           updatedCount++;
         } catch (error) {
-          console.error('Error updating node:', error, { tenorID, instrumentName });
+          console.error("Error updating node:", error, {
+            tenorID,
+            instrumentName,
+          });
         }
       } else {
         notFoundCount++;
         // Only warn if we have nodes (otherwise it's expected)
         if (rowNodeMap.current.size > 0) {
-          console.warn(`Node not found for tenorID: ${tenorID}, available: [${Array.from(rowNodeMap.current.keys()).join(', ')}]`);
+          console.warn(
+            `Node not found for tenorID: ${tenorID}, available: [${Array.from(
+              rowNodeMap.current.keys()
+            ).join(", ")}]`
+          );
         }
       }
     });
 
     if (updatedCount > 0) {
-      console.log(`✓ Updated ${updatedCount} cells${notFoundCount > 0 ? `, ${notFoundCount} not found` : ''}`);
+      console.log(
+        `✓ Updated ${updatedCount} cells${
+          notFoundCount > 0 ? `, ${notFoundCount} not found` : ""
+        }`
+      );
     }
 
     rafRef.current = null;
@@ -152,7 +163,10 @@ const updateNodeMap = useCallback(() => {
 
   // 4. Handle Real-time Feed Updates
   useEffect(() => {
-    if (!TreasuryForwardRates || !allInstrumentForTreasuryData?.forwardInstruments) {
+    if (
+      !TreasuryForwardRates ||
+      !allInstrumentForTreasuryData?.forwardInstruments
+    ) {
       return;
     }
 
@@ -160,12 +174,12 @@ const updateNodeMap = useCallback(() => {
       ? TreasuryForwardRates
       : [TreasuryForwardRates];
 
-    console.log('📨 New MQTT data received:', feeds.length, 'feeds');
+    console.log("📨 New MQTT data received:", feeds.length, "feeds");
 
     let updateCount = 0;
     feeds.forEach((feed) => {
       if (!feed.forwardRates) {
-        console.warn('Feed has no forwardRates:', feed);
+        console.warn("Feed has no forwardRates:", feed);
         return;
       }
 
@@ -185,23 +199,29 @@ const updateNodeMap = useCallback(() => {
       });
     });
 
-    console.log(`📊 Queued ${updateCount} updates, total pending: ${pendingUpdates.current.size}`);
+    console.log(
+      `📊 Queued ${updateCount} updates, total pending: ${pendingUpdates.current.size}`
+    );
 
     // Schedule processing if we have updates and nodes
     if (pendingUpdates.current.size > 0) {
       if (rowNodeMap.current.size === 0) {
-        console.error('❌ Node map is empty! Attempting to rebuild...');
+        console.error("❌ Node map is empty! Attempting to rebuild...");
         updateNodeMap();
 
         // Retry after map rebuild
         setTimeout(() => {
           if (rowNodeMap.current.size > 0 && !rafRef.current) {
-            rafRef.current = requestAnimationFrame(() => processQueueRef.current?.());
+            rafRef.current = requestAnimationFrame(() =>
+              processQueueRef.current?.()
+            );
           }
         }, 100);
       } else {
         if (!rafRef.current) {
-          rafRef.current = requestAnimationFrame(() => processQueueRef.current?.());
+          rafRef.current = requestAnimationFrame(() =>
+            processQueueRef.current?.()
+          );
         }
       }
     }
@@ -214,22 +234,21 @@ const updateNodeMap = useCallback(() => {
     }, 1000);
 
     return () => clearTimeout(clearId);
-  }, [TreasuryForwardRates, allInstrumentForTreasuryData, dispatch, updateNodeMap]);
+  }, [
+    TreasuryForwardRates,
+    allInstrumentForTreasuryData,
+    dispatch,
+    updateNodeMap,
+  ]);
 
   useEffect(() => {
     const api = gridRef.current?.api;
-    if (
-      !api ||
-      !dealerForwardTenorChanged ||
-      !getAllTenorsRecords?.tenors
-    )
+    if (!api || !dealerForwardTenorChanged || !getAllTenorsRecords?.tenors)
       return;
 
     try {
-      const {
-        newIsForwardtenorList = [],
-        removedtenorList = [],
-      } = dealerForwardTenorChanged;
+      const { newIsForwardtenorList = [], removedtenorList = [] } =
+        dealerForwardTenorChanged;
 
       const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
       const addedSet = new Set(newIsForwardtenorList.map((t) => t.tenorID));
@@ -257,7 +276,7 @@ const updateNodeMap = useCallback(() => {
       // ---------------- ADD ----------------
       const referenceRow = existingRows[0] || null;
 
-      console.log(referenceRow, "referenceRowreferenceRow")
+      console.log(referenceRow, "referenceRowreferenceRow");
 
       const toAdd = [];
 
@@ -269,9 +288,7 @@ const updateNodeMap = useCallback(() => {
             (t) => t.tenorID === addedTenor.tenorID
           ) || addedTenor;
 
-        const previousRow = existingMap.get(
-          String(addedTenor.tenorID)
-        );
+        const previousRow = existingMap.get(String(addedTenor.tenorID));
 
         // 🔥 Build row (same logic as your reference)
         const newRow = {
@@ -279,7 +296,7 @@ const updateNodeMap = useCallback(() => {
           tenorName: fullTenor.tenorName,
           tenorDays: fullTenor.tenorDays,
         };
-        console.log(referenceRow, newRow, "referenceRowreferenceRow")
+        console.log(referenceRow, newRow, "referenceRowreferenceRow");
 
         // Copy instrument columns from reference row
         if (referenceRow) {
@@ -291,9 +308,7 @@ const updateNodeMap = useCallback(() => {
               key.startsWith("ask_")
             ) {
               newRow[key] =
-                previousRow?.[key] !== undefined
-                  ? previousRow[key]
-                  : "-";
+                previousRow?.[key] !== undefined ? previousRow[key] : "-";
             }
           });
         }
@@ -330,40 +345,39 @@ const updateNodeMap = useCallback(() => {
     } catch (error) {
       console.error("Tenor sync error:", error);
     }
-  }, [
-    dealerForwardTenorChanged,
-    getAllTenorsRecords,
-    updateNodeMap,
-  ]);
+  }, [dealerForwardTenorChanged, getAllTenorsRecords, updateNodeMap]);
 
   // 7. Grid Events
-const onGridReady = useCallback((params) => {
-  console.log("✅ Grid ready");
+  const onGridReady = useCallback(
+    (params) => {
+      console.log("✅ Grid ready");
 
-  isGridReadyRef.current = true;
+      isGridReadyRef.current = true;
 
-  setTimeout(() => {
-    updateNodeMap();
-  }, 100);
-}, [updateNodeMap]);
+      setTimeout(() => {
+        updateNodeMap();
+      }, 100);
+    },
+    [updateNodeMap]
+  );
 
   const onFirstDataRendered = useCallback(() => {
-    console.log('✅ First data rendered');
+    console.log("✅ First data rendered");
     updateNodeMap();
   }, [updateNodeMap]);
 
   const onRowDataUpdated = useCallback(() => {
-    console.log('🔃 Row data updated event fired');
+    console.log("🔃 Row data updated event fired");
     updateNodeMap();
   }, [updateNodeMap]);
 
   // Cleanup
   useEffect(() => {
     isMountedRef.current = true;
-    console.log('🎬 Component mounted');
+    console.log("🎬 Component mounted");
 
     return () => {
-      console.log('🛑 Component unmounting');
+      console.log("🛑 Component unmounting");
       isMountedRef.current = false;
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
@@ -387,14 +401,14 @@ const onGridReady = useCallback((params) => {
 
   return (
     <div className={styles.mainForwardTable}>
-      <span className='flex-fill mt-3 fs-4 fw-bold color-black mb-1'>
+      <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
         Bank Forwards
       </span>
 
       <AgGridTable
         ref={gridRef}
         columnDefs={columnDefs}
-        className='liveRates-grid'
+        className="liveRates-grid"
         rowData={rowData}
         getRowId={(params) => String(params.data.tenorID)}
         onGridReady={onGridReady}

@@ -312,6 +312,10 @@
 .treasuryInterbankSelectDealer__menu {
   background-color: #fff8e5 !important;
 }
+
+.treasuryInterbankSelectDealer__menu-portal {
+  z-index: 2 !important;
+}
 .treasuryInterbankSelectDealer__menu-list {
   height: 210px;
 }

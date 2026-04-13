@@ -84,7 +84,6 @@ const Dashboard = () => {
     (data) => {
       const type = data?.payload?.message;
       const payload = data?.payload;
-      console.log(payload, "mqtt")
 
       try {
         switch (type) {
@@ -195,8 +194,6 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_FORWARD_RATES_FEED":
-            
-              console.log("TREASURY_FORWARD_RATES_FEED", payload);
             startTransition(() => {
               dispatch(setTreasuryForwardRates(payload));
             });
@@ -398,12 +395,13 @@ const Dashboard = () => {
         isConnected,
         activeTopics, // components read this inside useMqttTopics hook
         // unsubscribeAll, // MainHeader uses this
-      }}>
+      }}
+    >
       <Layout style={layoutStyle}>
-        <Header prefixCls='mainHeader'>
+        <Header prefixCls="mainHeader">
           <MainHeader />
         </Header>
-        <Content className='my-2'>
+        <Content className="my-2">
           <Outlet />
         </Content>
       </Layout>
