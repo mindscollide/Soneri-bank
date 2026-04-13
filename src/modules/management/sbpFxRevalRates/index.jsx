@@ -4,6 +4,7 @@ import styles from "../management.module.css";
 import { formatCompactDate } from "../../../utils/timeFunction";
 import { clearSbpFXRevalRatesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const GetRevalRatesForTreasury = (state) =>
@@ -303,6 +304,8 @@ const SBPFXRevalRates = memo(() => {
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+
         />
       </div>
     </>

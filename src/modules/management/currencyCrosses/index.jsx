@@ -5,6 +5,7 @@ import { IndexCell } from "../../../shareComponents/commonComponents/elements/in
 import styles from "../management.module.css";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const currencyCrossesForManagementFeed = (state) =>
@@ -338,6 +339,8 @@ const CurrencyCrosses = memo(() => {
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+
         />
       </div>
     </>

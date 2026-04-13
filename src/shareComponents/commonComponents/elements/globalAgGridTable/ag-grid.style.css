@@ -28,15 +28,7 @@
   text-align: center;
   border-right: 1px solid #a37c66 !important;
 }
-/* Group Headers (Bank Spot / USD Parity) */
-.liveRates-grid .ag-header-group-cell:first-child {
-  background-color: #fff !important;
-  font-weight: bold;
-  color: #000000 !important;
-  text-align: center;
-  outline: none !important;
-  box-shadow: none !important;
-}
+
 
 .liveRates-grid .ag-header-group-cell-label {
   justify-content: center !important;

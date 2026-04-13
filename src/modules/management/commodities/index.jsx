@@ -6,6 +6,7 @@ import styles from "../management.module.css";
 // import { clearCommoditiesForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { clearCommoditiesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const commoditiesForManagementFeed = (state) =>
@@ -347,6 +348,7 @@ const Commodities = memo(() => {
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
         />
       </div>
     </>

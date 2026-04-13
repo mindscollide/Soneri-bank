@@ -6,6 +6,7 @@ import styles from "../management.module.css";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const selectUSDParity = (state) =>
@@ -303,6 +304,8 @@ const USDParity = memo(() => {
           theme='legacy'
           defaultColDef={defaultColDef}
           className='usdParityManagement-grid'
+          loadingOverlayComponent={SectionLoader}
+
         />
       </div>
     </>

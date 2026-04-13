@@ -7,6 +7,7 @@ import {
   convertCurrentTimeZone,
 } from "../../../shareComponents/commonComponents/utils/timeFunction";
 import dayjs from "dayjs";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const GetSwapsInUSDForTreasury = (state) =>
@@ -364,6 +365,8 @@ const SwapsInUSD = memo(() => {
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+
         />
       </div>
     </>

@@ -6,6 +6,7 @@ import styles from "../management.module.css";
 
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { clearStockIndicesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // Selectors
 const stockIndicesForManagementFeed = (state) =>
@@ -355,6 +356,8 @@ const StockIndices = memo(() => {
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
           suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+
         />
       </div>
     </>
