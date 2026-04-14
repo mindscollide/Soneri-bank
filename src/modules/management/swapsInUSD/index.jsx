@@ -3,9 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "../management.module.css";
 import { clearSwapsinUSDForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
-import {
-  convertCurrentTimeZone,
-} from "../../../shareComponents/commonComponents/utils/timeFunction";
+import { convertCurrentTimeZone } from "../../../shareComponents/commonComponents/utils/timeFunction";
 import dayjs from "dayjs";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
@@ -19,7 +17,8 @@ const swapsinUSDForManagementFeed = (state) =>
 const SwapsInUSD = memo(() => {
   const dispatch = useDispatch();
 
-  const gridApiRef = useRef(null);
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
   const rowNodeMap = useRef(new Map());
   const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
@@ -89,16 +88,52 @@ const SwapsInUSD = memo(() => {
   }, [swapsinUSDList]);
 
   // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  useEffect(() => {
+    if (!gridApiRef.current || !swapsinUSDList?.swapsinUSDList?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live feed updates can target correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.tenorName) {
+        rowNodeMap.current.set(node.data.tenorName, node);
+      }
+    });
+  }, [swapsinUSDList, buildRowData]);
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+
+    // ❌ Case: API returned null / empty
+    if (!swapsinUSDList || !swapsinUSDList?.swapsinUSDList?.length) {
+      gridApiRef.current.setGridOption("rowData", []); // clear grid
+      gridApiRef.current.showNoRowsOverlay(); // ✅ show "no data"
+      return;
+    }
+
+    // ✅ Case: Data exists
+    gridApiRef.current.hideOverlay(); // remove loader / no rows
+  }, [swapsinUSDList]);
+
+  // ─────────────────────────────
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
 
-      gridApiRef.current = params.api;
-      const rowData = buildRowData();
+      gridApiRef.current = params.api; // ✅ store actual AG Grid API
 
+      const rowData = buildRowData();
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
+        params.api.hideOverlay(); // ✅ ensure loader stops
+      } else {
+        params.api.showNoRowsOverlay(); // ✅ show empty UI immediately
       }
+      // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
     [buildRowData]
   );
@@ -118,7 +153,11 @@ const SwapsInUSD = memo(() => {
   // ─────────────────────────────
   // ✅ THROTTLED PROCESSOR
   const processQueue = useCallback(() => {
-    if (!isMountedRef.current || isProcessingRef.current || !gridApiRef.current) {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
       rafRef.current = null;
       return;
     }
@@ -126,7 +165,6 @@ const SwapsInUSD = memo(() => {
     const now = Date.now();
     const timeSinceLastProcess = now - lastProcessTime.current;
 
-    // ✅ Throttle: minimum 50ms between updates
     if (timeSinceLastProcess < 50) {
       rafRef.current = requestAnimationFrame(processQueue);
       return;
@@ -141,11 +179,9 @@ const SwapsInUSD = memo(() => {
     lastProcessTime.current = now;
 
     try {
-      // ✅ Process updates
       for (const [tenor, updates] of pendingUpdates.current.entries()) {
         let node = rowNodeMap.current.get(tenor);
 
-        // If row doesn't exist, create it
         if (!node) {
           const newRow = {
             tenorName: tenor,
@@ -154,7 +190,6 @@ const SwapsInUSD = memo(() => {
 
           gridApiRef.current.applyTransaction({ add: [newRow] });
 
-          // Wait for next frame to get the new node
           setTimeout(() => {
             gridApiRef.current.forEachNode((n) => {
               if (n.data.tenorName === tenor) {
@@ -163,7 +198,6 @@ const SwapsInUSD = memo(() => {
             });
           }, 0);
         } else {
-          // Update existing row
           for (const [key, value] of Object.entries(updates.pairs)) {
             const currentValue = node.data[key];
             if (currentValue !== value) {
@@ -195,12 +229,10 @@ const SwapsInUSD = memo(() => {
       const bidKey = `${currencyPair}_bid`;
       const askKey = `${currencyPair}_ask`;
 
-      // Get existing pending update for this tenor or create new
       const existing = pendingUpdates.current.get(tenor) || {
         pairs: {},
       };
 
-      // Update the currency pair values
       existing.pairs[bidKey] = bid;
       existing.pairs[askKey] = ask;
 
@@ -218,7 +250,6 @@ const SwapsInUSD = memo(() => {
   useEffect(() => {
     if (!fullFeed) return;
 
-    // Handle both single object and array
     if (Array.isArray(fullFeed)) {
       fullFeed.forEach(queueUpdate);
     } else {
@@ -254,36 +285,7 @@ const SwapsInUSD = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  // Generate dynamic columns based on currency list
   const columnDefs = useMemo(() => {
-    const baseColumns = [
-      {
-        headerName: "Tenor",
-        field: "tenorName",
-        pinned: "left",
-
-        width: 120,
-      },
-    ];
-
-    const currencyColumns = currencyList.flatMap((currency) => [
-      {
-        headerName: `${currency} Bid`,
-        field: `${currency}_bid`,
-        width: 120,
-        valueFormatter: (p) =>
-          p.value != null ? Number(p.value).toFixed(2) : "0.00",
-      },
-      {
-        headerName: `${currency} Offer`,
-        field: `${currency}_ask`,
-        width: 120,
-        valueFormatter: (p) =>
-          p.value != null ? Number(p.value).toFixed(2) : "0.00",
-      },
-    ]);
-
-    // Group by currency pairs
     const groupedColumns = currencyList.map((currency) => ({
       headerName: currency,
       cellClass: "instrument-cell",
@@ -301,7 +303,6 @@ const SwapsInUSD = memo(() => {
           field: `${currency}_ask`,
           width: 70,
           cellClass: "value-cell",
-
           valueFormatter: (p) =>
             p.value != null ? Number(p.value).toFixed(2) : "0.00",
         },
@@ -317,7 +318,7 @@ const SwapsInUSD = memo(() => {
             field: "tenorName",
             pinned: "left",
             width: 120,
-            cellClass:"instrument-cell"
+            cellClass: "instrument-cell",
           },
         ],
       },
@@ -336,7 +337,6 @@ const SwapsInUSD = memo(() => {
     }),
     []
   );
-
   return (
     <>
       <span
@@ -353,7 +353,7 @@ const SwapsInUSD = memo(() => {
 
       <div style={{ height: "300px", width: "100%" }}>
         <AgGridTable
-          ref={gridApiRef}
+          ref={agGridComponentRef}
           columnDefs={columnDefs}
           className="swapsInUSDManagement-grid"
           getRowId={getRowId}
@@ -366,7 +366,6 @@ const SwapsInUSD = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
-
         />
       </div>
     </>

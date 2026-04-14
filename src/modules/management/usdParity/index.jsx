@@ -22,6 +22,7 @@ const USDParity = memo(() => {
   const dispatch = useDispatch();
 
   // ── Refs ──────────────────────────────────────────────────────────────
+  const agGridComponentRef = useRef(null); // for ref={} prop on AgGridTable
   const gridApiRef = useRef(null);
   const rowNodeMap = useRef(new Map());
   const pendingUpdates = useRef(new Map());
@@ -57,17 +58,32 @@ const USDParity = memo(() => {
     });
   }, [crossInstruments, worldCrosses]);
 
+  // ── Sync initial data AFTER grid is ready (handles race condition) ──
+  useEffect(() => {
+    if (!gridApiRef.current || !crossInstruments?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild the rowNodeMap so live updates can target nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, [crossInstruments, worldCrosses]); // re-runs when API data arrives
+
   // ── onGridReady ────────────────────────────────────────────────────────
   const onGridReady = useCallback(
     (params) => {
-      // console.log("🟢 Grid Ready");
       if (!isMountedRef.current) return;
 
-      gridApiRef.current = params.api;
+      gridApiRef.current = params.api; // ✅ stores actual AG Grid API
+
       const rowData = buildRowData();
-
-      // console.log("📊 Initial Row Data:", rowData);
-
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
       }
@@ -370,7 +386,7 @@ const USDParity = memo(() => {
 
       <div style={{ width: "100%", height: "300px" }}>
         <AgGridTable
-          ref={gridApiRef}
+          ref={agGridComponentRef} // ✅ separate ref for the component instance
           columnDefs={columnDefs}
           className="usdParityManagement-grid"
           getRowId={getRowId}

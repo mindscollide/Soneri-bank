@@ -3,7 +3,6 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
-
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { clearStockIndicesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
@@ -21,7 +20,8 @@ const GetAllOtherInstruments = (state) =>
 const StockIndices = memo(() => {
   const dispatch = useDispatch();
 
-  const gridApiRef = useRef(null);
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
   const rowNodeMap = useRef(new Map());
   const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
@@ -60,16 +60,37 @@ const StockIndices = memo(() => {
   }, [otherInstruments, stockIndexList]);
 
   // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  useEffect(() => {
+    if (!gridApiRef.current || !otherInstruments?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, [otherInstruments, stockIndexList]);
+
+  // ─────────────────────────────
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
 
-      gridApiRef.current = params.api;
-      const rowData = buildRowData();
+      gridApiRef.current = params.api; // ✅ store actual AG Grid API
 
+      // Attempt immediate load (works if API already resolved before grid init)
+      const rowData = buildRowData();
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
       }
+      // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
     [buildRowData]
   );
@@ -101,7 +122,6 @@ const StockIndices = memo(() => {
     const now = Date.now();
     const timeSinceLastProcess = now - lastProcessTime.current;
 
-    // ✅ Throttle: minimum 50ms between updates (20fps max)
     if (timeSinceLastProcess < 50) {
       rafRef.current = requestAnimationFrame(processQueue);
       return;
@@ -116,7 +136,6 @@ const StockIndices = memo(() => {
     lastProcessTime.current = now;
 
     try {
-      // ✅ Process in small batches
       let batchCount = 0;
       const MAX_BATCH_SIZE = 10;
 
@@ -153,7 +172,6 @@ const StockIndices = memo(() => {
         batchCount++;
       }
 
-      // ✅ Schedule next frame if needed
       if (pendingUpdates.current.size > 0) {
         rafRef.current = requestAnimationFrame(processQueue);
       } else {
@@ -199,7 +217,6 @@ const StockIndices = memo(() => {
   useEffect(() => {
     if (!fullFeed) return;
 
-    // Handle both single object and array
     if (Array.isArray(fullFeed)) {
       fullFeed.forEach(queueUpdate);
     } else {
@@ -235,7 +252,6 @@ const StockIndices = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  // Custom cell renderer for percentage change
   const PercentageCellRenderer = useCallback((props) => {
     const value = props.value;
     if (value === undefined || value === null || value === "-") return null;
@@ -317,7 +333,6 @@ const StockIndices = memo(() => {
         field: "time",
         flex: 1,
         cellClass: "percentage-cell",
-
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
@@ -346,7 +361,7 @@ const StockIndices = memo(() => {
 
       <div style={{ height: "235px", width: "100%" }}>
         <AgGridTable
-          ref={gridApiRef}
+          ref={agGridComponentRef}
           columnDefs={columnDefs}
           className="usdParityManagement-grid"
           getRowId={getRowId}

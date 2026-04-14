@@ -148,9 +148,9 @@ const Management = () => {
         <Row className="mt-3">
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<SectionLoader />}>
-                <SBPFXRevalRates />
-              </Suspense>
+              {/* <Suspense fallback={<SectionLoader />}> */}
+              <SBPFXRevalRates />
+              {/* </Suspense> */}
             </IsolatedBlock>
           </Col>
           <Col sm={12} md={6} lg={6}>

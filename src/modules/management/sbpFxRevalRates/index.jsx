@@ -16,13 +16,10 @@ const sbpFXRevalRatesForManagementFeed = (state) =>
 const SBPFXRevalRates = memo(() => {
   const dispatch = useDispatch();
 
+  const agGridComponentRef = useRef(null);
   const gridApiRef = useRef(null);
   const rowNodeMap = useRef(new Map());
-  const pendingUpdates = useRef(new Map());
-  const rafRef = useRef(null);
-  const isProcessingRef = useRef(false);
   const isMountedRef = useRef(true);
-  const lastProcessTime = useRef(0);
 
   const [latestDate, setLatestDate] = useState("");
   const [tenors, setTenors] = useState([]);
@@ -60,7 +57,6 @@ const SBPFXRevalRates = memo(() => {
         const apiDate = revalRatesListData[0]?.lastModifiedDate;
         if (apiDate) setLatestDate(apiDate);
 
-        // Extract and set tenors
         const uniqueTenors = getUniqueTenors(revalRatesListData);
         setTenors(uniqueTenors);
       }
@@ -84,166 +80,113 @@ const SBPFXRevalRates = memo(() => {
   }, [revalRatesList, getUniqueTenors]);
 
   // ─────────────────────────────
+  // Shared helper: rebuild rowNodeMap after grid has rendered rows
+  const rebuildRowNodeMap = useCallback(() => {
+    if (!gridApiRef.current) return;
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.currencyName) {
+        rowNodeMap.current.set(node.data.currencyName, node);
+      }
+    });
+    console.log("🗺️ rowNodeMap rebuilt, keys:", [...rowNodeMap.current.keys()]);
+  }, []);
+
+  // ─────────────────────────────
+  // Only set rowData here — let onRowDataUpdated rebuild the map
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+    const rowData = buildRowData();
+    gridApiRef.current.setGridOption("rowData", rowData || []);
+  }, [revalRatesList, buildRowData]);
+
+  // ─────────────────────────────
+  // onGridReady — just set data, map built by onRowDataUpdated
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
-
       gridApiRef.current = params.api;
       const rowData = buildRowData();
-
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
-      }
+      params.api.setGridOption("rowData", rowData || []);
     },
     [buildRowData]
   );
 
   // ─────────────────────────────
-  const onFirstDataRendered = useCallback((params) => {
+  // Fires once on first render — delegate to shared helper
+  const onFirstDataRendered = useCallback(() => {
     if (!isMountedRef.current) return;
-
-    rowNodeMap.current.clear();
-    params.api.forEachNode((node) => {
-      if (node.data?.currencyName) {
-        rowNodeMap.current.set(node.data.currencyName, node);
-      }
-    });
-  }, []);
+    rebuildRowNodeMap();
+  }, [rebuildRowNodeMap]);
 
   // ─────────────────────────────
-  // ✅ THROTTLED PROCESSOR
-  const processQueue = useCallback(() => {
-    if (!isMountedRef.current || isProcessingRef.current || !gridApiRef.current) {
-      rafRef.current = null;
-      return;
-    }
-
-    const now = Date.now();
-    const timeSinceLastProcess = now - lastProcessTime.current;
-
-    // ✅ Throttle: minimum 50ms between updates
-    if (timeSinceLastProcess < 50) {
-      rafRef.current = requestAnimationFrame(processQueue);
-      return;
-    }
-
-    if (pendingUpdates.current.size === 0) {
-      rafRef.current = null;
-      return;
-    }
-
-    isProcessingRef.current = true;
-    lastProcessTime.current = now;
-
-    try {
-      // ✅ Process updates
-      for (const [currency, updates] of pendingUpdates.current.entries()) {
-        const node = rowNodeMap.current.get(currency);
-        if (!node) {
-          pendingUpdates.current.delete(currency);
-          continue;
-        }
-
-        // Apply all tenor updates for this currency
-        for (const [tenorKey, value] of Object.entries(updates.tenorValues)) {
-          const currentValue = node.data[tenorKey];
-          if (currentValue !== value) {
-            node.setDataValue(tenorKey, value);
-          }
-        }
-
-        // Update date if provided
-        if (updates.lastModifiedDate) {
-          setLatestDate(updates.lastModifiedDate);
-        }
-
-        pendingUpdates.current.delete(currency);
-      }
-
-      rafRef.current = null;
-    } catch (error) {
-      console.error("Error processing queue:", error);
-      pendingUpdates.current.clear();
-      rafRef.current = null;
-    } finally {
-      isProcessingRef.current = false;
-    }
-  }, []);
-
-  // ─────────────────────────────
-  // ✅ Queue with deduplication
-  const queueUpdate = useCallback(
-    (feed) => {
-      if (!feed?.revalRates || !isMountedRef.current) return;
-
-      const { currency, tenorId, value, lastModifiedDate } = feed.revalRates;
-      const tenorKey = `tenorId_${tenorId}_value`;
-
-      // Get existing pending update for this currency or create new
-      const existing = pendingUpdates.current.get(currency) || {
-        tenorValues: {},
-        lastModifiedDate: null,
-      };
-
-      // Update the tenor value
-      existing.tenorValues[tenorKey] = Number(value);
-
-      // Update date if provided
-      if (lastModifiedDate) {
-        existing.lastModifiedDate = lastModifiedDate;
-      }
-
-      pendingUpdates.current.set(currency, existing);
-
-      if (!rafRef.current) {
-        rafRef.current = requestAnimationFrame(processQueue);
+  // Fires every time rowData changes — rebuilds map & manages overlays
+  const onRowDataUpdated = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
+      rebuildRowNodeMap();
+      const hasRows = params.api.getDisplayedRowCount() > 0;
+      if (hasRows) {
+        params.api.hideOverlay();
+      } else {
+        params.api.showNoRowsOverlay();
       }
     },
-    [processQueue]
+    [rebuildRowNodeMap]
   );
 
   // ─────────────────────────────
-  // ✅ Consume feed
+  // Apply MQTT update directly — no throttling
+  // Apply MQTT update directly — no throttling
+  const applyUpdate = useCallback((feed) => {
+    if (!feed?.revalRates || !isMountedRef.current || !gridApiRef.current)
+      return;
+
+    const { currency, tenorId, value, lastModifiedDate } = feed.revalRates;
+    const tenorKey = `tenorId_${tenorId}_value`;
+
+    const node = rowNodeMap.current.get(currency);
+    if (!node) return;
+
+    const newValue = Number(value ?? 0);
+
+    // ✅ updateData replaces the whole row data object and forces cell re-render
+    // setDataValue is blocked by editable: false — that's why UI wasn't updating
+    node.updateData({ ...node.data, [tenorKey]: newValue });
+
+    if (lastModifiedDate) {
+      setLatestDate(lastModifiedDate);
+    }
+  }, []);
+
+  // ─────────────────────────────
+  // Consume feed
   useEffect(() => {
     if (!fullFeed) return;
 
-    // Handle both single object and array
-    if (Array.isArray(fullFeed)) {
-      fullFeed.forEach(queueUpdate);
-    } else {
-      queueUpdate(fullFeed);
-    }
+    applyUpdate(fullFeed);
 
     const clearTimeoutId = setTimeout(() => {
       if (isMountedRef.current && dispatch) {
         dispatch(clearSbpFXRevalRatesForManagmentFeed());
       }
-    }, 200);
+    }, 100);
 
     return () => clearTimeout(clearTimeoutId);
-  }, [fullFeed, queueUpdate, dispatch]);
+  }, [fullFeed, applyUpdate, dispatch]);
 
   // ─────────────────────────────
-  // ✅ Cleanup
+  // Cleanup
   useEffect(() => {
     isMountedRef.current = true;
 
     return () => {
       isMountedRef.current = false;
-
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-
-      pendingUpdates.current.clear();
       rowNodeMap.current.clear();
-      isProcessingRef.current = false;
     };
   }, []);
 
   // ─────────────────────────────
-  // Generate dynamic columns based on tenors
   const columnDefs = useMemo(() => {
     const baseColumns = [
       {
@@ -264,7 +207,6 @@ const SBPFXRevalRates = memo(() => {
     }));
 
     return [...baseColumns, ...tenorColumns];
-    
   }, [tenors]);
 
   const getRowId = useCallback((params) => params.data.currencyName, []);
@@ -292,12 +234,13 @@ const SBPFXRevalRates = memo(() => {
 
       <div style={{ height: "300px", width: "100%" }}>
         <AgGridTable
-          ref={gridApiRef}
+          ref={agGridComponentRef}
           columnDefs={columnDefs}
           className="usdParityManagement-grid"
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onRowDataUpdated={onRowDataUpdated}
           domLayout="normal"
           theme="legacy"
           defaultColDef={defaultColDef}
@@ -305,7 +248,6 @@ const SBPFXRevalRates = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
-
         />
       </div>
     </>

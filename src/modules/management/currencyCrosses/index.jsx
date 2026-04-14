@@ -20,7 +20,8 @@ const GetAllOtherInstruments = (state) =>
 const CurrencyCrosses = memo(() => {
   const dispatch = useDispatch();
 
-  const gridApiRef = useRef(null);
+  const agGridComponentRef = useRef(null); // for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // for params.api in onGridReady
   const rowNodeMap = useRef(new Map());
   const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
@@ -56,13 +57,32 @@ const CurrencyCrosses = memo(() => {
   }, [otherInstruments, currencyCrosses]);
 
   // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  useEffect(() => {
+    if (!gridApiRef.current || !otherInstruments?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, [otherInstruments, currencyCrosses]);
+
+  // ─────────────────────────────
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
 
-      gridApiRef.current = params.api;
-      const rowData = buildRowData();
+      gridApiRef.current = params.api; // ✅ stores actual AG Grid API
 
+      const rowData = buildRowData();
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
       }
@@ -97,7 +117,6 @@ const CurrencyCrosses = memo(() => {
     const now = Date.now();
     const timeSinceLastProcess = now - lastProcessTime.current;
 
-    // ✅ Throttle: minimum 50ms between updates (20fps max)
     if (timeSinceLastProcess < 50) {
       rafRef.current = requestAnimationFrame(processQueue);
       return;
@@ -112,7 +131,6 @@ const CurrencyCrosses = memo(() => {
     lastProcessTime.current = now;
 
     try {
-      // ✅ Process in small batches
       let batchCount = 0;
       const MAX_BATCH_SIZE = 10;
 
@@ -131,7 +149,7 @@ const CurrencyCrosses = memo(() => {
           data.ask !== update.ask ||
           data.high !== update.high ||
           data.low !== update.low ||
-          data.percentageChange !== update.percentChange ||
+          data.percentageChange !== update.percentageChange ||
           data.time !== update.time;
 
         if (hasChanges) {
@@ -147,7 +165,6 @@ const CurrencyCrosses = memo(() => {
         batchCount++;
       }
 
-      // ✅ Schedule next frame if needed
       if (pendingUpdates.current.size > 0) {
         rafRef.current = requestAnimationFrame(processQueue);
       } else {
@@ -253,7 +270,7 @@ const CurrencyCrosses = memo(() => {
         cellClass: "bid-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value)} />
+            <IndexCell value={Number(p.value).toFixed(4)} />
           ) : null,
       },
       {
@@ -263,7 +280,7 @@ const CurrencyCrosses = memo(() => {
         cellClass: "offer-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value)} />
+            <IndexCell value={Number(p.value).toFixed(4)} />
           ) : null,
       },
       {
@@ -273,18 +290,17 @@ const CurrencyCrosses = memo(() => {
         flex: 1,
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value)} />
+            <IndexCell value={Number(p.value).toFixed(4)} />
           ) : null,
       },
       {
         headerName: "Low",
         field: "low",
         cellClass: "highLow-cell",
-
         flex: 1,
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value)} />
+            <IndexCell value={Number(p.value).toFixed(4)} />
           ) : null,
       },
       {
@@ -292,7 +308,6 @@ const CurrencyCrosses = memo(() => {
         field: "percentageChange",
         flex: 1,
         cellClass: "percentage-cell",
-
         cellRenderer: PercentageCellRenderer,
       },
       {
@@ -300,7 +315,6 @@ const CurrencyCrosses = memo(() => {
         field: "time",
         flex: 1,
         cellClass: "percentage-cell",
-
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
@@ -329,7 +343,7 @@ const CurrencyCrosses = memo(() => {
 
       <div style={{ height: "300px", width: "100%" }}>
         <AgGridTable
-          ref={gridApiRef}
+          ref={agGridComponentRef} // ✅ separate ref for the component instance
           columnDefs={columnDefs}
           className="usdParityManagement-grid"
           getRowId={getRowId}

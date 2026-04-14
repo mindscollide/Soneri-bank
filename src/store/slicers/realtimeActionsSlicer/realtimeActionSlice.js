@@ -271,7 +271,8 @@ const RealtimeActionsSlice = createSlice({
       state.sofrForManagementFeed = null;
     },
     setSbpFXRevalRatesForManagmentFeed: (state, { payload }) => {
-      state.sbpFXRevalRatesForManagementFeed = payload;
+      // store ONLY latest message (no array, no spreading)
+      state.sbpFXRevalRatesForManagementFeed = { ...payload };
     },
     clearSbpFXRevalRatesForManagmentFeed: (state) => {
       state.sbpFXRevalRatesForManagementFeed = null;
