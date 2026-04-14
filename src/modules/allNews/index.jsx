@@ -21,8 +21,12 @@ import {
   convertCurrentTimeZone,
   formatToUTCString,
 } from "../../shareComponents/commonComponents/utils/timeFunction";
-import { clearGetNewsDetailsByID } from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import {
+  clearGetNewsDetailsByID,
+  setNewsLoadingSpinner,
+} from "../../store/slicers/watchListSlicer/WatchListSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+import NewsByNewsId from "../../shareComponents/commonComponents/newsByNewsId";
 
 const NEWS_SOURCES = {
   cnbc: { id: 3, img: cnbcImg, icon: cnbcIcon },
@@ -33,14 +37,18 @@ const NEWS_SOURCES = {
 const News = () => {
   const dispatch = useDispatch();
 
+  const viewNewsModal = useSelector(
+    (state) => state.WatchListReducer.NewsByNewsIdViewModal
+  );
+
   const GetNewsHeadlinesLoading = useSelector(
     (state) => state.WatchListReducer.GetNewsHeadlinesLoading
   );
 
   // ── Filters ─────────────────────────────────────────────────────────────
   const [searchVal, setSearchVal] = useState("");
-  const [dateFrom, setDateFrom] = useState(null); // dayjs | null
-  const [dateTo, setDateTo] = useState(null); // dayjs | null
+  const [dateFrom, setDateFrom] = useState(dayjs()); // Today
+  const [dateTo, setDateTo] = useState(dayjs());
   const [sources, setSources] = useState({
     cnbc: true,
     tresmark: true,
@@ -229,6 +237,7 @@ const News = () => {
   };
 
   const handleDateFromChange = (date) => {
+    console.log(date, "datedate");
     setDateFrom(date);
   };
 
@@ -265,14 +274,11 @@ const News = () => {
   );
 
   const handleNewsClick = (newsID) => {
+    dispatch(setNewsLoadingSpinner(true));
     dispatch(GetNewsDetailsByIDApi({ Data: { NewsID: Number(newsID) } }));
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setNewsDetail(null);
-    dispatch(clearGetNewsDetailsByID());
-  };
+  console.log(modalOpen, "ModalState");
 
   // ── Group news by date ───────────────────────────────────────────────────
   const groupNewsByDate = (list) => {
@@ -355,7 +361,7 @@ const News = () => {
                 ((dateTo && current.isAfter(dateTo, "day")) ||
                   current.isAfter(dayjs(), "day"))
               }
-              allowClear
+              allowClear={false}
               inputReadOnly
             />
 
@@ -370,8 +376,8 @@ const News = () => {
                 ((dateFrom && current.isBefore(dateFrom, "day")) ||
                   current.isAfter(dayjs(), "day"))
               }
-              allowClear
               inputReadOnly
+              allowClear={false}
             />
 
             <CustomButton
@@ -454,70 +460,7 @@ const News = () => {
           </Col>
         </Row>
       </div>
-
-      {/* News Detail Modal */}
-      <GlobalModal
-        show={modalOpen}
-        size="lg"
-        centered
-        footerClassName="d-block border-0"
-        bodyClassName="newsModal"
-        onHide={handleCloseModal}
-        modalBody={
-          newsDetail && (
-            <div className={styles.mainContainer}>
-              <Row>
-                <Col sm={12} md={6} lg={6}>
-                  <div className={styles.headerRow}>News</div>
-                  <span className={styles.modalDateStyle}>
-                    {dayjs(convertCurrentTimeZone(newsDetail.createdOn)).format(
-                      "DD-MMM-YYYY h:mm A"
-                    )}
-                  </span>
-                </Col>
-                <Col
-                  sm={12}
-                  md={6}
-                  lg={6}
-                  className="d-flex justify-content-end align-items-center"
-                >
-                  <div
-                    className="cursor-pointer fw-bold"
-                    onClick={handleCloseModal}
-                  >
-                    X
-                  </div>
-                </Col>
-              </Row>
-
-              <Row className="mt-3">
-                <Col className="d-flex align-items-center gap-2">
-                  <img
-                    src={
-                      NEWS_SOURCES[
-                        Object.keys(NEWS_SOURCES).find(
-                          (k) => NEWS_SOURCES[k].id === newsDetail.newsSourceID
-                        )
-                      ]?.img ?? tresmarkImg
-                    }
-                    alt="source"
-                    style={{ width: 40, height: 40 }}
-                  />
-                  <span className={styles.modalTitle}>
-                    {newsDetail.headline}
-                  </span>
-                </Col>
-              </Row>
-
-              <Row className="mt-3">
-                <Col sm={12} className={styles.modalDetailWithScroll}>
-                  {newsDetail.content}
-                </Col>
-              </Row>
-            </div>
-          )
-        }
-      />
+      {viewNewsModal && <NewsByNewsId />}
     </>
   );
 };

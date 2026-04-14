@@ -1100,3 +1100,10 @@
   color: #000 !important;
   min-width: 120px;
 }
+.searchAllNews:disabled {
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+
+  filter: grayscale(1);
+}

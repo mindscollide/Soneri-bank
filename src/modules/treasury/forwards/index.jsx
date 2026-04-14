@@ -11,6 +11,7 @@ import { IndexCell } from "../../../shareComponents/commonComponents/elements/in
 import { buildForwardsAgGridTable } from "../../../shareComponents/commonComponents/utils/generateColumnsData";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 const Forwards = memo(() => {
   useMqttTopics([`SBL_REAL_TIME_FEED_TREASURY`]);
@@ -422,6 +423,7 @@ const Forwards = memo(() => {
         defaultColDef={defaultColDef}
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
+        loadingOverlayComponent={SectionLoader}
       />
     </div>
   );

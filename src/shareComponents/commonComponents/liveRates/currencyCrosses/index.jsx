@@ -19,9 +19,10 @@ const selectOtherInstruments = (state) =>
 const CurrencyCrosses = memo(() => {
   const dispatch = useDispatch();
 
-  const gridApiRef = useRef(null);
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
   const rowNodeMap = useRef(new Map());
-  const pendingUpdates = useRef(new Map()); // ✅ Use Map to deduplicate updates
+  const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
   const isProcessingRef = useRef(false);
   const isMountedRef = useRef(true);
@@ -51,16 +52,37 @@ const CurrencyCrosses = memo(() => {
   }, [otherInstruments, currencyCrosses]);
 
   // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  useEffect(() => {
+    if (!gridApiRef.current || !otherInstruments?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, [otherInstruments, currencyCrosses]);
+
+  // ─────────────────────────────
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
 
-      gridApiRef.current = params.api;
-      const rowData = buildRowData();
+      gridApiRef.current = params.api; // ✅ store actual AG Grid API
 
+      // Attempt immediate load (works if API already resolved before grid init)
+      const rowData = buildRowData();
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
       }
+      // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
     [buildRowData]
   );
@@ -78,7 +100,6 @@ const CurrencyCrosses = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  // ✅ THROTTLED PROCESSOR - Max 20 updates per second
   const processQueue = useCallback(() => {
     if (
       !isMountedRef.current ||
@@ -92,7 +113,6 @@ const CurrencyCrosses = memo(() => {
     const now = Date.now();
     const timeSinceLastProcess = now - lastProcessTime.current;
 
-    // ✅ Throttle: minimum 50ms between updates (20fps max)
     if (timeSinceLastProcess < 50) {
       rafRef.current = requestAnimationFrame(processQueue);
       return;
@@ -107,9 +127,8 @@ const CurrencyCrosses = memo(() => {
     lastProcessTime.current = now;
 
     try {
-      // ✅ Process in small batches to prevent blocking
       let batchCount = 0;
-      const MAX_BATCH_SIZE = 10; // Process max 10 items per frame
+      const MAX_BATCH_SIZE = 10;
 
       for (const [key, update] of pendingUpdates.current.entries()) {
         if (batchCount >= MAX_BATCH_SIZE) break;
@@ -127,7 +146,6 @@ const CurrencyCrosses = memo(() => {
           data.time !== update.time;
 
         if (hasChanges) {
-          // ✅ Batch set data values
           node.setDataValue("bid", update.bid);
           node.setDataValue("ask", update.ask);
           node.setDataValue("time", update.time);
@@ -137,7 +155,6 @@ const CurrencyCrosses = memo(() => {
         batchCount++;
       }
 
-      // ✅ If there are still pending updates, schedule next frame
       if (pendingUpdates.current.size > 0) {
         rafRef.current = requestAnimationFrame(processQueue);
       } else {
@@ -153,7 +170,6 @@ const CurrencyCrosses = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  // ✅ Queue updates with deduplication
   const queueFeed = useCallback(
     (feed) => {
       if (!feed?.currencyCrosses || !isMountedRef.current) return;
@@ -161,14 +177,12 @@ const CurrencyCrosses = memo(() => {
       const cross = feed.currencyCrosses;
       const key = String(cross.instrumentId);
 
-      // ✅ Deduplicate: only keep the latest update for each instrument
       pendingUpdates.current.set(key, {
         bid: cross.bid,
         ask: cross.ask,
         time: cross.time,
       });
 
-      // ✅ Schedule processing if not already scheduled
       if (!rafRef.current) {
         rafRef.current = requestAnimationFrame(processQueue);
       }
@@ -177,21 +191,18 @@ const CurrencyCrosses = memo(() => {
   );
 
   // ─────────────────────────────
-  // ✅ Debounced feed processing
   useEffect(() => {
     if (!fullFeed || !Array.isArray(fullFeed) || fullFeed.length === 0) {
       return;
     }
 
-    // ✅ Process all feeds
     fullFeed.forEach(queueFeed);
 
-    // ✅ Clear Redux state after a delay
     const clearTimeoutId = setTimeout(() => {
       if (isMountedRef.current) {
         dispatch(clearCurrencyCrossesForManagmentFeed());
       }
-    }, 200); // Increased delay
+    }, 200);
 
     return () => clearTimeout(clearTimeoutId);
   }, [fullFeed, queueFeed, dispatch]);
@@ -273,7 +284,7 @@ const CurrencyCrosses = memo(() => {
   return (
     <div style={{ height: "600px", width: "100%" }}>
       <AgGridTable
-        ref={gridApiRef}
+        ref={agGridComponentRef}
         columnDefs={columnDefs}
         className="liveRates-grid"
         getRowId={getRowId}

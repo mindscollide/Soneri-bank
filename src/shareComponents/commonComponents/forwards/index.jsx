@@ -11,6 +11,7 @@ import { IndexCell } from "../../../shareComponents/commonComponents/elements/in
 import { buildForwardsAgGridTable } from "../../../shareComponents/commonComponents/utils/generateColumnsData";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
+import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 
 const Forwards = memo(({ dealerIdForMQTT }) => {
   const dispatch = useDispatch();
@@ -267,6 +268,7 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
           defaultColDef={defaultColDef}
           animateRows={false}
           suppressColumnVirtualisation={true}
+          loadingOverlayComponent={SectionLoader}
         />
       </div>
     </div>

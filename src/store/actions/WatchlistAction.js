@@ -52,6 +52,10 @@ import {
   setPublishedSpotRates,
   setPublishedSpotRateSheet,
 } from "../slicers/modalSlicer/modalSlicer";
+import {
+  setNewsByNewsIdViewModal,
+  setNewsLoadingSpinner,
+} from "../slicers/watchListSlicer/WatchListSlicer";
 
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const getAllTreasuryInstrumentsApi = createAsyncThunk(
@@ -2768,7 +2772,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
 //GetNewsDetailsByID
 export const GetNewsDetailsByIDApi = createAsyncThunk(
   "watchlist/GetNewsDetailsByID", // A unique action type string
-  async ({ Data }, { rejectWithValue }) => {
+  async ({ Data }, { rejectWithValue, dispatch }) => {
     try {
       let GetNewsDetailsByIDData = createPostAPI(
         watchListApi,
@@ -2790,6 +2794,8 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
               )
           ) {
             // dispatch(setPublishedSpotRates(false));
+            dispatch(setNewsByNewsIdViewModal(true));
+            dispatch(setNewsLoadingSpinner(false));
 
             return {
               response: response.data.responseResult,

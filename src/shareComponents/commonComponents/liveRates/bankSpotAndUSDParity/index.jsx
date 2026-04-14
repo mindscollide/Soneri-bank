@@ -5,11 +5,11 @@ import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
 import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
 
 // Selectors
 const selectCrossInstruments = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
-
 
 const selectFeed = (state) => state.RealtimeActionsSlice.DealerSpotRatesFeed;
 
@@ -22,8 +22,9 @@ const selectWorldCurrencies = (state) =>
 const BankSpotAndUSDParity = memo(() => {
   const dispatch = useDispatch();
 
-  const gridApiRef = useRef(null);
-  const pendingUpdates = useRef(new Map()); // ✅ Use Map for deduplication
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
+  const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
   const rowNodeMap = useRef(new Map());
   const isProcessingRef = useRef(false);
@@ -31,7 +32,7 @@ const BankSpotAndUSDParity = memo(() => {
   const lastProcessTime = useRef(0);
 
   const crossInstruments = useSelector(selectCrossInstruments, shallowEqual);
-  const fullFeed = useSelector(selectFeed, shallowEqual); // ✅ Add shallowEqual
+  const fullFeed = useSelector(selectFeed, shallowEqual);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
 
@@ -53,53 +54,72 @@ const BankSpotAndUSDParity = memo(() => {
   }, [worldCrosses, worldCurrencies]);
 
   // ─────────────────────────────
-  // GRID INIT
+  // Build row data
+  const buildRowData = useCallback(() => {
+    if (!crossInstruments?.length) return [];
+
+    return crossInstruments.map((inst) => {
+      const cross = crossMap.get(
+        `${inst.instrumentID}_${inst.secondaryInstrumentID}`
+      );
+      const currency = currencyMap.get(inst.instrumentID);
+
+      return {
+        instrumentID: inst.instrumentID,
+        secondaryInstrumentID: inst.secondaryInstrumentID,
+        instrumentName: inst.instrumentName,
+        secondaryInstrumentName: inst.secondaryInstrumentName,
+        time: cross?.time ?? "",
+        worldCrossBid: cross?.bid ?? 0,
+        worldCrossOffer: cross?.offer ?? 0,
+        worldCurBid:
+          inst.instrumentID === 21 ? cross?.bid ?? 0 : currency?.bid ?? 0,
+        worldCurOffer:
+          inst.instrumentID === 21 ? cross?.offer ?? 0 : currency?.offer ?? 0,
+      };
+    });
+  }, [crossInstruments, crossMap, currencyMap]);
+
+  // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  useEffect(() => {
+    if (!gridApiRef.current || !crossInstruments?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
+      rowNodeMap.current.set(key, node);
+    });
+  }, [crossInstruments, worldCrosses, worldCurrencies]);
+
+  // ─────────────────────────────
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
-      
-      gridApiRef.current = params.api;
 
-      const rowData = crossInstruments?.map((inst) => {
-        const cross = crossMap.get(
-          `${inst.instrumentID}_${inst.secondaryInstrumentID}`
-        );
+      gridApiRef.current = params.api; // ✅ store actual AG Grid API
 
-        const currency = currencyMap.get(inst.instrumentID);
-
-        return {
-          instrumentID: inst.instrumentID,
-          secondaryInstrumentID: inst.secondaryInstrumentID,
-          instrumentName: inst.instrumentName,
-          secondaryInstrumentName: inst.secondaryInstrumentName,
-
-          time: cross?.time ?? "",
-
-          worldCrossBid: cross?.bid ?? 0,
-          worldCrossOffer: cross?.offer ?? 0,
-
-          worldCurBid:
-            inst.instrumentID === 21 ? cross?.bid ?? 0 : currency?.bid ?? 0,
-
-          worldCurOffer:
-            inst.instrumentID === 21 ? cross?.offer ?? 0 : currency?.offer ?? 0,
-        };
-      }) || [];
-
+      // Attempt immediate load (works if API already resolved before grid init)
+      const rowData = buildRowData();
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
       }
+      // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
-    [crossInstruments, crossMap, currencyMap]
+    [buildRowData]
   );
 
   // ─────────────────────────────
-  // Capture rowNodes
   const onFirstDataRendered = useCallback((params) => {
     if (!isMountedRef.current) return;
-    
-    rowNodeMap.current.clear();
 
+    rowNodeMap.current.clear();
     params.api.forEachNode((node) => {
       const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
       rowNodeMap.current.set(key, node);
@@ -107,17 +127,19 @@ const BankSpotAndUSDParity = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  // ✅ THROTTLED HIGH PERFORMANCE UPDATE ENGINE
   const processQueue = useCallback(() => {
-    if (!isMountedRef.current || isProcessingRef.current || !gridApiRef.current) {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
       rafRef.current = null;
       return;
     }
 
     const now = Date.now();
     const timeSinceLastProcess = now - lastProcessTime.current;
-    
-    // ✅ Throttle: minimum 50ms between updates (20fps max)
+
     if (timeSinceLastProcess < 50) {
       rafRef.current = requestAnimationFrame(processQueue);
       return;
@@ -132,15 +154,13 @@ const BankSpotAndUSDParity = memo(() => {
     lastProcessTime.current = now;
 
     try {
-      // ✅ Process in batches
       let batchCount = 0;
-      const MAX_BATCH_SIZE = 15; // Process max 15 items per frame
+      const MAX_BATCH_SIZE = 15;
 
-      // Process cross updates
       for (const [key, update] of pendingUpdates.current.entries()) {
         if (batchCount >= MAX_BATCH_SIZE) break;
 
-        if (update.type === 'cross') {
+        if (update.type === "cross") {
           const node = rowNodeMap.current.get(key);
           if (!node) {
             pendingUpdates.current.delete(key);
@@ -167,12 +187,10 @@ const BankSpotAndUSDParity = memo(() => {
 
           pendingUpdates.current.delete(key);
           batchCount++;
-        } 
-        else if (update.type === 'parity') {
+        } else if (update.type === "parity") {
           const parity = update.data;
           const instrumentID = update.instrumentID;
 
-          // Update all matching rows
           for (const node of rowNodeMap.current.values()) {
             const data = node.data;
 
@@ -187,15 +205,13 @@ const BankSpotAndUSDParity = memo(() => {
         }
       }
 
-      // ✅ If there are still pending updates, schedule next frame
       if (pendingUpdates.current.size > 0) {
         rafRef.current = requestAnimationFrame(processQueue);
       } else {
         rafRef.current = null;
       }
-
     } catch (error) {
-      console.error('Error processing queue:', error);
+      console.error("Error processing queue:", error);
       pendingUpdates.current.clear();
       rafRef.current = null;
     } finally {
@@ -204,7 +220,6 @@ const BankSpotAndUSDParity = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  // ✅ Queue updates with deduplication
   const queueUpdate = useCallback(
     (feed) => {
       if (!feed || !isMountedRef.current) return;
@@ -215,21 +230,20 @@ const BankSpotAndUSDParity = memo(() => {
       if (cross) {
         const key = `${cross.instrumentID}_${cross.secondaryInstrumentID}`;
         pendingUpdates.current.set(key, {
-          type: 'cross',
-          data: cross
+          type: "cross",
+          data: cross,
         });
       }
 
       if (parity) {
         const key = `parity_${parity.instrumentID}`;
         pendingUpdates.current.set(key, {
-          type: 'parity',
+          type: "parity",
           instrumentID: parity.instrumentID,
-          data: parity
+          data: parity,
         });
       }
 
-      // ✅ Schedule processing if not already scheduled
       if (!rafRef.current) {
         rafRef.current = requestAnimationFrame(processQueue);
       }
@@ -238,21 +252,18 @@ const BankSpotAndUSDParity = memo(() => {
   );
 
   // ─────────────────────────────
-  // ✅ Debounced feed processing
   useEffect(() => {
     if (!fullFeed || !Array.isArray(fullFeed) || fullFeed.length === 0) {
       return;
     }
 
-    // Process all feeds
     fullFeed.forEach(queueUpdate);
 
-    // Clear Redux state after a delay
     const clearTimeoutId = setTimeout(() => {
       if (isMountedRef.current) {
         dispatch(clearTreasurySpotRatesFeed());
       }
-    }, 200); // Increased delay
+    }, 200);
 
     return () => clearTimeout(clearTimeoutId);
   }, [fullFeed, queueUpdate, dispatch]);
@@ -264,12 +275,12 @@ const BankSpotAndUSDParity = memo(() => {
 
     return () => {
       isMountedRef.current = false;
-      
+
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
-      
+
       pendingUpdates.current.clear();
       rowNodeMap.current.clear();
       isProcessingRef.current = false;
@@ -294,18 +305,14 @@ const BankSpotAndUSDParity = memo(() => {
             field: "worldCrossBid",
             flex: 1,
             cellClass: "bid-cell",
-            cellRenderer: (p) => (
-              <IndexCell value={Number(p.value)} />
-            ),
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
             headerName: "Offer",
             field: "worldCrossOffer",
             flex: 1,
             cellClass: "offer-cell",
-            cellRenderer: (p) => (
-              <IndexCell value={Number(p.value)} />
-            ),
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
             headerName: "Time",
@@ -333,18 +340,14 @@ const BankSpotAndUSDParity = memo(() => {
             field: "worldCurBid",
             flex: 1,
             cellClass: "bid-cell",
-            cellRenderer: (p) => (
-              <IndexCell value={Number(p.value)} />
-            ),
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
             headerName: "Offer",
             field: "worldCurOffer",
             flex: 1,
             cellClass: "offer-cell",
-            cellRenderer: (p) => (
-              <IndexCell value={Number(p.value)} />
-            ),
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
             headerName: "Time",
@@ -368,34 +371,37 @@ const BankSpotAndUSDParity = memo(() => {
     []
   );
 
-  const defaultColDef = useMemo(() => ({
-    resizable: false,
-    sortable: false,
-    suppressMovable: true,
-    editable: false,
-  }), []);
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
 
   return (
     <div style={{ height: "600px", width: "100%" }}>
       <AgGridTable
-        ref={gridApiRef}
+        ref={agGridComponentRef}
         columnDefs={columnDefs}
-        className='liveRates-grid'
+        className="liveRates-grid"
         getRowId={getRowId}
         onGridReady={onGridReady}
         onFirstDataRendered={onFirstDataRendered}
-        domLayout='normal'
-        theme='legacy'
+        domLayout="normal"
+        theme="legacy"
         defaultColDef={defaultColDef}
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
         suppressCellFocus={true}
-        
+        loadingOverlayComponent={SectionLoader}
       />
     </div>
   );
 });
 
-BankSpotAndUSDParity.displayName = 'BankSpotAndUSDParity';
+BankSpotAndUSDParity.displayName = "BankSpotAndUSDParity";
 
 export default BankSpotAndUSDParity;

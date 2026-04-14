@@ -144,9 +144,19 @@ const WatchListSlice = createSlice({
     GetIndicativeFBPRates: null,
     GetSBPConversionRatesForRateSheet: null,
     GetNewsHeadlines: null,
+
+    // About Newa
+    NewsByNewsIdViewModal: false,
     GetNewsDetailsByID: null,
+    NewsLoadingSpinner: false,
   },
   reducers: {
+    setNewsLoadingSpinner: (state, { payload }) => {
+      state.NewsLoadingSpinner = payload;
+    },
+    setNewsByNewsIdViewModal: (state, { payload }) => {
+      state.NewsByNewsIdViewModal = payload;
+    },
     clearWatchListResponseMessage: (state) => {
       state.responseMessage = "";
     },
@@ -953,5 +963,9 @@ export const {
   clearGetNewsHeadlines,
   clearGetNewsDetailsByID,
   clearWatchListResponseMessage,
+
+  // News Modal
+  setNewsByNewsIdViewModal,
+  setNewsLoadingSpinner,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;
