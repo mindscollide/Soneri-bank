@@ -135,6 +135,7 @@ export const LogoutApi = createAsyncThunk(
           ) {
             // localStorage.clear();
             window.location.href = "/";
+            localStorage.clear();
           } else if (
             responseMessage
               .toLowerCase()
