@@ -83,6 +83,12 @@ const Dealer = () => {
   const [dealerOptions, setDealerOptions] = useState([]);
   const [selectedDealer, setSelectedDealer] = useState(null);
 
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem("globalTabsActiveKey");
+    };
+  }, []);
+
   // ✅ Tab change handler — mirrors Treasury pattern
   const handleTabChange = (tabTitle) => {
     setActiveTabId(tabTitle); // Update local state to trigger hook update

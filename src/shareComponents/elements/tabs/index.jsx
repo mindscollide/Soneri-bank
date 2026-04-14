@@ -6,7 +6,7 @@ const GlobalTabs = ({ items = [], tabBarExtraContent, onChange }) => {
   // ✅ accept onChange prop
   const storageKey = "globalTabsActiveKey";
 
-  const [activeKey, setActiveKey] = useState();
+  const [activeKey, setActiveKey] = useState(0);
 
   // Set initial tab when items load
   useEffect(() => {

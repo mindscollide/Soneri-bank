@@ -58,6 +58,12 @@ const Treasury = () => {
   // 4. Call the hook at the TOP LEVEL
   useMqttTopics(currentTopics);
 
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem("globalTabsActiveKey");
+    };
+  }, []);
+
   const handleTabChange = (tabTitle) => {
     setActiveTabId(tabTitle); // Update local state to trigger hook update
     dispatch(setActiveTab(tabTitle));
