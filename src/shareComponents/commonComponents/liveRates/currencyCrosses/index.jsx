@@ -4,6 +4,7 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { convertUTCTimeToLocalTime } from "../../../../utils/timeFunction";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../elements/globalAgGridTable";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
 
 // ─── Selectors ───────────────────────────────
 const selectFeed = (state) =>
@@ -231,16 +232,14 @@ const CurrencyCrosses = memo(() => {
             field: "bid",
             flex: 1,
             cellClass: "bid-cell",
-            valueFormatter: (p) =>
-              p.value != null ? Number(p.value) : "-",
+            valueFormatter: (p) => (p.value != null ? Number(p.value) : "-"),
           },
           {
             headerName: "Ask",
             field: "ask",
             flex: 1,
             cellClass: "offer-cell",
-            valueFormatter: (p) =>
-              p.value != null ? Number(p.value) : "-",
+            valueFormatter: (p) => (p.value != null ? Number(p.value) : "-"),
           },
           {
             headerName: "Time",
@@ -276,17 +275,18 @@ const CurrencyCrosses = memo(() => {
       <AgGridTable
         ref={gridApiRef}
         columnDefs={columnDefs}
-        className='liveRates-grid'
+        className="liveRates-grid"
         getRowId={getRowId}
         onGridReady={onGridReady}
         onFirstDataRendered={onFirstDataRendered}
-        domLayout='normal'
-        theme='legacy'
+        domLayout="normal"
+        theme="legacy"
         defaultColDef={defaultColDef}
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
         suppressColumnVirtualisation={false}
         suppressRowVirtualisation={false}
+        loadingOverlayComponent={SectionLoader}
       />
     </div>
   );
