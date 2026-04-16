@@ -254,11 +254,8 @@ const TenoreWiseCurrentAndLastRates = ({
     );
 
     if (checkAskValue !== undefined) {
-      const handleClick = () => {
-        showMessage("Ask value must be greater than Bid value.");
-      };
+      showMessage("Ask value must be greater than Bid value.");
 
-      handleClick();
       return;
     }
 

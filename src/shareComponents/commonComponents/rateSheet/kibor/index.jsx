@@ -41,7 +41,7 @@ const KIBOR = () => {
       const row = {};
 
       kiborList.forEach((item) => {
-        row[item.tenor] = Number(item.rate).toFixed(4);
+        row[item.tenor] = Number(item.rate).toFixed(2);
       });
 
       const tableData = [{ key: "kibor", ...row }];

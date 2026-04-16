@@ -3,7 +3,6 @@ import "./rateSheet.css";
 import { Col, Row } from "react-bootstrap";
 import moment from "moment";
 import { NumericFormat } from "react-number-format";
-import { formatRateSheetInput } from "../../../utils/formatters";
 import { formatDateUTCToGMT } from "../../../utils/timeFunction";
 import GlobalModal from "../../../shareComponents/commonComponents/elements/globalModal/Modal";
 import CustomButton from "../../../shareComponents/commonComponents/elements/globalButton/button";
@@ -162,20 +161,12 @@ const RateSheet = () => {
   }, [marketStatus]);
 
   const handleChangeCurrentRate = (event) => {
-    let name = event.target.name;
-    let value = event.target.value;
+    const { name, value } = event.target;
 
-    if (name === "bidValue") {
-      setCurrentRates({
-        ...currentRates,
-        bidValue: formatRateSheetInput(value),
-      });
-    } else if (name === "askValue") {
-      setCurrentRates({
-        ...currentRates,
-        askValue: formatRateSheetInput(value),
-      });
-    }
+    setCurrentRates((prev) => ({
+      ...prev,
+      [name]: value, // handles bidValue and askValue dynamically
+    }));
   };
 
   const handlePublishRates = () => {
@@ -188,33 +179,18 @@ const RateSheet = () => {
       const ask = Number(askValue);
       const lastBid = Number(lastPublishRates.bidValue);
       const lastAsk = Number(lastPublishRates.askValue);
-      console.log("Check Value again", currentRates);
-      console.log("Check Value again 1", { bid, ask, lastBid, lastAsk });
 
       // Step 1: Validate required fields
       if (!bid || !ask) {
-        console.log("Check Value again");
-
-        const handleClick = () => {
-          showMessage("Please fill all required fields");
-        };
-
-        handleClick();
+        showMessage("Please fill all required fields");
         return;
       }
 
       // Step 2: Ask value must be greater than Bid
       if (ask <= bid) {
-        console.log("Check Value again Ask is less than bid");
-        const handleClick = () => {
-          showMessage("Ask value must be greater than Bid value.");
-        };
-
-        handleClick();
+        showMessage("Ask value must be greater than Bid value.");
         return;
       }
-
-      // Step 3: Format and compare current and last publish dates
 
       // if copyBidVal and copyAskVal is 0 that means dealer or treasury update the first time rate in the morning
       const isFirstLogin2 =
@@ -432,32 +408,50 @@ const RateSheet = () => {
                           <tr>
                             <td className="border-0">
                               <NumericFormat
-                                min={1}
-                                disabled={isMarketOn === true ? false : true}
-                                value={currentRates.bidValue}
-                                onChange={handleChangeCurrentRate}
                                 name="bidValue"
-                                decimalScale={2}
-                                type="text"
-                                allowNegative={false}
-                                className={
-                                  "text-center form-control ff-roboto mt-4 d-block fs-5 fw-bold mb-0"
+                                value={currentRates.bidValue}
+                                onValueChange={(values) =>
+                                  handleChangeCurrentRate({
+                                    target: {
+                                      name: "bidValue",
+                                      value: values.floatValue,
+                                    },
+                                  })
                                 }
+                                decimalScale={2}
+                                fixedDecimalScale={false}
+                                allowNegative={false}
+                                isAllowed={({ floatValue }) =>
+                                  floatValue === undefined ||
+                                  (floatValue >= 1 && floatValue <= 1000)
+                                }
+                                disabled={!isMarketOn}
+                                type="text"
+                                className="text-center form-control mt-4 d-block fs-5 fw-bold mb-0"
                               />
                             </td>
                             <td className="border-0">
                               <NumericFormat
-                                min={1}
-                                disabled={isMarketOn === true ? false : true}
-                                type="text"
-                                value={currentRates.askValue}
-                                decimalScale={2}
-                                onChange={handleChangeCurrentRate}
                                 name="askValue"
-                                allowNegative={false}
-                                className={
-                                  "text-center form-control ff-roboto  mt-4 d-block fs-5 fw-bold mb-0"
+                                value={currentRates.askValue}
+                                onValueChange={(values) =>
+                                  handleChangeCurrentRate({
+                                    target: {
+                                      name: "askValue",
+                                      value: values.floatValue,
+                                    },
+                                  })
                                 }
+                                decimalScale={2}
+                                fixedDecimalScale={false}
+                                allowNegative={false}
+                                isAllowed={({ floatValue }) =>
+                                  floatValue === undefined ||
+                                  (floatValue >= 1 && floatValue <= 1000)
+                                }
+                                disabled={!isMarketOn}
+                                type="text"
+                                className="text-center form-control mt-4 d-block fs-5 fw-bold mb-0"
                               />
                             </td>
                           </tr>
