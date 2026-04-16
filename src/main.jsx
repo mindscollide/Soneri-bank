@@ -11,6 +11,13 @@ import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
+//During production uncomment this to hide the comments
+// console.log = () => {};
+// console.warn = () => {};
+// console.debug = () => {};
+
+// console.error = () => {};
+
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
   <Provider store={store}>

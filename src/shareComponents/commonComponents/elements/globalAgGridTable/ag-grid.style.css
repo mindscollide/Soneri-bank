@@ -11,9 +11,10 @@
 }
 
 .liveRates-grid .ag-root-wrapper {
-  border: 1px solid #a37c66 !important;
+  /* border: 1px solid #a37c66 !important; */
   margin: 0;
   padding: 0;
+  border: none;
 }
 
 /* ==============================================
@@ -63,6 +64,7 @@
   font-weight: bold;
   text-align: left;
   background: #e9e2dc !important;
+  border-right: 1px solid #a37c66 !important;
 }
 
 .liveRates-grid .ag-cell.instrument-cell {

@@ -23,7 +23,7 @@ const ProfileDropdown = () => {
         </span>
         <IconElement iconClass={"icon-arrow-down"} />
       </Dropdown.Toggle>
-      <Dropdown.Menu className={styles["ProfileDropdown_menu"]}>
+      <Dropdown.Menu align="end" className={styles["ProfileDropdown_menu"]}>
         <Dropdown.Item
           onClick={handleClickLogout}
           className="cursor-pointer logoutDropdown"

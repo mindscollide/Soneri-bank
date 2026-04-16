@@ -382,9 +382,9 @@ const USDParity = memo(() => {
 
   return (
     <>
-      <span className={styles.tableheaderbar}>USD Parity</span>
+      <span className={styles.tableheaderbarForUSDParity}>USD Parity</span>
 
-      <div style={{ width: "100%", height: "300px" }}>
+      <div style={{ width: "98%", height: "300px" }}>
         <AgGridTable
           ref={agGridComponentRef} // ✅ separate ref for the component instance
           columnDefs={columnDefs}

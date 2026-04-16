@@ -28,15 +28,12 @@ const Forwards = memo(() => {
   const currentRowDataRef = useRef(null); // Track current rowData
   const isGridReadyRef = useRef(false);
 
-  console.log(gridRef.current?.api, "gridRefgridRefgridRefgridRef");
-
   // --- Selectors ---
   const TreasuryForwardRates = useSelector(
     (state) => state.RealtimeActionsSlice.TreasuryForwardRates,
     shallowEqual
   );
 
-  console.log(TreasuryForwardRates, "TreasuryForwardRatesTreasuryForwardRates");
   const GetBankForwardForTreasury = useSelector(
     (state) => state.WatchListReducer.GetBankForwardForTreasury,
     shallowEqual
@@ -207,7 +204,7 @@ const Forwards = memo(() => {
     // Schedule processing if we have updates and nodes
     if (pendingUpdates.current.size > 0) {
       if (rowNodeMap.current.size === 0) {
-        console.error("❌ Node map is empty! Attempting to rebuild...");
+        // console.error("❌ Node map is empty! Attempting to rebuild...");
         updateNodeMap();
 
         // Retry after map rebuild
