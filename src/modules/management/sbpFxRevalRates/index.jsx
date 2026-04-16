@@ -5,6 +5,7 @@ import { formatCompactDate } from "../../../utils/timeFunction";
 import { clearSbpFXRevalRatesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 
 // Selectors
 const GetRevalRatesForTreasury = (state) =>
@@ -203,7 +204,9 @@ const SBPFXRevalRates = memo(() => {
       field: `tenorId_${tenor.tenorId}_value`,
       cellClass: "value-cell",
       width: 70,
-      valueFormatter: (p) => (p.value != null ? p.value : "-"),
+      valueFormatter: (p) => {
+        <IndexCell value={p.value} />;
+      },
     }));
 
     return [...baseColumns, ...tenorColumns];

@@ -276,7 +276,8 @@ const StockIndices = memo(() => {
         headerName: "Current",
         field: "current",
         cellClass: "bid-cell",
-        flex: 1,
+        width: 100,
+
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
             <IndexCell value={Number(p.value)} />
@@ -286,7 +287,8 @@ const StockIndices = memo(() => {
         headerName: "Change",
         field: "change",
         cellClass: "offer-cell",
-        flex: 1,
+        width: 100,
+
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
             <IndexCell value={Number(p.value)} />
@@ -296,13 +298,15 @@ const StockIndices = memo(() => {
         headerName: "% Change",
         field: "percentageChange",
         cellClass: "percentage-cell",
-        flex: 1,
+        width: 100,
+
         cellRenderer: PercentageCellRenderer,
       },
       {
         headerName: "High",
         field: "high",
-        flex: 1,
+        width: 100,
+
         cellClass: "highLow-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
@@ -313,7 +317,8 @@ const StockIndices = memo(() => {
         headerName: "Low",
         field: "low",
         cellClass: "highLow-cell",
-        flex: 1,
+        width: 100,
+
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
             <IndexCell value={Number(p.value)} />
@@ -322,7 +327,8 @@ const StockIndices = memo(() => {
       {
         headerName: "Volume",
         field: "volume",
-        flex: 1,
+        width: 100,
+        cellClass: "highLow-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
             <IndexCell value={Number(p.value)} />
@@ -331,7 +337,8 @@ const StockIndices = memo(() => {
       {
         headerName: "Time",
         field: "time",
-        flex: 1,
+        width: 120,
+
         cellClass: "percentage-cell",
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
