@@ -264,8 +264,16 @@ const RealtimeActionsSlice = createSlice({
       state.kiborForManagementFeed = null;
     },
 
+    // ✅ FIXED: store the whole payload as a single object (same pattern as KIBOR)
+    // Previously this was accumulating payload.sofr into an array, which broke
+    // the { sofr } destructuring in the component.
     setSofrForManagmentFeed: (state, { payload }) => {
-      state.sofrForManagementFeed = payload;
+      state.sofrForManagementFeed = {
+        ...payload,
+        sofr: Array.isArray(payload.sofr)
+          ? [...payload.sofr]
+          : { ...payload.sofr },
+      };
     },
     clearSofrForManagmentFeed: (state) => {
       state.sofrForManagementFeed = null;

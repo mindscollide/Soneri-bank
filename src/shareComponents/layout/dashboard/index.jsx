@@ -275,7 +275,6 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES":
-            console.log("TREASURY_MANAGEMENT_SBP_FX_REVAL_RATES", payload);
             startTransition(() => {
               dispatch(setSbpFXRevalRatesForManagmentFeed(payload));
             });

@@ -344,10 +344,7 @@ const SwapsInUSD = memo(() => {
       >
         <span>Swaps in USD</span>
         <span className={styles.management_date}>
-          {latestDate &&
-            dayjs(convertCurrentTimeZone(latestDate)).format(
-              "DD-MMM-YYYY h:mm A"
-            )}
+          {latestDate && dayjs(latestDate).format("DD-MMM-YYYY h:mm A")}
         </span>
       </span>
 

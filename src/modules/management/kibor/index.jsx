@@ -1,157 +1,179 @@
-import { memo, useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { useSelector } from "react-redux";
-import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import styles from "../management.module.css";
-import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 
-const GetKiborDataForTreasury = (state) =>
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
+import { clearKiborForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+
+// ── Selectors ──────────────────────────────────────────────────────────────────
+const selectKiborList = (state) =>
   state.WatchListReducer.GetKiborDataForTreasury?.kiborList;
-const KIBORForManagementFeed = (state) =>
+
+const selectKiborFeed = (state) =>
   state.RealtimeActionsSlice.kiborForManagementFeed;
 
+// ── Component ──────────────────────────────────────────────────────────────────
 const KIBOR = memo(() => {
-  const animationFrameRef = useRef(null);
-  const pendingFeedRef = useRef(null); // ✅ Always keep latest feed only (no queue, no throttle)
+  const dispatch = useDispatch();
 
-  const kiborList = useSelector(GetKiborDataForTreasury);
-  const fullFeed = useSelector(KIBORForManagementFeed);
+  // ── Refs ───────────────────────────────────────────────────────────────────
+  const agGridComponentRef = useRef(null);
+  const gridApiRef = useRef(null);
+  const rowNodeMap = useRef(new Map()); // key: displayName → AG Grid node
+  const pendingUpdates = useRef(new Map()); // key: displayName → latest values
+  const rafRef = useRef(null);
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
-  const [processedData, setProcessedData] = useState([]);
+  // ── Redux state ────────────────────────────────────────────────────────────
+  const kiborList = useSelector(selectKiborList, shallowEqual);
+  const fullFeed = useSelector(selectKiborFeed, shallowEqual);
 
-  const columns = useMemo(
-    () => [
-      {
-        title: "Tenor",
-        dataIndex: "displayName",
-        width: 150,
-        align: "left",
-      },
-      {
-        title: "Bid",
-        dataIndex: "bid",
-        className: "bidCol",
-        width: 120,
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "Ask",
-        dataIndex: "ask",
-        className: "offerCol",
-        width: 120,
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "Applicable Date",
-        dataIndex: "modifiedDateTime",
-        width: 245,
-      },
-    ],
-    []
-  );
+  // ── Build initial row data from REST snapshot ──────────────────────────────
+  const buildRowData = useCallback(() => {
+    if (!kiborList?.length) return [];
 
-  // ✅ Initialize base data from REST API
-  useEffect(() => {
-    if (kiborList && kiborList.length > 0) {
-      const enriched = kiborList.map((item) => ({
-        ...item,
-        bid: Number(item.bid ?? 0),
-        ask: Number(item.ask ?? 0),
-        version: 0,
-      }));
-      setProcessedData(enriched);
-    }
+    return kiborList.map((item) => ({
+      displayName: item.displayName,
+      bid: Number(item.bid ?? 0),
+      ask: Number(item.ask ?? 0),
+      modifiedDateTime: item.modifiedDateTime ?? "",
+    }));
   }, [kiborList]);
 
-  // ✅ Flush the latest pending MQTT update via rAF (no throttle, no queue)
-  // const flushUpdate = useCallback(() => {
-  //   animationFrameRef.current = null;
-  //   const feed = pendingFeedRef.current;
-  //   pendingFeedRef.current = null;
+  // ── Sync initial data after grid is ready (handles REST → grid race) ───────
+  useEffect(() => {
+    if (!gridApiRef.current || !kiborList?.length) return;
 
-  //   if (!feed) return;
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
 
-  //   const { kibor } = feed;
-  //   if (!kibor) return;
+    gridApiRef.current.setGridOption("rowData", rowData);
 
-  //   const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
+    // Rebuild rowNodeMap so live updates can target nodes by displayName
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.displayName) {
+        rowNodeMap.current.set(node.data.displayName, node);
+      }
+    });
+  }, [kiborList, buildRowData]);
 
-  //   setProcessedData((prevData) => {
-  //     let hasChanges = false;
+  // ── onGridReady ────────────────────────────────────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
+      gridApiRef.current = params.api;
 
-  //     const updatedData = prevData.map((item) => {
-  //       const feedItem = kiborArray.find(
-  //         (f) => f.displayName === item.displayName
-  //       );
+      const rowData = buildRowData();
+      if (rowData.length > 0) {
+        params.api.setGridOption("rowData", rowData);
+      }
+    },
+    [buildRowData]
+  );
 
-  //       if (!feedItem) return item;
+  // ── onFirstDataRendered ────────────────────────────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
 
-  //       return {
-  //         ...item,
-  //         bid: Number(feedItem.bid),
-  //         ask: Number(feedItem.ask),
-  //         modifiedDateTime: feedItem.modifiedDateTime,
-  //         version: item.version + 1,
-  //       };
-  //     });
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      if (node.data?.displayName) {
+        rowNodeMap.current.set(node.data.displayName, node);
+      }
+    });
+  }, []);
 
-  //     return hasChanges ? updatedData : prevData;
-  //   });
-  // }, []);
+  // ── Throttled queue processor (RAF-driven) ─────────────────────────────────
+  const processQueue = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
+      rafRef.current = null;
+      return;
+    }
 
-  // const flushUpdate = useCallback(() => {
-  //   animationFrameRef.current = null;
+    const now = Date.now();
+    if (now - lastProcessTime.current < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
 
-  //   const feeds = pendingFeedsRef.current;
-  //   pendingFeedsRef.current = [];
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
 
-  //   if (!feeds.length) return;
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
 
-  //   setProcessedData((prevData) => {
-  //     let updatedData = [...prevData];
+    try {
+      const MAX_BATCH = 10;
+      let batchCount = 0;
 
-  //     feeds.forEach((feed) => {
-  //       const { kibor } = feed;
-  //       if (!kibor) return;
+      for (const [key, update] of pendingUpdates.current.entries()) {
+        if (batchCount >= MAX_BATCH) break;
 
-  //       const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
+        const node = rowNodeMap.current.get(key);
+        if (!node) {
+          pendingUpdates.current.delete(key);
+          continue;
+        }
 
-  //       updatedData = updatedData.map((item) => {
-  //         const feedItem = kiborArray.find(
-  //           (f) => f.displayName === item.displayName
-  //         );
+        const data = node.data;
+        const hasChanges =
+          data.bid !== update.bid ||
+          data.ask !== update.ask ||
+          data.modifiedDateTime !== update.modifiedDateTime;
 
-  //         if (!feedItem) return item;
+        if (hasChanges) {
+          node.setDataValue("bid", update.bid);
+          node.setDataValue("ask", update.ask);
+          node.setDataValue("modifiedDateTime", update.modifiedDateTime);
+        }
 
-  //         return {
-  //           ...item,
-  //           bid: Number(feedItem.bid),
-  //           ask: Number(feedItem.ask),
-  //           modifiedDateTime: feedItem.modifiedDateTime,
-  //           version: (item.version || 0) + 1,
-  //         };
-  //       });
-  //     });
+        pendingUpdates.current.delete(key);
+        batchCount++;
+      }
 
-  //     return updatedData;
-  //   });
-  // }, []);
+      rafRef.current =
+        pendingUpdates.current.size > 0
+          ? requestAnimationFrame(processQueue)
+          : null;
+    } catch (error) {
+      console.error("❌ KIBOR queue error:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
+  }, []);
 
-  // ✅ On new MQTT feed: store latest and schedule ONE rAF flush
-  // No throttle — KIBOR updates are infrequent so every update must be applied
-  // useEffect(() => {
-  //   if (!fullFeed) return;
+  // ── Queue a single KIBOR update entry ─────────────────────────────────────
+  const queueUpdate = useCallback(
+    (feedItem) => {
+      if (!isMountedRef.current || !feedItem?.displayName) return;
 
-  //   pendingFeedRef.current = fullFeed; // overwrite with latest
+      pendingUpdates.current.set(feedItem.displayName, {
+        bid: Number(feedItem.bid ?? 0),
+        ask: Number(feedItem.ask ?? 0),
+        modifiedDateTime: feedItem.modifiedDateTime ?? "",
+      });
 
-  //   if (!animationFrameRef.current) {
-  //     animationFrameRef.current = requestAnimationFrame(flushUpdate);
-  //   }
-  // }, [fullFeed, flushUpdate]);
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      }
+    },
+    [processQueue]
+  );
 
+  // ── Consume MQTT feed ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!fullFeed) return;
 
@@ -159,49 +181,112 @@ const KIBOR = memo(() => {
     if (!kibor) return;
 
     const kiborArray = Array.isArray(kibor) ? kibor : [kibor];
+    kiborArray.forEach(queueUpdate);
 
-    setProcessedData((prevData) =>
-      prevData.map((item) => {
-        const feedItem = kiborArray.find(
-          (f) => f.displayName === item.displayName
-        );
-
-        if (!feedItem) return item;
-
-        return {
-          ...item,
-          bid: Number(feedItem.bid),
-          ask: Number(feedItem.ask),
-          modifiedDateTime: feedItem.modifiedDateTime,
-        };
-      })
-    );
-  }, [fullFeed]);
-
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+    const clearId = setTimeout(() => {
+      if (isMountedRef.current) {
+        dispatch(clearKiborForManagmentFeed());
       }
+    }, 500);
+
+    return () => clearTimeout(clearId);
+  }, [fullFeed, queueUpdate, dispatch]);
+
+  // ── Cleanup on unmount ─────────────────────────────────────────────────────
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
     };
   }, []);
 
+  // ── Column definitions ─────────────────────────────────────────────────────
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Tenor",
+        field: "displayName",
+        flex: 1,
+        cellClass: "instrument-cell",
+      },
+      {
+        headerName: "Bid",
+        field: "bid",
+        flex: 1,
+        cellClass: "bid-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "Ask",
+        field: "ask",
+        flex: 1,
+        cellClass: "offer-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "Applicable Date",
+        field: "modifiedDateTime",
+        flex: 1,
+        cellClass: "percentage-cell",
+      },
+    ],
+    []
+  );
+
+  const getRowId = useCallback((params) => params.data.displayName, []);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
       <span className={styles.tableheaderbar}>KIBOR</span>
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0
-            ? "managementTables"
-            : "managementTables_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
-      />
+
+      <div style={{ width: "100%", height: "257px" }}>
+        <AgGridTable
+          ref={agGridComponentRef}
+          columnDefs={columnDefs}
+          className="usdParityManagement-grid"
+          getRowId={getRowId}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          domLayout="normal"
+          theme="legacy"
+          defaultColDef={defaultColDef}
+          suppressScrollOnNewData={true}
+          suppressAnimationFrame={false}
+          suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+        />
+      </div>
     </>
   );
 });
+
+KIBOR.displayName = "KIBOR";
 
 export default KIBOR;
