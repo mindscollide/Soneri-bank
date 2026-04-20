@@ -44,7 +44,7 @@ const KIBOR = () => {
         row[item.tenor] = Number(item.rate).toFixed(2);
       });
 
-      const tableData = [{ key: "kibor", ...row }];
+      const tableData = [{ key: kiborList[kiborList.length + 1], ...row }];
 
       dataRef.current = tableData;
       setProcessedData(tableData);
@@ -73,7 +73,10 @@ const KIBOR = () => {
         updates.forEach((update) => {
           const { kibor } = update;
 
-          if (kibor && item.tenor === kibor.tenor) {
+          if (
+            kibor &&
+            item.tenor?.toLowerCase() === kibor.tenor?.toLowerCase()
+          ) {
             if (Number(updatedItem.rate) !== Number(kibor.rate)) {
               updatedItem = {
                 ...updatedItem,

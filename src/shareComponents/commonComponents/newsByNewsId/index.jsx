@@ -16,6 +16,7 @@ import cnbcImg from "../../../assets/img/cnbcImg.png";
 import dowjonesImg from "../../../assets/img/dowjonesImg.png";
 import GlobalModal from "../elements/globalModal/Modal";
 import { Col, Row } from "react-bootstrap";
+import { convertToHTML } from "../../../utils/converts";
 
 const NEWS_SOURCES = {
   cnbc: { id: 3, img: cnbcImg, icon: cnbcIcon },
@@ -106,10 +107,25 @@ const NewsByNewsId = () => {
 
             <Row className="mt-3">
               <Col sm={12} className={styles.modalDetailWithScroll}>
-                {/* Use a div with the pre-wrap styling instead of dangerouslySetInnerHTML */}
-                <div className={styles.newsContentBody}>
-                  {newsDetails?.content}
-                </div>
+                {newsDetails?.newsSourceID === 4 ? (
+                  <p
+                    dangerouslySetInnerHTML={{ __html: newsDetails?.content }}
+                  ></p>
+                ) : newsDetails?.newsSourceID === 3 ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: convertToHTML(newsDetails?.content),
+                    }}
+                  ></div>
+                ) : (
+                  <>
+                    {" "}
+                    {/* Use a div with the pre-wrap styling instead of dangerouslySetInnerHTML */}
+                    <div className={styles.newsContentBody}>
+                      {newsDetails?.content}
+                    </div>{" "}
+                  </>
+                )}
               </Col>
             </Row>
           </div>

@@ -41,10 +41,10 @@ const SOFR = () => {
       const row = {};
 
       sofrList.forEach((item) => {
-        row[item.tenor] = Number(item.rate).toFixed(4);
+        row[item.tenor] = Number(item.rate).toFixed(2);
       });
 
-      const tableData = [{ key: "sofr", ...row }];
+      const tableData = [{ key: sofrList[sofrList.length + 1], ...row }];
 
       dataRef.current = tableData;
       setProcessedData(tableData);
