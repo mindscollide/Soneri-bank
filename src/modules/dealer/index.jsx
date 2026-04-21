@@ -167,6 +167,10 @@ const Dealer = () => {
 
     if (isDealer) {
       const dealerId = localStorage.getItem("userID");
+      const dealerName = localStorage.getItem("ldapAccount");
+      const obj = { value: dealerId, label: dealerName };
+
+      dispatch(setDealerValue(obj));
       setDealerIdForMQTT(dealerId);
       const Data = { DealerId: Number(dealerId) };
       dispatch(GetSingleDealersSpreadApi({ Data }));

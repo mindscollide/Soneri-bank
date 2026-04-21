@@ -10,9 +10,10 @@ export const IndexCell = memo(({ value, record, CellClassName }) => {
       Number(num) === 0
     )
       return "-";
+
     return new Intl.NumberFormat("en-PK", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 5,
     }).format(num);
   };
 

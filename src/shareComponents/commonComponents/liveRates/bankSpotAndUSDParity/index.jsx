@@ -69,7 +69,10 @@ const BankSpotAndUSDParity = memo(() => {
         secondaryInstrumentID: inst.secondaryInstrumentID,
         instrumentName: inst.instrumentName,
         secondaryInstrumentName: inst.secondaryInstrumentName,
-        time: cross?.time ?? "",
+        crossTime: cross?.time ?? "",
+        currencyTime:
+          inst.instrumentID === 21 ? cross.time : currency?.time ?? "",
+
         worldCrossBid: cross?.bid ?? 0,
         worldCrossOffer: cross?.offer ?? 0,
         worldCurBid:
@@ -172,17 +175,17 @@ const BankSpotAndUSDParity = memo(() => {
 
           if (
             data.worldCrossBid !== cross.bid ||
-            data.worldCrossOffer !== cross.ask ||
-            data.time !== cross.updateDateTime
+            data.worldCrossOffer !== cross.ask
           ) {
             node.setDataValue("worldCrossBid", cross.bid);
             node.setDataValue("worldCrossOffer", cross.ask);
-            node.setDataValue("time", cross.updateDateTime);
+            node.setDataValue("currencyTime", cross.updateDateTime);
           }
 
           if (data.instrumentID === 21) {
             node.setDataValue("worldCurBid", cross.bid);
             node.setDataValue("worldCurOffer", cross.ask);
+            node.setDataValue("currencyTime", cross.updateDateTime);
           }
 
           pendingUpdates.current.delete(key);
@@ -197,6 +200,7 @@ const BankSpotAndUSDParity = memo(() => {
             if (data.instrumentID === instrumentID && instrumentID !== 21) {
               node.setDataValue("worldCurBid", parity.bid);
               node.setDataValue("worldCurOffer", parity.ask);
+              node.setDataValue("crossTime", parity.updateDateTime);
             }
           }
 
@@ -316,7 +320,8 @@ const BankSpotAndUSDParity = memo(() => {
           },
           {
             headerName: "Time",
-            field: "time",
+            field: "currencyTime",
+
             flex: 1,
             cellClass: "section-divider",
             valueFormatter: (p) =>
@@ -351,7 +356,8 @@ const BankSpotAndUSDParity = memo(() => {
           },
           {
             headerName: "Time",
-            field: "time",
+            field: "crossTime",
+
             flex: 1,
             cellClass: "section-divider",
             valueFormatter: (p) =>

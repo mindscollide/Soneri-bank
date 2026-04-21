@@ -9,6 +9,8 @@ const BankSpotAndUSDParityForTreasury = lazy(() =>
   import("../../../modules/treasury/liveRates/bankSpotAndUSDParity/index")
 );
 const CurrencyCrosses = lazy(() => import("./currencyCrosses/index"));
+const isTreasury = import.meta.env.VITE_APP_INCLUDE_TREASURY === "true";
+const isDealer = import.meta.env.VITE_APP_INCLUDE_DEALER === "true";
 
 const LiveRates = memo(({ dealerIdForMQTT }) => {
   const dealerValue = useSelector(
@@ -20,9 +22,12 @@ const LiveRates = memo(({ dealerIdForMQTT }) => {
   const mqttTopics = useMemo(() => {
     const topics = [
       `SBL_CURRENCY_CROSSES_REAL_TIME_FEED_TREASURY`,
-      dealerValue?.value === 0
-        ? `SBL_REAL_TIME_FEED_TREASURY`
-        : `SBL_TREASURY_DEALER_RATES_${dealerIdForMQTT}`,
+      isDealer
+        ? `SBL_TREASURY_DEALER_RATES_${Number(localStorage.getItem("userID"))}`
+        : isTreasury &&
+          location.pathname.toLowerCase().includes("dealer".toLowerCase())
+        ? `SBL_TREASURY_DEALER_RATES_${dealerValue?.value}`
+        : "SBL_REAL_TIME_FEED_TREASURY",
     ];
     return topics;
   }, [dealerValue?.value, dealerIdForMQTT]); // ✅ Fixed dependencies
@@ -33,7 +38,7 @@ const LiveRates = memo(({ dealerIdForMQTT }) => {
     <Row className="mt-2 mb-4 px-2">
       <Col sm={12} md={8} lg={8} className="pe-0">
         <Suspense fallback={<SectionLoader />}>
-          {dealerValue?.value === 0 ? (
+          {dealerValue?.value === 0 && isTreasury ? (
             <BankSpotAndUSDParityForTreasury />
           ) : (
             <BankSpotAndUSDParity />
@@ -49,6 +54,6 @@ const LiveRates = memo(({ dealerIdForMQTT }) => {
   );
 });
 
-LiveRates.displayName = 'LiveRates';
+LiveRates.displayName = "LiveRates";
 
 export default LiveRates;
