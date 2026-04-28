@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { isEqual } from "lodash";
 
+const MAX_BUFFER = 100;
+
 const RealtimeActionsSlice = createSlice({
   name: "realtimeActions",
   initialState: {
@@ -62,7 +64,6 @@ const RealtimeActionsSlice = createSlice({
       state.treasuryFowardsTenorsChanges = payload;
     },
     setClearRates: (state, { payload }) => {
-      console.log(payload, "checker");
       state.ClearRatesData = payload;
       // New Work
       state.DealerSpotClearRates = payload;
@@ -70,75 +71,36 @@ const RealtimeActionsSlice = createSlice({
       state.DealerDiscountingClearRates = payload;
     },
 
-    // Reducer logic
     setTreasuryFeDiscounting: (state, { payload }) => {
-      state.TreasuryFeDiscounting = [
-        ...(state.TreasuryFeDiscounting ?? []),
-        payload,
-      ];
+      state.TreasuryFeDiscounting = [...(state.TreasuryFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
     },
 
     clearTreasuryFeDiscounting: (state) => {
       state.TreasuryFeDiscounting = [];
     },
-    // setTreasuryNonFeDiscounting: (state, { payload }) => {
-    //   state.TreasuryNonFeDiscounting = payload;
-    // },
-
-    // Reducer logic
     setTreasuryNonFeDiscounting: (state, { payload }) => {
-      state.TreasuryNonFeDiscounting = [
-        ...(state.TreasuryNonFeDiscounting ?? []),
-        payload,
-      ];
+      state.TreasuryNonFeDiscounting = [...(state.TreasuryNonFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
     },
     clearTreasuryNonFeDiscounting: (state) => {
       state.TreasuryNonFeDiscounting = [];
     },
     setTreasuryForwardRates: (state, { payload }) => {
-      // ✅ accumulate payloads, don't overwrite
-      state.TreasuryForwardRates = [
-        ...(state.TreasuryForwardRates ?? []),
-        payload,
-      ];
+      state.TreasuryForwardRates = [...(state.TreasuryForwardRates ?? []), payload].slice(-MAX_BUFFER);
     },
 
     setTreasuryDealerForwardRates: (state, { payload }) => {
-      // ✅ accumulate payloads, don't overwrite
-      state.TreasuryDealerForwardRates = [
-        ...(state.TreasuryDealerForwardRates ?? []),
-        payload,
-      ];
+      state.TreasuryDealerForwardRates = [...(state.TreasuryDealerForwardRates ?? []), payload].slice(-MAX_BUFFER);
     },
 
-    // setTreasurySpotRatesFeed: (state, { payload }) => {
-    //   // if (!isEqual(state.TreasurySpotRatesFeed, payload)) {
-    //   state.TreasurySpotRatesFeed = payload;
-    //   // }
-    // },
-
     setTreasurySpotRatesFeed: (state, { payload }) => {
-      state.TreasurySpotRatesFeed = [
-        ...(state.TreasurySpotRatesFeed ?? []),
-        payload,
-      ];
+      state.TreasurySpotRatesFeed = [...(state.TreasurySpotRatesFeed ?? []), payload].slice(-MAX_BUFFER);
     },
 
     clearTreasurySpotRatesFeed: (state) => {
       state.TreasurySpotRatesFeed = [];
     },
-    // setDealerSpotRatesFeed: (state, { payload }) => {
-    //   if (!isEqual(state.DealerSpotRatesFeed, payload)) {
-    //     state.DealerSpotRatesFeed = payload;
-    //   }
-    // },
-
-    // ADD
     setDealerSpotRatesFeed: (state, { payload }) => {
-      state.DealerSpotRatesFeed = [
-        ...(state.DealerSpotRatesFeed ?? []),
-        payload,
-      ];
+      state.DealerSpotRatesFeed = [...(state.DealerSpotRatesFeed ?? []), payload].slice(-MAX_BUFFER);
     },
 
     clearDealerSpotRatesFeed: (state) => {
@@ -174,32 +136,15 @@ const RealtimeActionsSlice = createSlice({
         state.tresmarkCrossPremiumRates = payload;
       }
     },
-    // setTreasuryDealerFeDiscounting: (state, { payload }) => {
-    //   if (!isEqual(state.TreasuryDealerFeDiscounting, payload)) {
-    //     state.TreasuryDealerFeDiscounting = payload;
-    //   }
-    // },
     setTreasuryDealerFeDiscounting: (state, { payload }) => {
-      // Accumulate payloads in the array buffer
-      state.TreasuryDealerFeDiscounting = [
-        ...(state.TreasuryDealerFeDiscounting ?? []),
-        payload,
-      ];
+      state.TreasuryDealerFeDiscounting = [...(state.TreasuryDealerFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
     },
     // 3. Add a clear action (CRITICAL)
     clearTreasuryDealerFeDiscounting: (state) => {
       state.TreasuryDealerFeDiscounting = [];
     },
-    // setTreasuryDealerNonFeDiscounting: (state, { payload }) => {
-    //   if (!isEqual(state.TreasuryDealerNonFeDiscounting, payload)) {
-    //     state.TreasuryDealerNonFeDiscounting = payload;
-    //   }
-    // },
     setTreasuryDealerNonFeDiscounting: (state, { payload }) => {
-      state.TreasuryDealerNonFeDiscounting = [
-        ...(state.TreasuryDealerNonFeDiscounting ?? []),
-        payload,
-      ];
+      state.TreasuryDealerNonFeDiscounting = [...(state.TreasuryDealerNonFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
     },
     clearTreasuryDealerNonFeDiscounting: (state) => {
       state.TreasuryDealerNonFeDiscounting = [];
@@ -218,17 +163,8 @@ const RealtimeActionsSlice = createSlice({
     clearUSDParityForManagementFeed: (state) => {
       state.usdParityForManagmentFeed = null;
     },
-    // setCurrencyCrossesForManagementFeed: (state, { payload }) => {
-    //   if (!isEqual(state.currencyCrossesForManagmentFeed, payload)) {
-    //     state.currencyCrossesForManagmentFeed = payload;
-    //   }
-    // },
     setCurrencyCrossesForManagementFeed: (state, { payload }) => {
-      // ✅ accumulate payloads, don't overwrite
-      state.currencyCrossesForManagmentFeed = [
-        ...(state.currencyCrossesForManagmentFeed ?? []),
-        payload,
-      ];
+      state.currencyCrossesForManagmentFeed = [...(state.currencyCrossesForManagmentFeed ?? []), payload].slice(-MAX_BUFFER);
     },
     clearCurrencyCrossesForManagementFeed: (state) => {
       state.currencyCrossesForManagmentFeed = [];
@@ -291,25 +227,15 @@ const RealtimeActionsSlice = createSlice({
     clearSwapsinUSDForManagementFeed: (state) => {
       state.swapsinUSDForManagementFeed = null;
     },
-    // setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
-    //   state.treasuryRateSheetSpotTTRates = payload;
-    // },
-
     setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
-      state.treasuryRateSheetSpotTTRates = [
-        ...(state.treasuryRateSheetSpotTTRates ?? []),
-        payload,
-      ];
+      state.treasuryRateSheetSpotTTRates = [...(state.treasuryRateSheetSpotTTRates ?? []), payload].slice(-MAX_BUFFER);
     },
     clearTreasuryRateSheetSpotTTRates: (state) => {
       state.treasuryRateSheetSpotTTRates = [];
     },
 
     setTreasuryRateSheetCurrencyNotes: (state, { payload }) => {
-      state.treasuryRateSheetCurrencyNotes = [
-        ...(state.treasuryRateSheetCurrencyNotes ?? []),
-        payload,
-      ];
+      state.treasuryRateSheetCurrencyNotes = [...(state.treasuryRateSheetCurrencyNotes ?? []), payload].slice(-MAX_BUFFER);
     },
     clearTreasuryRateSheetCurrencyNotes: (state) => {
       state.treasuryRateSheetCurrencyNotes = [];
@@ -332,20 +258,15 @@ const RealtimeActionsSlice = createSlice({
     setRealTimeNewsFeed: (state, { payload }) => {
       state.realTimeNewsFeed = payload;
     },
-    setClearNewsMQTT: (state, { payload }) => {
+    setClearNewsMQTT: (state) => {
       state.realTimeNewsFeed = null;
     },
-    // ✅ add a clear action to reset after processing
     clearTreasuryDealerForwardRates: (state) => {
       state.TreasuryDealerForwardRates = [];
     },
-
-    // ✅ add a clear action to reset after processing
     clearTreasuryForwardRates: (state) => {
       state.TreasuryForwardRates = [];
     },
-
-    // ✅ add a clear action to reset after processing
     clearCurrencyCrossesForManagmentFeed: (state) => {
       state.currencyCrossesForManagmentFeed = [];
     },

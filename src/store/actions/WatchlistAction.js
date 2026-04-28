@@ -555,7 +555,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListiceManager_PublishTheCurrentUSDRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_02".toLowerCase()
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -563,20 +563,22 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchList_PublishTheCurrentUSDRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_03".toLowerCase()
               )
           ) {
             return rejectWithValue("Something went wrong");
           } else if (
             responseMessage
               .toLowerCase()
-              .includes("WatchList_WatchListeCurrentUSDRates_04".toLowerCase())
+              .includes("WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_04".toLowerCase())
           ) {
             return rejectWithValue("Something went wrong");
           } else if (
-            responseMessage.toWatchList_WatchList.includes(
-              "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_05".toLowerCase()
-            )
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_05".toLowerCase()
+              )
           ) {
             return rejectWithValue("Something went wrong");
           } else {
@@ -1416,7 +1418,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_01".toLowerCase()
             )
         ) {
           return {
@@ -1427,7 +1429,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_02".toLowerCase()
             )
         ) {
           return rejectWithValue("No Found");
@@ -2379,7 +2381,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesF2rRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_02".toLowerCase()
               )
           ) {
             return rejectWithValue(

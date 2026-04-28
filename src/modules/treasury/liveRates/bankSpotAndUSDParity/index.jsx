@@ -8,7 +8,6 @@ import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeAc
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
 
-// Selectors
 const selectCrossInstruments = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
 
@@ -23,14 +22,12 @@ const selectWorldCurrencies = (state) =>
 const BankSpotAndUSDParity = memo(() => {
   const dispatch = useDispatch();
 
-  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
-  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
+  const gridApiRef = useRef(null);
   const pendingUpdates = useRef(new Map());
   const rafRef = useRef(null);
   const rowNodeMap = useRef(new Map());
   const isProcessingRef = useRef(false);
   const isMountedRef = useRef(true);
-  const lastProcessTime = useRef(0);
 
   const crossInstruments = useSelector(selectCrossInstruments, shallowEqual);
   const fullFeed = useSelector(selectFeed, shallowEqual);
@@ -42,20 +39,15 @@ const BankSpotAndUSDParity = memo(() => {
   const { crossMap, currencyMap } = useMemo(() => {
     const crossMap = new Map();
     const currencyMap = new Map();
-
-    worldCrosses.forEach((c) => {
-      crossMap.set(`${c.instrumentID}_${c.secondaryInstrumentID}`, c);
-    });
-
-    worldCurrencies.forEach((c) => {
-      currencyMap.set(c.instrumentID, c);
-    });
-
+    worldCrosses.forEach((c) =>
+      crossMap.set(`${c.instrumentID}_${c.secondaryInstrumentID}`, c)
+    );
+    worldCurrencies.forEach((c) => currencyMap.set(c.instrumentID, c));
     return { crossMap, currencyMap };
   }, [worldCrosses, worldCurrencies]);
 
   // ─────────────────────────────
-  // Build row data
+  // Build initial row data from REST API snapshot
   const buildRowData = useCallback(() => {
     if (!crossInstruments?.length) return [];
 
@@ -71,8 +63,9 @@ const BankSpotAndUSDParity = memo(() => {
         instrumentName: inst.instrumentName,
         secondaryInstrumentName: inst.secondaryInstrumentName,
         crossTime: cross?.time ?? "",
+        // fixed: was `cross.time` (crash when cross is undefined)
         currencyTime:
-          inst.instrumentID === 21 ? cross.time : currency?.time ?? "",
+          inst.instrumentID === 21 ? cross?.time ?? "" : currency?.time ?? "",
         worldCrossBid: cross?.bid ?? 0,
         worldCrossOffer: cross?.offer ?? 0,
         worldCurBid:
@@ -84,20 +77,21 @@ const BankSpotAndUSDParity = memo(() => {
   }, [crossInstruments, crossMap, currencyMap]);
 
   // ─────────────────────────────
-  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  // Sync grid when REST API data arrives (handles race with grid init)
   useEffect(() => {
     if (!gridApiRef.current || !crossInstruments?.length) return;
 
     const rowData = buildRowData();
-    if (rowData.length === 0) return;
+    if (!rowData.length) return;
 
     gridApiRef.current.setGridOption("rowData", rowData);
 
-    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
     rowNodeMap.current.clear();
     gridApiRef.current.forEachNode((node) => {
-      const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
-      rowNodeMap.current.set(key, node);
+      rowNodeMap.current.set(
+        `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`,
+        node
+      );
     });
   }, [crossInstruments, worldCrosses, worldCurrencies]);
 
@@ -105,70 +99,50 @@ const BankSpotAndUSDParity = memo(() => {
   const onGridReady = useCallback(
     (params) => {
       if (!isMountedRef.current) return;
+      gridApiRef.current = params.api;
 
-      gridApiRef.current = params.api; // ✅ store actual AG Grid API
-
-      // Attempt immediate load (works if API already resolved before grid init)
       const rowData = buildRowData();
       if (rowData.length > 0) {
         params.api.setGridOption("rowData", rowData);
       }
-      // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
     [buildRowData]
   );
 
-  // ─────────────────────────────
   const onFirstDataRendered = useCallback((params) => {
     if (!isMountedRef.current) return;
 
     rowNodeMap.current.clear();
     params.api.forEachNode((node) => {
-      const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
-      rowNodeMap.current.set(key, node);
+      rowNodeMap.current.set(
+        `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`,
+        node
+      );
     });
   }, []);
 
   // ─────────────────────────────
+  // Drain the entire pending queue in one RAF tick — no throttle, no batch cap.
+  // suppressAnimationFrame={true} on the grid means setDataValue is applied
+  // synchronously, so all updates land in the same browser paint.
   const processQueue = useCallback(() => {
     if (
       !isMountedRef.current ||
       isProcessingRef.current ||
-      !gridApiRef.current
+      !gridApiRef.current ||
+      pendingUpdates.current.size === 0
     ) {
       rafRef.current = null;
       return;
     }
 
-    const now = Date.now();
-    const timeSinceLastProcess = now - lastProcessTime.current;
-
-    if (timeSinceLastProcess < 50) {
-      rafRef.current = requestAnimationFrame(processQueue);
-      return;
-    }
-
-    if (pendingUpdates.current.size === 0) {
-      rafRef.current = null;
-      return;
-    }
-
     isProcessingRef.current = true;
-    lastProcessTime.current = now;
 
     try {
-      let batchCount = 0;
-      const MAX_BATCH_SIZE = 15;
-
-      for (const [key, update] of pendingUpdates.current.entries()) {
-        if (batchCount >= MAX_BATCH_SIZE) break;
-
+      for (const [key, update] of pendingUpdates.current) {
         if (update.type === "cross") {
           const node = rowNodeMap.current.get(key);
-          if (!node) {
-            pendingUpdates.current.delete(key);
-            continue;
-          }
+          if (!node) continue;
 
           const data = node.data;
           const cross = update.data;
@@ -183,44 +157,34 @@ const BankSpotAndUSDParity = memo(() => {
           }
 
           if (data.instrumentID === 21) {
-            console.log(cross, "WorldCrrency");
             node.setDataValue("worldCurBid", cross.bid);
             node.setDataValue("worldCurOffer", cross.ask);
             node.setDataValue("currencyTime", cross.updateDateTime);
           }
-
-          pendingUpdates.current.delete(key);
-          batchCount++;
         } else if (update.type === "parity") {
           const parity = update.data;
           const instrumentID = update.instrumentID;
 
           for (const node of rowNodeMap.current.values()) {
-            const data = node.data;
-
-            if (data.instrumentID === instrumentID && instrumentID !== 21) {
+            if (
+              node.data.instrumentID === instrumentID &&
+              instrumentID !== 21
+            ) {
               node.setDataValue("worldCurBid", parity.bid);
               node.setDataValue("worldCurOffer", parity.ask);
               node.setDataValue("crossTime", parity.updateDateTime);
             }
           }
-
-          pendingUpdates.current.delete(key);
-          batchCount++;
         }
       }
 
-      if (pendingUpdates.current.size > 0) {
-        rafRef.current = requestAnimationFrame(processQueue);
-      } else {
-        rafRef.current = null;
-      }
+      pendingUpdates.current.clear();
     } catch (error) {
       console.error("Error processing queue:", error);
       pendingUpdates.current.clear();
-      rafRef.current = null;
     } finally {
       isProcessingRef.current = false;
+      rafRef.current = null;
     }
   }, []);
 
@@ -233,16 +197,14 @@ const BankSpotAndUSDParity = memo(() => {
       const parity = feed?.instrumentParitySpot;
 
       if (cross) {
-        const key = `${cross.instrumentID}_${cross.secondaryInstrumentID}`;
-        pendingUpdates.current.set(key, {
-          type: "cross",
-          data: cross,
-        });
+        pendingUpdates.current.set(
+          `${cross.instrumentID}_${cross.secondaryInstrumentID}`,
+          { type: "cross", data: cross }
+        );
       }
 
       if (parity) {
-        const key = `parity_${parity.instrumentID}`;
-        pendingUpdates.current.set(key, {
+        pendingUpdates.current.set(`parity_${parity.instrumentID}`, {
           type: "parity",
           instrumentID: parity.instrumentID,
           data: parity,
@@ -257,24 +219,19 @@ const BankSpotAndUSDParity = memo(() => {
   );
 
   // ─────────────────────────────
+  // Process feed immediately and clear Redux right away.
+  // Previously a 200ms timeout held the clear — that caused Redux to keep
+  // re-triggering this effect with already-processed messages, creating the
+  // "stuck for 1 second" appearance.
   useEffect(() => {
-    if (!fullFeed || !Array.isArray(fullFeed) || fullFeed.length === 0) {
-      return;
-    }
+    if (!fullFeed?.length) return;
 
     fullFeed.forEach(queueUpdate);
-
-    const clearTimeoutId = setTimeout(() => {
-      if (isMountedRef.current) {
-        dispatch(clearTreasurySpotRatesFeed());
-      }
-    }, 200);
-
-    return () => clearTimeout(clearTimeoutId);
+    dispatch(clearTreasurySpotRatesFeed());
   }, [fullFeed, queueUpdate, dispatch]);
 
   // ─────────────────────────────
-  // ✅ Cleanup
+  // Cleanup
   useEffect(() => {
     isMountedRef.current = true;
 
@@ -389,7 +346,6 @@ const BankSpotAndUSDParity = memo(() => {
   return (
     <div style={{ height: "600px", width: "100%" }}>
       <AgGridTable
-        ref={agGridComponentRef}
         columnDefs={columnDefs}
         className="liveRates-grid"
         getRowId={getRowId}
@@ -399,7 +355,7 @@ const BankSpotAndUSDParity = memo(() => {
         theme="legacy"
         defaultColDef={defaultColDef}
         suppressScrollOnNewData={true}
-        suppressAnimationFrame={false}
+        suppressAnimationFrame={true}
         suppressCellFocus={true}
         loadingOverlayComponent={SectionLoader}
       />

@@ -35,6 +35,7 @@ const AgGridTable = forwardRef((props, ref) => {
         headerHeight={32}
         rowHeight={32}
         onGridReady={onGridReady}
+        rowBuffer={10}
       />
     </div>
   );

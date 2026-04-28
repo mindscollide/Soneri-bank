@@ -7,7 +7,6 @@ import FeDiscountingTable from "./FeDiscountingTable";
 import { Col } from "react-bootstrap";
 import NonFeDiscountingTable from "./NonFeDiscountingTable";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   getAllTenorsAction,
   getAllTreasuryInstrumentsApi,
@@ -20,16 +19,15 @@ import { useMqttTopics } from "../../hook/useMqttTopics";
 const Interbank = () => {
   useMqttTopics(["SBL_DEALER", "SBL_TREASURY"]);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const hasFetched = useRef(false);
   useEffect(() => {
     if (hasFetched.current) return;
     hasFetched.current = true;
-    dispatch(getAllTreasuryInstrumentsApi({ navigate }));
-    dispatch(getLastPublishRatesAction({ navigate }));
-    dispatch(getAllTenorsAction({ navigate }));
-    dispatch(getDealerDashboardApi({ navigate }));
-    dispatch(GetLastAndCurrentPublishUSDRateSheetAction({ navigate }));
+    dispatch(getAllTreasuryInstrumentsApi({}));
+    dispatch(getLastPublishRatesAction({}));
+    dispatch(getAllTenorsAction({}));
+    dispatch(getDealerDashboardApi({}));
+    dispatch(GetLastAndCurrentPublishUSDRateSheetAction({}));
   }, []);
   return (
     <>
