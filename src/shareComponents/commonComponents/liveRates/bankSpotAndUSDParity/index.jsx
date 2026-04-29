@@ -71,7 +71,7 @@ const BankSpotAndUSDParity = memo(() => {
         secondaryInstrumentName: inst.secondaryInstrumentName,
         crossTime: cross?.time ?? "",
         currencyTime:
-          inst.instrumentID === 21 ? cross.time : currency?.time ?? "",
+          inst.instrumentID === 21 ? cross?.time : currency?.time ?? "",
 
         worldCrossBid: cross?.bid ?? 0,
         worldCrossOffer: cross?.offer ?? 0,
