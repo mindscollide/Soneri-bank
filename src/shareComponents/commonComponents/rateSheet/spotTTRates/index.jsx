@@ -143,12 +143,16 @@ const SpotTTRates = () => {
         dataIndex: "bid",
         className: "bidCol",
         width: 70,
+        // Update: Check for 0 or missing values
+        render: (value) => (value === 0 || !value ? "-" : value),
       },
       {
         title: "Selling",
         dataIndex: "offer",
         className: "offerCol",
         width: 70,
+        // Update: Check for 0 or missing values
+        render: (value) => (value === 0 || !value ? "-" : value),
       },
     ],
     []

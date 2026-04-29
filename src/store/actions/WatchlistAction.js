@@ -570,7 +570,9 @@ export const PublishNewRatesAction = createAsyncThunk(
           } else if (
             responseMessage
               .toLowerCase()
-              .includes("WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_04".toLowerCase())
+              .includes(
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_04".toLowerCase()
+              )
           ) {
             return rejectWithValue("Something went wrong");
           } else if (
@@ -1615,7 +1617,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
         ) {
           return {
             response: response.data.responseResult,
-            message: "Data Saved Successfully.",
+            message: "Spread Published Successfully.",
           };
         } else if (
           responseMessage

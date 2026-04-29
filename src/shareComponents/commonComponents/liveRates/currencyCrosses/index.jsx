@@ -45,8 +45,8 @@ const CurrencyCrosses = memo(() => {
         instrumentID: Number(instrument.instrumentId),
         instrumentName: instrument.name,
         time: match?.time ?? "",
-        bid: Number(match?.bid ?? 0),
-        ask: Number(match?.ask ?? 0),
+        bid: match?.bid != null ? Number(match.bid) : null,
+        ask: match?.ask != null ? Number(match.ask) : null,
       };
     });
   }, [otherInstruments, currencyCrosses]);
@@ -265,7 +265,6 @@ const CurrencyCrosses = memo(() => {
     ],
     []
   );
-
   const getRowId = useCallback(
     (params) => String(params.data.instrumentID),
     []

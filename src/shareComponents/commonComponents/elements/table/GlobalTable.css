@@ -2492,3 +2492,12 @@ tr.OutStanding_Table-cell-scrollbar {
 .RateSheetSoftAndKIBOR-wrapper .RateSheetSoftAndKIBOR {
   scrollbar-color: auto !important;
 }
+.custom-loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.custom-loader-img {
+  width: 55px; /* increase as needed */
+}

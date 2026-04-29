@@ -363,13 +363,13 @@ const SpotRates = () => {
                       onChange={handleChangeMarketStatus}
                     />
                   </div>
-                  <CustomButton
+                  {/* <CustomButton
                     value={"Clear Rates"}
                     applyClass="clearRates"
                     disabled={isMarketOn === true ? false : true}
                     onClick={handleClearRates}
                     loading={clearRatesLoading}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

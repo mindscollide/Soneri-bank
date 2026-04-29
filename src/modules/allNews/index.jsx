@@ -363,6 +363,7 @@ const News = () => {
               }
               allowClear={false}
               inputReadOnly
+              format={"DD/MM/YYYY"}
             />
 
             <label className={styles["Tradecount-date-to"]}>to</label>
@@ -377,6 +378,7 @@ const News = () => {
                   current.isAfter(dayjs(), "day"))
               }
               inputReadOnly
+              format={"DD/MM/YYYY"}
               allowClear={false}
             />
 

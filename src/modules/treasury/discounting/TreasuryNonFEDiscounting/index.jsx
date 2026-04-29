@@ -175,6 +175,7 @@ const TreasuryNonFeDiscountingTable = () => {
         dataSource={dataSource}
         prefixCls="Dealer_FE_Discounting"
         pagination={false}
+        loading={dataSource.length === 0}
       />
     </div>
   );
