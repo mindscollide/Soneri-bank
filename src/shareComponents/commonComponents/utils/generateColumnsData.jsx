@@ -523,14 +523,16 @@ export const buildForwardsAgGridTable = (
           {
             headerName: "Bid",
             field: `bid_${inst.instrumentName}`,
-            flex: 1,
+            // flex: 1,
+            width: 100,
             cellClass: "bid-cell",
             cellRenderer: (params) => <IndexCell value={params.value} />,
           },
           {
             headerName: "Ask",
             field: `ask_${inst.instrumentName}`,
-            flex: 1,
+            // flex: 1,
+            width: 100,
             cellClass: "offer-cell",
             cellRenderer: (params) => <IndexCell value={params.value} />,
           },

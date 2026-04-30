@@ -46,7 +46,10 @@ import {
   setUSDParityForManagementFeed,
   tenorWiseFowardsRatesPublishedActions,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
-import { setMarketStatus } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
+import {
+  setMarketStatus,
+  updateTenors,
+} from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import { getAllInstrumentsApi } from "../../../store/actions/authAction";
 import { useMqttClient } from "../../commonComponents/utils/mqttConnection";
 import { getMarketStatusApi } from "../../../store/actions/WatchlistAction";
@@ -124,6 +127,7 @@ const Dashboard = () => {
               };
               dispatch(setTreasuryFowardsTenorsChanges(tenorsData));
               dispatch(setDealerForwardTenorChanged(tenorsData));
+              dispatch(updateTenors(tenorsData));
             });
             break;
 

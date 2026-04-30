@@ -187,49 +187,6 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
 
   // ─────────────────────────────
   // TENOR ADD / REMOVE
-  useEffect(() => {
-    const api = gridApiRef.current;
-    if (!api || !dealerForwardTenorChanged) return;
-
-    const { newIsForwardtenorList = [], removedtenorList = [] } =
-      dealerForwardTenorChanged;
-
-    const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
-
-    const existingRows = [];
-    api.forEachNode((node) => node.data && existingRows.push(node.data));
-
-    const toRemove = existingRows.filter((row) => removedSet.has(row.tenorID));
-
-    const instrumentList =
-      allInstrumentForTreasuryData?.forwardInstruments || [];
-
-    const referenceRow = existingRows[0] || null;
-
-    const toAdd = newIsForwardtenorList.map((tenor) => ({
-      tenorID: tenor.tenorID,
-      tenorName: tenor.tenorName,
-      ...Object.fromEntries(
-        instrumentList.flatMap((inst) => [
-          [`bid_${inst.instrumentName}`, null],
-          [`ask_${inst.instrumentName}`, null],
-        ])
-      ),
-    }));
-
-    if (toAdd.length || toRemove.length) {
-      api.applyTransaction({ add: toAdd, remove: toRemove });
-
-      setTimeout(() => buildNodeMap(api), 0);
-    }
-
-    dispatch(setDealerForwardTenorChanged(null));
-  }, [
-    dealerForwardTenorChanged,
-    allInstrumentForTreasuryData,
-    buildNodeMap,
-    dispatch,
-  ]);
 
   // ─────────────────────────────
   // CLEANUP

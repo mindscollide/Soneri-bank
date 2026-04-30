@@ -43,9 +43,9 @@ const Forwards = memo(() => {
     shallowEqual
   );
   const getAllTenorsRecords = useSelector(
-    (state) => state.WatchListReducer.getAllTenors,
-    shallowEqual
+    (state) => state.WatchListReducer.getAllTenors
   );
+
   const dealerForwardTenorChanged = useSelector(
     (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged,
     shallowEqual
@@ -241,107 +241,110 @@ const Forwards = memo(() => {
 
   useEffect(() => {
     const api = gridRef.current?.api;
-    if (!api || !dealerForwardTenorChanged || !getAllTenorsRecords?.tenors)
-      return;
+    if (
+      api &&
+      dealerForwardTenorChanged !== null &&
+      getAllTenorsRecords !== null
+    ) {
+      try {
+        const { newIsForwardtenorList = [], removedtenorList = [] } =
+          dealerForwardTenorChanged;
 
-    try {
-      const { newIsForwardtenorList = [], removedtenorList = [] } =
-        dealerForwardTenorChanged;
+        const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
+        const addedSet = new Set(newIsForwardtenorList.map((t) => t.tenorID));
 
-      const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
-      const addedSet = new Set(newIsForwardtenorList.map((t) => t.tenorID));
-
-      if (!removedSet.size && !addedSet.size) {
-        dispatch(setDealerForwardTenorChanged(null));
-        return;
-      }
-
-      // 🔥 Get current rows from grid
-      const existingRows = [];
-      api.forEachNode((node) => {
-        if (node.data) existingRows.push(node.data);
-      });
-
-      const existingMap = new Map(
-        existingRows.map((r) => [String(r.tenorID), r])
-      );
-
-      // ---------------- REMOVE ----------------
-      const toRemove = existingRows.filter((row) =>
-        removedSet.has(row.tenorID)
-      );
-
-      // ---------------- ADD ----------------
-      const referenceRow = existingRows[0] || null;
-
-      console.log(referenceRow, "referenceRowreferenceRow");
-
-      const toAdd = [];
-
-      newIsForwardtenorList.forEach((addedTenor) => {
-        if (existingMap.has(String(addedTenor.tenorID))) return;
-
-        const fullTenor =
-          getAllTenorsRecords.tenors.find(
-            (t) => t.tenorID === addedTenor.tenorID
-          ) || addedTenor;
-
-        const previousRow = existingMap.get(String(addedTenor.tenorID));
-
-        // 🔥 Build row (same logic as your reference)
-        const newRow = {
-          tenorID: fullTenor.tenorID,
-          tenorName: fullTenor.tenorName,
-          tenorDays: fullTenor.tenorDays,
-        };
-        console.log(referenceRow, newRow, "referenceRowreferenceRow");
-
-        // Copy instrument columns from reference row
-        if (referenceRow) {
-          Object.keys(referenceRow).forEach((key) => {
-            if (
-              key.startsWith("InstrumentID_") ||
-              key.startsWith("InstrumentName_") ||
-              key.startsWith("bid_") ||
-              key.startsWith("ask_")
-            ) {
-              newRow[key] =
-                previousRow?.[key] !== undefined ? previousRow[key] : "-";
-            }
-          });
+        if (!removedSet.size && !addedSet.size) {
+          dispatch(setDealerForwardTenorChanged(null));
+          return;
         }
 
-        toAdd.push(newRow);
-      });
-
-      // ---------------- APPLY TRANSACTION ----------------
-      if (toAdd.length || toRemove.length) {
-        console.log("⚡ Tenor Transaction", {
-          add: toAdd.length,
-          remove: toRemove.length,
+        // 🔥 Get current rows from grid
+        const existingRows = [];
+        api.forEachNode((node) => {
+          if (node.data) existingRows.push(node.data);
         });
 
-        api.applyTransaction({
-          add: toAdd,
-          remove: toRemove,
-        });
+        const existingMap = new Map(
+          existingRows.map((r) => [String(r.tenorID), r])
+        );
 
-        // 🔥 rebuild node map after change
-        setTimeout(() => {
-          updateNodeMap();
+        // ---------------- REMOVE ----------------
+        const toRemove = existingRows.filter((row) =>
+          removedSet.has(row.tenorID)
+        );
 
-          // process MQTT updates after structure change
-          if (pendingUpdates.current.size > 0 && !rafRef.current) {
-            rafRef.current = requestAnimationFrame(() =>
-              processQueueRef.current?.()
-            );
+        // ---------------- ADD ----------------
+        const referenceRow = existingRows[0] || null;
+
+        console.log(referenceRow, "referenceRowreferenceRow");
+
+        const toAdd = [];
+
+        newIsForwardtenorList.forEach((addedTenor) => {
+          if (existingMap.has(String(addedTenor.tenorID))) return;
+
+          const fullTenor =
+            getAllTenorsRecords.tenors.find(
+              (t) => t.tenorID === addedTenor.tenorID
+            ) || addedTenor;
+
+          const previousRow = existingMap.get(String(addedTenor.tenorID));
+
+          // 🔥 Build row (same logic as your reference)
+          const newRow = {
+            tenorID: fullTenor.tenorID,
+            tenorName: fullTenor.tenorName,
+            tenorDays: fullTenor.tenorDays,
+          };
+          console.log(referenceRow, newRow, "referenceRowreferenceRow");
+
+          // Copy instrument columns from reference row
+          if (referenceRow) {
+            Object.keys(referenceRow).forEach((key) => {
+              if (
+                key.startsWith("InstrumentID_") ||
+                key.startsWith("InstrumentName_") ||
+                key.startsWith("bid_") ||
+                key.startsWith("ask_")
+              ) {
+                newRow[key] =
+                  previousRow?.[key] !== undefined ? previousRow[key] : "-";
+              }
+            });
           }
-        }, 50);
-      }
 
-      dispatch(setDealerForwardTenorChanged(null));
-    } catch (error) {
-      console.error("Tenor sync error:", error);
+          toAdd.push(newRow);
+        });
+
+        // ---------------- APPLY TRANSACTION ----------------
+        if (toAdd.length || toRemove.length) {
+          console.log("⚡ Tenor Transaction", {
+            add: toAdd.length,
+            remove: toRemove.length,
+          });
+
+          api.applyTransaction({
+            add: toAdd,
+            remove: toRemove,
+          });
+
+          // 🔥 rebuild node map after change
+          setTimeout(() => {
+            updateNodeMap();
+
+            // process MQTT updates after structure change
+            if (pendingUpdates.current.size > 0 && !rafRef.current) {
+              rafRef.current = requestAnimationFrame(() =>
+                processQueueRef.current?.()
+              );
+            }
+          }, 50);
+        }
+
+        dispatch(setDealerForwardTenorChanged(null));
+      } catch (error) {
+        console.error("Tenor sync error:", error);
+      }
     }
   }, [dealerForwardTenorChanged, getAllTenorsRecords, updateNodeMap]);
 

@@ -184,6 +184,30 @@ const WatchListSlice = createSlice({
         }
       );
     },
+    updateTenors: (state, { payload }) => {
+      const { removedtenorList, newIsForwardtenorList } = payload;
+
+      const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
+      const addedSet = new Set(newIsForwardtenorList.map((t) => t.tenorID));
+
+      state.getAllTenors.tenors = state.getAllTenors.tenors.map((tenor) => {
+        if (removedSet.has(tenor.tenorID)) {
+          return {
+            ...tenor,
+            isForwardingApplicable: false,
+          };
+        }
+
+        if (addedSet.has(tenor.tenorID)) {
+          return {
+            ...tenor,
+            isForwardingApplicable: true,
+          };
+        }
+
+        return tenor; // unchanged
+      });
+    },
 
     UpdatetDealerSpotRates: (state, { payload }) => {
       state.GetBankSpotForDealer = payload;
@@ -935,6 +959,7 @@ export const {
   UpdatetDealerSpotRates,
   UpdateDealerForwardRates,
   UpdateDealerDiscountingRates,
+  updateTenors,
 
   // Treasury Field Clear Actions
   clearGetBankSpotForDealer,
