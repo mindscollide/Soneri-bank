@@ -28,6 +28,7 @@ import {
   GetNewsDetailsByIDApi,
   GetNewsHeadlinesApi,
   GetRatesForCurrencyNotesForRateSheetApi,
+  GetRefreshIconTenorsApi,
   GetRevalRatesForTreasuryApi,
   GetSBPConversionRatesForRateSheetApi,
   GetSingleDealersSpreadApi,
@@ -94,7 +95,7 @@ const WatchListSlice = createSlice({
     GetSBPConversionRatesForRateSheetLoading: false,
     GetNewsHeadlinesLoading: false,
     GetNewsDetailsByIDLoading: false,
-
+    GetRefreshIconTenorsLoading: false,
     // data states
     GetAllInstrumentForTreasury: null,
     GetBankSpotForTreasury: null,
@@ -144,6 +145,7 @@ const WatchListSlice = createSlice({
     GetIndicativeFBPRates: null,
     GetSBPConversionRatesForRateSheet: null,
     GetNewsHeadlines: null,
+    GetRefreshIconTenors: null,
 
     // About Newa
     NewsByNewsIdViewModal: false,
@@ -941,6 +943,22 @@ const WatchListSlice = createSlice({
       .addCase(GetNewsDetailsByIDApi.rejected, (state, { payload }) => {
         state.GetNewsDetailsByIDLoading = false;
         state.GetNewsDetailsByID = null;
+        state.error = payload;
+      })
+
+      //GetRefreshIconTenorsApi
+      // ------------------ GetRefreshIconTenorsApi ------------------
+      .addCase(GetRefreshIconTenorsApi.pending, (state) => {
+        state.GetRefreshIconTenorsLoading = true;
+      })
+      .addCase(GetRefreshIconTenorsApi.fulfilled, (state, { payload }) => {
+        state.GetRefreshIconTenorsLoading = false;
+        state.GetRefreshIconTenors = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetRefreshIconTenorsApi.rejected, (state, { payload }) => {
+        state.GetRefreshIconTenorsLoading = false;
+        state.GetRefreshIconTenors = null;
         state.error = payload;
       });
 

@@ -19,6 +19,8 @@ const selectWorldCrosses = (state) =>
 const selectWorldCurrencies = (state) =>
   state.WatchListReducer.GetBankSpotForTreasury?.worldCurrencies || [];
 
+//USD Parity is Crosses in the Table
+//Bank Spot is Parity in the Table
 const BankSpotAndUSDParity = memo(() => {
   const dispatch = useDispatch();
 
@@ -160,6 +162,7 @@ const BankSpotAndUSDParity = memo(() => {
             node.setDataValue("worldCurBid", cross.bid);
             node.setDataValue("worldCurOffer", cross.ask);
             node.setDataValue("currencyTime", cross.updateDateTime);
+            node.setDataValue("crossTime", cross.updateDateTime);
           }
         } else if (update.type === "parity") {
           const parity = update.data;

@@ -17,7 +17,10 @@ import {
   setForwardsForTreasuryBranch,
   updateForwardItem,
 } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
-import { PublishTenorWiseForwardsAction } from "../../../../store/actions/WatchlistAction";
+import {
+  GetRefreshIconTenorsApi,
+  PublishTenorWiseForwardsAction,
+} from "../../../../store/actions/WatchlistAction";
 import styles from "./TenorWifeCurrent.module.css";
 import { Tooltip } from "antd";
 
@@ -72,6 +75,9 @@ const TenoreWiseCurrentAndLastRates = ({
   const getTenorWiseForwardsRates = useSelector(
     (state) => state.RealtimeActionsSlice.tenorWiseForwardsRates
   );
+  const GetRefreshIconTenors = useSelector(
+    (state) => state.WatchListReducer.GetRefreshIconTenors
+  );
 
   const [confirmationModal, setConfirmationModal] = useState(false);
   const [TenorRemoveRecord, setTenorRemoveRecord] = useState(null);
@@ -84,6 +90,34 @@ const TenoreWiseCurrentAndLastRates = ({
       setNewTenorRecord(null);
     }
   }, [newTenorRecord]);
+
+  useEffect(() => {
+    if (!GetRefreshIconTenors || !GetRefreshIconTenors.tenors) return;
+
+    const { tenors = [] } = GetRefreshIconTenors;
+
+    const updatedData = forwardsForTreasuryBranch.map((row) => {
+      const matchingTenor = tenors.find(
+        (tenor) => tenor.tenorID === row.tenorID
+      );
+
+      // No match — leave row completely untouched
+      if (!matchingTenor) return row;
+
+      return {
+        ...row,
+        tenorDays: matchingTenor.noOfDays ?? row.tenorDays,
+        currentBid: matchingTenor.bid ?? row.currentBid,
+        currentAsk: matchingTenor.ask ?? row.currentAsk,
+      };
+    });
+
+    const sortedData = updatedData.sort(
+      (a, b) => (a.tenorDays || 0) - (b.tenorDays || 0)
+    );
+
+    dispatch(setForwardsForTreasuryBranch(sortedData));
+  }, [GetRefreshIconTenors]);
 
   useEffect(() => {
     if (getAllTenorsData !== null) {
@@ -306,34 +340,7 @@ const TenoreWiseCurrentAndLastRates = ({
   };
 
   const handleGetDataFromTresmark = () => {
-    if (!getAllTenorsData || !getAllTenorsData.tenors) {
-      return;
-    }
-
-    const { tenors = [] } = getAllTenorsData;
-
-    if (tenors.length === 0) return;
-
-    // Update ONLY tenorDays
-    const updatedData = forwardsForTreasuryBranch.map((row) => {
-      const matchingTenor = tenors.find(
-        (tenor) => tenor.tenorID === row.tenorID
-      );
-
-      console.log(matchingTenor, "matchingTenormatchingTenor");
-      return {
-        ...row,
-        tenorDays:
-          matchingTenor !== undefined ? matchingTenor.tenorDays : row.tenorDays,
-      };
-    });
-
-    // Optional: re-sort by tenorDays like your useEffect does
-    const sortedData = updatedData.sort(
-      (a, b) => (a.tenorDays || 0) - (b.tenorDays || 0)
-    );
-
-    dispatch(setForwardsForTreasuryBranch(sortedData));
+    dispatch(GetRefreshIconTenorsApi({ navigate }));
   };
 
   const columns = [

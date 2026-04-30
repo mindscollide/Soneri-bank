@@ -32,6 +32,7 @@ import {
   GetNewsDetailsByID,
   GetNewsHeadlines,
   GetRatesForCurrencyNotesForRateSheet,
+  GetRefreshIconTenors,
   GetRevalRatesForTreasury,
   GetSBPConversionRatesForRateSheet,
   GetSingleDealersSpread,
@@ -2841,6 +2842,80 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
     } catch (error) {
       console.log(error);
       // Reject with error message
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+//GetRefreshIconTenors
+
+// Define the GetRefreshIconTenors async thunk
+export const GetRefreshIconTenorsApi = createAsyncThunk(
+  "watchlist/GetRefreshIconTenors", // A unique action type string
+  async ({}, { rejectWithValue }) => {
+    try {
+      let GetRefreshIconTenorsData = createPostAPI(
+        watchListApi,
+        GetRefreshIconTenors.RequestMethod
+      );
+
+      const response = await GetRefreshIconTenorsData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
       return rejectWithValue("Something went wrong");
     }
   }

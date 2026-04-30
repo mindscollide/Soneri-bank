@@ -174,3 +174,7 @@ export const GetNewsHeadlines = {
 export const GetNewsDetailsByID = {
   RequestMethod: "ServiceManager.GetNewsDetails",
 };
+
+export const GetRefreshIconTenors = {
+  RequestMethod: "ServiceManager.GetRefreshIconTenors",
+};
