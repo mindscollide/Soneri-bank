@@ -115,8 +115,10 @@ const Forwards = memo(() => {
     pendingUpdates.current.clear();
 
     updates.forEach(([key, update]) => {
-      const [tenorID, instrumentName] = key.split("|");
+      const [tenorID, instrumentName] = key.split("_");
       const node = rowNodeMap.current.get(String(tenorID));
+
+      console.log(update, node, key, "updateupdateupdate");
 
       if (node && node.data) {
         try {
@@ -187,7 +189,7 @@ const Forwards = memo(() => {
         );
 
         if (inst) {
-          const key = `${rate.tenorID}|${inst.instrumentName}`;
+          const key = `${rate.tenorID}_${inst.instrumentName}`;
           pendingUpdates.current.set(key, {
             bid: rate.bidWithSpread,
             ask: rate.askWithSpread,

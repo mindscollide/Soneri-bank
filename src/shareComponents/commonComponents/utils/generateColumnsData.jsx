@@ -477,8 +477,8 @@ export const buildForwardsAgGridTable = (
     Data.forEach((entry) => {
       const key = `${entry.instrumentID}-${entry.tenorID}`;
       rateMap[key] = {
-        bid: entry.bid ?? 0,
-        ask: value === 3 ? entry.offer : entry.ask ?? 0,
+        bid: entry.bid ?? null,
+        ask: value === 3 ? entry.offer : entry.ask ?? null,
       };
     });
 
@@ -492,7 +492,7 @@ export const buildForwardsAgGridTable = (
 
       applicableInstruments.forEach((inst) => {
         const key = `${inst.instrumentID}-${tenor.tenorID}`;
-        const rates = rateMap[key] || { bid: 0, ask: 0 };
+        const rates = rateMap[key] || { bid: null, ask: null };
 
         row[`bid_${inst.instrumentName}`] = rates.bid;
         row[`ask_${inst.instrumentName}`] = rates.ask;
@@ -592,7 +592,7 @@ export const buildDiscountingAgGridTable = (
 
       applicableInstruments.forEach((instrument) => {
         const compositeKey = `${instrument.instrumentID}-${tenor.tenorID}`;
-        const rateValue = rateMap[compositeKey] ?? 0;
+        const rateValue = rateMap[compositeKey] ?? null;
 
         row[`rate_${instrument.instrumentName}`] = rateValue;
         row[`InstrumentID_${instrument.instrumentName}`] =
