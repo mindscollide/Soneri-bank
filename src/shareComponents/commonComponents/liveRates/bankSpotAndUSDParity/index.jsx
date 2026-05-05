@@ -3,7 +3,10 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
 import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
-import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import {
+  clearTreasurySpotRatesFeed,
+  currentRatePublishedAction,
+} from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
 
@@ -77,7 +80,8 @@ const BankSpotAndUSDParity = memo(() => {
         instrumentName: inst.instrumentName,
         secondaryInstrumentName: inst.secondaryInstrumentName,
         crossTime: cross?.time ?? "",
-        currencyTime: inst.instrumentID === 21 ? cross?.time : "",
+        currencyTime:
+          inst.instrumentID === 21 ? cross?.time : (currency?.time ?? ""),
 
         worldCrossBid: cross?.bid ?? 0,
         worldCrossOffer: cross?.offer ?? 0,
