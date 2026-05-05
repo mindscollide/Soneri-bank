@@ -1,183 +1,310 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { throttle } from "lodash";
-import { buildDiscountingTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
-import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
-import GlobalTable from "../../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "./TreasuryFEDiscountingTable.module.css";
+
 import { clearTreasuryFeDiscounting } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
-// ─────────────────────────────────────────────
-// Constants
-const THROTTLE_MS = 100;
-
-const zeroRates = (rows) =>
-  rows.map((row) => {
-    const updated = { ...row };
-    Object.keys(updated).forEach((key) => {
-      if (key.startsWith("rate_")) {
-        updated[key] = 0;
-      }
-    });
-    return updated;
-  });
+import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
+import { buildDiscountingAgGridTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
+import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // ─────────────────────────────────────────────
-const TreasuryFeDiscountingTable = () => {
+const THROTTLE_INTERVAL_MS = 50; // ~20fps
+
+const TreasuryFeDiscountingTable = memo(() => {
   const dispatch = useDispatch();
 
-  // Local State
-  const [dataSource, setDataSource] = useState([]);
-  const [columnsData, setColumnsData] = useState([]);
+  // --- Refs ---
+  const gridRef = useRef(null);
+  const rowNodeMap = useRef(new Map()); // TenorID (string) → rowNode
+  const pendingUpdates = useRef(new Map()); // "TenorID|instrumentName" → rate value
+  const rafRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
+  const processQueueRef = useRef(null);
+  const isGridReadyRef = useRef(false);
 
-  // Performance Refs
-  const dataSourceRef = useRef([]);
-  const pendingRatesRef = useRef([]);
-  const isTableInitialized = useRef(false);
-
-  // Redux Selectors
+  // --- Selectors ---
+  const TreasuryFeDiscounting = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryFeDiscounting,
+    shallowEqual
+  );
   const GetDiscountingRatesForTreasury = useSelector(
-    (state) => state.WatchListReducer.GetDiscountingRatesForTreasury
+    (state) => state.WatchListReducer.GetDiscountingRatesForTreasury,
+    shallowEqual
   );
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
   const allInstrumentForTreasuryData = useSelector(
-    (state) => state.WatchListReducer.GetAllInstrumentForTreasury
-  );
-  const TreasuryFeDiscounting = useSelector(
-    (state) => state.RealtimeActionsSlice.TreasuryFeDiscounting
+    (state) => state.WatchListReducer.GetAllInstrumentForTreasury,
+    shallowEqual
   );
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
 
-  // ─────────────────────────────────────────────
-  const applyRows = useCallback((rows) => {
-    dataSourceRef.current = rows;
-    setDataSource(rows);
-  }, []);
+  // ── 1. Build initial rowData + columnDefs ──────────────────────────────────
+  const { rowData, columnDefs } = useMemo(() => {
+    const { feDiscountingRates = [] } = GetDiscountingRatesForTreasury || {};
 
-  // 1. Initial Build
-  useEffect(() => {
-    if (getAllTenorsRecords && allInstrumentForTreasuryData) {
-      try {
-        const { feDiscountingRates = [] } =
-          GetDiscountingRatesForTreasury || {};
-        const getAllInstrument = {
-          instruments: allInstrumentForTreasuryData.discountingInstruments,
-        };
-        const getAllTenorsData = { tenors: getAllTenorsRecords.tenors };
-
-        const { columnsData: cols, rowData } = buildDiscountingTable(
-          3,
-          feDiscountingRates,
-          getAllTenorsData,
-          getAllInstrument,
-          IndexCell
-        );
-
-        if (rowData.length > 0) {
-          applyRows(rowData);
-          setColumnsData(cols);
-          isTableInitialized.current = true;
-        }
-      } catch (error) {
-        console.error("Treasury Build Error:", error);
-      }
-    }
+    return buildDiscountingAgGridTable(
+      3,
+      feDiscountingRates,
+      { tenors: getAllTenorsRecords?.tenors || [] },
+      {
+        instruments: allInstrumentForTreasuryData?.discountingInstruments || [],
+      },
+      IndexCell
+    );
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
     GetDiscountingRatesForTreasury,
-    applyRows,
   ]);
 
-  // 2. Throttled Logic (Optimized for High Frequency)
-  const throttledUpdateRef = useRef(
-    throttle(() => {
-      const pending = pendingRatesRef.current;
-      if (!pending.length) return;
+  // ── 2. Rebuild node map (TenorID — capital T, matches buildDiscountingAgGridTable) ──
+  const updateNodeMap = useCallback(() => {
+    const api = gridRef.current?.api;
+    if (!api || !isGridReadyRef.current) return;
 
-      // Flatten payloads and map by unique key
-      const allRates = pending.flatMap((p) => p.feDiscountingRates ?? []);
-      if (!allRates.length) return;
+    rowNodeMap.current.clear();
+    api.forEachNode((node) => {
+      if (node.data?.TenorID != null) {
+        rowNodeMap.current.set(String(node.data.TenorID), node);
+      }
+    });
+  }, []);
 
-      // O(1) Lookup: "tenorID|instrumentID"
-      const rateMap = new Map(
-        allRates.map((d) => [`${d.tenorID}|${d.instrumentID}`, d])
+  // ── 3. RAF-throttled queue processor (~20fps) ─────────────────────────────
+  const processQueue = useCallback(() => {
+    const api = gridRef.current?.api;
+
+    if (!isMountedRef.current || !api) {
+      rafRef.current = null;
+      return;
+    }
+
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastProcessTime.current < THROTTLE_INTERVAL_MS) {
+      rafRef.current = requestAnimationFrame(() => processQueueRef.current?.());
+      return;
+    }
+
+    lastProcessTime.current = now;
+
+    let updatedCount = 0;
+    let notFoundCount = 0;
+
+    const updates = Array.from(pendingUpdates.current.entries());
+    pendingUpdates.current.clear();
+
+    updates.forEach(([key, rate]) => {
+      // key: "TenorID|instrumentName"  e.g. "5|USD"
+      const [tenorID, instrumentName] = key.split("|");
+      const node = rowNodeMap.current.get(String(tenorID));
+
+      if (node && node.data) {
+        try {
+          node.setDataValue(`rate_${instrumentName}`, rate);
+          updatedCount++;
+        } catch (error) {
+          console.error("FE Discounting: setDataValue error:", error, {
+            tenorID,
+            instrumentName,
+          });
+        }
+      } else {
+        notFoundCount++;
+        if (rowNodeMap.current.size > 0) {
+          console.warn(
+            `FE Discounting: node not found for TenorID: ${tenorID}, available: [${Array.from(
+              rowNodeMap.current.keys()
+            ).join(", ")}]`
+          );
+        }
+      }
+    });
+
+    if (updatedCount > 0) {
+      console.log(
+        `✓ FE Discounting: Updated ${updatedCount} cells${
+          notFoundCount > 0 ? `, ${notFoundCount} not found` : ""
+        }`
       );
+    }
 
-      const affectedTenors = new Set(allRates.map((d) => String(d.tenorID)));
+    rafRef.current = null;
+  }, []);
 
-      const updated = dataSourceRef.current.map((row) => {
-        const currentTenorId = String(row.TenorID || row.tenorID);
+  useEffect(() => {
+    processQueueRef.current = processQueue;
+  }, [processQueue]);
 
-        // Skip cloning if row hasn't changed
-        if (!affectedTenors.has(currentTenorId)) return row;
+  // ── 4. Receive real-time MQTT feed ───────────────────────────────────────
+  useEffect(() => {
+    if (
+      !TreasuryFeDiscounting ||
+      TreasuryFeDiscounting.length === 0 ||
+      !allInstrumentForTreasuryData?.discountingInstruments
+    ) {
+      return;
+    }
 
-        const updatedRow = { ...row };
+    const feeds = Array.isArray(TreasuryFeDiscounting)
+      ? TreasuryFeDiscounting
+      : [TreasuryFeDiscounting];
 
-        Object.keys(row).forEach((key) => {
-          if (!key.startsWith("InstrumentID_")) return;
+    console.log("📨 FE Discounting: MQTT feeds received:", feeds.length);
 
-          const instrumentID = row[key];
-          const rate = rateMap.get(`${currentTenorId}|${instrumentID}`);
+    let updateCount = 0;
 
-          if (!rate) return;
+    feeds.forEach((feed) => {
+      const rates = feed?.feDiscountingRates ?? [];
 
-          const currency = key.split("_")[1];
-          updatedRow[`rate_${currency}`] = rate.bidWithSpread;
-        });
+      rates.forEach((rate) => {
+        // Match instrumentID → instrumentName (same key used in buildDiscountingAgGridTable)
+        const inst = allInstrumentForTreasuryData.discountingInstruments.find(
+          (i) => Number(i.instrumentID) === Number(rate.instrumentID)
+        );
 
-        return updatedRow;
+        if (inst) {
+          // key: "TenorID|instrumentName"  value: rate.bidWithSpread
+          const key = `${rate.tenorID}|${inst.instrumentName}`;
+          pendingUpdates.current.set(key, rate.bidWithSpread);
+          updateCount++;
+        }
       });
+    });
 
-      applyRows(updated);
+    console.log(
+      `📊 FE Discounting: Queued ${updateCount} updates, pending: ${pendingUpdates.current.size}`
+    );
 
-      // Clear buffers
-      pendingRatesRef.current = [];
-      dispatch(clearTreasuryFeDiscounting());
-    }, THROTTLE_MS)
+    if (pendingUpdates.current.size > 0) {
+      if (rowNodeMap.current.size === 0) {
+        updateNodeMap();
+        setTimeout(() => {
+          if (rowNodeMap.current.size > 0 && !rafRef.current) {
+            rafRef.current = requestAnimationFrame(() =>
+              processQueueRef.current?.()
+            );
+          }
+        }, 100);
+      } else if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(() =>
+          processQueueRef.current?.()
+        );
+      }
+    }
+
+    const clearId = setTimeout(() => {
+      if (isMountedRef.current) dispatch(clearTreasuryFeDiscounting());
+    }, 1000);
+
+    return () => clearTimeout(clearId);
+  }, [
+    TreasuryFeDiscounting,
+    allInstrumentForTreasuryData,
+    dispatch,
+    updateNodeMap,
+  ]);
+
+  // ── 5. Market closed → zero all rate cells ───────────────────────────────
+  useEffect(() => {
+    const api = gridRef.current?.api;
+    if (marketStatus === false && api && isGridReadyRef.current) {
+      api.forEachNode((node) => {
+        if (!node.data) return;
+        Object.keys(node.data).forEach((key) => {
+          if (key.startsWith("rate_")) node.setDataValue(key, 0);
+        });
+      });
+      console.log("📴 FE Discounting: Market closed — rates zeroed");
+    }
+  }, [marketStatus]);
+
+  // ── 6. Grid lifecycle events ─────────────────────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      console.log("✅ FE Discounting Grid ready");
+      isGridReadyRef.current = true;
+      setTimeout(() => updateNodeMap(), 100);
+    },
+    [updateNodeMap]
   );
 
-  // 3. Receive Updates
-  useEffect(() => {
-    if (!TreasuryFeDiscounting || TreasuryFeDiscounting.length === 0) return;
+  const onFirstDataRendered = useCallback(() => {
+    console.log("✅ FE Discounting: First data rendered");
+    updateNodeMap();
+  }, [updateNodeMap]);
 
-    pendingRatesRef.current = [
-      ...pendingRatesRef.current,
-      ...TreasuryFeDiscounting,
-    ];
-    throttledUpdateRef.current();
-  }, [TreasuryFeDiscounting]);
+  const onRowDataUpdated = useCallback(() => {
+    console.log("🔃 FE Discounting: Row data updated");
+    updateNodeMap();
+  }, [updateNodeMap]);
 
-  // 4. Market Status
+  // ── 7. Cleanup ───────────────────────────────────────────────────────────
   useEffect(() => {
-    if (marketStatus === false && isTableInitialized.current) {
-      applyRows(zeroRates(dataSourceRef.current));
-    }
-  }, [marketStatus, applyRows]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => throttledUpdateRef.current.cancel();
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+    };
   }, []);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
 
   return (
     <div className={styles.mainDiscountingTable}>
       <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
         FE Discounting
       </span>
-      <GlobalTable
-        columns={columnsData}
-        dataSource={dataSource}
-        prefixCls="Dealer_FE_Discounting"
-        pagination={false}
-        loading={dataSource.length === 0}
+
+      <AgGridTable
+        ref={gridRef}
+        columnDefs={columnDefs}
+        className="fe-discounting-grid"
+        rowData={rowData}
+        // NOTE: TenorID with capital T — matches buildDiscountingAgGridTable row shape
+        getRowId={(params) => String(params.data.TenorID)}
+        onGridReady={onGridReady}
+        onFirstDataRendered={onFirstDataRendered}
+        onRowDataUpdated={onRowDataUpdated}
+        suppressColumnVirtualisation={true}
+        suppressRowVirtualisation={false}
+        animateRows={false}
+        headerHeight={35}
+        groupHeaderHeight={35}
+        rowHeight={32}
+        defaultColDef={defaultColDef}
+        suppressScrollOnNewData={true}
+        suppressAnimationFrame={false}
+        loadingOverlayComponent={SectionLoader}
       />
     </div>
   );
-};
+});
+
+TreasuryFeDiscountingTable.displayName = "TreasuryFeDiscountingTable";
 
 export default TreasuryFeDiscountingTable;

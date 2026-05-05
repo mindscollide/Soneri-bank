@@ -1,181 +1,254 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { throttle } from "lodash";
-import { buildDiscountingTable } from "../../utils/generateColumnsData";
-import { IndexCell } from "../../elements/inputField/IndexCell";
-import GlobalTable from "../../elements/table/GlobalTable";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "./dealerNonFEDiscountingTable.module.css";
+
 import { UpdateDealerDiscountingRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
 import {
   clearDealerDiscountingClearRates,
   clearTreasuryDealerNonFeDiscounting,
 } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
-// ─────────────────────────────────────────────
-// Constants
-const THROTTLE_MS = 100;
-
-const zeroRates = (rows) =>
-  rows.map((row) => {
-    const updated = { ...row };
-    Object.keys(updated).forEach((key) => {
-      if (key.startsWith("rate_")) {
-        updated[key] = 0;
-      }
-    });
-    return updated;
-  });
+import { IndexCell } from "../../elements/inputField/IndexCell";
+import { buildDiscountingAgGridTable } from "../../utils/generateColumnsData";
+import AgGridTable from "../../elements/globalAgGridTable";
+import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
 
 // ─────────────────────────────────────────────
-const DealerNonFeDiscountingTable = () => {
+const THROTTLE_INTERVAL_MS = 50; // ~20fps
+
+const DealerNonFeDiscountingTable = memo(() => {
   const dispatch = useDispatch();
 
-  // Local State
-  const [dataSource, setDataSource] = useState([]);
-  const [columnsData, setColumnsData] = useState([]);
+  // --- Refs ---
+  const gridRef = useRef(null);
+  const rowNodeMap = useRef(new Map()); // TenorID (string) → rowNode
+  const pendingUpdates = useRef(new Map()); // "TenorID|instrumentName" → rate value
+  const rafRef = useRef(null);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
+  const processQueueRef = useRef(null);
+  const isGridReadyRef = useRef(false);
 
-  // Performance Refs
-  const dataSourceRef = useRef([]);
-  const pendingRatesRef = useRef([]);
-  const isTableInitialized = useRef(false);
-
-  // Redux Selectors
+  // --- Selectors ---
+  const TreasuryDealerNonFeDiscounting = useSelector(
+    (state) => state.RealtimeActionsSlice.TreasuryDealerNonFeDiscounting,
+    shallowEqual
+  );
   const GetDiscountingRatesForDealer = useSelector(
-    (state) => state.WatchListReducer.GetDiscountingRatesForDealer
+    (state) => state.WatchListReducer.GetDiscountingRatesForDealer,
+    shallowEqual
   );
   const getAllTenorsRecords = useSelector(
     (state) => state.WatchListReducer.getAllTenors
   );
   const allInstrumentForTreasuryData = useSelector(
-    (state) => state.WatchListReducer.GetAllInstrumentForTreasury
-  );
-  const TreasuryDealerNonFeDiscounting = useSelector(
-    (state) => state.RealtimeActionsSlice.TreasuryDealerNonFeDiscounting
+    (state) => state.WatchListReducer.GetAllInstrumentForTreasury,
+    shallowEqual
   );
   const marketStatus = useSelector(
     (state) => state.WatchListReducer.getMarketStatus
   );
   const ClearRatesData = useSelector(
-    (state) => state.RealtimeActionsSlice.DealerDiscountingClearRates
+    (state) => state.RealtimeActionsSlice.DealerDiscountingClearRates,
+    shallowEqual
   );
 
-  // ─────────────────────────────────────────────
-  // Core Updater
-  const applyRows = useCallback((rows) => {
-    dataSourceRef.current = rows;
-    setDataSource(rows);
-  }, []);
+  // ── 1. Build initial rowData + columnDefs ──────────────────────────────────
+  // Reuses buildDiscountingAgGridTable — just swaps in nonFEDiscountingInstruments
+  const { rowData, columnDefs } = useMemo(() => {
+    const { nonFEDiscountingRates = [] } = GetDiscountingRatesForDealer || {};
 
-  // 1. Initial Table Build
-  useEffect(() => {
-    if (getAllTenorsRecords && allInstrumentForTreasuryData) {
-      try {
-        const { nonFEDiscountingRates = [] } =
-          GetDiscountingRatesForDealer || {};
-        const getAllInstrument = {
-          instruments: allInstrumentForTreasuryData.nonFEDiscountingInstruments,
-        };
-        const getAllTenorsData = { tenors: getAllTenorsRecords.tenors };
-
-        const { columnsData: cols, rowData } = buildDiscountingTable(
-          3,
-          nonFEDiscountingRates,
-          getAllTenorsData,
-          getAllInstrument,
-          IndexCell
-        );
-
-        if (rowData.length > 0) {
-          applyRows(rowData);
-          setColumnsData(cols);
-          isTableInitialized.current = true;
-        }
-      } catch (error) {
-        console.error("Non-FE Table Build Error:", error);
-      }
-    }
+    return buildDiscountingAgGridTable(
+      3,
+      nonFEDiscountingRates,
+      { tenors: getAllTenorsRecords?.tenors || [] },
+      {
+        instruments:
+          allInstrumentForTreasuryData?.nonFEDiscountingInstruments || [],
+      },
+      IndexCell
+    );
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
     GetDiscountingRatesForDealer,
-    applyRows,
   ]);
 
-  // 2. Throttled Batch Processor (Optimized Logic)
-  const throttledUpdateRef = useRef(
-    throttle(() => {
-      const pending = pendingRatesRef.current;
-      if (!pending.length) return;
+  // ── 2. Rebuild node map (TenorID — capital T) ─────────────────────────────
+  const updateNodeMap = useCallback(() => {
+    const api = gridRef.current?.api;
+    if (!api || !isGridReadyRef.current) return;
 
-      // Flatten multiple updates into one rate list
-      const allRates = pending.flatMap((p) => p.nonFeDiscountingRates ?? []);
-      if (!allRates.length) return;
+    rowNodeMap.current.clear();
+    api.forEachNode((node) => {
+      if (node.data?.TenorID != null) {
+        rowNodeMap.current.set(String(node.data.TenorID), node);
+      }
+    });
+  }, []);
 
-      // O(1) Lookup: "tenorID|instrumentID"
-      const rateMap = new Map(
-        allRates.map((d) => [`${d.tenorID}|${d.instrumentID}`, d])
+  // ── 3. RAF-throttled queue processor (~20fps) ─────────────────────────────
+  const processQueue = useCallback(() => {
+    const api = gridRef.current?.api;
+
+    if (!isMountedRef.current || !api) {
+      rafRef.current = null;
+      return;
+    }
+
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastProcessTime.current < THROTTLE_INTERVAL_MS) {
+      rafRef.current = requestAnimationFrame(() => processQueueRef.current?.());
+      return;
+    }
+
+    lastProcessTime.current = now;
+
+    let updatedCount = 0;
+    let notFoundCount = 0;
+
+    const updates = Array.from(pendingUpdates.current.entries());
+    pendingUpdates.current.clear();
+
+    updates.forEach(([key, rate]) => {
+      // key: "TenorID|instrumentName"  e.g. "5|USD"
+      const [tenorID, instrumentName] = key.split("|");
+      const node = rowNodeMap.current.get(String(tenorID));
+
+      if (node && node.data) {
+        try {
+          node.setDataValue(`rate_${instrumentName}`, rate);
+          updatedCount++;
+        } catch (error) {
+          console.error("NonFE Discounting: setDataValue error:", error, {
+            tenorID,
+            instrumentName,
+          });
+        }
+      } else {
+        notFoundCount++;
+        if (rowNodeMap.current.size > 0) {
+          console.warn(
+            `NonFE Discounting: node not found for TenorID: ${tenorID}, available: [${Array.from(
+              rowNodeMap.current.keys()
+            ).join(", ")}]`
+          );
+        }
+      }
+    });
+
+    if (updatedCount > 0) {
+      console.log(
+        `✓ NonFE Discounting: Updated ${updatedCount} cells${
+          notFoundCount > 0 ? `, ${notFoundCount} not found` : ""
+        }`
       );
+    }
 
-      // Identify which tenors actually need a re-render
-      const affectedTenors = new Set(allRates.map((d) => String(d.tenorID)));
+    rafRef.current = null;
+  }, []);
 
-      const updated = dataSourceRef.current.map((row) => {
-        const currentTenorId = String(row.TenorID || row.tenorID);
+  useEffect(() => {
+    processQueueRef.current = processQueue;
+  }, [processQueue]);
 
-        if (!affectedTenors.has(currentTenorId)) return row;
-
-        const updatedRow = { ...row };
-        Object.keys(row).forEach((key) => {
-          if (!key.startsWith("InstrumentID_")) return;
-
-          const instrumentID = row[key];
-          const rate = rateMap.get(`${currentTenorId}|${instrumentID}`);
-
-          if (!rate) return;
-
-          const currency = key.split("_")[1];
-          updatedRow[`rate_${currency}`] = rate.bidWithSpread;
-        });
-
-        return updatedRow;
-      });
-
-      applyRows(updated);
-
-      // Clear buffer and sync Redux
-      pendingRatesRef.current = [];
-      dispatch(clearTreasuryDealerNonFeDiscounting());
-    }, THROTTLE_MS)
-  );
-
-  // 3. Receive Realtime Buffer Updates
+  // ── 4. Receive real-time MQTT feed ───────────────────────────────────────
   useEffect(() => {
     if (
       !TreasuryDealerNonFeDiscounting ||
-      TreasuryDealerNonFeDiscounting.length === 0
-    )
+      TreasuryDealerNonFeDiscounting.length === 0 ||
+      !allInstrumentForTreasuryData?.nonFEDiscountingInstruments
+    ) {
       return;
-
-    pendingRatesRef.current = [
-      ...pendingRatesRef.current,
-      ...TreasuryDealerNonFeDiscounting,
-    ];
-    throttledUpdateRef.current();
-  }, [TreasuryDealerNonFeDiscounting]);
-
-  // 4. Handle Market Closed
-  useEffect(() => {
-    if (marketStatus === false && isTableInitialized.current) {
-      applyRows(zeroRates(dataSourceRef.current));
     }
-  }, [marketStatus, applyRows]);
 
-  // 5. Global Clear Rates
+    const feeds = Array.isArray(TreasuryDealerNonFeDiscounting)
+      ? TreasuryDealerNonFeDiscounting
+      : [TreasuryDealerNonFeDiscounting];
+
+    console.log("📨 NonFE Discounting: MQTT feeds received:", feeds.length);
+
+    let updateCount = 0;
+
+    feeds.forEach((feed) => {
+      const rates = feed?.nonFeDiscountingRates ?? [];
+
+      rates.forEach((rate) => {
+        const inst =
+          allInstrumentForTreasuryData.nonFEDiscountingInstruments.find(
+            (i) => Number(i.instrumentID) === Number(rate.instrumentID)
+          );
+
+        if (inst) {
+          const key = `${rate.tenorID}|${inst.instrumentName}`;
+          pendingUpdates.current.set(key, rate.bidWithSpread);
+          updateCount++;
+        }
+      });
+    });
+
+    console.log(
+      `📊 NonFE Discounting: Queued ${updateCount} updates, pending: ${pendingUpdates.current.size}`
+    );
+
+    if (pendingUpdates.current.size > 0) {
+      if (rowNodeMap.current.size === 0) {
+        updateNodeMap();
+        setTimeout(() => {
+          if (rowNodeMap.current.size > 0 && !rafRef.current) {
+            rafRef.current = requestAnimationFrame(() =>
+              processQueueRef.current?.()
+            );
+          }
+        }, 100);
+      } else if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(() =>
+          processQueueRef.current?.()
+        );
+      }
+    }
+
+    const clearId = setTimeout(() => {
+      if (isMountedRef.current) dispatch(clearTreasuryDealerNonFeDiscounting());
+    }, 1000);
+
+    return () => clearTimeout(clearId);
+  }, [
+    TreasuryDealerNonFeDiscounting,
+    allInstrumentForTreasuryData,
+    dispatch,
+    updateNodeMap,
+  ]);
+
+  // ── 5. Market closed → zero all rate cells ───────────────────────────────
+  useEffect(() => {
+    const api = gridRef.current?.api;
+    if (marketStatus === false && api && isGridReadyRef.current) {
+      api.forEachNode((node) => {
+        if (!node.data) return;
+        Object.keys(node.data).forEach((key) => {
+          if (key.startsWith("rate_")) node.setDataValue(key, 0);
+        });
+      });
+      console.log("📴 NonFE Discounting: Market closed — rates zeroed");
+    }
+  }, [marketStatus]);
+
+  // ── 6. Global Clear Rates ────────────────────────────────────────────────
+  // Mirrors original logic but operates on the grid directly instead of setState
   useEffect(() => {
     if (!ClearRatesData?.areRatesClear) return;
 
+    const api = gridRef.current?.api;
+
     try {
       if (GetDiscountingRatesForDealer?.nonFEDiscountingRates?.length) {
+        // Dispatch zeroed rates to Redux (triggers useMemo → new rowData → grid refresh)
         const clearedRates =
           GetDiscountingRatesForDealer.nonFEDiscountingRates.map((item) => ({
             ...item,
@@ -188,33 +261,96 @@ const DealerNonFeDiscountingTable = () => {
             nonFEDiscountingRates: clearedRates,
           })
         );
-      } else {
-        applyRows(zeroRates(dataSourceRef.current));
+      } else if (api && isGridReadyRef.current) {
+        // Fallback: zero cells directly on the grid
+        api.forEachNode((node) => {
+          if (!node.data) return;
+          Object.keys(node.data).forEach((key) => {
+            if (key.startsWith("rate_")) node.setDataValue(key, 0);
+          });
+        });
       }
+
       dispatch(clearDealerDiscountingClearRates());
     } catch (error) {
-      console.error("Clear Non-FE Rates Error:", error);
+      console.error("NonFE Discounting: Clear Rates Error:", error);
     }
-  }, [ClearRatesData, GetDiscountingRatesForDealer, dispatch, applyRows]);
+  }, [ClearRatesData, GetDiscountingRatesForDealer, dispatch]);
 
-  // Cleanup on unmount
+  // ── 7. Grid lifecycle events ─────────────────────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      console.log("✅ NonFE Discounting Grid ready");
+      isGridReadyRef.current = true;
+      setTimeout(() => updateNodeMap(), 100);
+    },
+    [updateNodeMap]
+  );
+
+  const onFirstDataRendered = useCallback(() => {
+    console.log("✅ NonFE Discounting: First data rendered");
+    updateNodeMap();
+  }, [updateNodeMap]);
+
+  const onRowDataUpdated = useCallback(() => {
+    console.log("🔃 NonFE Discounting: Row data updated");
+    updateNodeMap();
+  }, [updateNodeMap]);
+
+  // ── 8. Cleanup ───────────────────────────────────────────────────────────
   useEffect(() => {
-    return () => throttledUpdateRef.current.cancel();
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+    };
   }, []);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
 
   return (
     <div className={styles.mainDiscountingTable}>
       <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
         Non FE Discounting
       </span>
-      <GlobalTable
-        columns={columnsData}
-        dataSource={dataSource}
-        prefixCls="Dealer_FE_Discounting"
-        pagination={false}
+
+      <AgGridTable
+        ref={gridRef}
+        columnDefs={columnDefs}
+        className="fe-discounting-grid"
+        rowData={rowData}
+        getRowId={(params) => String(params.data.TenorID)}
+        onGridReady={onGridReady}
+        onFirstDataRendered={onFirstDataRendered}
+        onRowDataUpdated={onRowDataUpdated}
+        suppressColumnVirtualisation={true}
+        suppressRowVirtualisation={false}
+        animateRows={false}
+        headerHeight={35}
+        groupHeaderHeight={35}
+        rowHeight={32}
+        defaultColDef={defaultColDef}
+        suppressScrollOnNewData={true}
+        suppressAnimationFrame={false}
+        loadingOverlayComponent={SectionLoader}
       />
     </div>
   );
-};
+});
+
+DealerNonFeDiscountingTable.displayName = "DealerNonFeDiscountingTable";
 
 export default DealerNonFeDiscountingTable;
