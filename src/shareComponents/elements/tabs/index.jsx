@@ -35,7 +35,7 @@ const GlobalTabs = ({ items = [], tabBarExtraContent, onChange }) => {
       centered
       items={items}
       tabBarExtraContent={tabBarExtraContent}
-      destroyOnHidden
+      destroyOnHidden={false}
       activeKey={activeKey}
       onChange={handleChange} // ✅ always use internal handler
     />
