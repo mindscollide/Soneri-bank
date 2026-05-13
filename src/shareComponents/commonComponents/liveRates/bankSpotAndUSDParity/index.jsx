@@ -70,7 +70,7 @@ const BankSpotAndUSDParity = memo(() => {
 
     return crossInstruments.map((inst) => {
       const cross = crossMap.get(
-        `${inst.instrumentID}_${inst.secondaryInstrumentID}`,
+        `${inst.instrumentID}_${inst.secondaryInstrumentID}`
       );
       const currency = currencyMap.get(inst.instrumentID);
 
@@ -81,16 +81,14 @@ const BankSpotAndUSDParity = memo(() => {
         secondaryInstrumentName: inst.secondaryInstrumentName,
         crossTime: cross?.time ?? "",
         currencyTime:
-          inst.instrumentID === 21 ? cross?.time : (currency?.time ?? ""),
+          inst.instrumentID === 21 ? cross?.time : currency?.time ?? "",
 
         worldCrossBid: cross?.bid ?? 0,
         worldCrossOffer: cross?.offer ?? 0,
         worldCurBid:
-          inst.instrumentID === 21 ? (cross?.bid ?? 0) : (currency?.bid ?? 0),
+          inst.instrumentID === 21 ? cross?.bid ?? 0 : currency?.bid ?? 0,
         worldCurOffer:
-          inst.instrumentID === 21
-            ? (cross?.offer ?? 0)
-            : (currency?.offer ?? 0),
+          inst.instrumentID === 21 ? cross?.offer ?? 0 : currency?.offer ?? 0,
       };
     });
   }, [crossInstruments, crossMap, currencyMap]);
@@ -127,7 +125,7 @@ const BankSpotAndUSDParity = memo(() => {
       }
       // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
-    [buildRowData],
+    [buildRowData]
   );
 
   // ─────────────────────────────
@@ -186,20 +184,16 @@ const BankSpotAndUSDParity = memo(() => {
           const cross = update.data;
 
           if (
-            (data.worldCrossBid !== cross.bid ||
-              data.worldCrossOffer !== cross.ask) &&
-            data.instrumentID !== 21
+            data.worldCrossBid !== cross.bid ||
+            data.worldCrossOffer !== cross.ask ||
+            data.currencyTime !== cross.updateDateTime
           ) {
             node.setDataValue("worldCrossBid", cross.bid);
             node.setDataValue("worldCrossOffer", cross.ask);
             node.setDataValue("currencyTime", cross.updateDateTime);
           }
 
-          if (
-            (data.worldCrossBid !== cross.bid ||
-              data.worldCrossOffer !== cross.ask) &&
-            data.instrumentID === 21
-          ) {
+          if (data.instrumentID === 21) {
             node.setDataValue("worldCurBid", cross.bid);
             node.setDataValue("worldCurOffer", cross.ask);
             node.setDataValue("worldCrossBid", cross.bid);
@@ -272,7 +266,7 @@ const BankSpotAndUSDParity = memo(() => {
         rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processQueue],
+    [processQueue]
   );
 
   // ─────────────────────────────
@@ -387,13 +381,13 @@ const BankSpotAndUSDParity = memo(() => {
         ],
       },
     ],
-    [],
+    []
   );
 
   const getRowId = useCallback(
     (params) =>
       `${params.data.instrumentID}-${params.data.secondaryInstrumentID}`,
-    [],
+    []
   );
 
   const defaultColDef = useMemo(
@@ -403,7 +397,7 @@ const BankSpotAndUSDParity = memo(() => {
       suppressMovable: true,
       editable: false,
     }),
-    [],
+    []
   );
 
   return (
@@ -411,12 +405,12 @@ const BankSpotAndUSDParity = memo(() => {
       <AgGridTable
         ref={agGridComponentRef}
         columnDefs={columnDefs}
-        className='liveRates-grid'
+        className="liveRates-grid"
         getRowId={getRowId}
         onGridReady={onGridReady}
         onFirstDataRendered={onFirstDataRendered}
-        domLayout='normal'
-        theme='legacy'
+        domLayout="normal"
+        theme="legacy"
         defaultColDef={defaultColDef}
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}

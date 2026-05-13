@@ -151,7 +151,8 @@ const BankSpotAndUSDParity = memo(() => {
 
           if (
             data.worldCrossBid !== cross.bid ||
-            data.worldCrossOffer !== cross.ask
+            data.worldCrossOffer !== cross.ask ||
+            data.currencyTime !== cross.updateDateTime
           ) {
             node.setDataValue("worldCrossBid", cross.bid);
             node.setDataValue("worldCrossOffer", cross.ask);
