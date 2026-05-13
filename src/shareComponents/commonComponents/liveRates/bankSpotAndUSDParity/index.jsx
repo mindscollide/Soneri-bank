@@ -3,10 +3,7 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 
 import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
 import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
-import {
-  clearTreasurySpotRatesFeed,
-  currentRatePublishedAction,
-} from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
 
