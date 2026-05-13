@@ -3,7 +3,6 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "../management.module.css";
 import { clearSwapsinUSDForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
-import { convertCurrentTimeZone } from "../../../shareComponents/commonComponents/utils/timeFunction";
 import dayjs from "dayjs";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
@@ -88,14 +87,25 @@ const SwapsInUSD = memo(() => {
   }, [swapsinUSDList]);
 
   // ─────────────────────────────
-  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  // ✅ FIX: Sync data into grid — show loader until rowData is fully set
   useEffect(() => {
-    if (!gridApiRef.current || !swapsinUSDList?.swapsinUSDList?.length) return;
+    if (!gridApiRef.current) return;
+    if (!swapsinUSDList?.swapsinUSDList?.length) return;
+
+    // 🔑 Show loader BEFORE mapping starts (data arrived but not yet rendered)
+    gridApiRef.current.showLoadingOverlay();
 
     const rowData = buildRowData();
-    if (rowData.length === 0) return;
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+      return;
+    }
 
     gridApiRef.current.setGridOption("rowData", rowData);
+
+    // 🔑 Hide loader AFTER rowData is set in the grid
+    gridApiRef.current.hideOverlay();
 
     // Rebuild rowNodeMap so live feed updates can target correct nodes
     rowNodeMap.current.clear();
@@ -105,18 +115,19 @@ const SwapsInUSD = memo(() => {
       }
     });
   }, [swapsinUSDList, buildRowData]);
+
+  // ─────────────────────────────
+  // Handle null/empty API response (e.g. error or no data)
   useEffect(() => {
     if (!gridApiRef.current) return;
 
-    // ❌ Case: API returned null / empty
-    if (!swapsinUSDList || !swapsinUSDList?.swapsinUSDList?.length) {
-      gridApiRef.current.setGridOption("rowData", []); // clear grid
-      gridApiRef.current.showNoRowsOverlay(); // ✅ show "no data"
-      return;
+    if (!swapsinUSDList) {
+      // API returned null — show no rows
+      gridApiRef.current.setGridOption("rowData", []);
+      gridApiRef.current.showNoRowsOverlay();
     }
-
-    // ✅ Case: Data exists
-    gridApiRef.current.hideOverlay(); // remove loader / no rows
+    // ❌ Removed: hideOverlay() was being called here too early,
+    //    before buildRowData() finished mapping in the effect above.
   }, [swapsinUSDList]);
 
   // ─────────────────────────────
@@ -124,18 +135,23 @@ const SwapsInUSD = memo(() => {
     (params) => {
       if (!isMountedRef.current) return;
 
-      gridApiRef.current = params.api; // ✅ store actual AG Grid API
+      gridApiRef.current = params.api;
 
-      const rowData = buildRowData();
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
-        params.api.hideOverlay(); // ✅ ensure loader stops
+      if (!swapsinUSDList?.swapsinUSDList?.length) {
+        // 🔑 Data not yet arrived — keep the loading overlay on
+        params.api.showLoadingOverlay();
       } else {
-        params.api.showNoRowsOverlay(); // ✅ show empty UI immediately
+        // Data already in Redux (e.g. fast load / cached) — map immediately
+        const rowData = buildRowData();
+        if (rowData.length > 0) {
+          params.api.setGridOption("rowData", rowData);
+          params.api.hideOverlay();
+        } else {
+          params.api.showNoRowsOverlay();
+        }
       }
-      // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
-    [buildRowData]
+    [buildRowData, swapsinUSDList]
   );
 
   // ─────────────────────────────
