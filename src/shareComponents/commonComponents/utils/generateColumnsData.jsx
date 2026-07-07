@@ -71,7 +71,7 @@ export const buildDiscountingTable = (
           dataIndex: "discountDays",
           key: "discountingDays",
           align: "center",
-          width: 50,
+          width: 65,
         },
         ...applicableInstruments.map((inst) => ({
           title: inst.instrumentName,
@@ -449,5 +449,223 @@ export const buildTresmarkCrossPremiumTable = (
   } catch (error) {
     console.error("Error while building forwards table:", error);
     return { rowData: [], columnsData: [] };
+  }
+};
+
+export const buildForwardsAgGridTable = (
+  value,
+  Data,
+  getAllTenorsData,
+  getAllInstrument,
+  IndexCell // Aapka React Component
+) => {
+  if (!Data || !getAllTenorsData || !getAllInstrument) {
+    return { rowData: [], columnDefs: [] };
+  }
+
+  try {
+    const { tenors } = getAllTenorsData;
+    const { instruments } = getAllInstrument;
+
+    // Filter Tenors and Instruments
+    const applicableInstruments = instruments || [];
+    const applicableTenors =
+      tenors?.filter((tenor) => tenor.isForwardingApplicable) || [];
+
+    // Step 1: Create rateMap for initial data
+    const rateMap = {};
+    Data.forEach((entry) => {
+      const key = `${entry.instrumentID}-${entry.tenorID}`;
+      rateMap[key] = {
+        bid: entry.bid ?? null,
+        ask: value === 3 ? entry.offer : entry.ask ?? null,
+      };
+    });
+
+    // Step 2: Build Row Data
+    const rowData = applicableTenors.map((tenor) => {
+      const row = {
+        tenorID: tenor.tenorID,
+        tenorName: tenor.tenorName,
+        tenorDays: tenor.tenorDays,
+      };
+
+      applicableInstruments.forEach((inst) => {
+        const key = `${inst.instrumentID}-${tenor.tenorID}`;
+        const rates = rateMap[key] || { bid: null, ask: null };
+
+        row[`bid_${inst.instrumentName}`] = rates.bid;
+        row[`ask_${inst.instrumentName}`] = rates.ask;
+        // Meta data for easy access
+        row[`id_${inst.instrumentName}`] = inst.instrumentID;
+      });
+
+      return row;
+    });
+
+    // Step 3: Build Column Definitions (AG Grid Structure)
+    const columnDefs = [
+      {
+        headerName: "",
+        children: [
+          {
+            headerName: "Tenor",
+            field: "tenorName",
+            width: 170,
+            suppressMovable: false,
+            cellClass: "instrument-cell",
+          },
+        ],
+      },
+      ...applicableInstruments.map((inst) => ({
+        headerName: inst.instrumentName,
+        children: [
+          {
+            headerName: "Bid",
+            field: `bid_${inst.instrumentName}`,
+            // flex: 1,
+            width: 100,
+            cellClass: "bid-cell",
+            cellRenderer: (params) => <IndexCell value={params.value} />,
+          },
+          {
+            headerName: "Ask",
+            field: `ask_${inst.instrumentName}`,
+            // flex: 1,
+            width: 100,
+            cellClass: "offer-cell",
+            cellRenderer: (params) => <IndexCell value={params.value} />,
+          },
+        ],
+      })),
+    ];
+
+    return { rowData, columnDefs };
+  } catch (error) {
+    console.error("Error in buildForwardsAgGridTable:", error);
+    return { rowData: [], columnDefs: [] };
+  }
+};
+
+export const buildDiscountingAgGridTable = (
+  value,
+  Data,
+  getAllTenorsData,
+  getAllInstrument,
+  IndexCell
+) => {
+  if (!Data || !getAllTenorsData || !getAllInstrument) {
+    return { rowData: [], columnDefs: [] };
+  }
+
+  try {
+    const { tenors } = getAllTenorsData;
+    const { instruments } = getAllInstrument;
+
+    // ── 1. Filter instruments & tenors (mirrors buildDiscountingTable logic) ──
+    const applicableInstruments =
+      value === 1
+        ? instruments?.filter((inst) => inst.discountingApplicable) || []
+        : instruments || [];
+
+    const applicableTenors =
+      value === 1 || value === 3 || value === 5
+        ? tenors?.filter((tenor) => tenor.isDiscountingApplicable) || []
+        : tenors || [];
+
+    // ── 2. Build rate lookup map (instrumentID-tenorID → rate) ──
+    const rateMap = {};
+    Data?.forEach((rate) => {
+      const key = `${rate.instrumentID}-${rate.tenorID}`;
+      rateMap[key] = rate.rate;
+    });
+
+    // ── 3. Build Row Data ──
+    // NOTE: Row key field is TenorID (capital T) — matches buildDiscountingTable
+    const rowData = applicableTenors.map((tenor) => {
+      const row = {
+        TenorID: tenor.tenorID, // ← capital T, used as getRowId
+        tenorName: tenor.tenorName,
+        tenorDays: tenor.tenorDays,
+        discountDays: tenor.discountingDays,
+      };
+
+      applicableInstruments.forEach((instrument) => {
+        const compositeKey = `${instrument.instrumentID}-${tenor.tenorID}`;
+        const rateValue = rateMap[compositeKey] ?? null;
+
+        row[`rate_${instrument.instrumentName}`] = rateValue;
+        row[`InstrumentID_${instrument.instrumentName}`] =
+          instrument.instrumentID;
+        row[`InstrumentName_${instrument.instrumentName}`] =
+          instrument.instrumentName;
+      });
+
+      return row;
+    });
+
+    // ── 4. Build Column Definitions ──
+    let columnDefs = [];
+
+    if (value === 1 || value === 5) {
+      // Flat layout: Tenor | USD | EUR | …
+      columnDefs = [
+        {
+          headerName: "Tenor",
+          field: "tenorName",
+          flex: 1,
+          pinned: "left",
+          cellClass: "tenor-cell",
+          headerClass: "tenor-header",
+        },
+        {
+          headerName: "Tenor Days",
+          field: "discountDays",
+          flex: 1,
+          cellClass: "value-cell",
+        },
+        ...applicableInstruments.map((inst) => ({
+          headerName: inst.instrumentName,
+          field: `rate_${inst.instrumentName}`,
+          flex: 1,
+          cellClass: "value-cell",
+          cellRenderer: (params) => <IndexCell value={params.value} />,
+        })),
+      ];
+    } else {
+      // Grouped layout (value === 3): "" → Tenor | USD → Value | EUR → Value …
+      // Matches the image — two header rows, each currency groups a single "Value" child
+      columnDefs = [
+        {
+          headerName: "", // blank top-level group for Tenor column
+          children: [
+            {
+              headerName: "Tenor",
+              field: "tenorName",
+              flex: 1,
+              cellClass: "tenor-cell",
+              headerClass: "tenor-header",
+            },
+          ],
+        },
+        ...applicableInstruments.map((inst) => ({
+          headerName: inst.instrumentName, // e.g. "USD", "EUR"
+          children: [
+            {
+              headerName: "Value",
+              field: `rate_${inst.instrumentName}`,
+              flex: 1,
+              cellClass: "value-cell",
+              cellRenderer: (params) => <IndexCell value={params.value} />,
+            },
+          ],
+        })),
+      ];
+    }
+
+    return { rowData, columnDefs };
+  } catch (error) {
+    console.error("Error in buildDiscountingAgGridTable:", error);
+    return { rowData: [], columnDefs: [] };
   }
 };

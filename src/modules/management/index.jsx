@@ -17,6 +17,27 @@ import {
 } from "../../store/actions/WatchlistAction";
 import { IsolatedBlock } from "../../shareComponents/commonComponents/utils/isolateBlock";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../hook/useMqttTopics";
+import {
+  clearGetCommoditiesForTreasury,
+  clearGetCurrencyCrosses,
+  clearGetIndicesForTreasury,
+  clearGetKiborDataForTreasury,
+  clearGetRevalRatesForTreasury,
+  clearGetSOFRDataForTreasury,
+  clearGetSwapsInUSDForTreasury,
+  clearGetUSDParityForTreasury,
+} from "../../store/slicers/watchListSlicer/WatchListSlicer";
+import {
+  clearCommoditiesForManagmentFeed,
+  clearCurrencyCrossesForManagementFeed,
+  clearKiborForManagmentFeed,
+  clearSbpFXRevalRatesForManagmentFeed,
+  clearSofrForManagmentFeed,
+  clearStockIndicesForManagmentFeed,
+  clearSwapsinUSDForManagementFeed,
+  clearUSDParityForManagementFeed,
+} from "../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 const USDParityComponent = lazy(() => import("./usdParity/index"));
 const Commodities = lazy(() => import("./commodities/index"));
@@ -27,13 +48,20 @@ const SOFR = lazy(() => import("./sofr/index"));
 const StockIndices = lazy(() => import("./stockIndices/index"));
 const SwapsInUSD = lazy(() => import("./swapsInUSD/index"));
 const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+
 const Management = () => {
+  useMqttTopics([
+    "SBL_REAL_TIME_FEED_TREASURY_MANAGEMENT",
+    "SBL_REAL_TIME_STATIC_TREASURY_MANAGEMENT",
+    "SBL_REAL_TIME_FEED_NEWS",
+  ]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // Inital UseEffect as soon as user Clicks on Management Tab
   const hasFetched = useRef(false);
   useEffect(() => {
     if (hasFetched.current) return;
+
     hasFetched.current = true;
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(GetAllOtherInstrumentsApi({ navigate }));
@@ -45,6 +73,25 @@ const Management = () => {
     dispatch(GetSOFRDataForTreasuryApi({ navigate }));
     dispatch(GetRevalRatesForTreasuryApi({ navigate }));
     dispatch(GetSwapsInUSDForTreasuryApi({ navigate }));
+
+    return () => {
+      dispatch(clearGetUSDParityForTreasury());
+      dispatch(clearGetCurrencyCrosses());
+      dispatch(clearGetCommoditiesForTreasury());
+      dispatch(clearGetIndicesForTreasury());
+      dispatch(clearGetKiborDataForTreasury());
+      dispatch(clearGetSOFRDataForTreasury());
+      dispatch(clearGetRevalRatesForTreasury());
+      dispatch(clearGetSwapsInUSDForTreasury());
+      dispatch(clearSwapsinUSDForManagementFeed());
+      dispatch(clearSbpFXRevalRatesForManagmentFeed());
+      dispatch(clearSofrForManagmentFeed());
+      dispatch(clearKiborForManagmentFeed());
+      dispatch(clearStockIndicesForManagmentFeed());
+      dispatch(clearCommoditiesForManagmentFeed());
+      dispatch(clearCurrencyCrossesForManagementFeed());
+      dispatch(clearUSDParityForManagementFeed());
+    };
   }, []);
 
   const layout = useMemo(
@@ -101,9 +148,9 @@ const Management = () => {
         <Row className="mt-3">
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
-              <Suspense fallback={<SectionLoader />}>
-                <SBPFXRevalRates />
-              </Suspense>
+              {/* <Suspense fallback={<SectionLoader />}> */}
+              <SBPFXRevalRates />
+              {/* </Suspense> */}
             </IsolatedBlock>
           </Col>
           <Col sm={12} md={6} lg={6}>

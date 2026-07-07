@@ -6,20 +6,27 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../../commonComponents/elements/profileDropdown/ProfileDropdown";
 import PublshDealerSpreads from "../../../modules/dealer/publishDealerSpreads";
 import Management from "../../../modules/management";
-import { useMqtt } from "../../../context/MqttContext";
 import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
 import { useDispatch } from "react-redux";
+import {
+  clearGetCommoditiesForTreasury,
+  clearGetCurrencyCrosses,
+  clearGetIndicesForTreasury,
+  clearGetKiborDataForTreasury,
+  clearGetRevalRatesForTreasury,
+  clearGetSOFRDataForTreasury,
+  clearGetSwapsInUSDForTreasury,
+  clearGetUSDParityForTreasury,
+} from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 const MainHeader = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { unsubscribeAll } = useMqtt();
+  // const { unsubscribeAll } = useMqtt();
   const [isPending, startTransition] = useTransition();
-  const handleNavigate = (to) => {
-    unsubscribeAll();
-
+  const handleNavigate = (e, to) => {
+    e.preventDefault(); // Stop the default Link behavior
     startTransition(() => {
-      dispatch(setMainLoader(true));
       navigate(to);
     });
   };
@@ -34,59 +41,67 @@ const MainHeader = () => {
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Nav className="ms-auto align-items-center justify-content-end">
-              {!location.pathname.toLowerCase().includes("allnews") &&
-                (import.meta.env.VITE_APP_INCLUDE_TREASURY === "true" ? (
-                  <>
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("interbank")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      // to="interbank"
-                      onClick={() => handleNavigate("interbank")}
-                    >
-                      Interbank
-                    </Nav.Link>
+              {location.pathname
+                .toLowerCase()
+                .includes("allnews") ? null : import.meta.env
+                  .VITE_APP_INCLUDE_TREASURY === "true" ? (
+                <>
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("interbank")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to="interbank"
+                    as={Link}
+                    onClick={(e) => handleNavigate(e, "interbank")}
+                    // onClick={handleClickInterbank}
+                  >
+                    Interbank
+                  </Nav.Link>
 
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("dealer")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      onClick={() => handleNavigate("dealer")}
-                    >
-                      Dealer
-                    </Nav.Link>
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("dealer")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to="dealer"
+                    as={Link}
+                    onClick={(e) => handleNavigate(e, "dealer")}
+                  >
+                    Dealer
+                  </Nav.Link>
 
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("management")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      onClick={() => handleNavigate("Management")}
-                    >
-                      Management
-                    </Nav.Link>
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("management")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to="Management"
+                    as={Link}
+                    onClick={(e) => handleNavigate(e, "Management")}
+                  >
+                    Management
+                  </Nav.Link>
 
-                    <Nav.Link
-                      className={
-                        location.pathname.toLowerCase().includes("treasury")
-                          ? styles.navItemAcitve
-                          : styles.navItem
-                      }
-                      onClick={() => handleNavigate("treasury")}
-                    >
-                      Treasury
-                    </Nav.Link>
-                  </>
-                ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
-                  <PublshDealerSpreads />
-                ) : import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true" ? (
-                  <Management />
-                ) : null)}
+                  <Nav.Link
+                    className={
+                      location.pathname.toLowerCase().includes("treasury")
+                        ? styles.navItemAcitve
+                        : styles.navItem
+                    }
+                    to="treasury"
+                    as={Link}
+                    onClick={(e) => handleNavigate(e, "treasury")}
+                  >
+                    Treasury
+                  </Nav.Link>
+                </>
+              ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
+                <PublshDealerSpreads />
+              ) : null}
 
               <ProfileDropdown />
             </Nav>

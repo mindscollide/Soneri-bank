@@ -11,8 +11,8 @@ export const refreshTokenFn = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 
     if (!token || !refreshToken) {
-      // localStorage.clear();
-      // window.location.href = "/";
+      localStorage.clear();
+      window.location.href = "/";
       throw new Error("Missing authentication tokens");
     }
 
@@ -33,8 +33,8 @@ export const refreshTokenFn = async () => {
 
     // Invalid token
     if (responseCode === 205) {
-      // localStorage.clear();
-      // window.location.href = "/";
+      localStorage.clear();
+      window.location.href = "/";
       console.log("Refresh token expired");
 
       throw new Error("Invalid refresh token");
@@ -52,8 +52,8 @@ export const refreshTokenFn = async () => {
       localStorage.removeItem("refreshToken");
 
       if (!isExecuted) {
-        // localStorage.clear();
-        // window.location.href = "/";
+        localStorage.clear();
+        window.location.href = "/";
         console.log("Refresh token expired");
 
         throw new Error("Token execution failed");
@@ -79,8 +79,8 @@ export const refreshTokenFn = async () => {
           "ERM_AuthService_AuthManager_RefreshToken_02".toLowerCase()
         )
       ) {
-        // localStorage.clear();
-        // window.location.href = "/";
+        localStorage.clear();
+        window.location.href = "/";
         console.log("Refresh token expired");
         throw new Error("Refresh token expired");
       }

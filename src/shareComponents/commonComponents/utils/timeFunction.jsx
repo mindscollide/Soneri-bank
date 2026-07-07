@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export function formatDateTimeToUTCTime(dateTimeStr) {
   try {
     // Extract year, month, day, hour, minute, second from the string
@@ -141,16 +143,54 @@ export function convertUTCToDateTime(input) {
   return `${dayFormatted}-${monthFormatted}-${yearFormatted} ${hourFormatted}:${minuteFormatted} ${ampm}`;
 }
 
+export const convertCurrentTimeZone = (dateTime) => {
+  try {
+    if (dateTime !== null && dateTime !== undefined) {
+      if (!dateTime || dateTime.length < 14) {
+        return "Invalid date";
+      }
+    }
+    let fullDateYear =
+      dateTime.slice(0, 4) +
+      "-" +
+      dateTime.slice(4, 6) +
+      "-" +
+      dateTime.slice(6, 8) +
+      "T" +
+      dateTime.slice(8, 10) +
+      ":" +
+      dateTime.slice(10, 12) +
+      ":" +
+      dateTime.slice(12, 14) +
+      ".000Z";
+
+    let convertTime = new Date(fullDateYear);
+
+    return convertTime;
+  } catch (error) {
+    console.error("Error converting date:", error);
+    return "Invalid date";
+  }
+};
+
 export const formatToUTCString = (date, type) => {
   if (!date) return "";
 
+  const m = moment(date).utcOffset(0); // don't mutate original
+
   if (type === "start") {
-    return date.startOf("day").utc().format("YYYYMMDDHHmmss");
+    return m
+      .clone()
+      .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+      .format("YYYYMMDDHHmmss");
   }
 
   if (type === "end") {
-    return date.endOf("day").utc().format("YYYYMMDDHHmmss");
+    return m
+      .clone()
+      .set({ hour: 23, minute: 59, second: 59, millisecond: 999 })
+      .format("YYYYMMDDHHmmss");
   }
 
-  return date.utc().format("YYYYMMDDHHmmss");
+  return m.format("YYYYMMDDHHmmss");
 };

@@ -8,52 +8,73 @@ export const useMqttClient = ({
   onConnectionLostCallback,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [subscribedTopics, setSubscribedTopics] = useState([]);
+
+  // 1. The Source of Truth for subscriptions
+  const topicCounts = useRef({}); // e.g., { "SBL_REAL_TIME_FEED_TREASURY": 2 }
+  const [activeTopics, setActiveTopics] = useState(new Set());
+
   const clientRef = useRef(null);
   const randomString = secureRandomString();
 
-  const subscribeToTopics = useCallback(
-    (topics = []) => {
-      const client = clientRef.current;
-
-      if (!client || !client.isConnected()) return;
-
-      topics.forEach((topic) => {
-        if (!subscribedTopics.includes(topic)) {
-          clientRef.current.subscribe(topic, {
-            qos: 0,
-            onSuccess: () => {
-              console.log(`Subscribed to topic: ${topic}`);
-              setSubscribedTopics((prev) =>
-                Array.from(new Set([...prev, topic]))
-              );
-            },
-            onFailure: (err) => {
-              console.error(`Failed to subscribe: ${topic}`, err?.errorMessage);
-            },
-          });
-        }
-      });
-    },
-    [subscribedTopics]
-  );
-
-  const unsubscribeFromTopics = useCallback((topics = []) => {
+  const subscribeToTopics = useCallback((topics = []) => {
     const client = clientRef.current;
-
-    // 🔐 Real safety check
     if (!client || !client.isConnected()) return;
 
     topics.forEach((topic) => {
-      client.unsubscribe(topic, {
-        onSuccess: () => {
-          console.log(`Unsubscribed from topic: ${topic}`);
-          setSubscribedTopics((prev) => prev.filter((t) => t !== topic));
-        },
-        onFailure: (err) => {
-          console.error(`Failed to unsubscribe: ${topic}`, err?.errorMessage);
-        },
-      });
+      // Get current count, default to 0
+      const currentCount = topicCounts.current[topic] || 0;
+
+      // Increment the counter synchronously
+      topicCounts.current[topic] = currentCount + 1;
+
+      // Only send network request if this is the FIRST component asking for it
+      if (currentCount === 0) {
+        client.subscribe(topic, {
+          qos: 0,
+          onSuccess: () => {
+            console.log(`Subscribed to topic: ${topic}`);
+            setActiveTopics((prev) => new Set([...prev, topic]));
+          },
+          onFailure: (err) => {
+            console.error(`Failed to subscribe: ${topic}`, err?.errorMessage);
+            // Revert count on failure
+            topicCounts.current[topic] -= 1;
+          },
+        });
+      }
+    });
+  }, []);
+
+  const unsubscribeFromTopics = useCallback((topics = []) => {
+    const client = clientRef.current;
+    if (!client || !client.isConnected()) return;
+
+    topics.forEach((topic) => {
+      const currentCount = topicCounts.current[topic] || 0;
+
+      // Decrement the counter
+      if (currentCount > 0) {
+        topicCounts.current[topic] = currentCount - 1;
+      }
+
+      // Only send network request if NO components need this topic anymore
+      if (topicCounts.current[topic] === 0) {
+        client.unsubscribe(topic, {
+          onSuccess: () => {
+            console.log(`Unsubscribed from topic: ${topic}`);
+            setActiveTopics((prev) => {
+              const next = new Set(prev);
+              next.delete(topic);
+              return next;
+            });
+          },
+          onFailure: (err) => {
+            console.error(`Failed to unsubscribe: ${topic}`, err?.errorMessage);
+          },
+        });
+        // Clean up the key
+        delete topicCounts.current[topic];
+      }
     });
   }, []);
 
@@ -61,10 +82,15 @@ export const useMqttClient = ({
     (message) => {
       try {
         const parsed = JSON.parse(message.payloadString);
-        // console.log("MQTT message arrived:", parsed);
-        if (parsed.payload.message === "TREASURY_MANAGEMENT_KIBOR")
-          console.log("MQTT message arrived:", parsed);
-        if (onMessageArrivedCallback) onMessageArrivedCallback(parsed);
+        // if (parsed?.payload?.instrumentCrossRate?.instrumentID === 21) {
+        //   console.log(
+        //     parsed.payload,
+        //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
+        //   );
+        // }
+
+        // if (onMessageArrivedCallback) onMessageArrivedCallback(parsed);
+        onMessageArrivedCallback?.(parsed);
       } catch (err) {
         console.error("Failed to parse message:", err);
       }
@@ -76,8 +102,9 @@ export const useMqttClient = ({
     (resObj) => {
       console.warn("MQTT connection lost:", resObj);
       setIsConnected(false);
-      setSubscribedTopics([]);
-      // if (onConnectionLostCallback) onConnectionLostCallback(resObj);
+      // Reset everything on disconnect
+      topicCounts.current = {};
+      setActiveTopics(new Set());
     },
     [onConnectionLostCallback]
   );
@@ -87,17 +114,16 @@ export const useMqttClient = ({
       if (!subscribeID || clientRef.current?.isConnected()) {
         console.warn(
           "Already connected or missing subscribeID",
-          subscribeID,
-          clientRef.current.isConnected()
+          clientRef.current?.isConnected(),
+          subscribeID
         );
         return;
       }
 
-      const newClientID = `${randomString}`;
       clientRef.current = new Paho.Client(
         import.meta.env.VITE_MQTT_HOST,
         Number(import.meta.env.VITE_MQTT_PORT),
-        newClientID
+        randomString
       );
 
       clientRef.current.onConnectionLost = onConnectionLost;
@@ -106,7 +132,6 @@ export const useMqttClient = ({
       clientRef.current.onConnected = () => {
         console.log("MQTT connected successfully");
         setIsConnected(true);
-
         subscribeToTopics([subscribeID]);
       };
 
@@ -115,17 +140,18 @@ export const useMqttClient = ({
         onFailure: (err) => {
           console.log("Connection failed:", err.errorMessage);
           setIsConnected(false);
-          // setTimeout(() => connectToMqtt({ subscribeID, userID }), 6000);
         },
-        // keepAliveInterval: 300,
-        reconnect: false,
+        reconnect: true,
         userName: import.meta.env.VITE_MQTT_USERNAME,
         password: import.meta.env.VITE_MQTT_PASSWORD,
-        cleanSession: true,
-        useSSL: false,
+        cleanSession: false,
+        // useSSL: false,
+        useSSL:
+          import.meta.env.VITE_MQTT_PORT === "8883" &&
+          import.meta.env.VITE_MQTT_HOST === "Soneritrade.tresmark.com",
       });
     },
-    [onMessageArrived, onConnectionLost, randomString, subscribeToTopics]
+    [onMessageArrived, onConnectionLost, subscribeToTopics, randomString]
   );
 
   return {
@@ -136,6 +162,6 @@ export const useMqttClient = ({
     unsubscribeFromTopics,
     onMessageArrived,
     onConnectionLost,
-    setSubscribedTopics,
+    activeTopics, // Still exposed for the UI if needed
   };
 };

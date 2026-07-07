@@ -71,13 +71,23 @@ const PublshDealerSpreads = () => {
             value={bidSpreads}
             name="bidValue"
             customInput={InputFIeld}
-            decimalScale={2}
-            type="text"
+            decimalScale={2} // max 2 digits after decimal
             allowNegative={false}
             placeholder={"0.00"}
             applyClass={"bidAskInput"}
             onChange={handleChangeSpreads}
-            maxLength={6}
+            isAllowed={({ floatValue, value }) => {
+              if (floatValue === undefined) return true;
+
+              const [intPart, decimalPart] = value.split(".");
+
+              return (
+                floatValue >= 0 &&
+                floatValue <= 99 &&
+                intPart.length <= 2 && // max 2 digits before decimal
+                (!decimalPart || decimalPart.length <= 2) // max 2 after decimal
+              );
+            }}
           />
         </Col>
         <Col>
@@ -93,7 +103,18 @@ const PublshDealerSpreads = () => {
             placeholder={"0.00"}
             allowNegative={false}
             applyClass={"bidAskInput"}
-            maxLength={6}
+            isAllowed={({ floatValue, value }) => {
+              if (floatValue === undefined) return true;
+
+              const [intPart, decimalPart] = value.split(".");
+
+              return (
+                floatValue >= 0 &&
+                floatValue <= 99 &&
+                intPart.length <= 2 && // max 2 digits before decimal
+                (!decimalPart || decimalPart.length <= 2) // max 2 after decimal
+              );
+            }}
           />
         </Col>
         <Col>

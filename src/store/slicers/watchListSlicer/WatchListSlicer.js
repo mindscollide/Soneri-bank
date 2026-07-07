@@ -28,6 +28,7 @@ import {
   GetNewsDetailsByIDApi,
   GetNewsHeadlinesApi,
   GetRatesForCurrencyNotesForRateSheetApi,
+  GetRefreshIconTenorsApi,
   GetRevalRatesForTreasuryApi,
   GetSBPConversionRatesForRateSheetApi,
   GetSingleDealersSpreadApi,
@@ -94,7 +95,7 @@ const WatchListSlice = createSlice({
     GetSBPConversionRatesForRateSheetLoading: false,
     GetNewsHeadlinesLoading: false,
     GetNewsDetailsByIDLoading: false,
-
+    GetRefreshIconTenorsLoading: false,
     // data states
     GetAllInstrumentForTreasury: null,
     GetBankSpotForTreasury: null,
@@ -144,9 +145,20 @@ const WatchListSlice = createSlice({
     GetIndicativeFBPRates: null,
     GetSBPConversionRatesForRateSheet: null,
     GetNewsHeadlines: null,
+    GetRefreshIconTenors: null,
+
+    // About Newa
+    NewsByNewsIdViewModal: false,
     GetNewsDetailsByID: null,
+    NewsLoadingSpinner: false,
   },
   reducers: {
+    setNewsLoadingSpinner: (state, { payload }) => {
+      state.NewsLoadingSpinner = payload;
+    },
+    setNewsByNewsIdViewModal: (state, { payload }) => {
+      state.NewsByNewsIdViewModal = payload;
+    },
     clearWatchListResponseMessage: (state) => {
       state.responseMessage = "";
     },
@@ -174,6 +186,30 @@ const WatchListSlice = createSlice({
         }
       );
     },
+    updateTenors: (state, { payload }) => {
+      const { removedtenorList, newIsForwardtenorList } = payload;
+
+      const removedSet = new Set(removedtenorList.map((t) => t.tenorID));
+      const addedSet = new Set(newIsForwardtenorList.map((t) => t.tenorID));
+
+      state.getAllTenors.tenors = state.getAllTenors.tenors.map((tenor) => {
+        if (removedSet.has(tenor.tenorID)) {
+          return {
+            ...tenor,
+            isForwardingApplicable: false,
+          };
+        }
+
+        if (addedSet.has(tenor.tenorID)) {
+          return {
+            ...tenor,
+            isForwardingApplicable: true,
+          };
+        }
+
+        return tenor; // unchanged
+      });
+    },
 
     UpdatetDealerSpotRates: (state, { payload }) => {
       state.GetBankSpotForDealer = payload;
@@ -183,6 +219,74 @@ const WatchListSlice = createSlice({
     },
     UpdateDealerDiscountingRates: (state) => {
       state.GetDiscountingRatesForDealer = null;
+    },
+
+    // Individual Clear Reducers
+    clearGetBankSpotForDealer: (state) => {
+      state.GetBankSpotForDealer = null;
+    },
+    clearGetCurrencyCrosses: (state) => {
+      state.GetCurrencyCrosses = null;
+    },
+    clearGetBankForwardForTreasuryDealer: (state) => {
+      state.GetBankForwardForTreasuryDealer = null;
+    },
+    clearGetDiscountingRatesForDealer: (state) => {
+      state.GetDiscountingRatesForDealer = null;
+    },
+    clearGetAllDealersSpread: (state) => {
+      state.GetAllDealersSpread = null;
+    },
+    clearAddDealerSpread: (state) => {
+      state.AddDealerSpread = null;
+    },
+    clearGetSingleDealersSpread: (state) => {
+      state.GetSingleDealersSpread = null;
+    },
+    clearGetAllOtherInstruments: (state) => {
+      state.GetAllOtherInstruments = null;
+    },
+    clearGetUSDParityForTreasury: (state) => {
+      state.GetUSDParityForTreasury = null;
+    },
+    clearGetCommoditiesForTreasury: (state) => {
+      state.GetCommoditiesForTreasury = null;
+    },
+    clearGetIndicesForTreasury: (state) => {
+      state.GetIndicesForTreasury = null;
+    },
+    clearGetKiborDataForTreasury: (state) => {
+      state.GetKiborDataForTreasury = null;
+    },
+    clearGetSOFRDataForTreasury: (state) => {
+      state.GetSOFRDataForTreasury = null;
+    },
+    clearGetRevalRatesForTreasury: (state) => {
+      state.GetRevalRatesForTreasury = null;
+    },
+    clearGetSwapsInUSDForTreasury: (state) => {
+      state.GetSwapsInUSDForTreasury = null;
+    },
+    clearGetSpotTTRatesForRateSheet: (state) => {
+      state.GetSpotTTRatesForRateSheet = null;
+    },
+    clearGetRatesForCurrencyNotesForRateSheet: (state) => {
+      state.GetRatesForCurrencyNotesForRateSheet = null;
+    },
+    clearGetKiborDataForRateSheet: (state) => {
+      state.GetKiborDataForRateSheet = null;
+    },
+    clearGetSOFRDataForRateSheet: (state) => {
+      state.GetSOFRDataForRateSheet = null;
+    },
+    clearGetIndicativeFBPRates: (state) => {
+      state.GetIndicativeFBPRates = null;
+    },
+    clearGetSBPConversionRatesForRateSheet: (state) => {
+      state.GetSBPConversionRatesForRateSheet = null;
+    },
+    clearGetNewsHeadlines: (state) => {
+      state.GetNewsHeadlines = null;
     },
     clearGetNewsDetailsByID: (state) => {
       state.GetNewsDetailsByID = null;
@@ -840,6 +944,22 @@ const WatchListSlice = createSlice({
         state.GetNewsDetailsByIDLoading = false;
         state.GetNewsDetailsByID = null;
         state.error = payload;
+      })
+
+      //GetRefreshIconTenorsApi
+      // ------------------ GetRefreshIconTenorsApi ------------------
+      .addCase(GetRefreshIconTenorsApi.pending, (state) => {
+        state.GetRefreshIconTenorsLoading = true;
+      })
+      .addCase(GetRefreshIconTenorsApi.fulfilled, (state, { payload }) => {
+        state.GetRefreshIconTenorsLoading = false;
+        state.GetRefreshIconTenors = payload?.response;
+        state.responseMessage = payload?.message;
+      })
+      .addCase(GetRefreshIconTenorsApi.rejected, (state, { payload }) => {
+        state.GetRefreshIconTenorsLoading = false;
+        state.GetRefreshIconTenors = null;
+        state.error = payload;
       });
 
     builder.addCase(setActiveTab, (state, action) => {
@@ -849,7 +969,7 @@ const WatchListSlice = createSlice({
 });
 
 export const {
-  clearWatchListResponseMessage,
+  // Standard Market/Dealer Actions
   setMarketStatus,
   setForwardsForTreasuryBranch,
   setDealerValue,
@@ -857,6 +977,38 @@ export const {
   UpdatetDealerSpotRates,
   UpdateDealerForwardRates,
   UpdateDealerDiscountingRates,
+  updateTenors,
+
+  // Treasury Field Clear Actions
+  clearGetBankSpotForDealer,
+  clearGetCurrencyCrosses,
+  clearGetBankForwardForTreasuryDealer,
+  clearGetDiscountingRatesForDealer,
+  clearGetAllDealersSpread,
+  clearAddDealerSpread,
+  clearGetSingleDealersSpread,
+  clearGetAllOtherInstruments,
+  clearGetUSDParityForTreasury,
+  clearGetCommoditiesForTreasury,
+  clearGetIndicesForTreasury,
+  clearGetKiborDataForTreasury,
+  clearGetSOFRDataForTreasury,
+  clearGetRevalRatesForTreasury,
+  clearGetSwapsInUSDForTreasury,
+  clearGetSpotTTRatesForRateSheet,
+  clearGetRatesForCurrencyNotesForRateSheet,
+  clearGetKiborDataForRateSheet,
+  clearGetSOFRDataForRateSheet,
+  clearGetIndicativeFBPRates,
+  clearGetSBPConversionRatesForRateSheet,
+
+  // News and Misc Clear Actions
+  clearGetNewsHeadlines,
   clearGetNewsDetailsByID,
+  clearWatchListResponseMessage,
+
+  // News Modal
+  setNewsByNewsIdViewModal,
+  setNewsLoadingSpinner,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;

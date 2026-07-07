@@ -1,367 +1,378 @@
-import GlobalTable from "../../elements/table/GlobalTable";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import {
-  convertUTCTimeToLocalTime,
-  extractTimeFromCompactDate,
-  formatDateUTCToGMT,
-} from "../../../../utils/timeFunction";
-import { IndexCell } from "../../elements/inputField/IndexCell";
-import { clearDealerSpotClearRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
-import { UpdatetDealerSpotRates } from "../../../../store/slicers/watchListSlicer/WatchListSlicer";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 
-// // ✅ Pure selectors (no object creation here)
-const selectGetAllInstrumentForTreasury = (state) =>
+import { formatDateUTCToGMT } from "../../../../utils/timeFunction";
+import { IndexCell } from "../../../../shareComponents/commonComponents/elements/inputField/IndexCell";
+import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+
+// Selectors
+const selectCrossInstruments = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
-const selectDealerSpotRatesFeed = (state) =>
-  state.RealtimeActionsSlice.DealerSpotRatesFeed;
+
+const selectFeed = (state) => state.RealtimeActionsSlice.DealerSpotRatesFeed;
+
 const selectWorldCrosses = (state) =>
   state.WatchListReducer.GetBankSpotForDealer?.worldCrosses || [];
+
 const selectWorldCurrencies = (state) =>
   state.WatchListReducer.GetBankSpotForDealer?.worldCurrencies || [];
-const SelectGetCurrencyCrosses = (state) =>
-  state.WatchListReducer.GetCurrencyCrosses;
-const selectMarketStatus = (state) => state.WatchListReducer.getMarketStatus;
 
 const BankSpotAndUSDParity = memo(() => {
   const dispatch = useDispatch();
-  const crossInstruments = useSelector(
-    selectGetAllInstrumentForTreasury,
-    shallowEqual
-  );
 
-  // Checklist
-  const GetBankSpotForDealer = useSelector(
-    (state) => state.WatchListReducer.GetBankSpotForDealer
-  );
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
+  const pendingUpdates = useRef(new Map());
+  const rafRef = useRef(null);
+  const rowNodeMap = useRef(new Map());
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
-  const ClearRatesData = useSelector(
-    (state) => state.RealtimeActionsSlice.DealerSpotClearRates
-  );
-
-  const fullFeed = useSelector(selectDealerSpotRatesFeed);
-  const marketStatus = useSelector(selectMarketStatus);
+  const crossInstruments = useSelector(selectCrossInstruments, shallowEqual);
+  const fullFeed = useSelector(selectFeed, shallowEqual);
   const worldCrosses = useSelector(selectWorldCrosses, shallowEqual);
   const worldCurrencies = useSelector(selectWorldCurrencies, shallowEqual);
 
-  // ✅ Memoized essential feed values
-  const feedEssentials = useMemo(() => {
-    if (!fullFeed) return null;
+  // console.log("BankSpotAndUSDParity render", {
+  //   crossInstruments,
+  //   fullFeed,
+  //   worldCrosses,
+  //   worldCurrencies,
+  // });
 
-    return {
-      crossBid: fullFeed.instrumentCrossRate?.bid,
-      crossAsk: fullFeed.instrumentCrossRate?.ask,
-      crossUpdateTime: fullFeed.instrumentCrossRate?.updateDateTime,
-      crossInstrumentID: fullFeed.instrumentCrossRate?.instrumentID,
-      crossSecondaryID: fullFeed.instrumentCrossRate?.secondaryInstrumentID,
-      spotBid: fullFeed.instrumentParitySpot?.bid,
-      spotAsk: fullFeed.instrumentParitySpot?.ask,
-      spotInstrumentID: fullFeed.instrumentParitySpot?.instrumentID,
-    };
-  }, [
-    fullFeed?.instrumentCrossRate?.bid,
-    fullFeed?.instrumentCrossRate?.ask,
-    fullFeed?.instrumentCrossRate?.updateDateTime,
-    fullFeed?.instrumentCrossRate?.instrumentID,
-    fullFeed?.instrumentCrossRate?.secondaryInstrumentID,
-    fullFeed?.instrumentParitySpot?.bid,
-    fullFeed?.instrumentParitySpot?.ask,
-    fullFeed?.instrumentParitySpot?.instrumentID,
-  ]);
+  // ─────────────────────────────
+  // Fast lookup maps
+  const { crossMap, currencyMap } = useMemo(() => {
+    const crossMap = new Map();
+    const currencyMap = new Map();
 
-  // Local state for processed data
-  const [processedData, setProcessedData] = useState([]);
+    worldCrosses.forEach((c) => {
+      crossMap.set(`${c.instrumentID}_${c.secondaryInstrumentID}`, c);
+    });
 
-  // Refs for batching updates
-  const dataRef = useRef([]);
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
-  const animationFrameRef = useRef(null);
+    worldCurrencies.forEach((c) => {
+      currencyMap.set(c.instrumentID, c);
+    });
 
-  // ✅ Enriched base data
-  const enrichedData = useMemo(() => {
-    if (!crossInstruments || !worldCrosses || !worldCurrencies) return [];
+    return { crossMap, currencyMap };
+  }, [worldCrosses, worldCurrencies]);
 
-    try {
-      return crossInstruments.map((instrument) => {
-        const matchedCross = worldCrosses.find(
-          (wc) =>
-            wc.instrumentID === instrument.instrumentID &&
-            wc.secondaryInstrumentID === instrument.secondaryInstrumentID
-        );
+  // ─────────────────────────────
+  // Build row data
+  const buildRowData = useCallback(() => {
+    if (!crossInstruments?.length) return [];
 
-        const matchedCurrency = worldCurrencies.find(
-          (wc) => wc.instrumentID === instrument.instrumentID
-        );
+    return crossInstruments.map((inst) => {
+      const cross = crossMap.get(
+        `${inst.instrumentID}_${inst.secondaryInstrumentID}`
+      );
+      const currency = currencyMap.get(inst.instrumentID);
 
-        return {
-          instrumentID: instrument.instrumentID,
-          secondaryInstrumentID: instrument.secondaryInstrumentID,
-          instrumentName: instrument.instrumentName,
-          secondaryInstrumentName: instrument.secondaryInstrumentName,
-          time: matchedCross?.time ?? "",
+      return {
+        instrumentID: inst.instrumentID,
+        secondaryInstrumentID: inst.secondaryInstrumentID,
+        instrumentName: inst.instrumentName,
+        secondaryInstrumentName: inst.secondaryInstrumentName,
+        crossTime: cross?.time ?? "",
+        currencyTime:
+          inst.instrumentID === 21 ? cross?.time : currency?.time ?? "",
 
-          worldCrossBid: matchedCross?.bid ?? 0,
-          worldCrossOffer: matchedCross?.offer ?? 0,
-          worldCurBid:
-            instrument.instrumentID === 21
-              ? matchedCross?.bid ?? 0
-              : matchedCurrency?.bid ?? 0,
-          worldCurOffer:
-            instrument.instrumentID === 21
-              ? matchedCross?.offer ?? 0
-              : matchedCurrency?.offer ?? 0,
+        worldCrossBid: cross?.bid ?? 0,
+        worldCrossOffer: cross?.offer ?? 0,
+        worldCurBid:
+          inst.instrumentID === 21 ? cross?.bid ?? 0 : currency?.bid ?? 0,
+        worldCurOffer:
+          inst.instrumentID === 21 ? cross?.offer ?? 0 : currency?.offer ?? 0,
+      };
+    });
+  }, [crossInstruments, crossMap, currencyMap]);
 
-          version: 0,
-        };
-      });
-    } catch (error) {
-      console.error("Error enriching data:", error);
-      return [];
-    }
+  // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  useEffect(() => {
+    if (!gridApiRef.current || !crossInstruments?.length) return;
+
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
+      rowNodeMap.current.set(key, node);
+    });
   }, [crossInstruments, worldCrosses, worldCurrencies]);
 
-  // Initialize processed data when enriched data changes
-  useEffect(() => {
-    if (enrichedData.length > 0) {
-      dataRef.current = enrichedData;
-      setProcessedData(enrichedData);
-    }
-  }, [enrichedData]);
+  // ─────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
 
-  // ✅ Batch update function
-  const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
+      gridApiRef.current = params.api; // ✅ store actual AG Grid API
+
+      // Attempt immediate load (works if API already resolved before grid init)
+      const rowData = buildRowData();
+      if (rowData.length > 0) {
+        params.api.setGridOption("rowData", rowData);
+      }
+      // If data isn't ready yet, the useEffect above will handle it when it arrives
+    },
+    [buildRowData]
+  );
+
+  // ─────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
+
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
+      rowNodeMap.current.set(key, node);
+    });
+  }, []);
+
+  // ─────────────────────────────
+  const processQueue = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
+      rafRef.current = null;
       return;
     }
 
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime.current;
 
-    setProcessedData((prevData) => {
-      let hasChanges = false;
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
+    if (timeSinceLastProcess < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
 
-        updates.forEach((update) => {
-          const { instrumentCrossRate, instrumentParitySpot } = update;
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
+
+    try {
+      let batchCount = 0;
+      const MAX_BATCH_SIZE = 15;
+
+      for (const [key, update] of pendingUpdates.current.entries()) {
+        if (batchCount >= MAX_BATCH_SIZE) break;
+
+        if (update.type === "cross") {
+          const node = rowNodeMap.current.get(key);
+          if (!node) {
+            pendingUpdates.current.delete(key);
+            continue;
+          }
+
+          const data = node.data;
+          const cross = update.data;
 
           if (
-            instrumentCrossRate &&
-            item.instrumentID === instrumentCrossRate.instrumentID &&
-            item.secondaryInstrumentID ===
-              instrumentCrossRate.secondaryInstrumentID
+            data.worldCrossBid !== cross.bid ||
+            data.worldCrossOffer !== cross.ask ||
+            data.currencyTime !== cross.updateDateTime
           ) {
-            if (item.worldCrossBid !== instrumentCrossRate.bid) {
-              updatedItem = {
-                ...updatedItem,
-                worldCrossBid: instrumentCrossRate.bid,
-                worldCrossOffer: instrumentCrossRate.ask,
-                time: instrumentCrossRate.updateDateTime,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
+            node.setDataValue("worldCrossBid", cross.bid);
+            node.setDataValue("worldCrossOffer", cross.ask);
+            node.setDataValue("currencyTime", cross.updateDateTime);
+          }
 
-            if (item.instrumentID === 21) {
-              updatedItem = {
-                ...updatedItem,
-                worldCurBid: instrumentCrossRate.bid,
-                worldCurOffer: instrumentCrossRate.ask,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
+          if (data.instrumentID === 21) {
+            node.setDataValue("worldCurBid", cross.bid);
+            node.setDataValue("worldCurOffer", cross.ask);
+            node.setDataValue("worldCrossBid", cross.bid);
+            node.setDataValue("worldCrossOffer", cross.ask);
+            node.setDataValue("currencyTime", cross.updateDateTime);
+            node.setDataValue("crossTime", cross.updateDateTime);
+          }
+
+          pendingUpdates.current.delete(key);
+          batchCount++;
+        } else if (update.type === "parity") {
+          const parity = update.data;
+          const instrumentID = update.instrumentID;
+
+          for (const node of rowNodeMap.current.values()) {
+            const data = node.data;
+
+            if (data.instrumentID === instrumentID && instrumentID !== 21) {
+              node.setDataValue("worldCurBid", parity.bid);
+              node.setDataValue("worldCurOffer", parity.ask);
+              node.setDataValue("crossTime", parity.updateDateTime);
             }
           }
 
-          if (
-            instrumentParitySpot &&
-            item.instrumentID === instrumentParitySpot.instrumentID &&
-            item.instrumentID !== 21
-          ) {
-            if (
-              Number(updatedItem.worldCurBid) !==
-                Number(instrumentParitySpot.bid) ||
-              Number(updatedItem.worldCurOffer) !==
-                Number(instrumentParitySpot.ask)
-            ) {
-              updatedItem = {
-                ...updatedItem,
-                worldCurBid: instrumentParitySpot.bid,
-                worldCurOffer: instrumentParitySpot.ask,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
-          }
-        });
+          pendingUpdates.current.delete(key);
+          batchCount++;
+        }
+      }
 
-        return changed ? updatedItem : item;
-      });
-
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
-
-      return hasChanges ? updatedData : prevData;
-    });
-
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      if (pendingUpdates.current.size > 0) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      } else {
+        rafRef.current = null;
+      }
+    } catch (error) {
+      console.error("Error processing queue:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
   }, []);
 
-  // ✅ Queue update
+  // ─────────────────────────────
   const queueUpdate = useCallback(
     (feed) => {
-      if (!feed) return;
+      if (!feed || !isMountedRef.current) return;
 
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
-      lastUpdateRef.current = now;
+      const cross = feed?.instrumentCrossRate;
+      const parity = feed?.instrumentParitySpot;
 
-      updateQueueRef.current.push(feed);
+      if (cross) {
+        const key = `${cross.instrumentID}_${cross.secondaryInstrumentID}`;
+        pendingUpdates.current.set(key, {
+          type: "cross",
+          data: cross,
+        });
+      }
 
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      if (parity) {
+        const key = `parity_${parity.instrumentID}`;
+        pendingUpdates.current.set(key, {
+          type: "parity",
+          instrumentID: parity.instrumentID,
+          data: parity,
+        });
+      }
+
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processUpdateQueue]
+    [processQueue]
   );
-  // console.log(processedData, "ProcessedData");
-  // ✅ Feed update effect
-  useEffect(() => {
-    if (!feedEssentials || !fullFeed) return;
-    queueUpdate(fullFeed);
-  }, [feedEssentials, fullFeed, queueUpdate]);
 
-  // Cleanup
+  // ─────────────────────────────
   useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+    if (!fullFeed || !Array.isArray(fullFeed) || fullFeed.length === 0) {
+      return;
+    }
+
+    fullFeed.forEach(queueUpdate);
+
+    const clearTimeoutId = setTimeout(() => {
+      if (isMountedRef.current) {
+        dispatch(clearTreasurySpotRatesFeed());
       }
+    }, 200);
+
+    return () => clearTimeout(clearTimeoutId);
+  }, [fullFeed, queueUpdate, dispatch]);
+
+  // ─────────────────────────────
+  // ✅ Cleanup
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
     };
   }, []);
 
-  useEffect(() => {
-    if (marketStatus === false) {
-      setProcessedData((prevData) =>
-        prevData.map((data) => ({
-          ...data,
-          worldCrossBid: 0,
-          worldCrossOffer: 0,
-          worldCurBid: 0,
-          worldCurOffer: 0,
-        }))
-      );
-
-      setProcessedData((prevData) =>
-        prevData.map((data) => ({
-          ...data,
-          bid: 0,
-          offer: 0,
-        }))
-      );
-    }
-  }, [marketStatus]);
-
-  useEffect(() => {
-    if (ClearRatesData?.areRatesClear && GetBankSpotForDealer) {
-      console.log(ClearRatesData, "ClearRatesDataClearRatesData");
-      const clearedData = {
-        ...GetBankSpotForDealer,
-        worldCurrencies:
-          GetBankSpotForDealer.worldCurrencies?.map((item) => ({
-            ...item,
-            bid: 0,
-            offer: 0,
-          })) || [],
-        worldCrosses:
-          GetBankSpotForDealer.worldCrosses?.map((item) => ({
-            ...item,
-            bid: 0,
-            offer: 0,
-          })) || [],
-      };
-
-      dispatch(UpdatetDealerSpotRates(clearedData));
-
-      // optional reset so it doesn't re-trigger
-      dispatch(clearDealerSpotClearRates());
-    }
-  }, [ClearRatesData, GetBankSpotForDealer, dispatch]);
-  // Columns
-  const columns = useMemo(
+  // ─────────────────────────────
+  const columnDefs = useMemo(
     () => [
       {
-        title: "Bank Spot",
+        headerName: "Bank Spot",
         children: [
           {
-            title: "Instrument",
-            dataIndex: "instrumentName",
-            render: (text, record) => {
-              return (
-                <span>{`${record?.instrumentName} / ${record?.secondaryInstrumentName}`}</span>
-              );
-            },
+            headerName: "Instrument",
+            flex: 1,
+            cellClass: "instrument-cell",
+            valueGetter: (p) =>
+              `${p.data.instrumentName} / ${p.data.secondaryInstrumentName}`,
           },
           {
-            title: "Bid",
-            dataIndex: "worldCrossBid",
-            className: "bidCol",
-            width: 120,
-            render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
-            },
+            headerName: "Bid",
+            field: "worldCrossBid",
+            flex: 1,
+            cellClass: "bid-cell",
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
-            title: "Offer",
-            dataIndex: "worldCrossOffer",
-            className: "offerCol",
-            width: 120,
-            render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
-            },
+            headerName: "Offer",
+            field: "worldCrossOffer",
+            flex: 1,
+            cellClass: "offer-cell",
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
-            title: "Time",
-            dataIndex: "time",
-            render: (text) =>
-              text
-                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
+            headerName: "Time",
+            field: "currencyTime",
+
+            flex: 1,
+            cellClass: "section-divider",
+            valueFormatter: (p) =>
+              p.value
+                ? formatDateUTCToGMT(p.value).toTimeString().substring(0, 8)
                 : "--:--:--",
           },
         ],
       },
       {
-        title: "USD Parity",
+        headerName: "USD Parity",
         children: [
-          { title: "Instrument", dataIndex: "instrumentName" },
           {
-            title: "Bid",
-            dataIndex: "worldCurBid",
-            className: "bidCol",
-            width: 120,
-            render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
-            },
+            headerName: "Instrument",
+            flex: 1,
+            cellClass: "instrument-cell",
+            valueGetter: (p) => p.data.instrumentName,
           },
           {
-            title: "Offer",
-            dataIndex: "worldCurOffer",
-            className: "offerCol",
-            width: 120,
-            render: (text) => {
-              return text !== "-" && <IndexCell value={text.toFixed(4)} />;
-            },
+            headerName: "Bid",
+            field: "worldCurBid",
+            flex: 1,
+            cellClass: "bid-cell",
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
           },
           {
-            title: "Time",
-            dataIndex: "time",
-            render: (text) =>
-              text
-                ? formatDateUTCToGMT(text).toTimeString().substring(0, 8)
+            headerName: "Offer",
+            field: "worldCurOffer",
+            flex: 1,
+            cellClass: "offer-cell",
+            cellRenderer: (p) => <IndexCell value={Number(p.value)} />,
+          },
+          {
+            headerName: "Time",
+            field: "crossTime",
+            flex: 1,
+            cellClass: "section-divider",
+            valueFormatter: (p) =>
+              p.value
+                ? formatDateUTCToGMT(p.value).toTimeString().substring(0, 8)
                 : "--:--:--",
           },
         ],
@@ -370,18 +381,43 @@ const BankSpotAndUSDParity = memo(() => {
     []
   );
 
+  const getRowId = useCallback(
+    (params) =>
+      `${params.data.instrumentID}-${params.data.secondaryInstrumentID}`,
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
+
   return (
-    <GlobalTable
-      columns={columns}
-      dataSource={processedData}
-      rowKey={(record) =>
-        `${record.instrumentID}-${record.secondaryInstrumentID}`
-      }
-      prefixCls={"LiveRatesTable"}
-      pagination={false}
-      scroll={{ x: "max-content", y: 500 }}
-    />
+    <div style={{ height: "600px", width: "100%" }}>
+      <AgGridTable
+        ref={agGridComponentRef}
+        columnDefs={columnDefs}
+        className="liveRates-grid"
+        getRowId={getRowId}
+        onGridReady={onGridReady}
+        onFirstDataRendered={onFirstDataRendered}
+        domLayout="normal"
+        theme="legacy"
+        defaultColDef={defaultColDef}
+        suppressScrollOnNewData={true}
+        suppressAnimationFrame={false}
+        suppressCellFocus={true}
+        loadingOverlayComponent={SectionLoader}
+      />
+    </div>
   );
 });
+
+BankSpotAndUSDParity.displayName = "BankSpotAndUSDParity";
 
 export default BankSpotAndUSDParity;

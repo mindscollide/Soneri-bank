@@ -124,6 +124,33 @@ export const formatCompactDate = (input) => {
   return `${day}-${monthNames[date.getUTCMonth()]}-${date.getUTCFullYear()}`;
 };
 
+export const formatTimeForSwapsinUSD = (input) => {
+  if (!input || input.length < 8) return "";
+
+  const day = input.slice(0, 2);
+  const month = input.slice(2, 4);
+  const year = input.slice(4, 8);
+
+  const date = new Date(`${year}-${month}-${day}T00:00:00`);
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  return `${day}-${monthNames[date.getUTCMonth()]}-${date.getUTCFullYear()}`;
+};
+
 export function convertUTCTimeToLocalTime(timeStr) {
   try {
     if (!timeStr || timeStr.length !== 6) return "";
@@ -173,16 +200,31 @@ export const formatDateTimeForNews = (dateTime) => {
   const day = dateTime.slice(6, 8);
   const hour = dateTime.slice(8, 10);
   const minute = dateTime.slice(10, 12);
+  const second = dateTime.slice(12, 14);
 
-  const dateObj = new Date(`${year}-${month}-${day}`);
+  // ✅ Create UTC date correctly
+  const dateObj = new Date(
+    Date.UTC(year, month - 1, day, hour, minute, second)
+  );
 
+  // ✅ Convert to local automatically
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
   });
 
+  const formattedTime = dateObj.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false, // change to false if you want 24-hour
+  });
+
   return {
     date: formattedDate,
-    time: `${hour}:${minute}`,
+    time: formattedTime,
   };
+};
+
+export const formatISOToYYYMMDDHHMMss = (dateStr) => {
+  return dateStr.replace(/[T:\-Z]/g, "");
 };

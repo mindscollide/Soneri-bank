@@ -6,13 +6,25 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import App from "./App.jsx";
 import { NotificationProvider } from "./context/NotificationProvider.jsx";
 import { store } from "./store/store.js"; // adjust path if needed
+import Loader from "./shareComponents/elements/soneriLoader/index.jsx";
+import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+//During production uncomment this to hide the comments
+// console.log = () => {};
+// console.warn = () => {};
+// console.debug = () => {};
+
+// console.error = () => {};
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
-    <Provider store={store}>
-      <NotificationProvider>
-        <App />
-      </NotificationProvider>
-    </Provider>
+  <Provider store={store}>
+    <NotificationProvider>
+      <App />
+      <Loader />
+    </NotificationProvider>
+  </Provider>
   // </StrictMode>
 );

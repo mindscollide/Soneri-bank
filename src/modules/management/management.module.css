@@ -16,6 +16,17 @@
   min-width: 100%;
   display: block;
 }
+
+.tableheaderbarForUSDParity {
+  font-family: "Helvetica-Bold", sans-serif !important;
+  background: var(--color-light) !important;
+  color: var(--color-black) !important;
+  padding: 5px 10px !important;
+  font-size: 1rem;
+  width: 98%;
+  min-width: 98%;
+  display: block;
+}
 .management_date {
   font-family: "Helvetica-Bold", sans-serif !important;
   color: var(--color-blue);

@@ -4,19 +4,29 @@ import NotificationSnackbar from "../shareComponents/commonComponents/elements/N
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
-  const [message, setMessage] = useState("");
+  const [notifications, setNotifications] = useState([]);
 
-  const showMessage = useCallback((msg) => {
-    setMessage(msg);
+  const showMessage = useCallback((msgText) => {
+    const newMsg = {
+      id: Date.now(), // Unique ID for the snackbar logic
+      message: msgText,
+      description: "", // Optional
+    };
+
+    // Update to an array so the Snackbar's useEffect triggers correctly
+    setNotifications((prev) => [...prev, newMsg]);
+
+    // Clean up after the duration
     setTimeout(() => {
-      setMessage("");
-    }, 3000);
+      setNotifications((prev) => prev.filter((n) => n.id !== newMsg.id));
+    }, 4000);
   }, []);
 
   return (
     <NotificationContext.Provider value={{ showMessage }}>
       {children}
-      <NotificationSnackbar message={message} />
+      {/* Changed 'message' to 'messages' to match the snackbar component */}
+      <NotificationSnackbar messages={notifications} />
     </NotificationContext.Provider>
   );
 };

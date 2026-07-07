@@ -12,5 +12,11 @@ export const store = configureStore({
     modalReducer: modalSlicer,
     tabReducer: tabSlicer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+      immutableCheck: false,
+    }),
+  // 👇 Enable Redux DevTools
+  devTools: true,
 });

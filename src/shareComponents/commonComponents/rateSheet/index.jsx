@@ -28,8 +28,10 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { formatTodayForRateSheet } from "../../../utils/timeFunction";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
+import { useMqttTopics } from "../../../hook/useMqttTopics";
 
 const RateSheet = () => {
+  useMqttTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const screenRef = useRef(null);
@@ -62,15 +64,110 @@ const RateSheet = () => {
       img.src = imgUrl;
     });
   };
+  // const handleExportPDF = async () => {
+  //   const element = screenRef.current;
+
+  //   const canvas = await html2canvas(element, {
+  //     scale: 2,
+  //     useCORS: true,
+  //   });
+
+  //   const imgData = canvas.toDataURL("image/jpeg", 0.9); // better quality
+
+  //   const pdf = new jsPDF({
+  //     orientation: "p",
+  //     unit: "mm",
+  //     format: "a4",
+  //     compress: true,
+  //   });
+  //   const pageWidth = pdf.internal.pageSize.getWidth();
+  //   const logoBase64 = await getBase64Image(logo);
+
+  //   /* -------- CENTER LOGO -------- */
+
+  //   const headerWidth = 60;
+  //   const headerHeight = 15;
+
+  //   const xPosition = (pageWidth - headerWidth) / 2;
+
+  //   pdf.addImage(logoBase64, "PNG", xPosition, 8, headerWidth, headerHeight);
+
+  //   /* -------- HEADER TEXT -------- */
+  //   pdf.setFontSize(10);
+  //   pdf.text("Roshan Har Qadam", pageWidth / 2, 28, { align: "center" });
+
+  //   pdf.setFontSize(11);
+  //   pdf.text("FOREIGN EXCHANGE RATE SHEET", 10, 35);
+
+  //   pdf.text("TREASURY & CAPITAL MARKETS GROUP", pageWidth - 10, 35, {
+  //     align: "right",
+  //   });
+
+  //   pdf.text(todayDate, 10, 42);
+
+  //   /* -------- ADD SCREENSHOT -------- */
+
+  //   const imgWidth = pageWidth - 20;
+  //   const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  //   pdf.addImage(
+  //     imgData,
+  //     "JPEG",
+  //     10,
+  //     48,
+  //     imgWidth,
+  //     imgHeight,
+  //     undefined,
+  //     "FAST"
+  //   );
+  //   pdf.save("RateSheet.pdf");
+  // };
+
   const handleExportPDF = async () => {
     const element = screenRef.current;
+
+    // 1. Detect current browser zoom (e.g. 1.5 at 150% zoom)
+    const zoomRatio = window.outerWidth / window.innerWidth;
+
+    // 2. Save original inline styles so we can restore them
+    const savedStyles = {
+      width: element.style.width,
+      transform: element.style.transform,
+      transformOrigin: element.style.transformOrigin,
+      overflow: element.style.overflow,
+    };
+
+    // 3. Force the element to render at its 100%-zoom natural width
+    //    offsetWidth is in CSS pixels (shrunk by zoom), so multiply by zoomRatio to get true width
+    const naturalWidth = element.offsetWidth * zoomRatio;
+    element.style.width = `${naturalWidth}px`;
+    element.style.overflow = "visible";
+
+    // 4. Scale the element back down visually — html2canvas captures CSS pixels,
+    //    so this cancels out the extra width we added above
+    element.style.transform = `scale(${1 / zoomRatio})`;
+    element.style.transformOrigin = "top left";
+
+    // 5. Wait for the browser to re-layout before capturing
+    await new Promise((r) => requestAnimationFrame(r));
+    await new Promise((r) => setTimeout(r, 50));
 
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+      windowWidth: naturalWidth, // tell html2canvas the true 100% zoom width
+      windowHeight: element.scrollHeight,
     });
 
-    const imgData = canvas.toDataURL("image/jpeg", 0.9); // better quality
+    // 6. Restore original styles immediately after capture
+    element.style.width = savedStyles.width;
+    element.style.transform = savedStyles.transform;
+    element.style.transformOrigin = savedStyles.transformOrigin;
+    element.style.overflow = savedStyles.overflow;
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.9);
 
     const pdf = new jsPDF({
       orientation: "p",
@@ -78,32 +175,25 @@ const RateSheet = () => {
       format: "a4",
       compress: true,
     });
+
     const pageWidth = pdf.internal.pageSize.getWidth();
     const logoBase64 = await getBase64Image(logo);
 
-    /* -------- CENTER LOGO -------- */
-
     const headerWidth = 60;
     const headerHeight = 15;
-
     const xPosition = (pageWidth - headerWidth) / 2;
 
     pdf.addImage(logoBase64, "PNG", xPosition, 8, headerWidth, headerHeight);
 
-    /* -------- HEADER TEXT -------- */
     pdf.setFontSize(10);
     pdf.text("Roshan Har Qadam", pageWidth / 2, 28, { align: "center" });
 
     pdf.setFontSize(11);
     pdf.text("FOREIGN EXCHANGE RATE SHEET", 10, 35);
-
     pdf.text("TREASURY & CAPITAL MARKETS GROUP", pageWidth - 10, 35, {
       align: "right",
     });
-
     pdf.text(todayDate, 10, 42);
-
-    /* -------- ADD SCREENSHOT -------- */
 
     const imgWidth = pageWidth - 20;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;

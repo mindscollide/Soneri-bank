@@ -1,349 +1,236 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "./forwards.module.css";
 
-import { throttle } from "lodash";
-
-import { useDispatch } from "react-redux";
-import { buildForwardsTable } from "../utils/generateColumnsData";
 import {
-  clearDealerForwardClearRates,
+  clearTreasuryDealerForwardRates,
   setDealerForwardTenorChanged,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
-import { IndexCell } from "../elements/inputField/IndexCell";
-import GlobalTable from "../elements/table/GlobalTable";
-import { UpdateDealerForwardRates } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 
-const Forwards = () => {
+import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
+import { buildForwardsAgGridTable } from "../../../shareComponents/commonComponents/utils/generateColumnsData";
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import { useMqttTopics } from "../../../hook/useMqttTopics";
+import SectionLoader from "../../elements/soneriLoader/SectionLoader";
+
+const Forwards = memo(({ dealerIdForMQTT }) => {
   const dispatch = useDispatch();
-  const [dataSource, setDataSource] = useState([]);
-  const [columnsData, setColumnsData] = useState([]);
 
+  useMqttTopics([`SBL_REAL_TIME_FEED_TREASURY_DEALER_${dealerIdForMQTT}`]);
+
+  // ─────────────────────────────
+  // REFS
+  const gridRef = useRef(null);
+  const gridApiRef = useRef(null);
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map());
+  const rafRef = useRef(null);
+  const isMountedRef = useRef(true);
+
+  // ─────────────────────────────
+  // SELECTORS
   const TreasuryDealerForwardRates = useSelector(
-    (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
+    (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates,
+    shallowEqual
   );
-  // const GetCategoryWiseForwardRatesData = null;
-  // console.log(
-  //   GetCategoryWiseForwardRatesData,
-  //   "GetCategoryWiseForwardRatesDataGetCategoryWiseForwardRatesData"
-  // );
+
   const GetBankForwardForTreasuryDealer = useSelector(
-    (state) => state.WatchListReducer.GetBankForwardForTreasuryDealer
+    (state) => state.WatchListReducer.GetBankForwardForTreasuryDealer,
+    shallowEqual
   );
 
   const allInstrumentForTreasuryData = useSelector(
-    (state) => state.WatchListReducer.GetAllInstrumentForTreasury
+    (state) => state.WatchListReducer.GetAllInstrumentForTreasury,
+    shallowEqual
   );
 
   const getAllTenorsRecords = useSelector(
-    (state) => state.WatchListReducer.getAllTenors
+    (state) => state.WatchListReducer.getAllTenors,
+    shallowEqual
   );
-
-  // const CategoryForwardRates = useSelector(
-  //   (state) => state.RealtimeActionsSlice.CategoryForwardRates
-  // );
-
-  // const TreasuryDealerForwardRates = useSelector(
-  //   (state) => state.RealtimeActionsSlice.TreasuryDealerForwardRates
-  // );
 
   const dealerForwardTenorChanged = useSelector(
-    (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged
-  );
-  const marketStatus = useSelector(
-    (state) => state.WatchListReducer.getMarketStatus
+    (state) => state.RealtimeActionsSlice.dealerForwardTenorChanged,
+    shallowEqual
   );
 
-  const ClearRatesData = useSelector(
-    (state) => state.RealtimeActionsSlice.DealerForwardClearRates
-  );
-
-  // Define the data source for the Ant Design Table
-  useEffect(() => {
-    if (getAllTenorsRecords !== null && allInstrumentForTreasuryData !== null) {
-      try {
-        let getAllTenorsData = { tenors: getAllTenorsRecords.tenors };
-        let getAllInstrument = {
-          instruments: allInstrumentForTreasuryData.forwardInstruments,
-        };
-
-        const { forwardRates = [] } =
-          GetBankForwardForTreasuryDealer !== null &&
-          GetBankForwardForTreasuryDealer;
-
-        const { rowData, columnsData } = buildForwardsTable(
-          3,
-          forwardRates,
-          getAllTenorsData,
-          getAllInstrument,
-          IndexCell
-        );
-        if (rowData.length > 0) {
-          setDataSource(rowData);
-          setColumnsData(columnsData);
-        }
-      } catch (error) {
-        console.log(error, "Error while building discounting table");
-      }
-    }
+  // ─────────────────────────────
+  // INITIAL TABLE BUILD (STABLE)
+  const { rowData, columnDefs } = useMemo(() => {
+    return buildForwardsAgGridTable(
+      3,
+      GetBankForwardForTreasuryDealer?.forwardRates || [],
+      { tenors: getAllTenorsRecords?.tenors || [] },
+      { instruments: allInstrumentForTreasuryData?.forwardInstruments || [] },
+      IndexCell
+    );
   }, [
-    allInstrumentForTreasuryData,
     getAllTenorsRecords,
+    allInstrumentForTreasuryData,
     GetBankForwardForTreasuryDealer,
   ]);
 
-  // useEffect(() => {
-  //   if (
-  //     categoryFowardsTenorsChanges !== null &&
-  //     getAllTenorsRecords !== null &&
-  //     allInstrumentForTreasuryData !== null
-  //   ) {
-  //     try {
-  //       const { newIsForwardtenorList = [], removedtenorList = [] } =
-  //         categoryFowardsTenorsChanges;
-  //       const allTenors = [...(getAllTenorsRecords.tenors || [])];
+  // ─────────────────────────────
+  // BUILD NODE MAP
+  const buildNodeMap = useCallback((api) => {
+    rowNodeMap.current.clear();
 
-  //       // Convert arrays of objects to Set of IDs
-  //       const removedSet = new Set(
-  //         removedtenorList.map((item) => item.tenorID)
-  //       );
+    api.forEachNode((node) => {
+      if (node.data?.tenorID) {
+        rowNodeMap.current.set(String(node.data.tenorID), node);
+      }
+    });
+  }, []);
 
-  //       // Update each tenor's isForwardingApplicable field
-  //       const updatedTenors = allTenors.map((tenor) => ({
-  //         ...tenor,
-  //         isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
-  //       }));
+  // ─────────────────────────────
+  // GRID READY
+  const onGridReady = useCallback((params) => {
+    gridApiRef.current = params.api;
+  }, []);
 
-  //       let getAllTenorsData = { tenors: updatedTenors };
-  //       let getAllInstrument = {
-  //         instruments: allInstrumentForTreasuryData.forwardInstruments,
-  //       };
+  // ─────────────────────────────
+  // FIRST DATA RENDERED
+  const onFirstDataRendered = useCallback(
+    (params) => {
+      buildNodeMap(params.api);
+    },
+    [buildNodeMap]
+  );
 
-  //       const { forwardRates = [] } =
-  //         GetCategoryWiseForwardRatesData !== null &&
-  //         GetCategoryWiseForwardRatesData;
-  //       const { rowData, columnsData } = buildForwardsTable(
-  //         forwardRates,
-  //         getAllTenorsData,
-  //         getAllInstrument,
-  //         IndexCell
-  //       );
-  //       if (rowData.length > 0) {
-  //         setDataSource(rowData);
-  //         setColumnsData(columnsData);
-  //       }
-  //       dispatch(setCategoryFowardsTenorsChanges(null));
-  //       console.log(updatedTenors, "updatedTenorsupdatedTenors");
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
-  // }, [
-  //   categoryFowardsTenorsChanges,
-  //   getAllTenorsRecords,
-  //   allInstrumentForTreasuryData,
-  // ]);
+  // ─────────────────────────────
+  // REBUILD NODE MAP WHEN DATA CHANGES
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) return;
 
-  const throttledCategoryForwardUpdate = useMemo(
-    () =>
-      throttle((forwardRatesUpdate) => {
-        const { forwardRates } = forwardRatesUpdate;
+    buildNodeMap(api);
+  }, [rowData, buildNodeMap]);
 
-        setDataSource((prevData) =>
-          prevData.map((row) => {
-            let updatedRow = { ...row };
+  // ─────────────────────────────
+  // HFT PROCESSOR
+  const processQueue = useCallback(() => {
+    const api = gridApiRef.current;
 
-            forwardRates.forEach((d) => {
-              Object.keys(row).forEach((key) => {
-                if (
-                  key.startsWith("InstrumentID_") &&
-                  row[key] === d.instrumentID &&
-                  row.tenorID === d.tenorID
-                ) {
-                  const currency = key.split("_")[1]; // e.g., USD
-                  updatedRow[`bid_${currency}`] = d.bidWithSpread;
-                  updatedRow[`ask_${currency}`] = d.askWithSpread;
-                }
-              });
-            });
+    if (!api || rowNodeMap.current.size === 0) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
 
-            return updatedRow;
-          })
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    for (const [key, update] of pendingUpdates.current.entries()) {
+      const [tenorID, instrumentName] = key.split("|");
+      const node = rowNodeMap.current.get(String(tenorID));
+
+      if (node) {
+        node.setDataValue(`bid_${instrumentName}`, update.bid);
+        node.setDataValue(`ask_${instrumentName}`, update.ask);
+
+        // ✅ delete only when applied
+        pendingUpdates.current.delete(key);
+      }
+    }
+
+    rafRef.current = null;
+  }, []);
+
+  // ─────────────────────────────
+  // MQTT FEED HANDLER
+  useEffect(() => {
+    if (
+      !TreasuryDealerForwardRates ||
+      !allInstrumentForTreasuryData?.forwardInstruments
+    )
+      return;
+
+    const feeds = Array.isArray(TreasuryDealerForwardRates)
+      ? TreasuryDealerForwardRates
+      : [TreasuryDealerForwardRates];
+
+    feeds.forEach((feed) => {
+      feed.forwardRates?.forEach((rate) => {
+        const inst = allInstrumentForTreasuryData.forwardInstruments.find(
+          (i) => Number(i.instrumentID) === Number(rate.instrumentID)
         );
-      }, 20),
+
+        if (inst) {
+          const key = `${String(rate.tenorID)}|${inst.instrumentName}`;
+
+          pendingUpdates.current.set(key, {
+            bid: rate.bidWithSpread,
+            ask: rate.askWithSpread,
+          });
+        }
+      });
+    });
+
+    if (!rafRef.current && pendingUpdates.current.size > 0) {
+      rafRef.current = requestAnimationFrame(processQueue);
+    }
+
+    const clearId = setTimeout(() => {
+      if (isMountedRef.current) {
+        dispatch(clearTreasuryDealerForwardRates());
+      }
+    }, 50);
+
+    return () => clearTimeout(clearId);
+  }, [
+    TreasuryDealerForwardRates,
+    allInstrumentForTreasuryData,
+    dispatch,
+    processQueue,
+  ]);
+
+  // ─────────────────────────────
+  // TENOR ADD / REMOVE
+
+  // ─────────────────────────────
+  // CLEANUP
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  // ─────────────────────────────
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+    }),
     []
   );
 
-  useEffect(() => {
-    if (TreasuryDealerForwardRates) {
-      throttledCategoryForwardUpdate(TreasuryDealerForwardRates);
-    }
-  }, [TreasuryDealerForwardRates, throttledCategoryForwardUpdate]);
-
-  useEffect(() => {
-    if (marketStatus !== null && marketStatus === false) {
-      setDataSource((prevData) =>
-        prevData.map((row) => {
-          const updatedRow = { ...row };
-          Object.keys(row).forEach((key) => {
-            if (key.startsWith("bid_") || key.startsWith("ask_")) {
-              updatedRow[key] = 0;
-            }
-          });
-          return updatedRow;
-        })
-      );
-    }
-  }, [marketStatus]);
-
-  useEffect(() => {
-    if (
-      dealerForwardTenorChanged !== null &&
-      getAllTenorsRecords !== null &&
-      allInstrumentForTreasuryData !== null
-    ) {
-      try {
-        const { newIsForwardtenorList = [], removedtenorList = [] } =
-          dealerForwardTenorChanged;
-        const allTenors = [...(getAllTenorsRecords.tenors || [])];
-
-        // Convert arrays of objects to Set of IDs
-        const removedSet = new Set(
-          removedtenorList.map((item) => item.tenorID)
-        );
-
-        // Update each tenor's isForwardingApplicable field
-        const updatedTenors = allTenors.map((tenor) => ({
-          ...tenor,
-          isForwardingApplicable: removedSet.has(tenor.tenorID) ? false : true, // leave unchanged if in neither
-        }));
-        let getAllTenorsData = { tenors: updatedTenors };
-        let getAllInstrument = {
-          instruments: allInstrumentForTreasuryData.forwardInstruments,
-        };
-
-        const { forwardRates = [] } =
-          GetBankForwardForTreasuryDealer !== null &&
-          GetBankForwardForTreasuryDealer;
-
-        const { rowData, columnsData } = buildForwardsTable(
-          3,
-          forwardRates,
-          getAllTenorsData,
-          getAllInstrument,
-          IndexCell
-        );
-
-        if (rowData.length > 0) {
-          setDataSource(rowData);
-          setColumnsData(columnsData);
-        }
-        dispatch(setDealerForwardTenorChanged(null));
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }, [
-    dealerForwardTenorChanged,
-    getAllTenorsRecords,
-    allInstrumentForTreasuryData,
-  ]);
-  GetBankForwardForTreasuryDealer;
-
-  // For clear Forward Rates
-  useEffect(() => {
-    if (!ClearRatesData?.areRatesClear) return;
-
-    if (GetBankForwardForTreasuryDealer?.forwardRates) {
-      // ✅ Clear bid/ask values
-      const clearedForwardRates =
-        GetBankForwardForTreasuryDealer.forwardRates.map((item) => ({
-          ...item,
-          bid: 0,
-          ask: 0,
-        }));
-
-      const newGetCategoryWiseForwardRatesData = {
-        ...GetBankForwardForTreasuryDealer,
-        forwardRates: clearedForwardRates,
-      };
-
-      dispatch(UpdateDealerForwardRates(newGetCategoryWiseForwardRatesData));
-    } else {
-      // ✅ Fallback: clear current local dataSource if Redux data missing
-      setDataSource((prevData) =>
-        prevData.map((row) => {
-          const updatedRow = { ...row };
-          Object.keys(row).forEach((key) => {
-            if (key.startsWith("bid_") || key.startsWith("ask_")) {
-              updatedRow[key] = 0;
-            }
-          });
-          return updatedRow;
-        })
-      );
-    }
-
-    // ✅ Reset ClearRatesData flag in Redux
-    dispatch(clearDealerForwardClearRates());
-  }, [ClearRatesData, GetBankForwardForTreasuryDealer, dispatch]);
-
-  // // For clear Forward Rates
-  // useEffect(() => {
-  //   if (!ClearRatesData?.areRatesClear) return;
-
-  //   if (GetCategoryWiseForwardRatesData?.forwardRates) {
-  //     // ✅ Clear bid/ask values
-  //     const clearedForwardRates =
-  //       GetCategoryWiseForwardRatesData.forwardRates.map((item) => ({
-  //         ...item,
-  //         bid: 0,
-  //         ask: 0,
-  //       }));
-
-  //     const newGetCategoryWiseForwardRatesData = {
-  //       ...GetCategoryWiseForwardRatesData,
-  //       forwardRates: clearedForwardRates,
-  //     };
-
-  //     dispatch(
-  //       UpdateGetCategoryWiseForwardRates(newGetCategoryWiseForwardRatesData)
-  //     );
-  //   } else {
-  //     // ✅ Fallback: clear current local dataSource if Redux data missing
-  //     setDataSource((prevData) =>
-  //       prevData.map((row) => {
-  //         const updatedRow = { ...row };
-  //         Object.keys(row).forEach((key) => {
-  //           if (key.startsWith("bid_") || key.startsWith("ask_")) {
-  //             updatedRow[key] = 0;
-  //           }
-  //         });
-  //         return updatedRow;
-  //       })
-  //     );
-  //   }
-
-  //   // ✅ Reset ClearRatesData flag in Redux
-  //   dispatch(clearCategoryForwardClearRates());
-  // }, [ClearRatesData, GetCategoryWiseForwardRatesData, dispatch]);
-
   return (
-    <>
-      <div className={styles["mainForwardTable"]}>
-        <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
-          Bank Forwards
-        </span>
-        <GlobalTable
-          columns={columnsData}
-          prefixCls={"Dealer_Forwards_Treasury"}
-          dataSource={dataSource}
-          pagination={false}
-          scroll={{ x: "scroll" }}
+    <div className={styles.mainForwardTable}>
+      <span className="flex-fill mt-3 fs-4 fw-bold color-black mb-1">
+        Bank Forwards
+      </span>
+
+      <div style={{ width: "100%", height: "600px" }}>
+        <AgGridTable
+          ref={gridRef}
+          rowData={rowData}
+          className="liveRates-grid"
+          columnDefs={columnDefs}
+          getRowId={(p) => String(p.data.tenorID)}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          defaultColDef={defaultColDef}
+          animateRows={false}
+          suppressColumnVirtualisation={true}
+          loadingOverlayComponent={SectionLoader}
         />
       </div>
-    </>
+    </div>
   );
-};
+});
 
+Forwards.displayName = "Forwards";
 export default Forwards;

@@ -28,11 +28,7 @@ const SpotRates = () => {
   const navigate = useNavigate();
   const { showMessage } = useNotification();
   const [isMarketOn, setIsMarketOn] = useState(false);
-  const [error, setError] = useState({ tenorName: "", noOfDays: "" });
-  const [createTenor, setCreateTenor] = useState({
-    tenorName: "",
-    noOfDays: 0,
-  });
+
   const getLastPublishRates = useSelector(
     (state) => state.WatchListReducer.getLastPublishRates
   );
@@ -196,85 +192,51 @@ const SpotRates = () => {
   };
 
   const handleChangeCurrentRate = (event) => {
-    let name = event.target.name;
-    let value = event.target.value;
+    const { name, value } = event.target;
 
-    if (name === "bidValue") {
-      setCurrentRates({
-        ...currentRates,
-        bidValue: formatCurrencyInput(value),
-      });
-    } else if (name === "askValue") {
-      setCurrentRates({
-        ...currentRates,
-        askValue: formatCurrencyInput(value),
-      });
-    } else if (name === "refreshInterval") {
+    if (name === "refreshInterval") {
       const validated = isValidNumberUnderMaxNumber(value, 30);
-      if (validated) {
-        setRefreshInterval(value);
-      }
+      if (validated) setRefreshInterval(value);
+      return;
     }
+
+    setCurrentRates((prev) => ({
+      ...prev,
+      [name]: value, // handles bidValue and askValue dynamically
+    }));
   };
 
   const handlePublishRates = () => {
     //Object destructuring
-    const { bidValue, askValue, dateTime } = currentRates;
+    const { bidValue, askValue } = currentRates;
     const { bidValue: copyBidVal, askValue: copyAskVal } = copyCurrentRates;
 
     const bid = Number(bidValue);
     const ask = Number(askValue);
     const lastBid = Number(lastPublishRates.bidValue);
     const lastAsk = Number(lastPublishRates.askValue);
-    console.log("Check Value again", currentRates);
-    console.log("Check Value again", { bid, ask });
 
     // Step 1: Validate required fields
     if (!bid || !ask) {
-      console.log("Check Value again");
+      showMessage("Please fill all required fields");
 
-      const handleClick = () => {
-        showMessage("Please fill all required fields");
-      };
-
-      handleClick();
       return;
     }
     if (!refreshInterval) {
-      const handleClick = () => {
-        showMessage("Please enter the Refresh Interval value");
-      };
+      showMessage("Please enter the Refresh Interval value");
 
-      handleClick();
       return;
     }
 
     // Step 2: Ask value must be greater than Bid
     if (ask <= bid) {
-      console.log("Check Value again");
-      const handleClick = () => {
-        console.log("testtest");
-        showMessage("Ask value must be greater than Bid value.");
-      };
+      showMessage("Ask value must be greater than Bid value.");
 
-      handleClick();
       return;
     }
 
-    // Step 3: Format and compare current and last publish dates
-    const currentDate = moment(formatDateUTCToGMT(dateTime)).format(
-      "DD MMM YYYY"
-    );
-    const lastDate = moment(
-      formatDateUTCToGMT(lastPublishRates.dateTime)
-    ).format("DD MMM YYYY");
-
     // if copyBidVal and copyAskVal is 0 that means dealer or treasury update the first time rate in the morning
     const isFirstLogin2 = Number(copyBidVal) === 0 || Number(copyAskVal) === 0;
-
-    // Step 4: Determine if it's the first time login (no last published data)
-    const isFirstLogin =
-      !copyBidVal || !copyAskVal || copyBidVal === 0 || copyAskVal === 0;
 
     // Helper to get allowed bid/ask range based on percentage
 
@@ -401,13 +363,13 @@ const SpotRates = () => {
                       onChange={handleChangeMarketStatus}
                     />
                   </div>
-                  <CustomButton
+                  {/* <CustomButton
                     value={"Clear Rates"}
                     applyClass="clearRates"
                     disabled={isMarketOn === true ? false : true}
                     onClick={handleClearRates}
                     loading={clearRatesLoading}
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
@@ -486,7 +448,6 @@ const SpotRates = () => {
                                 type="text"
                                 value={lastPublishRates.askValue}
                                 decimalScale={2}
-                                onChange={handleChangeCurrentRate}
                                 name="askValue"
                                 allowNegative={false}
                                 className={
@@ -525,32 +486,50 @@ const SpotRates = () => {
                           <tr>
                             <td className="border-0">
                               <NumericFormat
-                                min={1}
-                                disabled={isMarketOn === true ? false : true}
-                                value={currentRates.bidValue}
-                                onChange={handleChangeCurrentRate}
                                 name="bidValue"
-                                decimalScale={2}
-                                type="text"
-                                allowNegative={false}
-                                className={
-                                  "text-center form-control  mt-4 d-block fs-5 fw-bold mb-0"
+                                value={currentRates.bidValue}
+                                onValueChange={(values) =>
+                                  handleChangeCurrentRate({
+                                    target: {
+                                      name: "bidValue",
+                                      value: values.floatValue,
+                                    },
+                                  })
                                 }
+                                decimalScale={2}
+                                fixedDecimalScale={false}
+                                allowNegative={false}
+                                isAllowed={({ floatValue }) =>
+                                  floatValue === undefined ||
+                                  (floatValue >= 1 && floatValue <= 1000)
+                                }
+                                disabled={!isMarketOn}
+                                type="text"
+                                className="text-center form-control mt-4 d-block fs-5 fw-bold mb-0"
                               />
                             </td>
                             <td className="border-0">
                               <NumericFormat
-                                min={1}
-                                disabled={isMarketOn === true ? false : true}
-                                type="text"
-                                value={currentRates.askValue}
-                                decimalScale={2}
-                                onChange={handleChangeCurrentRate}
                                 name="askValue"
-                                allowNegative={false}
-                                className={
-                                  "text-center form-control  mt-4 d-block fs-5 fw-bold mb-0"
+                                value={currentRates.askValue}
+                                onValueChange={(values) =>
+                                  handleChangeCurrentRate({
+                                    target: {
+                                      name: "askValue",
+                                      value: values.floatValue,
+                                    },
+                                  })
                                 }
+                                decimalScale={2}
+                                fixedDecimalScale={false}
+                                allowNegative={false}
+                                isAllowed={({ floatValue }) =>
+                                  floatValue === undefined ||
+                                  (floatValue >= 1 && floatValue <= 1000)
+                                }
+                                disabled={!isMarketOn}
+                                type="text"
+                                className="text-center form-control mt-4 d-block fs-5 fw-bold mb-0"
                               />
                             </td>
                           </tr>
@@ -570,11 +549,11 @@ const SpotRates = () => {
         backdrop="static"
         onHide={() => {
           dispatch(setPublishedSpotRates(false));
-          setError({ tenorName: "", noOfDays: "" });
-          setCreateTenor({
-            tenorName: "",
-            noOfDays: 0,
-          });
+          // setError({ tenorName: "", noOfDays: "" });
+          // setCreateTenor({
+          //   tenorName: "",
+          //   noOfDays: 0,
+          // });
         }}
         centered={true}
         footerClassName="d-block border-0"

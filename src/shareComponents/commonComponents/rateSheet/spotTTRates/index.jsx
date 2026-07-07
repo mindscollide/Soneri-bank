@@ -7,8 +7,10 @@ import React, {
 } from "react";
 import styles from "../RateSheet.module.css";
 import GlobalTable from "../../elements/table/GlobalTable";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { clearTreasuryRateSheetSpotTTRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
+// Selectors
 const GetSpotTTRatesForRateSheet = (state) =>
   state.WatchListReducer.GetSpotTTRatesForRateSheet;
 
@@ -16,22 +18,112 @@ const treasuryRateSheetSpotTTRatesFeed = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetSpotTTRates;
 
 const SpotTTRates = () => {
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
-  const animationFrameRef = useRef(null);
+  const dispatch = useDispatch();
+
+  // State
   const [processedData, setProcessedData] = useState([]);
+
+  // Refs (same pattern as forwards)
+  const dataRef = useRef([]);
+  const pendingUpdatesRef = useRef([]);
+  const animationFrameRef = useRef(null);
+  const isInitializedRef = useRef(false);
+
   const spotTTRatesData = useSelector(GetSpotTTRatesForRateSheet);
   const fullFeed = useSelector(treasuryRateSheetSpotTTRatesFeed);
 
-  useEffect(() => {
-    if (spotTTRatesData && spotTTRatesData !== null) {
-      const { spotTTRates } = spotTTRatesData;
-      if (Array.isArray(spotTTRates)) {
-        setProcessedData(spotTTRates);
-      }
-    }
-  }, [spotTTRatesData]);
+  // ✅ Sync helper
+  const applyRows = useCallback((rows) => {
+    dataRef.current = rows;
+    setProcessedData(rows);
+  }, []);
 
+  // ✅ Initialize base data
+  useEffect(() => {
+    if (!spotTTRatesData?.spotTTRates) return;
+
+    const base = spotTTRatesData.spotTTRates.map((item) => ({
+      ...item,
+      version: 0,
+    }));
+
+    applyRows(base);
+    isInitializedRef.current = true;
+  }, [spotTTRatesData, applyRows]);
+
+  // ✅ RAF batch processor
+  const processQueue = useCallback(() => {
+    const updates = pendingUpdatesRef.current;
+    if (!updates.length) {
+      animationFrameRef.current = null;
+      return;
+    }
+
+    pendingUpdatesRef.current = [];
+
+    // 🔥 Flatten updates
+    const flatUpdates = updates.map((u) => u?.spotTTRates).filter(Boolean);
+
+    if (!flatUpdates.length) {
+      animationFrameRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
+
+    // 🔥 O(1) lookup map
+    const updateMap = new Map(flatUpdates.map((u) => [u.instrumentID, u]));
+
+    const updated = dataRef.current.map((row) => {
+      const update = updateMap.get(row.instrumentID);
+      if (!update) return row;
+
+      if (
+        Number(row.bid) === Number(update.bid) &&
+        Number(row.offer) === Number(update.offer) &&
+        row.currencyName === update.currencyName &&
+        row.currencyCode === update.currencyCode
+      ) {
+        return row;
+      }
+
+      return {
+        ...row,
+        currencyName: update.currencyName,
+        currencyCode: update.currencyCode,
+        bid: update.bid,
+        offer: update.offer,
+        version: (row.version || 0) + 1,
+      };
+    });
+
+    applyRows(updated);
+
+    // ✅ clear redux queue (IMPORTANT)
+    dispatch(clearTreasuryRateSheetSpotTTRates());
+
+    animationFrameRef.current = requestAnimationFrame(processQueue);
+  }, [applyRows, dispatch]);
+
+  // ✅ enqueue updates
+  useEffect(() => {
+    if (!fullFeed?.length) return;
+
+    pendingUpdatesRef.current = fullFeed;
+
+    if (!animationFrameRef.current) {
+      animationFrameRef.current = requestAnimationFrame(processQueue);
+    }
+  }, [fullFeed, processQueue]);
+
+  // cleanup
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  // Columns
   const columns = useMemo(
     () => [
       {
@@ -51,112 +143,29 @@ const SpotTTRates = () => {
         dataIndex: "bid",
         className: "bidCol",
         width: 70,
+        // Update: Check for 0 or missing values
+        render: (value) => (value === 0 || !value ? "-" : value),
       },
       {
         title: "Selling",
         dataIndex: "offer",
         className: "offerCol",
         width: 70,
+        // Update: Check for 0 or missing values
+        render: (value) => (value === 0 || !value ? "-" : value),
       },
     ],
     []
   );
 
-  // MQTT Work
-  // ✅ Batch update function
-  const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
-      return;
-    }
-
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
-
-    setProcessedData((prevData) => {
-      if (!Array.isArray(prevData)) return prevData;
-
-      let hasChanges = false;
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
-
-        updates.forEach((update) => {
-          const { spotTTRates } = update;
-
-          if (spotTTRates && item.instrumentID === spotTTRates.instrumentID) {
-            if (
-              Number(updatedItem.currencyName) !==
-                Number(spotTTRates.currencyName) ||
-              Number(updatedItem.currencyCode) !==
-                Number(spotTTRates.currencyCode) ||
-              Number(updatedItem.bid) !== Number(spotTTRates.bid) ||
-              Number(updatedItem.offer) !== Number(spotTTRates.offer)
-            ) {
-              updatedItem = {
-                ...updatedItem,
-                currencyName: spotTTRates.currencyName,
-                currencyCode: spotTTRates.currencyCode,
-                bid: spotTTRates.bid,
-                offer: spotTTRates.offer,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
-          }
-        });
-
-        return changed ? updatedItem : item;
-      });
-
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
-
-      return hasChanges ? updatedData : prevData;
-    });
-
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-  }, []);
-
-  // ✅ Queue update
-  const queueUpdate = useCallback(
-    (feed) => {
-      if (!feed) return;
-
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
-      lastUpdateRef.current = now;
-
-      updateQueueRef.current.push(feed);
-
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-      }
-    },
-    [processUpdateQueue]
-  );
-  // ✅ Feed update effect
-  useEffect(() => {
-    if (!fullFeed) return;
-    queueUpdate(fullFeed);
-  }, [fullFeed, queueUpdate]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-
   return (
     <>
       <span className={styles.tableheaderbar}>Spot TT Rates</span>
+
       <GlobalTable
         columns={columns}
         dataSource={processedData}
+        rowKey={(record) => `${record.instrumentID}-${record.version}`}
         prefixCls={
           processedData.length > 0 ? "rateSheetTable" : "rateSheetTable_Empty"
         }

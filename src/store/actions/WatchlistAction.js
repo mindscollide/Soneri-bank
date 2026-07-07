@@ -32,6 +32,7 @@ import {
   GetNewsDetailsByID,
   GetNewsHeadlines,
   GetRatesForCurrencyNotesForRateSheet,
+  GetRefreshIconTenors,
   GetRevalRatesForTreasury,
   GetSBPConversionRatesForRateSheet,
   GetSingleDealersSpread,
@@ -52,11 +53,15 @@ import {
   setPublishedSpotRates,
   setPublishedSpotRateSheet,
 } from "../slicers/modalSlicer/modalSlicer";
+import {
+  setNewsByNewsIdViewModal,
+  setNewsLoadingSpinner,
+} from "../slicers/watchListSlicer/WatchListSlicer";
 
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const getAllTreasuryInstrumentsApi = createAsyncThunk(
   "watchlist/getAllTreasuryInstruments", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getAllInstruments = createPostAPI(
         watchListApi,
@@ -127,7 +132,7 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
 
 export const GetBankSpotForTreasuryApi = createAsyncThunk(
   "watchlist/GetBankSpotForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetBankSpotForTreasuryData = createPostAPI(
         watchListApi,
@@ -196,7 +201,7 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
 
 export const GetBankForwardForTreasuryApi = createAsyncThunk(
   "watchlist/GetBankForwardForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetBankForwardForTreasuryData = createPostAPI(
         watchListApi,
@@ -266,7 +271,7 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
 // Define the GetDiscountingRatesForTreasury async thunk
 export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
   "watchlist/GetDiscountingRatesForTreasury", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetDiscountingRatesForTreasuryData = createPostAPI(
         watchListApi,
@@ -337,7 +342,7 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
 
 export const getMarketStatusApi = createAsyncThunk(
   "watchlist/getMarketStatus",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getMarketStatusPost = createPostAPI(
         watchListApi,
@@ -383,7 +388,7 @@ export const getMarketStatusApi = createAsyncThunk(
 
 // Define the login async thunk
 export const clearRatesAction = createAsyncThunk(
-  "uploadRate/clearRate", // A unique action type string
+  "watchlist/clearRate", // A unique action type string
   async ({ Data }, { rejectWithValue }) => {
     try {
       let clearRates = createPostAPI(watchListApi, clearRatesRM.RequestMethod);
@@ -450,8 +455,8 @@ export const clearRatesAction = createAsyncThunk(
 
 // Define the login async thunk
 export const getLastPublishRatesAction = createAsyncThunk(
-  "uploadRate/getLastPublishRates", // A unique action type string
-  async ({ rejectWithValue }) => {
+  "watchlist/getLastPublishRates", // A unique action type string
+  async ({}, { rejectWithValue }) => {
     try {
       let getLastPublishRates = createPostAPI(
         watchListApi,
@@ -519,7 +524,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
 
 // Define the login async thunk
 export const PublishNewRatesAction = createAsyncThunk(
-  "uploadRate/PublishNewRates", // A unique action type string
+  "watchlist/PublishNewRates", // A unique action type string
   async ({ Data }, { rejectWithValue, dispatch }) => {
     try {
       let PublishNewRates = createPostAPI(
@@ -530,7 +535,6 @@ export const PublishNewRatesAction = createAsyncThunk(
       const response = await PublishNewRates(Data);
 
       const { responseCode } = response.data;
-      console.log(responseCode, "responseCoderesponseCode");
 
       if (responseCode === 200) {
         const { isExecuted, responseMessage } = response.data.responseResult;
@@ -552,7 +556,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListiceManager_PublishTheCurrentUSDRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_02".toLowerCase()
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -560,20 +564,24 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchList_PublishTheCurrentUSDRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_03".toLowerCase()
               )
           ) {
             return rejectWithValue("Something went wrong");
           } else if (
             responseMessage
               .toLowerCase()
-              .includes("WatchList_WatchListeCurrentUSDRates_04".toLowerCase())
+              .includes(
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_04".toLowerCase()
+              )
           ) {
             return rejectWithValue("Something went wrong");
           } else if (
-            responseMessage.toWatchList_WatchList.includes(
-              "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_05".toLowerCase()
-            )
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_05".toLowerCase()
+              )
           ) {
             return rejectWithValue("Something went wrong");
           } else {
@@ -596,8 +604,8 @@ export const PublishNewRatesAction = createAsyncThunk(
 // ----------------------------
 // Define the login async thunk
 export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
-  "uploadRate/GetLastAndCurrentPublishUSDRateSheet", // A unique action type string
-  async ({ rejectWithValue }) => {
+  "watchlist/GetLastAndCurrentPublishUSDRateSheet", // A unique action type string
+  async ({}, { rejectWithValue }) => {
     try {
       let GetLastAndCurrentPublishUSDRateSheetData = createPostAPI(
         watchListApi,
@@ -665,7 +673,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
 
 // Define the login async thunk
 export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
-  "uploadRate/PublishCurrentUSDRateSheet", // A unique action type string
+  "watchlist/PublishCurrentUSDRateSheet", // A unique action type string
   async ({ Data }, { rejectWithValue, dispatch }) => {
     try {
       let PublishCurrentUSDRateSheetData = createPostAPI(
@@ -676,7 +684,6 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
       const response = await PublishCurrentUSDRateSheetData(Data);
 
       const { responseCode } = response.data;
-      console.log(responseCode, "responseCoderesponseCode");
 
       if (responseCode === 200) {
         const { isExecuted, responseMessage } = response.data.responseResult;
@@ -817,8 +824,8 @@ export const marketOnOffAction = createAsyncThunk(
 
 // Define the login async thunk
 export const getAllTenorsAction = createAsyncThunk(
-  "uploadRate/getAllTenors", // A unique action type string
-  async ({ rejectWithValue }) => {
+  "watchlist/getAllTenors", // A unique action type string
+  async ({}, { rejectWithValue }) => {
     try {
       let getAllTenors = createPostAPI(authApi, getAllTenorsRM.RequestMethod);
 
@@ -883,7 +890,7 @@ export const getAllTenorsAction = createAsyncThunk(
 
 // Define the login async thunk
 export const createTenorAction = createAsyncThunk(
-  "uploadRate/createTenors", // A unique action type string
+  "watchlist/createTenors", // A unique action type string
   async ({ Data, setCreateTenor }, { dispatch, rejectWithValue }) => {
     try {
       let createTenor = createPostAPI(
@@ -967,7 +974,7 @@ export const createTenorAction = createAsyncThunk(
 
 // Define the login async thunk
 export const PublishTenorWiseForwardsAction = createAsyncThunk(
-  "uploadRate/publishTenorWiseForward", // A unique action type string
+  "watchlist/publishTenorWiseForward", // A unique action type string
   async ({ Data }, { rejectWithValue }) => {
     try {
       let PublishTenorWiseForwards = createPostAPI(
@@ -1044,76 +1051,9 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
   }
 );
 
-// export const getDiscountingRatesAction = createAsyncThunk(
-//   "uploadRate/getDiscountingRates",
-//   async ({ navigate }, { dispatch, rejectWithValue }) => {
-//     try {
-//       let getDiscountingRates = createPostAPI(
-//         watchListApi,
-//         getDiscountingRatesRM.RequestMethod
-//       );
-
-//       const response = await getDiscountingRates();
-//       const { responseCode } = response.data;
-
-//       if (responseCode === 200) {
-//         const { isExecuted, responseMessage } = response.data.responseResult;
-//         if (isExecuted) {
-//           if (
-//             responseMessage
-//               .toLowerCase()
-//               .includes(
-//                 "WatchList_WatchListServiceManager_GetDiscountingRates_01".toLowerCase()
-//               )
-//           ) {
-//             return {
-//               response: response.data?.responseResult,
-//               message: "Forwards Rates are Published",
-//             };
-//           } else if (
-//             responseMessage
-//               .toLowerCase()
-//               .includes(
-//                 "WatchList_WatchListServiceManager_GetDiscountingRates_02".toLowerCase()
-//               )
-//           ) {
-//             return rejectWithValue("Something went wrong");
-//           } else if (
-//             responseMessage
-//               .toLowerCase()
-//               .includes(
-//                 "WatchList_WatchListServiceManager_GetDiscountingRates_03".toLowerCase()
-//               )
-//           ) {
-//             return rejectWithValue("Something went wrong");
-//           } else if (
-//             responseMessage
-//               .toLowerCase()
-//               .includes(
-//                 "WatchList_WatchListServiceManager_GetDiscountingRates_04".toLowerCase()
-//               )
-//           ) {
-//             return rejectWithValue("Something went wrong");
-//           } else {
-//             console.log("", response.data);
-//             return rejectWithValue("Something went wrong");
-//           }
-//         } else {
-//           console.log("", response.data);
-//           return rejectWithValue("Something went wrong");
-//         }
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       // Reject with error message
-//       return rejectWithValue("Something went wrong");
-//     }
-//   }
-// );
-
 export const getDealerDashboardApi = createAsyncThunk(
-  "uploadRates/getDashboardApi",
-  async ({ rejectWithValue }) => {
+  "watchlist/getDashboardApi",
+  async ({}, { rejectWithValue }) => {
     try {
       let DealerDashboardApi = createPostAPI(
         watchListApi,
@@ -1189,77 +1129,8 @@ export const getDealerDashboardApi = createAsyncThunk(
   }
 );
 
-// export const GetFEDiscountingTableApi = createAsyncThunk(
-//   "uploadRates/GetFeDiscounting",
-//   async ({ navigate }, { rejectWithValue, dispatch }) => {
-//     try {
-//       const getFeDiscounting = createPostAPI(
-//         watchListApi,
-//         GetFeDiscountingRM.RequestMethod
-//       );
-//       const response = await getFeDiscounting();
-//       console.log(response.data.responseCode, "result");
-//       const { responseCode } = response.data;
-//       console.log(responseCode, "result");
-
-//       if (responseCode === 200) {
-//         console.log(response, "result");
-
-//         const { isExecuted, responseMessage } = response.data.responseResult;
-//         if (!isExecuted) {
-//           console.log(response, "result");
-
-//           return rejectWithValue("Something went wrong");
-//         }
-//         if (
-//           responseMessage
-//             .toLowerCase()
-//             .includes(
-//               "WatchList_WatchListServiceManager_GetFEDiscountingRates_01".toLowerCase()
-//             )
-//         ) {
-//           return {
-//             response: response.data.responseResult,
-//             message: "Fe Discounting Published Data Successfully",
-//           };
-//         } else if (
-//           responseMessage
-//             .toLowerCase()
-//             .includes(
-//               "WatchList_WatchListServiceManager_GetFEDiscountingRates_02".toLowerCase()
-//             )
-//         ) {
-//           return rejectWithValue("No Found");
-//         } else if (
-//           responseMessage
-//             .toLowerCase()
-//             .includes(
-//               "WatchList_WatchListServiceManager_GetFEDiscountingRates_03".toLowerCase()
-//             )
-//         ) {
-//           return rejectWithValue("Someting went wrong");
-//         } else if (
-//           responseMessage
-//             .toLowerCase()
-//             .includes(
-//               "WatchList_WatchListServiceManager_GetFEDiscountingRates_04".toLowerCase()
-//             )
-//         ) {
-//           return rejectWithValue("Someting went wrong");
-//         } else {
-//           return rejectWithValue("Someting went wrong");
-//         }
-//       } else {
-//         return rejectWithValue("Something went wrong");
-//       }
-//     } catch (error) {
-//       console.error("Error fetching FE discounting data:", error);
-//       return rejectWithValue("Something went wrong");
-//     }
-//   }
-// );
 export const PublishFEDiscountingTableApi = createAsyncThunk(
-  "uploadRates/PublishFeDiscounting",
+  "watchlist/PublishFeDiscounting",
   async ({ Data }, { rejectWithValue }) => {
     try {
       const publishFeDiscounting = createPostAPI(
@@ -1267,7 +1138,6 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
         PublishFeDiscountingRM.RequestMethod
       );
       const response = await publishFeDiscounting(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
 
       if (responseCode === 200) {
@@ -1332,7 +1202,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
 );
 
 export const PublishNonFEDiscountingTableApi = createAsyncThunk(
-  "uploadRates/PublishNonFeDiscounting",
+  "watchlist/PublishNonFeDiscounting",
   async ({ Data }, { rejectWithValue }) => {
     try {
       const publishNonFeDiscounting = createPostAPI(
@@ -1340,7 +1210,6 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
         PublishNonFeDiscountingRatesRM.RequestMethod
       );
       const response = await publishNonFeDiscounting(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
 
       if (responseCode === 200) {
@@ -1413,17 +1282,11 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
         GetBankSpotForDealer.RequestMethod
       );
       const response = await GetBankSpotForDealerData(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
-      console.log(responseCode, "result");
 
       if (responseCode === 200) {
-        console.log(response, "result");
-
         const { isExecuted, responseMessage } = response.data.responseResult;
         if (!isExecuted) {
-          console.log(response, "result");
-
           return rejectWithValue("Something went wrong");
         }
         if (
@@ -1483,17 +1346,11 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
         GetBankForwardForTreasuryDealer.RequestMethod
       );
       const response = await GetBankForwardForTreasuryDealerData(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
-      console.log(responseCode, "result");
 
       if (responseCode === 200) {
-        console.log(response, "result");
-
         const { isExecuted, responseMessage } = response.data.responseResult;
         if (!isExecuted) {
-          console.log(response, "result");
-
           return rejectWithValue("Something went wrong");
         }
         if (
@@ -1553,24 +1410,18 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
         GetDiscountingRatesForDealer.RequestMethod
       );
       const response = await GetDiscountingRatesForDealerData(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
-      console.log(responseCode, "result");
 
       if (responseCode === 200) {
-        console.log(response, "result");
-
         const { isExecuted, responseMessage } = response.data.responseResult;
         if (!isExecuted) {
-          console.log(response, "result");
-
           return rejectWithValue("Something went wrong");
         }
         if (
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_01".toLowerCase()
             )
         ) {
           return {
@@ -1581,7 +1432,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_02".toLowerCase()
             )
         ) {
           return rejectWithValue("No Found");
@@ -1616,24 +1467,18 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
 // const response = await publishDiscountingRates(Data);
 export const GetAllDealersSpreadApi = createAsyncThunk(
   "watchlist/GetAllDealersSpread",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       const GetAllDealersSpreadData = createPostAPI(
         watchListApi,
         GetAllDealersSpread.RequestMethod
       );
       const response = await GetAllDealersSpreadData();
-      console.log(response, "result");
       const { responseCode } = response.data;
-      console.log(responseCode, "result");
 
       if (responseCode === 200) {
-        console.log(response, "result");
-
         const { isExecuted, responseMessage } = response.data.responseResult;
         if (!isExecuted) {
-          console.log(response, "result");
-
           return rejectWithValue("Something went wrong");
         }
         if (
@@ -1686,24 +1531,18 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
 
 export const GetCurrencyCrossesApi = createAsyncThunk(
   "watchlist/GetCurrencyCrosses",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       const GetCurrencyCrossesData = createPostAPI(
         watchListApi,
         GetCurrencyCrosses.RequestMethod
       );
       const response = await GetCurrencyCrossesData();
-      console.log(response, "result");
       const { responseCode } = response.data;
-      console.log(responseCode, "result");
 
       if (responseCode === 200) {
-        console.log(response, "result");
-
         const { isExecuted, responseMessage } = response.data.responseResult;
         if (!isExecuted) {
-          console.log(response, "result");
-
           return rejectWithValue("Something went wrong");
         }
         if (
@@ -1763,7 +1602,6 @@ export const AddDealerSpreadApi = createAsyncThunk(
         AddDealerSpread.RequestMethod
       );
       const response = await AddDealerSpreadData(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
 
       if (responseCode === 200) {
@@ -1780,7 +1618,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
         ) {
           return {
             response: response.data.responseResult,
-            message: "Data Saved Successfully.",
+            message: "Spread Published Successfully.",
           };
         } else if (
           responseMessage
@@ -1828,7 +1666,6 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
         GetSingleDealersSpread.RequestMethod
       );
       const response = await GetSingleDealersSpreadData(Data);
-      console.log(response, "result");
       const { responseCode } = response.data;
 
       if (responseCode === 200) {
@@ -1887,7 +1724,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const GetAllOtherInstrumentsApi = createAsyncThunk(
   "watchlist/GetAllOtherInstruments", // A unique action type string
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetAllOtherInstrumentsData = createPostAPI(
         watchListApi,
@@ -1959,7 +1796,7 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
 //GetUSDParityForTreasury
 export const GetUSDParityForTreasuryApi = createAsyncThunk(
   "watchlist/GetUSDParityForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetUSDParityForTreasuryData = createPostAPI(
         watchListApi,
@@ -2029,7 +1866,7 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
 //GetCommoditiesForTreasury
 export const GetCommoditiesForTreasuryApi = createAsyncThunk(
   "watchlist/GetCommoditiesForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetCommoditiesForTreasuryData = createPostAPI(
         watchListApi,
@@ -2099,7 +1936,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
 //GetIndicesForTreasury
 export const GetIndicesForTreasuryApi = createAsyncThunk(
   "watchlist/GetIndicesForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetIndicesForTreasuryData = createPostAPI(
         watchListApi,
@@ -2169,7 +2006,7 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
 //GetKiborDataForTreasury
 export const GetKiborDataForTreasuryApi = createAsyncThunk(
   "watchlist/GetKiborDataForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetKiborDataForTreasuryData = createPostAPI(
         watchListApi,
@@ -2239,7 +2076,7 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
 //GetSOFRDataForTreasury
 export const GetSOFRDataForTreasuryApi = createAsyncThunk(
   "watchlist/GetSOFRDataForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSOFRDataForTreasuryData = createPostAPI(
         watchListApi,
@@ -2309,7 +2146,7 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
 //GetRevalRatesForTreasury
 export const GetRevalRatesForTreasuryApi = createAsyncThunk(
   "watchlist/GetRevalRatesForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetRevalRatesForTreasuryData = createPostAPI(
         watchListApi,
@@ -2379,7 +2216,7 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
 //GetRevalRatesForTreasury
 export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
   "watchlist/GetSwapsInUSDForTreasury",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSwapsInUSDForTreasuryData = createPostAPI(
         watchListApi,
@@ -2449,7 +2286,7 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
 //GetSpotTTRatesForRateSheet
 export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
   "watchlist/GetSpotTTRatesForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSpotTTRatesForRateSheetData = createPostAPI(
         watchListApi,
@@ -2519,7 +2356,7 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
 //GetRatesForCurrencyNotesForRateSheet
 export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
   "watchlist/GetRatesForCurrencyNotesForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetRatesForCurrencyNotesForRateSheetData = createPostAPI(
         watchListApi,
@@ -2547,7 +2384,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesF2rRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_02".toLowerCase()
               )
           ) {
             return rejectWithValue(
@@ -2589,7 +2426,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
 //GetKiborDataForRateSheet
 export const GetKiborDataForRateSheetApi = createAsyncThunk(
   "watchlist/GetKiborDataForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetKiborDataForRateSheetData = createPostAPI(
         watchListApi,
@@ -2659,7 +2496,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
 //GetSOFRDataForRateSheet
 export const GetSOFRDataForRateSheetApi = createAsyncThunk(
   "watchlist/GetSOFRDataForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSOFRDataForRateSheetData = createPostAPI(
         watchListApi,
@@ -2729,7 +2566,7 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
 //GetIndicativeFBPRates
 export const GetIndicativeFBPRatesApi = createAsyncThunk(
   "watchlist/GetIndicativeFBPRates",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetIndicativeFBPRatesData = createPostAPI(
         watchListApi,
@@ -2799,7 +2636,7 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
 //GetSBPConversionRatesForRateSheet
 export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
   "watchlist/GetSBPConversionRatesForRateSheet",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let GetSBPConversionRatesForRateSheetData = createPostAPI(
         watchListApi,
@@ -2879,7 +2716,6 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
       const response = await GetNewsHeadlinesData(Data);
 
       const { responseCode } = response.data;
-      console.log(responseCode, "responseCoderesponseCode");
 
       if (responseCode === 200) {
         const { isExecuted, responseMessage } = response.data.responseResult;
@@ -2941,7 +2777,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
 //GetNewsDetailsByID
 export const GetNewsDetailsByIDApi = createAsyncThunk(
   "watchlist/GetNewsDetailsByID", // A unique action type string
-  async ({ Data }, { rejectWithValue }) => {
+  async ({ Data }, { rejectWithValue, dispatch }) => {
     try {
       let GetNewsDetailsByIDData = createPostAPI(
         watchListApi,
@@ -2951,7 +2787,6 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
       const response = await GetNewsDetailsByIDData(Data);
 
       const { responseCode } = response.data;
-      console.log(responseCode, "responseCoderesponseCode");
 
       if (responseCode === 200) {
         const { isExecuted, responseMessage } = response.data.responseResult;
@@ -2964,6 +2799,8 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
               )
           ) {
             // dispatch(setPublishedSpotRates(false));
+            dispatch(setNewsByNewsIdViewModal(true));
+            dispatch(setNewsLoadingSpinner(false));
 
             return {
               response: response.data.responseResult,
@@ -3005,6 +2842,80 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
     } catch (error) {
       console.log(error);
       // Reject with error message
+      return rejectWithValue("Something went wrong");
+    }
+  }
+);
+
+//GetRefreshIconTenors
+
+// Define the GetRefreshIconTenors async thunk
+export const GetRefreshIconTenorsApi = createAsyncThunk(
+  "watchlist/GetRefreshIconTenors", // A unique action type string
+  async ({}, { rejectWithValue }) => {
+    try {
+      let GetRefreshIconTenorsData = createPostAPI(
+        watchListApi,
+        GetRefreshIconTenors.RequestMethod
+      );
+
+      const response = await GetRefreshIconTenorsData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_01".toLowerCase()
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_02".toLowerCase()
+              )
+          ) {
+            return rejectWithValue(
+              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+            );
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_03".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Role doesn’t matched");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_04".toLowerCase()
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
       return rejectWithValue("Something went wrong");
     }
   }

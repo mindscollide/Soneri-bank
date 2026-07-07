@@ -1,6 +1,8 @@
 import { Table } from "antd";
 import React from "react";
 import "./GlobalTable.css";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+import LoaderImage from "../../../../assets/Soneri-Loader.svg";
 
 const GlobalTable = ({
   columns,
@@ -24,8 +26,9 @@ const GlobalTable = ({
   sticky,
   rowKey,
   onRow, // Add this line to accept the onRow prop
-  loading,
+  loading = false,
   ref,
+  key,
 }) => {
   return (
     <Table
@@ -53,8 +56,16 @@ const GlobalTable = ({
       onRow={onRow} // Pass the onRow prop to Table
       sticky={sticky}
       rowKey={rowKey}
-      loading={loading}
+      loading={{
+        indicator: (
+          <div className="custom-loader-container">
+            <img src={LoaderImage} className="custom-loader-img" />
+          </div>
+        ),
+        spinning: loading,
+      }}
       ref={ref}
+      key={key}
     />
   );
 };

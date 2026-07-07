@@ -134,3 +134,17 @@
   font-size: 14px;
   font-weight: 500;
 }
+/* Add this new class for the actual text content */
+.newsContentBody {
+  /* Crucial: Respects line breaks (\r\n) and multiple spaces */
+  white-space: pre-wrap;
+
+  /* Crucial: Ensures columns like 'Bid' and 'Ask' align perfectly */
+  /* font-family: "Consolas", "Monaco", "Courier New", monospace !important; */
+
+  font-size: 13px;
+  line-height: 1.6;
+  color: #333;
+  margin-top: 10px;
+  word-break: break-word;
+}

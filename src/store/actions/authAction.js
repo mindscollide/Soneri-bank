@@ -119,13 +119,11 @@ export const loginInApi = createAsyncThunk(
 
 export const LogoutApi = createAsyncThunk(
   "auth/Logout",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       const logoutUser = createPostAPI(authApi, LogoutRM.RequestMethod);
       const response = await logoutUser();
       const { responseCode } = response.data;
-
-      console.log(responseCode, response, "responseCoderesponseCode");
 
       if (responseCode === 200) {
         const { isExecuted, responseMessage } = response.data.responseResult;
@@ -137,6 +135,7 @@ export const LogoutApi = createAsyncThunk(
           ) {
             // localStorage.clear();
             window.location.href = "/";
+            localStorage.clear();
           } else if (
             responseMessage
               .toLowerCase()
@@ -164,7 +163,7 @@ export const LogoutApi = createAsyncThunk(
 
 export const getAllInstrumentsApi = createAsyncThunk(
   "auth/getAllInstruments",
-  async ({ rejectWithValue }) => {
+  async ({}, { rejectWithValue }) => {
     try {
       let getInstruments = createPostAPI(
         authApi,

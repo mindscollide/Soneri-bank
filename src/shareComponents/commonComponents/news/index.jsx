@@ -8,19 +8,36 @@ import cnbcIcon from "../../../assets/icons/cnbc-news.png";
 import tresmarkImg from "../../../assets/img/tresmarkImg.png";
 import cnbcImg from "../../../assets/img/cnbcImg.png";
 import dowjonesImg from "../../../assets/img/dowjonesImg.png";
-import { formatDateTimeForNews } from "../../../utils/timeFunction";
+import {
+  formatDateTimeForNews,
+  formatISOToYYYMMDDHHMMss,
+} from "../../../utils/timeFunction";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GetNewsDetailsByIDApi,
   GetNewsHeadlinesApi,
 } from "../../../store/actions/WatchlistAction";
 import GlobalModal from "../elements/globalModal/Modal";
-import { convertUTCToDateTime } from "../utils/timeFunction";
-import { clearGetNewsDetailsByID } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
+import { convertCurrentTimeZone } from "../utils/timeFunction";
+import {
+  clearGetNewsDetailsByID,
+  setNewsLoadingSpinner,
+} from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
+import dayjs from "dayjs";
+import { setClearNewsMQTT } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import NewsByNewsId from "../newsByNewsId";
 
 const News = () => {
+  // ✅ This is the ONLY change needed in News.jsx
+  // On mount: unsubscribes all other topics, subscribes REAL_TIME_FEED_NEWS
+  // On unmount: unsubscribes REAL_TIME_FEED_NEWS
+  // useMqttTopics(["REAL_TIME_FEED_NEWS"]);
   const dispatch = useDispatch();
+
+  const viewNewsModal = useSelector(
+    (state) => state.WatchListReducer.NewsByNewsIdViewModal
+  );
 
   // Map icons to their source IDs
   const sourceIdMap = {
@@ -60,10 +77,7 @@ const News = () => {
   const GetNewsHeadlinesLoading = useSelector(
     (state) => state.WatchListReducer.GetNewsHeadlinesLoading
   );
-  // console.log(
-  //   GetNewsHeadlinesLoading,
-  //   "GetNewsHeadlinesLoadingGetNewsHeadlinesLoading"
-  // );
+
   const GetNewsDetailsByID = useSelector(
     (state) => state.WatchListReducer.GetNewsDetailsByID
   );
@@ -242,6 +256,8 @@ const News = () => {
 
   const handleClickNewsHeading = (newsID) => {
     // API for Search News By Id
+    dispatch(setNewsLoadingSpinner(true));
+
     const Data = { NewsID: Number(newsID) };
     dispatch(GetNewsDetailsByIDApi({ Data }));
   };
@@ -294,29 +310,34 @@ const News = () => {
 
   // Realtime work
   useEffect(() => {
-    if (realTimeNewsFeed?.News) {
-      const incomingNews = realTimeNewsFeed.News;
+    if (realTimeNewsFeed !== null) {
+      try {
+        const incomingNews = realTimeNewsFeed?.news;
 
-      setNewsList((prev) => {
-        // ❌ duplicate
-        const alreadyExists = prev.some(
-          (item) => item.newsID === incomingNews.NewsID
-        );
+        setNewsList((prev) => {
+          // ❌ duplicate
+          const alreadyExists = prev.some(
+            (item) => item.newsID === incomingNews.newsID
+          );
 
-        if (alreadyExists) return prev;
+          if (alreadyExists) return prev;
 
-        // ✅ normalize incoming structure to match your UI
-        const formattedNews = {
-          newsID: incomingNews.NewsID,
-          newsSourceID: incomingNews.NewsSourceID,
-          headline: incomingNews.Headline,
-          content: incomingNews.Content,
-          newsDateTime: incomingNews.NewsDateTime,
-        };
+          // ✅ normalize incoming structure to match your UI
+          const formattedNews = {
+            newsID: incomingNews.newsID,
+            newsSourceID: incomingNews.newsSourceID,
+            headline: incomingNews.headline,
+            content: incomingNews.content,
+            newsDateTime: formatISOToYYYMMDDHHMMss(incomingNews.newsDateTime),
+          };
 
-        // ✅ add on top
-        return [formattedNews, ...prev];
-      });
+          // ✅ add on top
+          return [formattedNews, ...prev];
+        });
+        dispatch(setClearNewsMQTT());
+      } catch (error) {
+        console.log(error);
+      }
     }
   }, [realTimeNewsFeed]);
 
@@ -444,7 +465,7 @@ const News = () => {
                 getActiveSourceIds().length > 0 &&
                 newsList.length === 0 && (
                   <div className="text-center p-3 text-muted">
-                    No news available for selected sources
+                    No news available
                   </div>
                 )
               )}
@@ -453,66 +474,8 @@ const News = () => {
         </Row>
       </div>
 
-      <GlobalModal
-        show={newsByIdModal}
-        onHide={handleCloseModal}
-        size={"lg"}
-        centered={true}
-        footerClassName={"d-block border-0"}
-        bodyClassName={"newsModal"}
-        // modalHeader={}
-        modalBody={
-          <div className={styles.mainContainer}>
-            <Row>
-              <Col sm={12} md={6} lg={6}>
-                <div className={`${styles.headerRow}`}>News</div>
-                <span className={styles.modalDateStyle}>
-                  {newsById.createdOn
-                    ? convertUTCToDateTime(newsById.createdOn)
-                    : ""}
-                </span>
-              </Col>
-              <Col
-                sm={12}
-                md={6}
-                lg={6}
-                className="d-flex justify-content-end align-items-center"
-              >
-                <div
-                  className="cursor-pointer fw-bold"
-                  onClick={handleCloseModal}
-                >
-                  X
-                </div>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col className="d-flex align-items-center gap-2">
-                <span>
-                  {newsById.newsSourceID && (
-                    <img
-                      src={newsSourceIconMap[newsById.newsSourceID]}
-                      alt="source"
-                      style={{ width: "40px", height: "40px" }}
-                    />
-                  )}
-                </span>
-                <span className={styles.modalTitle}>{newsById.headline}</span>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col
-                sm={12}
-                md={12}
-                lg={12}
-                className={styles.modalDetailWithScroll}
-              >
-                {newsById.content}
-              </Col>
-            </Row>
-          </div>
-        }
-      />
+      {viewNewsModal && <NewsByNewsId />}
+
       {isLoading && (
         <div className="text-center p-2 text-muted">Loading more news...</div>
       )}

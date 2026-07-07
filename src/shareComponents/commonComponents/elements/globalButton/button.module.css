@@ -1058,12 +1058,10 @@
 /*  End Button ConfirmationModalYesDealBox */
 
 .TryAgainButton {
-  background: #feac78 !important;
-  background: -moz-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
-  background: -webkit-linear-gradient(top, #feac78 0%, #e97225 100%) !important;
-  background: linear-gradient(to bottom, #feac78 0%, #e97225 100%) !important;
+  border-color: #ffc530 !important;
+  background: #ffc530 !important;
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#feac78', endColorstr='#e97225',GradientType=0 ) !important;
-  border-color: #feac78 !important;
+  /* border-color: #feac78 !important; */
   cursor: pointer !important;
   font-family: "Poppins", sans-serif !important;
   border-radius: 4px !important;
@@ -1099,4 +1097,11 @@
   background: #ffc530 !important;
   color: #000 !important;
   min-width: 120px;
+}
+.searchAllNews:disabled {
+  border-color: #002cb3 !important;
+  background: #002cb3 !important;
+  color: #fff !important;
+
+  filter: grayscale(1);
 }

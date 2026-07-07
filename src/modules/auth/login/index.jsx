@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { loginInApi } from "../../../store/actions/authAction";
 
 const shouldIsManagement =
-  import.meta.env.VITE_APP_INCLUDE_Management === "true";
+  import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true";
 const shouldIsDealer = import.meta.env.VITE_APP_INCLUDE_DEALER === "true";
 const shouldIsTreasury = import.meta.env.VITE_APP_INCLUDE_TREASURY === "true";
 const Login = () => {
@@ -45,7 +45,7 @@ const Login = () => {
         DeviceID: "1",
         Device: "Browser",
         RoleID: shouldIsManagement
-          ? 9
+          ? 10
           : shouldIsDealer
           ? 7
           : shouldIsTreasury

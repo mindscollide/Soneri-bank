@@ -1,7 +1,12 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "../management.module.css";
+import { clearSwapsinUSDForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import dayjs from "dayjs";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+
+// Selectors
 const GetSwapsInUSDForTreasury = (state) =>
   state.WatchListReducer.GetSwapsInUSDForTreasury;
 
@@ -9,229 +14,377 @@ const swapsinUSDForManagementFeed = (state) =>
   state.RealtimeActionsSlice.swapsinUSDForManagementFeed;
 
 const SwapsInUSD = memo(() => {
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
-  const animationFrameRef = useRef(null);
-  const swapsinUSDList = useSelector(GetSwapsInUSDForTreasury);
-  const fullFeed = useSelector(swapsinUSDForManagementFeed);
+  const dispatch = useDispatch();
 
-  // Local state for processed data
-  const [processedData, setProcessedData] = useState([]);
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map());
+  const rafRef = useRef(null);
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
-  const { tableData, currencyList } = useMemo(() => {
-    if (!swapsinUSDList?.swapsinUSDList)
-      return { tableData: [], currencyList: [] };
+  const [latestDate, setLatestDate] = useState("");
+  const [currencyList, setCurrencyList] = useState([]);
 
-    const data = swapsinUSDList.swapsinUSDList;
+  const swapsinUSDList = useSelector(GetSwapsInUSDForTreasury, shallowEqual);
+  const fullFeed = useSelector(swapsinUSDForManagementFeed, shallowEqual);
 
-    // 🔹 Build currencyPair → currencyPairFull mapping
-    const pairMapping = {};
-    data.forEach((item) => {
-      if (
-        item.currencyPairFull &&
-        item.currencyPairFull.includes(item.currencyPair)
-      ) {
-        pairMapping[item.currencyPair] = item.currencyPairFull;
-      }
-    });
+  // ─────────────────────────────
+  // Build row data from API
+  const buildRowData = useCallback(() => {
+    if (!swapsinUSDList?.swapsinUSDList) return [];
 
-    // 🔹 Get unique full currencies
-    const currencySet = new Set();
-    data.forEach((item) => {
-      const full = item.currencyPairFull || pairMapping[item.currencyPair];
-      if (full) currencySet.add(full);
-    });
+    try {
+      setLatestDate(swapsinUSDList?.datetime);
 
-    const currencyList = Array.from(currencySet);
+      const data = swapsinUSDList.swapsinUSDList;
 
-    // 🔹 Group by Tenor (row-wise)
-    const grouped = {};
+      // 🔹 Build currencyPair → currencyPairFull mapping
+      const pairMapping = {};
+      data.forEach((item) => {
+        if (
+          item.currencyPairFull &&
+          item.currencyPairFull.includes(item.currencyPair)
+        ) {
+          pairMapping[item.currencyPair] = item.currencyPairFull;
+        }
+      });
 
-    data.forEach((item) => {
-      const tenor = item.tenor;
-      const full = item.currencyPairFull || pairMapping[item.currencyPair];
+      // 🔹 Get unique full currencies
+      const currencySet = new Set();
+      data.forEach((item) => {
+        const full = item.currencyPairFull || pairMapping[item.currencyPair];
+        if (full) currencySet.add(full);
+      });
 
-      if (!grouped[tenor]) {
-        grouped[tenor] = {
-          key: tenor,
-          tenorName: tenor,
-        };
-      }
+      const currencies = Array.from(currencySet);
+      setCurrencyList(currencies);
 
-      grouped[tenor][`${full}_bid`] = item.bid;
-      grouped[tenor][`${full}_ask`] = item.ask;
-    });
+      // 🔹 Group by Tenor (row-wise)
+      const grouped = {};
 
-    return {
-      tableData: Object.values(grouped),
-      currencyList,
-    };
+      data.forEach((item) => {
+        const tenor = item.tenor;
+        const full = item.currencyPairFull || pairMapping[item.currencyPair];
+
+        if (!grouped[tenor]) {
+          grouped[tenor] = {
+            tenorName: tenor,
+          };
+        }
+
+        grouped[tenor][`${full}_bid`] = item.bid;
+        grouped[tenor][`${full}_ask`] = item.ask;
+      });
+
+      return Object.values(grouped);
+    } catch (error) {
+      console.error("Error building row data:", error);
+      return [];
+    }
   }, [swapsinUSDList]);
-  const columns = useMemo(() => {
-    if (!currencyList.length) return [];
 
-    const baseColumn = [
-      {
-        title: "",
-        dataIndex: "tenorName",
-        key: "tenorName",
-        fixed: "left",
-        width: 100,
-        children: [
-          {
-            title: "Tenor",
-            dataIndex: "tenorName",
-            key: "tenorName",
-            align: "left",
-            width: 100,
-          },
-        ],
-      },
-    ];
+  // ─────────────────────────────
+  // ✅ FIX: Sync data into grid — show loader until rowData is fully set
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+    if (!swapsinUSDList?.swapsinUSDList?.length) return;
 
-    const currencyColumns = currencyList.map((currency) => ({
-      title: currency,
+    // 🔑 Show loader BEFORE mapping starts (data arrived but not yet rendered)
+    gridApiRef.current.showLoadingOverlay();
+
+    const rowData = buildRowData();
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+      return;
+    }
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // 🔑 Hide loader AFTER rowData is set in the grid
+    gridApiRef.current.hideOverlay();
+
+    // Rebuild rowNodeMap so live feed updates can target correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.tenorName) {
+        rowNodeMap.current.set(node.data.tenorName, node);
+      }
+    });
+  }, [swapsinUSDList, buildRowData]);
+
+  // ─────────────────────────────
+  // Handle null/empty API response (e.g. error or no data)
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+
+    if (!swapsinUSDList) {
+      // API returned null — show no rows
+      gridApiRef.current.setGridOption("rowData", []);
+      gridApiRef.current.showNoRowsOverlay();
+    }
+    // ❌ Removed: hideOverlay() was being called here too early,
+    //    before buildRowData() finished mapping in the effect above.
+  }, [swapsinUSDList]);
+
+  // ─────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
+
+      gridApiRef.current = params.api;
+
+      if (!swapsinUSDList?.swapsinUSDList?.length) {
+        // 🔑 Data not yet arrived — keep the loading overlay on
+        params.api.showLoadingOverlay();
+      } else {
+        // Data already in Redux (e.g. fast load / cached) — map immediately
+        const rowData = buildRowData();
+        if (rowData.length > 0) {
+          params.api.setGridOption("rowData", rowData);
+          params.api.hideOverlay();
+        } else {
+          params.api.showNoRowsOverlay();
+        }
+      }
+    },
+    [buildRowData, swapsinUSDList]
+  );
+
+  // ─────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
+
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      if (node.data?.tenorName) {
+        rowNodeMap.current.set(node.data.tenorName, node);
+      }
+    });
+  }, []);
+
+  // ─────────────────────────────
+  // ✅ THROTTLED PROCESSOR
+  const processQueue = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
+      rafRef.current = null;
+      return;
+    }
+
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime.current;
+
+    if (timeSinceLastProcess < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
+
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
+
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
+
+    try {
+      for (const [tenor, updates] of pendingUpdates.current.entries()) {
+        let node = rowNodeMap.current.get(tenor);
+
+        if (!node) {
+          const newRow = {
+            tenorName: tenor,
+            ...updates.pairs,
+          };
+
+          gridApiRef.current.applyTransaction({ add: [newRow] });
+
+          setTimeout(() => {
+            gridApiRef.current.forEachNode((n) => {
+              if (n.data.tenorName === tenor) {
+                rowNodeMap.current.set(tenor, n);
+              }
+            });
+          }, 0);
+        } else {
+          for (const [key, value] of Object.entries(updates.pairs)) {
+            const currentValue = node.data[key];
+            if (currentValue !== value) {
+              node.setDataValue(key, value);
+            }
+          }
+        }
+
+        pendingUpdates.current.delete(tenor);
+      }
+
+      rafRef.current = null;
+    } catch (error) {
+      console.error("Error processing queue:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
+  }, []);
+
+  // ─────────────────────────────
+  // ✅ Queue with deduplication
+  const queueUpdate = useCallback(
+    (feed) => {
+      if (!feed?.swaapsInUSD || !isMountedRef.current) return;
+
+      const { currencyPair, tenor, bid, ask } = feed.swaapsInUSD;
+      const bidKey = `${currencyPair}_bid`;
+      const askKey = `${currencyPair}_ask`;
+
+      const existing = pendingUpdates.current.get(tenor) || {
+        pairs: {},
+      };
+
+      existing.pairs[bidKey] = bid;
+      existing.pairs[askKey] = ask;
+
+      pendingUpdates.current.set(tenor, existing);
+
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      }
+    },
+    [processQueue]
+  );
+
+  // ─────────────────────────────
+  // ✅ Consume feed
+  useEffect(() => {
+    if (!fullFeed) return;
+
+    if (Array.isArray(fullFeed)) {
+      fullFeed.forEach(queueUpdate);
+    } else {
+      queueUpdate(fullFeed);
+    }
+
+    const clearTimeoutId = setTimeout(() => {
+      if (isMountedRef.current && dispatch) {
+        dispatch(clearSwapsinUSDForManagementFeed());
+      }
+    }, 200);
+
+    return () => clearTimeout(clearTimeoutId);
+  }, [fullFeed, queueUpdate, dispatch]);
+
+  // ─────────────────────────────
+  // ✅ Cleanup
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
+    };
+  }, []);
+
+  // ─────────────────────────────
+  const columnDefs = useMemo(() => {
+    const groupedColumns = currencyList.map((currency) => ({
+      headerName: currency,
+      cellClass: "instrument-cell",
       children: [
         {
-          title: "Bid",
-          dataIndex: `${currency}_bid`,
-          key: `${currency}_bid`,
-          align: "center",
-          width: 100,
-          render: (val) => (val ? Number(val).toFixed(2) : "0.00"),
+          headerName: "Bid",
+          field: `${currency}_bid`,
+          width: 70,
+          cellClass: "value-cell",
+          valueFormatter: (p) =>
+            p.value != null ? Number(p.value).toFixed(2) : "0.00",
         },
         {
-          title: "Offer",
-          dataIndex: `${currency}_ask`,
-          key: `${currency}_ask`,
-          align: "center",
-          width: 100,
-          render: (val) => (val ? Number(val).toFixed(2) : "0.00"),
+          headerName: "Offer",
+          field: `${currency}_ask`,
+          width: 70,
+          cellClass: "value-cell",
+          valueFormatter: (p) =>
+            p.value != null ? Number(p.value).toFixed(2) : "0.00",
         },
       ],
     }));
 
-    return [...baseColumn, ...currencyColumns];
+    return [
+      {
+        headerName: "",
+        children: [
+          {
+            headerName: "Tenor",
+            field: "tenorName",
+            pinned: "left",
+            width: 120,
+            cellClass: "instrument-cell",
+          },
+        ],
+      },
+      ...groupedColumns,
+    ];
   }, [currencyList]);
 
-  // MQTT Work
-  // ✅ Batch update function
-  // ✅ Batch update function (SBP FX Reval Rates)
-  const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
-      return;
-    }
+  const getRowId = useCallback((params) => params.data.tenorName, []);
 
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
-
-    setProcessedData((prevData) => {
-      let updatedData = [...prevData];
-
-      updates.forEach((feed) => {
-        const swaapsInUSD = feed?.swaapsInUSD;
-        if (!swaapsInUSD) return;
-
-        const { currencyPair, tenor, bid, ask } = swaapsInUSD;
-        const dynamicBidKey = `${currencyPair}_bid`;
-        const dynamicAskKey = `${currencyPair}_ask`;
-
-        const rowIndex = updatedData.findIndex(
-          (row) => row.tenorName === tenor
-        );
-
-        if (rowIndex !== -1) {
-          // Update existing row
-          updatedData[rowIndex] = {
-            ...updatedData[rowIndex],
-            [dynamicBidKey]: bid,
-            [dynamicAskKey]: ask,
-          };
-        } else {
-          // Add new row
-          updatedData.push({
-            key: tenor,
-            tenorName: tenor,
-            [dynamicBidKey]: bid,
-            [dynamicAskKey]: ask,
-          });
-        }
-      });
-
-      return updatedData;
-    });
-
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-  }, []);
-
-  // ✅ Queue update
-  const queueUpdate = useCallback(
-    (feed) => {
-      if (!feed) return;
-
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
-      lastUpdateRef.current = now;
-
-      updateQueueRef.current.push(feed);
-
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
-      }
-    },
-    [processUpdateQueue]
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
   );
-  // ✅ Feed update effect
-  useEffect(() => {
-    if (!fullFeed) return;
-    queueUpdate(fullFeed);
-  }, [fullFeed, queueUpdate]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-  const mergedTableData = useMemo(() => {
-    const dataMap = {};
-
-    // Start with static tableData
-    tableData.forEach((row) => {
-      dataMap[row.tenorName] = { ...row };
-    });
-
-    // Merge processed MQTT updates
-    processedData.forEach((row) => {
-      if (!dataMap[row.tenorName]) {
-        dataMap[row.tenorName] = { ...row };
-      } else {
-        dataMap[row.tenorName] = { ...dataMap[row.tenorName], ...row };
-      }
-    });
-
-    return Object.values(dataMap);
-  }, [tableData, processedData]);
   return (
     <>
-      <span className={styles.tableheaderbar}>Swaps in USD</span>
+      <span
+        className={`${styles.tableheaderbar} d-flex justify-content-between`}
+      >
+        <span>Swaps in USD</span>
+        <span className={styles.management_date}>
+          {latestDate && dayjs(latestDate).format("DD-MMM-YYYY h:mm A")}
+        </span>
+      </span>
 
-      <GlobalTable
-        columns={columns}
-        dataSource={mergedTableData}
-        prefixCls={
-          tableData.length > 0
-            ? "managementTable_Swaps"
-            : "managementTable_Swaps_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 275, x: "max-content" }}
-      />
+      <div style={{ height: "300px", width: "100%" }}>
+        <AgGridTable
+          ref={agGridComponentRef}
+          columnDefs={columnDefs}
+          className="swapsInUSDManagement-grid"
+          getRowId={getRowId}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          domLayout="normal"
+          theme="legacy"
+          defaultColDef={defaultColDef}
+          suppressScrollOnNewData={true}
+          suppressAnimationFrame={false}
+          suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+        />
+      </div>
     </>
   );
 });
+
+SwapsInUSD.displayName = "SwapsInUSD";
 
 export default SwapsInUSD;

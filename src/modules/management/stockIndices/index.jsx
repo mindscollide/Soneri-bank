@@ -1,13 +1,13 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import {
-  convertUTCTimeToLocalTime,
-  formatDateUTCToGMT,
-} from "../../../utils/timeFunction";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
+import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import styles from "../management.module.css";
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import { clearStockIndicesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 
+// Selectors
 const stockIndicesForManagementFeed = (state) =>
   state.RealtimeActionsSlice.stockIndicesForManagementFeed;
 
@@ -18,248 +18,375 @@ const GetAllOtherInstruments = (state) =>
   state.WatchListReducer.GetAllOtherInstruments?.stockIndices;
 
 const StockIndices = memo(() => {
-  const dataRef = useRef([]);
-  const lastUpdateRef = useRef(0);
-  const updateQueueRef = useRef([]);
-  const animationFrameRef = useRef(null);
-  const otherInstruments = useSelector(GetAllOtherInstruments);
-  const stockIndexList = useSelector(GetIndicesForTreasury);
+  const dispatch = useDispatch();
 
-  const fullFeed = useSelector(stockIndicesForManagementFeed);
+  const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null); // ✅ for params.api in onGridReady
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map());
+  const rafRef = useRef(null);
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
-  // // Local state for processed data
-  const [processedData, setProcessedData] = useState([]);
+  const otherInstruments = useSelector(GetAllOtherInstruments, shallowEqual);
+  const stockIndexList = useSelector(GetIndicesForTreasury, shallowEqual);
+  const fullFeed = useSelector(stockIndicesForManagementFeed, shallowEqual);
 
-  // Columns
-  const columns = useMemo(
-    () => [
-      {
-        title: "",
-        dataIndex: "instrumentName",
-        ellipsis: true,
-        width: 90,
-      },
-      {
-        title: "Current",
-        dataIndex: "current",
-        className: "bidCol",
-        width: 90,
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "Change",
-        dataIndex: "change",
-        className: "offerCol",
-        ellipsis: true,
-        width: 90,
+  // ─────────────────────────────
+  // Build initial row data
+  const buildRowData = useCallback(() => {
+    if (!otherInstruments?.length) return [];
 
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "% Change",
-        dataIndex: "percentageChange",
-        className: "offerCol",
-        ellipsis: true,
-        render: (text) => {
-          if (text === "-") return null;
+    const map = new Map(
+      stockIndexList?.map((item) => [Number(item.instrumentId), item]) || []
+    );
 
-          const value = Number(text);
+    return otherInstruments.map((instrument) => {
+      const matched = map.get(Number(instrument.instrumentId));
 
-          let cellClassName =
-            value < 0 ? "color-red" : value > 0 ? "color-green" : "color-blue";
-
-          return <IndexCell value={value} CellClassName={cellClassName} />;
-        },
-      },
-      {
-        title: "High",
-        dataIndex: "high",
-        // width: 90,
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "Low",
-        dataIndex: "low",
-        className: "offerCol",
-        // width: 90,
-
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "Volume",
-        dataIndex: "volume",
-        className: "offerCol",
-        // width: 90,
-
-        render: (text) => {
-          return text !== "-" && <IndexCell value={text} />;
-        },
-      },
-      {
-        title: "Time",
-        dataIndex: "time",
-        // width: 90,
-
-        render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
-      },
-    ],
-    []
-  );
-  // ✅ Enriched base data
-  const enrichedData = useMemo(() => {
-    if (!otherInstruments || !stockIndexList) return [];
-    try {
-      return otherInstruments.map((instrument) => {
-        const matchedCross = stockIndexList.find(
-          (wc) => Number(wc.instrumentId) === instrument.instrumentId
-        );
-
-        return {
-          instrumentName: instrument.name,
-          change: Number(matchedCross?.change ?? 0),
-          current: Number(matchedCross?.current ?? 0),
-          high: Number(matchedCross?.high ?? 0),
-          instrumentID: Number(instrument.instrumentId),
-          low: Number(matchedCross?.low ?? 0),
-          percentageChange: Number(matchedCross?.percentChange ?? 0),
-          time: matchedCross?.time ?? "",
-          volume: Number(matchedCross?.change ?? 0),
-          version: 0,
-        };
-      });
-    } catch (error) {
-      console.error("Error enriching data:", error);
-      return [];
-    }
+      return {
+        instrumentID: Number(instrument.instrumentId),
+        instrumentName: instrument.name,
+        current: Number(matched?.current ?? 0),
+        change: Number(matched?.change ?? 0),
+        percentageChange: Number(matched?.percentChange ?? 0),
+        high: Number(matched?.high ?? 0),
+        low: Number(matched?.low ?? 0),
+        volume: Number(matched?.volume ?? 0),
+        time: matched?.time ?? "",
+      };
+    });
   }, [otherInstruments, stockIndexList]);
 
-  // Initialize processed data when enriched data changes
+  // ─────────────────────────────
+  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
   useEffect(() => {
-    if (enrichedData.length > 0) {
-      dataRef.current = enrichedData;
-      setProcessedData(enrichedData);
-    }
-  }, [enrichedData]);
+    if (!gridApiRef.current || !otherInstruments?.length) return;
 
-  // MQTT Work
-  // ✅ Batch update function
-  const processUpdateQueue = useCallback(() => {
-    if (updateQueueRef.current.length === 0) {
-      animationFrameRef.current = null;
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
+
+    gridApiRef.current.setGridOption("rowData", rowData);
+
+    // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, [otherInstruments, stockIndexList]);
+
+  // ─────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
+
+      gridApiRef.current = params.api; // ✅ store actual AG Grid API
+
+      // Attempt immediate load (works if API already resolved before grid init)
+      const rowData = buildRowData();
+      if (rowData.length > 0) {
+        params.api.setGridOption("rowData", rowData);
+      }
+      // If data isn't ready yet, the useEffect above will handle it when it arrives
+    },
+    [buildRowData]
+  );
+
+  // ─────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
+
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+  }, []);
+
+  // ─────────────────────────────
+  // ✅ THROTTLED PROCESSOR
+  const processQueue = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
+      rafRef.current = null;
       return;
     }
 
-    const updates = updateQueueRef.current;
-    updateQueueRef.current = [];
+    const now = Date.now();
+    const timeSinceLastProcess = now - lastProcessTime.current;
 
-    setProcessedData((prevData) => {
-      let hasChanges = false;
-      const updatedData = prevData.map((item) => {
-        let updatedItem = { ...item };
-        let changed = false;
+    if (timeSinceLastProcess < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
 
-        updates.forEach((update) => {
-          const { stocK_INDICES } = update;
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
 
-          if (
-            stocK_INDICES &&
-            item.instrumentID === stocK_INDICES.instrumentId
-          ) {
-            if (
-              Number(updatedItem.current) !== Number(stocK_INDICES.current) ||
-              Number(updatedItem.ask) !== Number(stocK_INDICES.ask) ||
-              Number(updatedItem.high) !== Number(stocK_INDICES.high) ||
-              Number(updatedItem.low) !== Number(stocK_INDICES.low) ||
-              Number(updatedItem.percentageChange) !==
-                Number(stocK_INDICES.percentChange) ||
-              Number(updatedItem.time) !== Number(stocK_INDICES.time)
-            ) {
-              updatedItem = {
-                ...updatedItem,
-                current: stocK_INDICES.current,
-                change: stocK_INDICES.change,
-                percentageChange: stocK_INDICES.percentChange,
-                high: stocK_INDICES.high,
-                low: stocK_INDICES.low,
-                ask: stocK_INDICES.ask,
-                volume: stocK_INDICES.volume,
-                time: stocK_INDICES.time,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
-          }
-        });
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
 
-        return changed ? updatedItem : item;
-      });
+    try {
+      let batchCount = 0;
+      const MAX_BATCH_SIZE = 10;
 
-      hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
-      );
+      for (const [key, update] of pendingUpdates.current.entries()) {
+        if (batchCount >= MAX_BATCH_SIZE) break;
 
-      return hasChanges ? updatedData : prevData;
-    });
+        const node = rowNodeMap.current.get(key);
+        if (!node) {
+          pendingUpdates.current.delete(key);
+          continue;
+        }
 
-    animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+        const data = node.data;
+        const hasChanges =
+          data.current !== update.current ||
+          data.change !== update.change ||
+          data.percentageChange !== update.percentageChange ||
+          data.high !== update.high ||
+          data.low !== update.low ||
+          data.volume !== update.volume ||
+          data.time !== update.time;
+
+        if (hasChanges) {
+          node.setDataValue("current", update.current);
+          node.setDataValue("change", update.change);
+          node.setDataValue("percentageChange", update.percentageChange);
+          node.setDataValue("high", update.high);
+          node.setDataValue("low", update.low);
+          node.setDataValue("volume", update.volume);
+          node.setDataValue("time", update.time);
+        }
+
+        pendingUpdates.current.delete(key);
+        batchCount++;
+      }
+
+      if (pendingUpdates.current.size > 0) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      } else {
+        rafRef.current = null;
+      }
+    } catch (error) {
+      console.error("Error processing queue:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
   }, []);
 
-  // ✅ Queue update
+  // ─────────────────────────────
+  // ✅ Queue with deduplication
   const queueUpdate = useCallback(
     (feed) => {
-      if (!feed) return;
+      if (!feed?.stocK_INDICES || !isMountedRef.current) return;
 
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
-      lastUpdateRef.current = now;
+      const stockIndex = feed.stocK_INDICES;
+      const key = String(stockIndex.instrumentId);
 
-      updateQueueRef.current.push(feed);
+      pendingUpdates.current.set(key, {
+        current: stockIndex.current,
+        change: stockIndex.change,
+        percentageChange: stockIndex.percentChange,
+        high: stockIndex.high,
+        low: stockIndex.low,
+        volume: stockIndex.volume,
+        time: stockIndex.time,
+      });
 
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processUpdateQueue]
+    [processQueue]
   );
-  // ✅ Feed update effect
+
+  // ─────────────────────────────
+  // ✅ Consume feed
   useEffect(() => {
     if (!fullFeed) return;
-    queueUpdate(fullFeed);
-  }, [fullFeed, queueUpdate]);
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+    if (Array.isArray(fullFeed)) {
+      fullFeed.forEach(queueUpdate);
+    } else {
+      queueUpdate(fullFeed);
+    }
+
+    const clearTimeoutId = setTimeout(() => {
+      if (isMountedRef.current && dispatch) {
+        dispatch(clearStockIndicesForManagmentFeed());
       }
+    }, 200);
+
+    return () => clearTimeout(clearTimeoutId);
+  }, [fullFeed, queueUpdate, dispatch]);
+
+  // ─────────────────────────────
+  // ✅ Cleanup
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
     };
   }, []);
+
+  // ─────────────────────────────
+  const PercentageCellRenderer = useCallback((props) => {
+    const value = props.value;
+    if (value === undefined || value === null || value === "-") return null;
+
+    const numValue = Number(value);
+    const cellClassName =
+      numValue < 0 ? "color-red" : numValue > 0 ? "color-green" : "color-blue";
+
+    return <IndexCell value={numValue} CellClassName={cellClassName} />;
+  }, []);
+
+  // ─────────────────────────────
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Instrument",
+        field: "instrumentName",
+        cellClass: "instrument-cell",
+        width: 100,
+      },
+      {
+        headerName: "Current",
+        field: "current",
+        cellClass: "bid-cell",
+        width: 100,
+
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value)} />
+          ) : null,
+      },
+      {
+        headerName: "Change",
+        field: "change",
+        cellClass: "offer-cell",
+        width: 100,
+
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value)} />
+          ) : null,
+      },
+      {
+        headerName: "% Change",
+        field: "percentageChange",
+        cellClass: "percentage-cell",
+        width: 100,
+
+        cellRenderer: PercentageCellRenderer,
+      },
+      {
+        headerName: "High",
+        field: "high",
+        width: 100,
+
+        cellClass: "highLow-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value)} />
+          ) : null,
+      },
+      {
+        headerName: "Low",
+        field: "low",
+        cellClass: "highLow-cell",
+        width: 100,
+
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value)} />
+          ) : null,
+      },
+      {
+        headerName: "Volume",
+        field: "volume",
+        width: 100,
+        cellClass: "highLow-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value)} />
+          ) : null,
+      },
+      {
+        headerName: "Time",
+        field: "time",
+        width: 120,
+
+        cellClass: "percentage-cell",
+        valueFormatter: (p) =>
+          p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
+      },
+    ],
+    [PercentageCellRenderer]
+  );
+
+  const getRowId = useCallback(
+    (params) => String(params.data.instrumentID),
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
+  );
 
   return (
     <>
       <span className={styles.tableheaderbar}>Stock Indices</span>
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0
-            ? "managementTables"
-            : "managementTables_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 235, x: "max-content" }}
-      />
+
+      <div style={{ height: "235px", width: "100%" }}>
+        <AgGridTable
+          ref={agGridComponentRef}
+          columnDefs={columnDefs}
+          className="usdParityManagement-grid"
+          getRowId={getRowId}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          domLayout="normal"
+          theme="legacy"
+          defaultColDef={defaultColDef}
+          suppressScrollOnNewData={true}
+          suppressAnimationFrame={false}
+          suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+        />
+      </div>
     </>
   );
 });
+
+StockIndices.displayName = "StockIndices";
 
 export default StockIndices;

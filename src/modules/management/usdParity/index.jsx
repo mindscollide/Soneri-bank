@@ -1,17 +1,12 @@
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import styles from "../management.module.css";
+
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
-import GlobalTable from "../../../shareComponents/commonComponents/elements/table/GlobalTable";
-import { shallowEqual, useSelector } from "react-redux";
-import { store } from "../../../store/store"; // ✅ import your redux store
-import styles from "../management.module.css";
+import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
+import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import { clearUSDParityForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 // Selectors
 const selectUSDParity = (state) =>
@@ -24,180 +19,392 @@ const selectUSDParityFeed = (state) =>
   state.RealtimeActionsSlice.usdParityForManagmentFeed;
 
 const USDParity = memo(() => {
-  // ✅ normalized state (object instead of array)
-  const [processedData, setProcessedData] = useState({});
+  const dispatch = useDispatch();
 
-  const animationFrameRef = useRef(null);
-  const pendingFeedRef = useRef(null);
+  // ── Refs ──────────────────────────────────────────────────────────────
+  const agGridComponentRef = useRef(null); // for ref={} prop on AgGridTable
+  const gridApiRef = useRef(null);
+  const rowNodeMap = useRef(new Map());
+  const pendingUpdates = useRef(new Map());
+  const rafRef = useRef(null);
+  const isProcessingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const lastProcessTime = useRef(0);
 
+  // ── Selectors ──────────────────────────────────────────────────────────
   const crossInstruments = useSelector(selectSpotInstruments, shallowEqual);
   const worldCrosses = useSelector(selectUSDParity, shallowEqual);
+  const fullFeed = useSelector(selectUSDParityFeed, shallowEqual);
 
-  // ✅ Columns (unchanged but stable)
-  const columns = useMemo(
-    () => [
-      { title: "Instrument", dataIndex: "instrumentName" },
-      {
-        title: "Bid",
-        dataIndex: "bid",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
-      },
-      {
-        title: "Ask",
-        dataIndex: "ask",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
-      },
-      {
-        title: "High",
-        dataIndex: "high",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
-      },
-      {
-        title: "Low",
-        dataIndex: "low",
-        width: 90,
-        render: (text) => text !== "-" && <IndexCell value={text} />,
-      },
-      {
-        title: "% Change",
-        dataIndex: "percentageChange",
-        width: 120,
-        render: (text) => {
-          if (text === "-") return null;
-          const value = Number(text);
-          const cellClassName =
-            value < 0 ? "color-red" : value > 0 ? "color-green" : "color-blue";
-          return <IndexCell value={value} CellClassName={cellClassName} />;
-        },
-      },
-      {
-        title: "Time",
-        dataIndex: "time",
-        width: 90,
-        render: (text) => (text ? convertUTCTimeToLocalTime(text) : "--:--:--"),
-      },
-    ],
-    []
-  );
+  // ── Build initial row data ─────────────────────────────────────────────
+  const buildRowData = useCallback(() => {
+    if (!crossInstruments?.length) return [];
 
-  // ✅ Build initial normalized data
-  useEffect(() => {
-    if (!crossInstruments?.length || !worldCrosses?.length) return;
-
-    const mappedData = {};
-
-    crossInstruments.forEach((instrument) => {
-      const matchedCross = worldCrosses.find(
-        (wc) => Number(wc.instrumentID) === instrument.instrumentID
+    return crossInstruments.map((instrument) => {
+      const matched = worldCrosses?.find(
+        (wc) => Number(wc.instrumentID) === Number(instrument.instrumentID)
       );
 
-      mappedData[instrument.instrumentID] = {
+      return {
         instrumentID: Number(instrument.instrumentID),
         instrumentName: instrument.instrumentName,
-        time: matchedCross?.time ?? "",
-        bid: Number(matchedCross?.bid ?? 0),
-        ask: Number(matchedCross?.ask ?? 0),
-        high: Number(matchedCross?.high ?? 0),
-        low: Number(matchedCross?.low ?? 0),
-        percentageChange: Number(matchedCross?.percentageChange ?? 0),
+        time: matched?.time ?? "",
+        bid: Number(matched?.bid ?? 0),
+        ask: Number(matched?.ask ?? 0),
+        high: Number(matched?.high ?? 0),
+        low: Number(matched?.low ?? 0),
+        percentageChange: Number(matched?.percentageChange ?? 0),
       };
     });
-
-    setProcessedData(mappedData);
   }, [crossInstruments, worldCrosses]);
 
-  // ✅ Apply updates (O(1))
-  const flushUpdate = useCallback(() => {
-    animationFrameRef.current = null;
+  // ── Sync initial data AFTER grid is ready (handles race condition) ──
+  useEffect(() => {
+    if (!gridApiRef.current || !crossInstruments?.length) return;
 
-    const feed = pendingFeedRef.current;
-    pendingFeedRef.current = null;
+    const rowData = buildRowData();
+    if (rowData.length === 0) return;
 
-    if (!feed?.instrumentParitySpot) return;
+    gridApiRef.current.setGridOption("rowData", rowData);
 
-    const update = feed.instrumentParitySpot;
-    const id = update.instrumentID;
-
-    setProcessedData((prev) => {
-      const existing = prev[id];
-      if (!existing) return prev;
-
-      const changed =
-        Number(existing.bid) !== Number(update.bid) ||
-        Number(existing.ask) !== Number(update.ask) ||
-        Number(existing.high) !== Number(update.high) ||
-        Number(existing.low) !== Number(update.low) ||
-        Number(existing.percentageChange) !== Number(update.percentageChange) ||
-        existing.time !== update.time;
-
-      if (!changed) return prev;
-
-      return {
-        ...prev,
-        [id]: {
-          ...existing,
-          bid: update.bid,
-          ask: update.ask,
-          high: update.high,
-          low: update.low,
-          percentageChange: update.percentageChange,
-          time: update.time,
-        },
-      };
+    // Rebuild the rowNodeMap so live updates can target nodes
+    rowNodeMap.current.clear();
+    gridApiRef.current.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
     });
+  }, [crossInstruments, worldCrosses]); // re-runs when API data arrives
+
+  // ── onGridReady ────────────────────────────────────────────────────────
+  const onGridReady = useCallback(
+    (params) => {
+      if (!isMountedRef.current) return;
+
+      gridApiRef.current = params.api; // ✅ stores actual AG Grid API
+
+      const rowData = buildRowData();
+      if (rowData.length > 0) {
+        params.api.setGridOption("rowData", rowData);
+      }
+    },
+    [buildRowData]
+  );
+
+  // ── onFirstDataRendered ────────────────────────────────────────────────
+  const onFirstDataRendered = useCallback((params) => {
+    if (!isMountedRef.current) return;
+
+    rowNodeMap.current.clear();
+    params.api.forEachNode((node) => {
+      if (node.data?.instrumentID) {
+        rowNodeMap.current.set(String(node.data.instrumentID), node);
+      }
+    });
+
+    // console.log("🗺️ Row Node Map populated:", rowNodeMap.current.size, "nodes");
   }, []);
 
-  // ✅ Subscribe to store manually (NO re-render on every tick)
-  useEffect(() => {
-    const unsubscribe = store.subscribe(() => {
-      const feed = selectUSDParityFeed(store.getState());
+  // ── Throttled queue processor ──────────────────────────────────────────
+  const processQueue = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      isProcessingRef.current ||
+      !gridApiRef.current
+    ) {
+      rafRef.current = null;
+      return;
+    }
 
-      if (!feed) return;
+    const now = Date.now();
+    if (now - lastProcessTime.current < 50) {
+      rafRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
 
-      pendingFeedRef.current = feed;
+    if (pendingUpdates.current.size === 0) {
+      rafRef.current = null;
+      return;
+    }
 
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(flushUpdate);
+    isProcessingRef.current = true;
+    lastProcessTime.current = now;
+
+    try {
+      let batchCount = 0;
+      const MAX_BATCH_SIZE = 10;
+
+      // console.log("⚙️ Processing queue, size:", pendingUpdates.current.size);
+
+      for (const [key, update] of pendingUpdates.current.entries()) {
+        if (batchCount >= MAX_BATCH_SIZE) break;
+
+        const node = rowNodeMap.current.get(key);
+        if (!node) {
+          // console.warn("⚠️ Node not found for key:", key);
+          pendingUpdates.current.delete(key);
+          continue;
+        }
+
+        const data = node.data;
+        const hasChanges =
+          data.bid !== update.bid ||
+          data.ask !== update.ask ||
+          data.high !== update.high ||
+          data.low !== update.low ||
+          data.percentageChange !== update.percentageChange ||
+          data.time !== update.time;
+
+        if (hasChanges) {
+          // console.log("✅ Updating node:", key, update);
+          node.setDataValue("bid", update.bid);
+          node.setDataValue("ask", update.ask);
+          node.setDataValue("high", update.high);
+          node.setDataValue("low", update.low);
+          node.setDataValue("percentageChange", update.percentageChange);
+          node.setDataValue("time", update.time);
+        }
+
+        pendingUpdates.current.delete(key);
+        batchCount++;
       }
-    });
 
-    return unsubscribe;
-  }, [flushUpdate]);
+      if (pendingUpdates.current.size > 0) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      } else {
+        rafRef.current = null;
+      }
+    } catch (error) {
+      console.error("❌ Error processing queue:", error);
+      pendingUpdates.current.clear();
+      rafRef.current = null;
+    } finally {
+      isProcessingRef.current = false;
+    }
+  }, []);
 
-  // ✅ Cleanup
+  // ── Queue update ───────────────────────────────────────────────────────
+  const queueUpdate = useCallback(
+    (feed) => {
+      // console.log("📨 Received feed:", feed);
+
+      if (!isMountedRef.current) {
+        // console.warn("⚠️ Component not mounted");
+        return;
+      }
+
+      // Check different possible feed structures
+      let update = null;
+      let key = null;
+
+      // Try different feed structures
+      if (feed?.instrumentParitySpot) {
+        update = feed.instrumentParitySpot;
+        key = String(update.instrumentID);
+      } else if (feed?.instrumentID) {
+        // Direct feed structure
+        update = feed;
+        key = String(feed.instrumentID);
+      } else {
+        // console.warn("⚠️ Unknown feed structure:", feed);
+        return;
+      }
+
+      if (!key || !update) {
+        // console.warn("⚠️ Invalid update or key:", { key, update });
+        return;
+      }
+
+      // console.log("✨ Queueing update for key:", key, update);
+
+      pendingUpdates.current.set(key, {
+        bid: Number(update.bid ?? 0),
+        ask: Number(update.ask ?? 0),
+        high: Number(update.high ?? 0),
+        low: Number(update.low ?? 0),
+        percentageChange: Number(update.percentageChange ?? 0),
+        time: update.time || "",
+      });
+
+      // console.log("📦 Pending updates size:", pendingUpdates.current.size);
+
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(processQueue);
+      }
+    },
+    [processQueue]
+  );
+
+  // ── Consume MQTT feed ──────────────────────────────────────────────────
   useEffect(() => {
+    // console.log("🔄 Feed effect triggered, fullFeed:", fullFeed);
+
+    if (!fullFeed) {
+      // console.log("⏭️ No feed data");
+      return;
+    }
+
+    // Handle both array and single object feeds
+    const feedArray = Array.isArray(fullFeed) ? fullFeed : [fullFeed];
+
+    if (feedArray.length === 0) {
+      // console.log("⏭️ Empty feed array");
+      return;
+    }
+
+    // console.log("🚀 Processing feed array:", feedArray);
+    feedArray.forEach(queueUpdate);
+
+    // Increase timeout to give more time for processing
+    const clearTimeoutId = setTimeout(() => {
+      if (isMountedRef.current) {
+        // console.log("🧹 Clearing feed");
+        dispatch(clearUSDParityForManagementFeed());
+      }
+    }, 500); // Increased from 200ms to 500ms
+
+    return () => clearTimeout(clearTimeoutId);
+  }, [fullFeed, queueUpdate, dispatch]);
+
+  // ── Cleanup ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    isMountedRef.current = true;
+    // console.log("🎬 Component mounted");
+
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      // console.log("🛑 Component unmounting");
+      isMountedRef.current = false;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
       }
+
+      pendingUpdates.current.clear();
+      rowNodeMap.current.clear();
+      isProcessingRef.current = false;
     };
   }, []);
 
-  // ✅ Convert to array only when needed
-  const tableData = useMemo(
-    () => Object.values(processedData),
-    [processedData]
+  // ── Cell renderers ─────────────────────────────────────────────────────
+  const PercentChangeCellRenderer = useCallback((params) => {
+    const value = Number(params.value);
+    const cellClassName =
+      value < 0
+        ? "color-red justify-center"
+        : value > 0
+        ? "color-green justify-center"
+        : "color-blue justify-center";
+    return <IndexCell value={value} CellClassName={cellClassName} />;
+  }, []);
+
+  // ── Column defs ────────────────────────────────────────────────────────
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Instrument",
+        field: "instrumentName",
+        flex: 1,
+        cellClass: "instrument-cell",
+      },
+      {
+        headerName: "Bid",
+        field: "bid",
+        flex: 1,
+        cellClass: "bid-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "Ask",
+        field: "ask",
+        flex: 1,
+        cellClass: "offer-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "High",
+        field: "high",
+        flex: 1,
+        cellClass: "highLow-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "Low",
+        field: "low",
+        flex: 1,
+        cellClass: "highLow-cell",
+        cellRenderer: (p) =>
+          p.value != null && p.value !== "-" ? (
+            <IndexCell value={Number(p.value).toFixed(4)} />
+          ) : null,
+      },
+      {
+        headerName: "% Change",
+        field: "percentageChange",
+        flex: 1,
+        cellClass: "percentage-cell",
+        cellRenderer: PercentChangeCellRenderer,
+      },
+      {
+        headerName: "Time",
+        field: "time",
+        flex: 1,
+        valueFormatter: (p) =>
+          p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
+      },
+    ],
+    [PercentChangeCellRenderer]
+  );
+
+  const getRowId = useCallback(
+    (params) => String(params.data.instrumentID),
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      editable: false,
+    }),
+    []
   );
 
   return (
     <>
-      <span className={styles.tableheaderbar}>USD Parity</span>
+      <span className={styles.tableheaderbarForUSDParity}>USD Parity</span>
 
-      <GlobalTable
-        columns={columns}
-        dataSource={tableData}
-        rowKey={(record) => record.instrumentID}
-        pagination={false}
-        scroll={{ y: 300, x: "max-content" }}
-        prefixCls={
-          tableData.length > 0 ? "managementTables" : "managementTables_Empty"
-        }
-      />
+      <div style={{ width: "98%", height: "300px" }}>
+        <AgGridTable
+          ref={agGridComponentRef} // ✅ separate ref for the component instance
+          columnDefs={columnDefs}
+          className="usdParityManagement-grid"
+          getRowId={getRowId}
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+          domLayout="normal"
+          theme="legacy"
+          defaultColDef={defaultColDef}
+          suppressScrollOnNewData={true}
+          suppressAnimationFrame={false}
+          suppressCellFocus={true}
+          loadingOverlayComponent={SectionLoader}
+        />
+      </div>
     </>
   );
 });
+
+USDParity.displayName = "USDParity";
 
 export default USDParity;

@@ -46,28 +46,12 @@ const emailValidation = (text) => {
 };
 
 const roleBasedNavigation = (navigate, roleID) => {
-  console.log(roleID, "roleIDroleID");
-  // 1	Bank
-  // 2	Corporate
-  // 3	Broker
-  // 6	Auditor
-  // 7	Dealer
-  // 8	Treasury
-  // 9	Branch
-  if (roleID === 1) {
-    ("");
-  } else if (roleID === 2) {
-    navigate("/BOP/corporate");
-  } else if (roleID === 3) {
-    ("");
-  } else if (roleID === 6) {
-    ("");
-  } else if (roleID === 7) {
+  if (roleID === 7) {
     navigate("/SONERI/dealer");
   } else if (roleID === 8) {
     navigate("/SONERI/treasury");
-  } else if (roleID === 9) {
-    navigate("/BOP/branch");
+  } else if (roleID === 10) {
+    navigate("/SONERI/management");
   }
 };
 export { setCustomHeaders, emailValidation, roleBasedNavigation };

@@ -44,7 +44,7 @@ const SOFR = () => {
         row[item.tenor] = Number(item.rate).toFixed(4);
       });
 
-      const tableData = [{ key: "sofr", ...row }];
+      const tableData = [{ key: sofrList[sofrList.length + 1], ...row }];
 
       dataRef.current = tableData;
       setProcessedData(tableData);

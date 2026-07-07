@@ -75,16 +75,14 @@ const SBPConversionRates = () => {
 
           if (
             sbpConversionrate &&
-            item.currency === sbpConversionrate.currency
+            item.currencyCode === sbpConversionrate.currencyCode
           ) {
-            if (Number(updatedItem.rate) !== Number(sbpConversionrate.rate)) {
-              updatedItem = {
-                ...updatedItem,
-                rate: sbpConversionrate.rate,
-                version: updatedItem.version + 1,
-              };
-              changed = true;
-            }
+            updatedItem = {
+              ...updatedItem,
+              rate: sbpConversionrate.rate,
+              version: updatedItem.version + 1,
+            };
+            changed = true;
           }
         });
 
