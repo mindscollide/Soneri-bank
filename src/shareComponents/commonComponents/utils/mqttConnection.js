@@ -148,7 +148,7 @@ export const useMqttClient = ({
         // useSSL: false,
         useSSL:
           import.meta.env.VITE_MQTT_PORT === "8883" &&
-          import.meta.env.VITE_MQTT_HOST === "Soneritrade.tresmark.com",
+          import.meta.env.VITE_MQTT_HOST === "ttrade.soneribank.com",
       });
     },
     [onMessageArrived, onConnectionLost, subscribeToTopics, randomString]

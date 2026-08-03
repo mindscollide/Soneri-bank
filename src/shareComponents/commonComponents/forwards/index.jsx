@@ -203,6 +203,7 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
       resizable: false,
       sortable: false,
       suppressMovable: true,
+      minWidth: 120,
     }),
     []
   );

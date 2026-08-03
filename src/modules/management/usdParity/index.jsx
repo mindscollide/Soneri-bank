@@ -358,6 +358,7 @@ const USDParity = memo(() => {
         headerName: "Time",
         field: "time",
         flex: 1,
+        cellClass: "text-center",
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },

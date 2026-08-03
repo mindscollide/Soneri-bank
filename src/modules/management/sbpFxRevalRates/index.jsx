@@ -195,7 +195,7 @@ const SBPFXRevalRates = memo(() => {
         field: "currencyName",
         cellClass: "instrument-cell",
         pinned: "left",
-        width: 80,
+        width: 120,
       },
     ];
 
@@ -203,7 +203,8 @@ const SBPFXRevalRates = memo(() => {
       headerName: tenor.tenorName,
       field: `tenorId_${tenor.tenorId}_value`,
       cellClass: "value-cell",
-      width: 70,
+              flex: 1,
+
       valueFormatter: (p) => {
         <IndexCell value={p.value} />;
       },
@@ -220,6 +221,7 @@ const SBPFXRevalRates = memo(() => {
       sortable: false,
       suppressMovable: true,
       editable: false,
+        minWidth: 90,
     }),
     []
   );

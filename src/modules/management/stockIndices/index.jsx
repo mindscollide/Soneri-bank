@@ -39,7 +39,7 @@ const StockIndices = memo(() => {
     if (!otherInstruments?.length) return [];
 
     const map = new Map(
-      stockIndexList?.map((item) => [Number(item.instrumentId), item]) || []
+      stockIndexList?.map((item) => [Number(item.instrumentId), item]) || [],
     );
 
     return otherInstruments.map((instrument) => {
@@ -92,7 +92,7 @@ const StockIndices = memo(() => {
       }
       // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
-    [buildRowData]
+    [buildRowData],
   );
 
   // ─────────────────────────────
@@ -209,7 +209,7 @@ const StockIndices = memo(() => {
         rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processQueue]
+    [processQueue],
   );
 
   // ─────────────────────────────
@@ -276,7 +276,7 @@ const StockIndices = memo(() => {
         headerName: "Current",
         field: "current",
         cellClass: "bid-cell",
-        width: 100,
+        flex: 1,
 
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
@@ -287,7 +287,7 @@ const StockIndices = memo(() => {
         headerName: "Change",
         field: "change",
         cellClass: "offer-cell",
-        width: 100,
+        flex: 1,
 
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
@@ -298,14 +298,14 @@ const StockIndices = memo(() => {
         headerName: "% Change",
         field: "percentageChange",
         cellClass: "percentage-cell",
-        width: 100,
+        flex: 1,
 
         cellRenderer: PercentageCellRenderer,
       },
       {
         headerName: "High",
         field: "high",
-        width: 100,
+        flex: 1,
 
         cellClass: "highLow-cell",
         cellRenderer: (p) =>
@@ -317,7 +317,7 @@ const StockIndices = memo(() => {
         headerName: "Low",
         field: "low",
         cellClass: "highLow-cell",
-        width: 100,
+        flex: 1,
 
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
@@ -327,7 +327,7 @@ const StockIndices = memo(() => {
       {
         headerName: "Volume",
         field: "volume",
-        width: 100,
+        flex: 1,
         cellClass: "highLow-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
@@ -337,19 +337,19 @@ const StockIndices = memo(() => {
       {
         headerName: "Time",
         field: "time",
-        width: 120,
+        flex: 1,
 
         cellClass: "percentage-cell",
         valueFormatter: (p) =>
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
     ],
-    [PercentageCellRenderer]
+    [PercentageCellRenderer],
   );
 
   const getRowId = useCallback(
     (params) => String(params.data.instrumentID),
-    []
+    [],
   );
 
   const defaultColDef = useMemo(
@@ -359,7 +359,7 @@ const StockIndices = memo(() => {
       suppressMovable: true,
       editable: false,
     }),
-    []
+    [],
   );
 
   return (
@@ -370,12 +370,12 @@ const StockIndices = memo(() => {
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
-          className="usdParityManagement-grid"
+          className='usdParityManagement-grid'
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
-          domLayout="normal"
-          theme="legacy"
+          domLayout='normal'
+          theme='legacy'
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
