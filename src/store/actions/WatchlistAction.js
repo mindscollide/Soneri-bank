@@ -12,6 +12,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { authApi, watchListApi } from "../../common/apiend_point";
 import {
   AddDealerSpread,
+  CalculateTenorSwapAndForwardRateRM,
   clearRatesRM,
   createTenorRM,
   GetAllDealersSpread,
@@ -65,7 +66,7 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
     try {
       let getAllInstruments = createPostAPI(
         watchListApi,
-        GetAllInstrumentForTreasuryRM.RequestMethod
+        GetAllInstrumentForTreasuryRM.RequestMethod,
       );
 
       const response = await getAllInstruments();
@@ -77,7 +78,7 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -88,17 +89,19 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched");
@@ -106,7 +109,7 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllInstrumentForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -127,7 +130,7 @@ export const getAllTreasuryInstrumentsApi = createAsyncThunk(
       console.log("", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const GetBankSpotForTreasuryApi = createAsyncThunk(
@@ -136,7 +139,7 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
     try {
       let GetBankSpotForTreasuryData = createPostAPI(
         watchListApi,
-        GetBankSpotForTreasury.RequestMethod
+        GetBankSpotForTreasury.RequestMethod,
       );
 
       const response = await GetBankSpotForTreasuryData();
@@ -149,7 +152,7 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -160,17 +163,19 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -178,7 +183,7 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankSpotForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -196,7 +201,7 @@ export const GetBankSpotForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 export const GetBankForwardForTreasuryApi = createAsyncThunk(
@@ -205,7 +210,7 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
     try {
       let GetBankForwardForTreasuryData = createPostAPI(
         watchListApi,
-        GetBankForwardForTreasury.RequestMethod
+        GetBankForwardForTreasury.RequestMethod,
       );
 
       const response = await GetBankForwardForTreasuryData();
@@ -218,7 +223,7 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -229,17 +234,19 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -247,7 +254,7 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetBankForwardForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -265,7 +272,7 @@ export const GetBankForwardForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 // Define the GetDiscountingRatesForTreasury async thunk
@@ -275,7 +282,7 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
     try {
       let GetDiscountingRatesForTreasuryData = createPostAPI(
         watchListApi,
-        GetDiscountingRatesForTreasury.RequestMethod
+        GetDiscountingRatesForTreasury.RequestMethod,
       );
 
       const response = await GetDiscountingRatesForTreasuryData();
@@ -287,7 +294,7 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -298,17 +305,19 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched");
@@ -316,7 +325,7 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDiscountingRatesForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured");
@@ -337,7 +346,7 @@ export const GetDiscountingRatesForTreasuryApi = createAsyncThunk(
       console.log("", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const getMarketStatusApi = createAsyncThunk(
@@ -346,7 +355,7 @@ export const getMarketStatusApi = createAsyncThunk(
     try {
       let getMarketStatusPost = createPostAPI(
         watchListApi,
-        getMarketStatusRM.RequestMethod
+        getMarketStatusRM.RequestMethod,
       );
 
       const response = await getMarketStatusPost();
@@ -366,7 +375,7 @@ export const getMarketStatusApi = createAsyncThunk(
               return rejectWithValue(
                 import.meta.env.VITE_MQTT_PORT === "8883"
                   ? ""
-                  : "No Record Found"
+                  : "No Record Found",
               );
 
             default:
@@ -383,7 +392,7 @@ export const getMarketStatusApi = createAsyncThunk(
       console.log("", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -403,7 +412,7 @@ export const clearRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_ClearRates_01".toLowerCase()
+                "WatchList_WatchListServiceManager_ClearRates_01".toLowerCase(),
               )
           ) {
             return {
@@ -414,7 +423,7 @@ export const clearRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_ClearRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_ClearRates_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -422,7 +431,7 @@ export const clearRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_ClearRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_ClearRates_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -430,7 +439,7 @@ export const clearRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_ClearRates_04".toLowerCase()
+                "WatchList_WatchListServiceManager_ClearRates_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -450,7 +459,7 @@ export const clearRatesAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -460,7 +469,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
     try {
       let getLastPublishRates = createPostAPI(
         watchListApi,
-        getLastAndCurrentUSDRatesRM.RequestMethod
+        getLastAndCurrentUSDRatesRM.RequestMethod,
       );
 
       const response = await getLastPublishRates();
@@ -474,7 +483,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_01".toLowerCase(),
               )
           ) {
             return {
@@ -485,7 +494,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -493,7 +502,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -501,7 +510,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRates_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -519,7 +528,7 @@ export const getLastPublishRatesAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -529,7 +538,7 @@ export const PublishNewRatesAction = createAsyncThunk(
     try {
       let PublishNewRates = createPostAPI(
         watchListApi,
-        publishCurrentUSDRatesRM.RequestMethod
+        publishCurrentUSDRatesRM.RequestMethod,
       );
 
       const response = await PublishNewRates(Data);
@@ -543,7 +552,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_01".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_01".toLowerCase(),
               )
           ) {
             dispatch(setPublishedSpotRates(false));
@@ -556,7 +565,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -564,7 +573,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -572,7 +581,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_04".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -580,7 +589,7 @@ export const PublishNewRatesAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_05".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRates_05".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -598,7 +607,7 @@ export const PublishNewRatesAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // ----------------------------
@@ -609,7 +618,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
     try {
       let GetLastAndCurrentPublishUSDRateSheetData = createPostAPI(
         watchListApi,
-        GetLastAndCurrentPublishUSDRateSheet.RequestMethod
+        GetLastAndCurrentPublishUSDRateSheet.RequestMethod,
       );
 
       const response = await GetLastAndCurrentPublishUSDRateSheetData();
@@ -623,7 +632,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_01".toLowerCase(),
               )
           ) {
             return {
@@ -634,7 +643,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -642,7 +651,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -650,7 +659,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetTheLastAndCurrentPublishUSDRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -668,7 +677,7 @@ export const GetLastAndCurrentPublishUSDRateSheetAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -678,7 +687,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
     try {
       let PublishCurrentUSDRateSheetData = createPostAPI(
         watchListApi,
-        PublishCurrentUSDRateSheet.RequestMethod
+        PublishCurrentUSDRateSheet.RequestMethod,
       );
 
       const response = await PublishCurrentUSDRateSheetData(Data);
@@ -692,7 +701,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_01".toLowerCase(),
               )
           ) {
             dispatch(setPublishedSpotRateSheet(false));
@@ -705,7 +714,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -713,7 +722,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -721,7 +730,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -729,7 +738,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_05".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTheCurrentUSDRateSheet_05".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -747,7 +756,7 @@ export const PublishCurrentUSDRateSheetAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // ---------------------------------
@@ -759,7 +768,7 @@ export const marketOnOffAction = createAsyncThunk(
     try {
       let marketOnOff = createPostAPI(
         watchListApi,
-        marketOnOffRM.RequestMethod
+        marketOnOffRM.RequestMethod,
       );
 
       const response = await marketOnOff(Data);
@@ -772,7 +781,7 @@ export const marketOnOffAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_MarketONOFF_01".toLowerCase()
+                "WatchList_WatchListServiceManager_MarketONOFF_01".toLowerCase(),
               )
           ) {
             return {
@@ -783,7 +792,7 @@ export const marketOnOffAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_MarketONOFF_02".toLowerCase()
+                "WatchList_WatchListServiceManager_MarketONOFF_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -791,7 +800,7 @@ export const marketOnOffAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_MarketONOFF_03".toLowerCase()
+                "WatchList_WatchListServiceManager_MarketONOFF_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -799,7 +808,7 @@ export const marketOnOffAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_MarketONOFF_04".toLowerCase()
+                "WatchList_WatchListServiceManager_MarketONOFF_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -819,7 +828,7 @@ export const marketOnOffAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -840,7 +849,7 @@ export const getAllTenorsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "ERM_AuthService_CommonManager_GetAllTenors_01".toLowerCase()
+                "ERM_AuthService_CommonManager_GetAllTenors_01".toLowerCase(),
               )
           ) {
             return {
@@ -851,7 +860,7 @@ export const getAllTenorsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "ERM_AuthService_CommonManager_GetAllTenors_02".toLowerCase()
+                "ERM_AuthService_CommonManager_GetAllTenors_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -859,7 +868,7 @@ export const getAllTenorsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "ERM_AuthService_CommonManager_GetAllTenors_03".toLowerCase()
+                "ERM_AuthService_CommonManager_GetAllTenors_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -867,7 +876,7 @@ export const getAllTenorsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "ERM_AuthService_CommonManager_GetAllTenors_04".toLowerCase()
+                "ERM_AuthService_CommonManager_GetAllTenors_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -885,7 +894,7 @@ export const getAllTenorsAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -895,7 +904,7 @@ export const createTenorAction = createAsyncThunk(
     try {
       let createTenor = createPostAPI(
         watchListApi,
-        createTenorRM.RequestMethod
+        createTenorRM.RequestMethod,
       );
 
       const response = await createTenor(Data);
@@ -909,7 +918,7 @@ export const createTenorAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_CreateTenor_01".toLowerCase()
+                "WatchList_WatchListServiceManager_CreateTenor_01".toLowerCase(),
               )
           ) {
             dispatch(setCreateTenorModal(false));
@@ -925,7 +934,7 @@ export const createTenorAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_CreateTenor_02".toLowerCase()
+                "WatchList_WatchListServiceManager_CreateTenor_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -933,7 +942,7 @@ export const createTenorAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_CreateTenor_03".toLowerCase()
+                "WatchList_WatchListServiceManager_CreateTenor_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -941,7 +950,7 @@ export const createTenorAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_CreateTenor_04".toLowerCase()
+                "WatchList_WatchListServiceManager_CreateTenor_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -949,7 +958,7 @@ export const createTenorAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_CreateTenor_05".toLowerCase()
+                "WatchList_WatchListServiceManager_CreateTenor_05".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -969,7 +978,7 @@ export const createTenorAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the login async thunk
@@ -979,7 +988,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
     try {
       let PublishTenorWiseForwards = createPostAPI(
         watchListApi,
-        publishTenorWiseForwardRatesRM.RequestMethod
+        publishTenorWiseForwardRatesRM.RequestMethod,
       );
 
       const response = await PublishTenorWiseForwards(Data);
@@ -993,7 +1002,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_01".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_01".toLowerCase(),
               )
           ) {
             return {
@@ -1004,7 +1013,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -1012,7 +1021,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -1020,7 +1029,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_04".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -1028,7 +1037,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_05".toLowerCase()
+                "WatchList_WatchListServiceManager_PublishTenorWiseForwardRates_05".toLowerCase(),
               )
           ) {
             return rejectWithValue("Input model is empty");
@@ -1048,7 +1057,7 @@ export const PublishTenorWiseForwardsAction = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const getDealerDashboardApi = createAsyncThunk(
@@ -1057,7 +1066,7 @@ export const getDealerDashboardApi = createAsyncThunk(
     try {
       let DealerDashboardApi = createPostAPI(
         watchListApi,
-        getDealerDasboardDataRM.RequestMethod
+        getDealerDasboardDataRM.RequestMethod,
       );
       const response = await DealerDashboardApi();
       const { responseCode } = response.data;
@@ -1069,7 +1078,7 @@ export const getDealerDashboardApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDealerDashboardData_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDealerDashboardData_01".toLowerCase(),
               )
           ) {
             return {
@@ -1080,7 +1089,7 @@ export const getDealerDashboardApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDealerDashboardData_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDealerDashboardData_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched");
@@ -1088,7 +1097,7 @@ export const getDealerDashboardApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDealerDashboardData_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDealerDashboardData_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -1096,7 +1105,7 @@ export const getDealerDashboardApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDealerDashboardData_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDealerDashboardData_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -1104,11 +1113,13 @@ export const getDealerDashboardApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetDealerDashboardData_05".toLowerCase()
+                "WatchList_WatchListServiceManager_GetDealerDashboardData_05".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else {
             console.log("", response.data);
@@ -1126,7 +1137,7 @@ export const getDealerDashboardApi = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const PublishFEDiscountingTableApi = createAsyncThunk(
@@ -1135,7 +1146,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
     try {
       const publishFeDiscounting = createPostAPI(
         watchListApi,
-        PublishFeDiscountingRM.RequestMethod
+        PublishFeDiscountingRM.RequestMethod,
       );
       const response = await publishFeDiscounting(Data);
       const { responseCode } = response.data;
@@ -1149,7 +1160,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_01".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_01".toLowerCase(),
             )
         ) {
           return {
@@ -1160,7 +1171,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_02".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1168,7 +1179,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_03".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1176,7 +1187,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_04".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1184,7 +1195,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_05".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishFEDiscountingRates_05".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1198,7 +1209,7 @@ export const PublishFEDiscountingTableApi = createAsyncThunk(
       console.log("Error publishing FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const PublishNonFEDiscountingTableApi = createAsyncThunk(
@@ -1207,7 +1218,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
     try {
       const publishNonFeDiscounting = createPostAPI(
         watchListApi,
-        PublishNonFeDiscountingRatesRM.RequestMethod
+        PublishNonFeDiscountingRatesRM.RequestMethod,
       );
       const response = await publishNonFeDiscounting(Data);
       const { responseCode } = response.data;
@@ -1221,7 +1232,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_01".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_01".toLowerCase(),
             )
         ) {
           return {
@@ -1232,7 +1243,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_02".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1240,7 +1251,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_03".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1248,7 +1259,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_04".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1256,7 +1267,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_05".toLowerCase()
+              "WatchList_WatchListServiceManager_PublishNonFEDiscountingRates_05".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1270,7 +1281,7 @@ export const PublishNonFEDiscountingTableApi = createAsyncThunk(
       console.log("Error publishing FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const GetBankSpotForDealerApi = createAsyncThunk(
@@ -1279,7 +1290,7 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
     try {
       const GetBankSpotForDealerData = createPostAPI(
         watchListApi,
-        GetBankSpotForDealer.RequestMethod
+        GetBankSpotForDealer.RequestMethod,
       );
       const response = await GetBankSpotForDealerData(Data);
       const { responseCode } = response.data;
@@ -1293,7 +1304,7 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankSpotForDealer_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankSpotForDealer_01".toLowerCase(),
             )
         ) {
           return {
@@ -1304,7 +1315,7 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankSpotForDealer_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankSpotForDealer_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1312,7 +1323,7 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankSpotForDealer_03".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankSpotForDealer_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1320,7 +1331,7 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankSpotForDealer_04".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankSpotForDealer_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1334,7 +1345,7 @@ export const GetBankSpotForDealerApi = createAsyncThunk(
       console.error("Error fetching GetBankSpotForDealer:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
@@ -1343,7 +1354,7 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
     try {
       const GetBankForwardForTreasuryDealerData = createPostAPI(
         watchListApi,
-        GetBankForwardForTreasuryDealer.RequestMethod
+        GetBankForwardForTreasuryDealer.RequestMethod,
       );
       const response = await GetBankForwardForTreasuryDealerData(Data);
       const { responseCode } = response.data;
@@ -1357,7 +1368,7 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_01".toLowerCase(),
             )
         ) {
           return {
@@ -1368,7 +1379,7 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1376,7 +1387,7 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_03".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1384,7 +1395,7 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_04".toLowerCase()
+              "WatchList_WatchListServiceManager_GetBankForwardForTreasuryDealer_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1398,7 +1409,7 @@ export const GetBankForwardForTreasuryDealerApi = createAsyncThunk(
       console.error("Error fetching FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const GetDiscountingRatesForDealerApi = createAsyncThunk(
@@ -1407,7 +1418,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
     try {
       const GetDiscountingRatesForDealerData = createPostAPI(
         watchListApi,
-        GetDiscountingRatesForDealer.RequestMethod
+        GetDiscountingRatesForDealer.RequestMethod,
       );
       const response = await GetDiscountingRatesForDealerData(Data);
       const { responseCode } = response.data;
@@ -1421,7 +1432,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_01".toLowerCase(),
             )
         ) {
           return {
@@ -1432,7 +1443,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1440,7 +1451,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_03".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1448,7 +1459,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_04".toLowerCase()
+              "WatchList_WatchListServiceManager_GetDiscountingRatesForDealer_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1462,7 +1473,7 @@ export const GetDiscountingRatesForDealerApi = createAsyncThunk(
       console.error("Error fetching FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 // const response = await publishDiscountingRates(Data);
 export const GetAllDealersSpreadApi = createAsyncThunk(
@@ -1471,7 +1482,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
     try {
       const GetAllDealersSpreadData = createPostAPI(
         watchListApi,
-        GetAllDealersSpread.RequestMethod
+        GetAllDealersSpread.RequestMethod,
       );
       const response = await GetAllDealersSpreadData();
       const { responseCode } = response.data;
@@ -1485,7 +1496,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetAllDealersSpread_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetAllDealersSpread_01".toLowerCase(),
             )
         ) {
           return {
@@ -1496,7 +1507,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetAllDealersSpread_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetAllDealersSpread_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1504,7 +1515,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetAllDealersSpread_03".toLowerCase()
+              "WatchList_WatchListServiceManager_GetAllDealersSpread_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1512,7 +1523,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetAllDealersSpread_04".toLowerCase()
+              "WatchList_WatchListServiceManager_GetAllDealersSpread_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1526,7 +1537,7 @@ export const GetAllDealersSpreadApi = createAsyncThunk(
       console.error("Error fetching GetAllDealersSpread data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const GetCurrencyCrossesApi = createAsyncThunk(
@@ -1535,7 +1546,7 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
     try {
       const GetCurrencyCrossesData = createPostAPI(
         watchListApi,
-        GetCurrencyCrosses.RequestMethod
+        GetCurrencyCrosses.RequestMethod,
       );
       const response = await GetCurrencyCrossesData();
       const { responseCode } = response.data;
@@ -1549,7 +1560,7 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetCurrencyCrosses_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetCurrencyCrosses_01".toLowerCase(),
             )
         ) {
           return {
@@ -1560,7 +1571,7 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetCurrencyCrosses_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetCurrencyCrosses_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("No Found");
@@ -1568,7 +1579,7 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetCurrencyCrosses_03".toLowerCase()
+              "WatchList_WatchListServiceManager_GetCurrencyCrosses_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1576,7 +1587,7 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetCurrencyCrosses_04".toLowerCase()
+              "WatchList_WatchListServiceManager_GetCurrencyCrosses_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1590,7 +1601,7 @@ export const GetCurrencyCrossesApi = createAsyncThunk(
       console.error("Error fetching GetBankSpotForDealer:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const AddDealerSpreadApi = createAsyncThunk(
@@ -1599,7 +1610,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
     try {
       const AddDealerSpreadData = createPostAPI(
         watchListApi,
-        AddDealerSpread.RequestMethod
+        AddDealerSpread.RequestMethod,
       );
       const response = await AddDealerSpreadData(Data);
       const { responseCode } = response.data;
@@ -1613,7 +1624,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_AddDealerSpread_01".toLowerCase()
+              "WatchList_WatchListServiceManager_AddDealerSpread_01".toLowerCase(),
             )
         ) {
           return {
@@ -1624,7 +1635,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_AddDealerSpread_02".toLowerCase()
+              "WatchList_WatchListServiceManager_AddDealerSpread_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("");
@@ -1632,7 +1643,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_AddDealerSpread_03".toLowerCase()
+              "WatchList_WatchListServiceManager_AddDealerSpread_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1640,7 +1651,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_AddDealerSpread_04".toLowerCase()
+              "WatchList_WatchListServiceManager_AddDealerSpread_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1654,7 +1665,7 @@ export const AddDealerSpreadApi = createAsyncThunk(
       console.log("Error publishing FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 export const GetSingleDealersSpreadApi = createAsyncThunk(
@@ -1663,7 +1674,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
     try {
       const GetSingleDealersSpreadData = createPostAPI(
         watchListApi,
-        GetSingleDealersSpread.RequestMethod
+        GetSingleDealersSpread.RequestMethod,
       );
       const response = await GetSingleDealersSpreadData(Data);
       const { responseCode } = response.data;
@@ -1677,7 +1688,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetSingleDealersSpread_01".toLowerCase()
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_01".toLowerCase(),
             )
         ) {
           return {
@@ -1688,7 +1699,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetSingleDealersSpread_02".toLowerCase()
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_02".toLowerCase(),
             )
         ) {
           return rejectWithValue("");
@@ -1696,7 +1707,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetSingleDealersSpread_03".toLowerCase()
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_03".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1704,7 +1715,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
           responseMessage
             .toLowerCase()
             .includes(
-              "WatchList_WatchListServiceManager_GetSingleDealersSpread_04".toLowerCase()
+              "WatchList_WatchListServiceManager_GetSingleDealersSpread_04".toLowerCase(),
             )
         ) {
           return rejectWithValue("Someting went wrong");
@@ -1718,7 +1729,7 @@ export const GetSingleDealersSpreadApi = createAsyncThunk(
       console.log("Error publishing FE discounting data:", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 // Define the GetAllFowardsAndDiscountsRates async thunk
@@ -1728,7 +1739,7 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
     try {
       let GetAllOtherInstrumentsData = createPostAPI(
         watchListApi,
-        GetAllOtherInstruments.RequestMethod
+        GetAllOtherInstruments.RequestMethod,
       );
 
       const response = await GetAllOtherInstrumentsData();
@@ -1740,7 +1751,7 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllOtherInstruments_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_01".toLowerCase(),
               )
           ) {
             return {
@@ -1751,17 +1762,19 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllOtherInstruments_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllOtherInstruments_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched");
@@ -1769,7 +1782,7 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetAllOtherInstruments_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetAllOtherInstruments_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -1790,7 +1803,7 @@ export const GetAllOtherInstrumentsApi = createAsyncThunk(
       console.log("", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 //GetUSDParityForTreasury
@@ -1800,7 +1813,7 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
     try {
       let GetUSDParityForTreasuryData = createPostAPI(
         watchListApi,
-        GetUSDParityForTreasury.RequestMethod
+        GetUSDParityForTreasury.RequestMethod,
       );
 
       const response = await GetUSDParityForTreasuryData();
@@ -1813,7 +1826,7 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -1824,17 +1837,19 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -1842,7 +1857,7 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetUSDParityForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -1860,7 +1875,7 @@ export const GetUSDParityForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetCommoditiesForTreasury
@@ -1870,7 +1885,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
     try {
       let GetCommoditiesForTreasuryData = createPostAPI(
         watchListApi,
-        GetCommoditiesForTreasury.RequestMethod
+        GetCommoditiesForTreasury.RequestMethod,
       );
 
       const response = await GetCommoditiesForTreasuryData();
@@ -1883,7 +1898,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -1894,17 +1909,19 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -1912,7 +1929,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetCommoditiesForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -1930,7 +1947,7 @@ export const GetCommoditiesForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetIndicesForTreasury
@@ -1940,7 +1957,7 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
     try {
       let GetIndicesForTreasuryData = createPostAPI(
         watchListApi,
-        GetIndicesForTreasury.RequestMethod
+        GetIndicesForTreasury.RequestMethod,
       );
 
       const response = await GetIndicesForTreasuryData();
@@ -1953,7 +1970,7 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicesForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -1964,17 +1981,19 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicesForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicesForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -1982,7 +2001,7 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicesForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicesForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2000,7 +2019,7 @@ export const GetIndicesForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetKiborDataForTreasury
@@ -2010,7 +2029,7 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
     try {
       let GetKiborDataForTreasuryData = createPostAPI(
         watchListApi,
-        GetKiborDataForTreasury.RequestMethod
+        GetKiborDataForTreasury.RequestMethod,
       );
 
       const response = await GetKiborDataForTreasuryData();
@@ -2023,7 +2042,7 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -2034,17 +2053,19 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2052,7 +2073,7 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2070,7 +2091,7 @@ export const GetKiborDataForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetSOFRDataForTreasury
@@ -2080,7 +2101,7 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
     try {
       let GetSOFRDataForTreasuryData = createPostAPI(
         watchListApi,
-        GetSOFRDataForTreasury.RequestMethod
+        GetSOFRDataForTreasury.RequestMethod,
       );
 
       const response = await GetSOFRDataForTreasuryData();
@@ -2093,7 +2114,7 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -2104,17 +2125,19 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2122,7 +2145,7 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2140,7 +2163,7 @@ export const GetSOFRDataForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetRevalRatesForTreasury
@@ -2150,7 +2173,7 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
     try {
       let GetRevalRatesForTreasuryData = createPostAPI(
         watchListApi,
-        GetRevalRatesForTreasury.RequestMethod
+        GetRevalRatesForTreasury.RequestMethod,
       );
 
       const response = await GetRevalRatesForTreasuryData();
@@ -2163,7 +2186,7 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -2174,17 +2197,19 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2192,7 +2217,7 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRevalRatesForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2210,7 +2235,7 @@ export const GetRevalRatesForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetRevalRatesForTreasury
@@ -2220,7 +2245,7 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
     try {
       let GetSwapsInUSDForTreasuryData = createPostAPI(
         watchListApi,
-        GetSwapsInUSDForTreasury.RequestMethod
+        GetSwapsInUSDForTreasury.RequestMethod,
       );
 
       const response = await GetSwapsInUSDForTreasuryData();
@@ -2233,7 +2258,7 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_01".toLowerCase(),
               )
           ) {
             return {
@@ -2244,17 +2269,19 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2262,7 +2289,7 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSwapsInUSDForTreasury_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2280,7 +2307,7 @@ export const GetSwapsInUSDForTreasuryApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetSpotTTRatesForRateSheet
@@ -2290,7 +2317,7 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
     try {
       let GetSpotTTRatesForRateSheetData = createPostAPI(
         watchListApi,
-        GetSpotTTRatesForRateSheet.RequestMethod
+        GetSpotTTRatesForRateSheet.RequestMethod,
       );
 
       const response = await GetSpotTTRatesForRateSheetData();
@@ -2303,7 +2330,7 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_01".toLowerCase(),
               )
           ) {
             return {
@@ -2314,17 +2341,19 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2332,7 +2361,7 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSpotTTRatesForRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2350,7 +2379,7 @@ export const GetSpotTTRatesForRateSheetApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetRatesForCurrencyNotesForRateSheet
@@ -2360,7 +2389,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
     try {
       let GetRatesForCurrencyNotesForRateSheetData = createPostAPI(
         watchListApi,
-        GetRatesForCurrencyNotesForRateSheet.RequestMethod
+        GetRatesForCurrencyNotesForRateSheet.RequestMethod,
       );
 
       const response = await GetRatesForCurrencyNotesForRateSheetData();
@@ -2373,7 +2402,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_01".toLowerCase(),
               )
           ) {
             return {
@@ -2384,17 +2413,19 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2402,7 +2433,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRatesForCurrencyNotesForRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2420,7 +2451,7 @@ export const GetRatesForCurrencyNotesForRateSheetApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetKiborDataForRateSheet
@@ -2430,7 +2461,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
     try {
       let GetKiborDataForRateSheetData = createPostAPI(
         watchListApi,
-        GetKiborDataForRateSheet.RequestMethod
+        GetKiborDataForRateSheet.RequestMethod,
       );
 
       const response = await GetKiborDataForRateSheetData();
@@ -2443,7 +2474,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_01".toLowerCase(),
               )
           ) {
             return {
@@ -2454,17 +2485,19 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2472,7 +2505,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetKiborDataForRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2490,7 +2523,7 @@ export const GetKiborDataForRateSheetApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetSOFRDataForRateSheet
@@ -2500,7 +2533,7 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
     try {
       let GetSOFRDataForRateSheetData = createPostAPI(
         watchListApi,
-        GetSOFRDataForRateSheet.RequestMethod
+        GetSOFRDataForRateSheet.RequestMethod,
       );
 
       const response = await GetSOFRDataForRateSheetData();
@@ -2513,7 +2546,7 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_01".toLowerCase(),
               )
           ) {
             return {
@@ -2524,17 +2557,19 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2542,7 +2577,7 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSOFRDataForRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2560,7 +2595,7 @@ export const GetSOFRDataForRateSheetApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetIndicativeFBPRates
@@ -2570,7 +2605,7 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
     try {
       let GetIndicativeFBPRatesData = createPostAPI(
         watchListApi,
-        GetIndicativeFBPRates.RequestMethod
+        GetIndicativeFBPRates.RequestMethod,
       );
 
       const response = await GetIndicativeFBPRatesData();
@@ -2583,7 +2618,7 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_01".toLowerCase(),
               )
           ) {
             return {
@@ -2594,17 +2629,19 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2612,7 +2649,7 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetIndicativeFBPRates_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2630,7 +2667,7 @@ export const GetIndicativeFBPRatesApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetSBPConversionRatesForRateSheet
@@ -2640,7 +2677,7 @@ export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
     try {
       let GetSBPConversionRatesForRateSheetData = createPostAPI(
         watchListApi,
-        GetSBPConversionRatesForRateSheet.RequestMethod
+        GetSBPConversionRatesForRateSheet.RequestMethod,
       );
 
       const response = await GetSBPConversionRatesForRateSheetData();
@@ -2653,7 +2690,7 @@ export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_01".toLowerCase(),
               )
           ) {
             return {
@@ -2664,17 +2701,19 @@ export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched.");
@@ -2682,7 +2721,7 @@ export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetSBPConversionRatesForRateSheet_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Exception occured.");
@@ -2700,7 +2739,7 @@ export const GetSBPConversionRatesForRateSheetApi = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 //GetNewsHeadlines
@@ -2710,7 +2749,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
     try {
       let GetNewsHeadlinesData = createPostAPI(
         watchListApi,
-        GetNewsHeadlines.RequestMethod
+        GetNewsHeadlines.RequestMethod,
       );
 
       const response = await GetNewsHeadlinesData(Data);
@@ -2724,7 +2763,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsHeadlines_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_01".toLowerCase(),
               )
           ) {
             // dispatch(setPublishedSpotRates(false));
@@ -2737,7 +2776,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsHeadlines_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2745,7 +2784,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsHeadlines_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2753,7 +2792,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsHeadlines_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsHeadlines_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2771,7 +2810,7 @@ export const GetNewsHeadlinesApi = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 //GetNewsDetailsByID
@@ -2781,7 +2820,7 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
     try {
       let GetNewsDetailsByIDData = createPostAPI(
         watchListApi,
-        GetNewsDetailsByID.RequestMethod
+        GetNewsDetailsByID.RequestMethod,
       );
 
       const response = await GetNewsDetailsByIDData(Data);
@@ -2795,7 +2834,7 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsDetails_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsDetails_01".toLowerCase(),
               )
           ) {
             // dispatch(setPublishedSpotRates(false));
@@ -2810,7 +2849,7 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsDetails_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsDetails_02".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2818,7 +2857,7 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsDetails_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsDetails_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2826,7 +2865,7 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetNewsDetails_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetNewsDetails_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2844,7 +2883,7 @@ export const GetNewsDetailsByIDApi = createAsyncThunk(
       // Reject with error message
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
 );
 
 //GetRefreshIconTenors
@@ -2856,7 +2895,7 @@ export const GetRefreshIconTenorsApi = createAsyncThunk(
     try {
       let GetRefreshIconTenorsData = createPostAPI(
         watchListApi,
-        GetRefreshIconTenors.RequestMethod
+        GetRefreshIconTenors.RequestMethod,
       );
 
       const response = await GetRefreshIconTenorsData();
@@ -2868,7 +2907,7 @@ export const GetRefreshIconTenorsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRefreshIconTenors_01".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_01".toLowerCase(),
               )
           ) {
             return {
@@ -2879,17 +2918,19 @@ export const GetRefreshIconTenorsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRefreshIconTenors_02".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_02".toLowerCase(),
               )
           ) {
             return rejectWithValue(
-              import.meta.env.VITE_MQTT_PORT === "8883" ? "" : "No Record Found"
+              import.meta.env.VITE_MQTT_PORT === "8883"
+                ? ""
+                : "No Record Found",
             );
           } else if (
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRefreshIconTenors_03".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_03".toLowerCase(),
               )
           ) {
             return rejectWithValue("Role doesn’t matched");
@@ -2897,7 +2938,7 @@ export const GetRefreshIconTenorsApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetRefreshIconTenors_04".toLowerCase()
+                "WatchList_WatchListServiceManager_GetRefreshIconTenors_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something went wrong");
@@ -2918,5 +2959,66 @@ export const GetRefreshIconTenorsApi = createAsyncThunk(
       console.log("", error);
       return rejectWithValue("Something went wrong");
     }
-  }
+  },
+);
+
+export const GetCalculateTenorSwapAndForwardRateApi = createAsyncThunk(
+  "watchlist/FWDCalulator",
+  async ({ Data }, { rejectWithValue }) => {
+    try {
+      let GetCalculateTenorSwapAndForwardRate = createPostAPI(
+        watchListApi,
+        CalculateTenorSwapAndForwardRateRM.RequestMethod,
+      );
+
+      const response = await GetCalculateTenorSwapAndForwardRate(Data);
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage } = response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_CalculateTenorSwapAndForwardRate_01".toLowerCase(),
+              )
+          ) {
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_CalculateTenorSwapAndForwardRate_02".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("No Record Found");
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_CalculateTenorSwapAndForwardRate_03".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
 );

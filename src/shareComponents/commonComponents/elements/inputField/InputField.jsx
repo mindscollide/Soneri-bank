@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./input.module.css";
 
-const InputFIeld = ({
+const InputField = ({
   type,
   value,
   onChange,
@@ -49,4 +49,4 @@ const InputFIeld = ({
     />
   </>
 );
-export default InputFIeld;
+export default InputField;

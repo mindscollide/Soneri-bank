@@ -18,6 +18,7 @@ import {
   clearGetSwapsInUSDForTreasury,
   clearGetUSDParityForTreasury,
 } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
+import CustomButton from "../../commonComponents/elements/globalButton/button";
 const MainHeader = () => {
   const location = useLocation();
   const dispatch = useDispatch();
@@ -30,6 +31,11 @@ const MainHeader = () => {
       navigate(to);
     });
   };
+
+  const handleClickCalculator = (e) => {
+    e.preventDefault();
+    window.open("/SONERI/calculator", "_blank");
+  }
 
   return (
     <Row>
@@ -46,6 +52,7 @@ const MainHeader = () => {
                 .includes("allnews") ? null : import.meta.env
                   .VITE_APP_INCLUDE_TREASURY === "true" ? (
                 <>
+                <CustomButton value={"Calculator"} onClick={handleClickCalculator} className={styles.CalculatorBtn} />
                   <Nav.Link
                     className={
                       location.pathname.toLowerCase().includes("interbank")

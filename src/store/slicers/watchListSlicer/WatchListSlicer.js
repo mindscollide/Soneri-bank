@@ -13,6 +13,7 @@ import {
   GetBankForwardForTreasuryDealerApi,
   GetBankSpotForDealerApi,
   GetBankSpotForTreasuryApi,
+  GetCalculateTenorSwapAndForwardRateApi,
   GetCommoditiesForTreasuryApi,
   GetCurrencyCrossesApi,
   getDealerDashboardApi,
@@ -96,6 +97,7 @@ const WatchListSlice = createSlice({
     GetNewsHeadlinesLoading: false,
     GetNewsDetailsByIDLoading: false,
     GetRefreshIconTenorsLoading: false,
+    GetCalculateTenorSwapAndForwardRateLoading: false,
     // data states
     GetAllInstrumentForTreasury: null,
     GetBankSpotForTreasury: null,
@@ -146,6 +148,7 @@ const WatchListSlice = createSlice({
     GetSBPConversionRatesForRateSheet: null,
     GetNewsHeadlines: null,
     GetRefreshIconTenors: null,
+    GetCalculateTenorSwapAndForwardRate: null,
 
     // About Newa
     NewsByNewsIdViewModal: false,
@@ -183,7 +186,7 @@ const WatchListSlice = createSlice({
             };
           }
           return item;
-        }
+        },
       );
     },
     updateTenors: (state, { payload }) => {
@@ -350,7 +353,7 @@ const WatchListSlice = createSlice({
           state.GetDiscountingRatesForTreasuryLoading = false;
           state.GetDiscountingRatesForTreasury = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         GetDiscountingRatesForTreasuryApi.rejected,
@@ -358,7 +361,7 @@ const WatchListSlice = createSlice({
           state.GetDiscountingRatesForTreasuryLoading = false;
           state.GetDiscountingRatesForTreasury = null;
           state.error = payload;
-        }
+        },
       )
 
       // ------------------ GetMarketStatus ------------------
@@ -447,7 +450,7 @@ const WatchListSlice = createSlice({
           state.getLastPublishRatesSheetLoading = false;
           state.getLastPublishRatesSheet = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         GetLastAndCurrentPublishUSDRateSheetAction.rejected,
@@ -455,7 +458,7 @@ const WatchListSlice = createSlice({
           state.getLastPublishRatesSheetLoading = false;
           state.getLastPublishRatesSheet = null;
           state.error = payload;
-        }
+        },
       )
 
       // ✅ Publish New Rates
@@ -469,7 +472,7 @@ const WatchListSlice = createSlice({
           state.PublishCurrentUSDRateSheet = payload?.response;
 
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         PublishCurrentUSDRateSheetAction.rejected,
@@ -477,7 +480,7 @@ const WatchListSlice = createSlice({
           state.PublishCurrentUSDRateSheetLoading = false;
           state.PublishCurrentUSDRateSheet = null;
           state.error = payload;
-        }
+        },
       )
 
       // ✅ Get All Tenors
@@ -520,7 +523,7 @@ const WatchListSlice = createSlice({
           state.publishTenorWiseForwardsLoading = false;
           state.publishTenorwiseForwardRates = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         PublishTenorWiseForwardsAction.rejected,
@@ -529,7 +532,7 @@ const WatchListSlice = createSlice({
           state.publishTenorwiseForwardRates = null;
           state.error = payload;
           state.responseMessage = payload;
-        }
+        },
       )
 
       .addCase(PublishFEDiscountingTableApi.pending, (state) => {
@@ -555,7 +558,7 @@ const WatchListSlice = createSlice({
           state.publishNonFeDiscountingLoading = false;
           state.publishNonFeDiscounting = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         PublishNonFEDiscountingTableApi.rejected,
@@ -563,7 +566,7 @@ const WatchListSlice = createSlice({
           state.publishNonFeDiscountingLoading = false;
           state.publishNonFeDiscounting = null;
           state.error = payload;
-        }
+        },
       )
 
       // ✅ Dealer Dashboard
@@ -619,7 +622,7 @@ const WatchListSlice = createSlice({
           state.GetBankForwardForTreasuryDealerLoading = false;
           state.GetBankForwardForTreasuryDealer = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         GetBankForwardForTreasuryDealerApi.rejected,
@@ -627,7 +630,7 @@ const WatchListSlice = createSlice({
           state.GetBankForwardForTreasuryDealerLoading = false;
           state.GetBankForwardForTreasuryDealer = null;
           state.error = payload;
-        }
+        },
       )
       // ✅ GetDiscountingRatesForDealer
       .addCase(GetDiscountingRatesForDealerApi.pending, (state) => {
@@ -639,7 +642,7 @@ const WatchListSlice = createSlice({
           state.GetDiscountingRatesForDealerLoading = false;
           state.GetDiscountingRatesForDealer = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         GetDiscountingRatesForDealerApi.rejected,
@@ -647,7 +650,7 @@ const WatchListSlice = createSlice({
           state.GetDiscountingRatesForDealerLoading = false;
           state.GetDiscountingRatesForDealer = null;
           state.error = payload;
-        }
+        },
       )
       // ✅ GetAllDealersSpread
       .addCase(GetAllDealersSpreadApi.pending, (state) => {
@@ -821,7 +824,7 @@ const WatchListSlice = createSlice({
           state.GetSpotTTRatesForRateSheetLoading = false;
           state.GetSpotTTRatesForRateSheet = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(GetSpotTTRatesForRateSheetApi.rejected, (state, { payload }) => {
         state.GetSpotTTRatesForRateSheetLoading = false;
@@ -839,7 +842,7 @@ const WatchListSlice = createSlice({
           state.GetRatesForCurrencyNotesForRateSheetLoading = false;
           state.GetRatesForCurrencyNotesForRateSheet = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         GetRatesForCurrencyNotesForRateSheetApi.rejected,
@@ -847,7 +850,7 @@ const WatchListSlice = createSlice({
           state.GetRatesForCurrencyNotesForRateSheetLoading = false;
           state.GetRatesForCurrencyNotesForRateSheet = null;
           state.error = payload;
-        }
+        },
       )
 
       // ✅ GetKiborDataForRateSheet
@@ -905,7 +908,7 @@ const WatchListSlice = createSlice({
           state.GetSBPConversionRatesForRateSheetLoading = false;
           state.GetSBPConversionRatesForRateSheet = payload?.response;
           state.responseMessage = payload?.message;
-        }
+        },
       )
       .addCase(
         GetSBPConversionRatesForRateSheetApi.rejected,
@@ -913,7 +916,7 @@ const WatchListSlice = createSlice({
           state.GetSBPConversionRatesForRateSheetLoading = false;
           state.GetSBPConversionRatesForRateSheet = null;
           state.error = payload;
-        }
+        },
       )
 
       // ------------------ GetNewsHeadlines ------------------
@@ -960,7 +963,26 @@ const WatchListSlice = createSlice({
         state.GetRefreshIconTenorsLoading = false;
         state.GetRefreshIconTenors = null;
         state.error = payload;
-      });
+      })
+      .addCase(GetCalculateTenorSwapAndForwardRateApi.pending, (state) => {
+        state.GetCalculateTenorSwapAndForwardRateLoading = true;
+      })
+      .addCase(
+        GetCalculateTenorSwapAndForwardRateApi.fulfilled,
+        (state, { payload }) => {
+          state.GetCalculateTenorSwapAndForwardRateLoading = false;
+          state.GetCalculateTenorSwapAndForwardRate = payload?.response;
+          state.responseMessage = payload?.message;
+        },
+      )
+      .addCase(
+        GetCalculateTenorSwapAndForwardRateApi.rejected,
+        (state, { payload }) => {
+          state.GetCalculateTenorSwapAndForwardRateLoading = false;
+          state.GetCalculateTenorSwapAndForwardRate = null;
+          state.responseMessage = payload;
+        },
+      );
 
     builder.addCase(setActiveTab, (state, action) => {
       state.activeTab = action.payload;

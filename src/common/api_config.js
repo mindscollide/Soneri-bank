@@ -178,3 +178,7 @@ export const GetNewsDetailsByID = {
 export const GetRefreshIconTenors = {
   RequestMethod: "ServiceManager.GetRefreshIconTenors",
 };
+
+export const CalculateTenorSwapAndForwardRateRM = {
+  RequestMethod: "ServiceManager.CalculateTenorSwapAndForwardRate"
+}

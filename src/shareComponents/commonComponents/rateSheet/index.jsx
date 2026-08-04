@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useRef } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Col, Row } from "react-bootstrap";
 import styles from "./RateSheet.module.css";
 import CustomButton from "../elements/globalButton/button";
@@ -16,9 +16,10 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import logo from "../../../assets/img/logo.png";
+import SoneriLogo from "../../../assets/newSoneriLogo.jpg";
 const SpotTTRates = lazy(() => import("./spotTTRates/index"));
-const RatesForCurrencyNotes = lazy(() =>
-  import("./ratesForCurrencyNotes/index")
+const RatesForCurrencyNotes = lazy(
+  () => import("./ratesForCurrencyNotes/index"),
 );
 const SbpConversionRates = lazy(() => import("./sbpConversionRates/index"));
 const IndicativeFBPRates = lazy(() => import("./indicativeFBPRates/index"));
@@ -29,12 +30,16 @@ import jsPDF from "jspdf";
 import { formatTodayForRateSheet } from "../../../utils/timeFunction";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
+import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
+import Loader from "../../elements/soneriLoader/Loader";
 
 const RateSheet = () => {
   useMqttTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [showLoader, setShowLoader] = useState(false);
   const screenRef = useRef(null);
+
   useEffect(() => {
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
     dispatch(GetAllOtherInstrumentsApi({ navigate }));
@@ -46,252 +51,280 @@ const RateSheet = () => {
     dispatch(GetSBPConversionRatesForRateSheetApi({ navigate }));
   }, []);
   const todayDate = formatTodayForRateSheet();
+
+  const waitForRender = () =>
+    new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
+
   const getBase64Image = (imgUrl) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
-      img.setAttribute("crossOrigin", "anonymous");
+
+      img.crossOrigin = "anonymous";
+
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
+        try {
+          const canvas = document.createElement("canvas");
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
 
-        const dataURL = canvas.toDataURL("image/png");
-        resolve(dataURL);
+          const context = canvas.getContext("2d");
+
+          if (!context) {
+            reject(new Error("Unable to create canvas context."));
+            return;
+          }
+
+          context.drawImage(img, 0, 0);
+
+          resolve(canvas.toDataURL("image/png"));
+        } catch (error) {
+          reject(error);
+        }
       };
+
+      img.onerror = () => {
+        reject(new Error("Soneri logo failed to load."));
+      };
+
       img.src = imgUrl;
     });
   };
-  // const handleExportPDF = async () => {
-  //   const element = screenRef.current;
 
-  //   const canvas = await html2canvas(element, {
-  //     scale: 2,
-  //     useCORS: true,
-  //   });
+  const withTimeout = (
+    promise,
+    timeout = 30000,
+    message = "Operation timed out",
+  ) => {
+    let timeoutId;
 
-  //   const imgData = canvas.toDataURL("image/jpeg", 0.9); // better quality
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(message));
+      }, timeout);
+    });
 
-  //   const pdf = new jsPDF({
-  //     orientation: "p",
-  //     unit: "mm",
-  //     format: "a4",
-  //     compress: true,
-  //   });
-  //   const pageWidth = pdf.internal.pageSize.getWidth();
-  //   const logoBase64 = await getBase64Image(logo);
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+      clearTimeout(timeoutId);
+    });
+  };
 
-  //   /* -------- CENTER LOGO -------- */
-
-  //   const headerWidth = 60;
-  //   const headerHeight = 15;
-
-  //   const xPosition = (pageWidth - headerWidth) / 2;
-
-  //   pdf.addImage(logoBase64, "PNG", xPosition, 8, headerWidth, headerHeight);
-
-  //   /* -------- HEADER TEXT -------- */
-  //   pdf.setFontSize(10);
-  //   pdf.text("Roshan Har Qadam", pageWidth / 2, 28, { align: "center" });
-
-  //   pdf.setFontSize(11);
-  //   pdf.text("FOREIGN EXCHANGE RATE SHEET", 10, 35);
-
-  //   pdf.text("TREASURY & CAPITAL MARKETS GROUP", pageWidth - 10, 35, {
-  //     align: "right",
-  //   });
-
-  //   pdf.text(todayDate, 10, 42);
-
-  //   /* -------- ADD SCREENSHOT -------- */
-
-  //   const imgWidth = pageWidth - 20;
-  //   const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  //   pdf.addImage(
-  //     imgData,
-  //     "JPEG",
-  //     10,
-  //     48,
-  //     imgWidth,
-  //     imgHeight,
-  //     undefined,
-  //     "FAST"
-  //   );
-  //   pdf.save("RateSheet.pdf");
-  // };
+  const waitForBrowserPaint = () =>
+    new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(resolve);
+      });
+    });
 
   const handleExportPDF = async () => {
     const element = screenRef.current;
 
-    // 1. Detect current browser zoom (e.g. 1.5 at 150% zoom)
-    const zoomRatio = window.outerWidth / window.innerWidth;
+    if (!element) {
+      console.error("Rate sheet element was not found.");
+      return;
+    }
 
-    // 2. Save original inline styles so we can restore them
-    const savedStyles = {
-      width: element.style.width,
-      transform: element.style.transform,
-      transformOrigin: element.style.transformOrigin,
-      overflow: element.style.overflow,
-    };
+    setShowLoader(true);
 
-    // 3. Force the element to render at its 100%-zoom natural width
-    //    offsetWidth is in CSS pixels (shrunk by zoom), so multiply by zoomRatio to get true width
-    const naturalWidth = element.offsetWidth * zoomRatio;
-    element.style.width = `${naturalWidth}px`;
-    element.style.overflow = "visible";
+    try {
+      // Let React display the loader before heavy processing starts.
+      await waitForBrowserPaint();
 
-    // 4. Scale the element back down visually — html2canvas captures CSS pixels,
-    //    so this cancels out the extra width we added above
-    element.style.transform = `scale(${1 / zoomRatio})`;
-    element.style.transformOrigin = "top left";
+      const canvasPromise = withTimeout(
+        html2canvas(element, {
+          scale: 1,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          logging: false,
+          width: element.scrollWidth,
+          height: element.scrollHeight,
+          ignoreElements: (node) => node.classList?.contains("pdf-ignore"),
+        }),
+        45000,
+        "Rate sheet capture timed out.",
+      );
 
-    // 5. Wait for the browser to re-layout before capturing
-    await new Promise((r) => requestAnimationFrame(r));
-    await new Promise((r) => setTimeout(r, 50));
+      const logoPromise = withTimeout(
+        getBase64Image(SoneriLogo),
+        10000,
+        "Logo loading timed out.",
+      );
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      scrollX: 0,
-      scrollY: -window.scrollY,
-      windowWidth: naturalWidth, // tell html2canvas the true 100% zoom width
-      windowHeight: element.scrollHeight,
-    });
+      const [canvas, logoBase64] = await Promise.all([
+        canvasPromise,
+        logoPromise,
+      ]);
 
-    // 6. Restore original styles immediately after capture
-    element.style.width = savedStyles.width;
-    element.style.transform = savedStyles.transform;
-    element.style.transformOrigin = savedStyles.transformOrigin;
-    element.style.overflow = savedStyles.overflow;
+      const imgData = canvas.toDataURL("image/jpeg", 0.75);
 
-    const imgData = canvas.toDataURL("image/jpeg", 0.9);
+      const pdf = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
 
-    const pdf = new jsPDF({
-      orientation: "p",
-      unit: "mm",
-      format: "a4",
-      compress: true,
-    });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const logoBase64 = await getBase64Image(logo);
+      pdf.addImage(logoBase64, "PNG", 0, 0, pageWidth, 20, undefined, "FAST");
 
-    const headerWidth = 60;
-    const headerHeight = 15;
-    const xPosition = (pageWidth - headerWidth) / 2;
+      // Header
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(11);
 
-    pdf.addImage(logoBase64, "PNG", xPosition, 8, headerWidth, headerHeight);
+      pdf.text("FOREIGN EXCHANGE RATE SHEET", 10, 35);
 
-    pdf.setFontSize(10);
-    pdf.text("Roshan Har Qadam", pageWidth / 2, 28, { align: "center" });
+      pdf.text("TREASURY & CAPITAL MARKETS GROUP", pageWidth - 10, 35, {
+        align: "right",
+      });
 
-    pdf.setFontSize(11);
-    pdf.text("FOREIGN EXCHANGE RATE SHEET", 10, 35);
-    pdf.text("TREASURY & CAPITAL MARKETS GROUP", pageWidth - 10, 35, {
-      align: "right",
-    });
-    pdf.text(todayDate, 10, 42);
+      // Date & Time
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
 
-    const imgWidth = pageWidth - 20;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.text(todayDate, pageWidth - 10, 42, {
+        align: "right",
+      });
+      const imageX = 10;
+      const imageY = 48;
+      const imageWidth = pageWidth - 20;
+      const footerSpace = 15;
 
-    pdf.addImage(
-      imgData,
-      "JPEG",
-      10,
-      48,
-      imgWidth,
-      imgHeight,
-      undefined,
-      "FAST"
-    );
-    pdf.save("RateSheet.pdf");
+      const availableImageHeight = pageHeight - imageY - footerSpace - 10;
+
+      const calculatedImageHeight = (canvas.height * imageWidth) / canvas.width;
+
+      const imageHeight = Math.min(calculatedImageHeight, availableImageHeight);
+
+      pdf.addImage(
+        imgData,
+        "JPEG",
+        imageX,
+        imageY,
+        imageWidth,
+        imageHeight,
+        undefined,
+        "FAST",
+      );
+
+      const footerY = imageY + imageHeight + 7;
+
+      pdf.setFontSize(8);
+
+      pdf.text(
+        "THIS IS A COMPUTER GENERATED RATE SHEET AND DOES NOT REQUIRE ANY SIGNATURE",
+        pageWidth / 2,
+        footerY,
+        {
+          align: "center",
+          maxWidth: pageWidth - 20,
+        },
+      );
+
+      pdf.save("RateSheet.pdf");
+    } catch (error) {
+      console.error("PDF export failed:", error);
+    } finally {
+      setShowLoader(false);
+    }
   };
-  return (
-    <div className={styles.mainRateSheetContianer}>
-      <Row className="d-flex justify-space-between">
-        <Col sm={12} md={6} lg={6} className={styles.dateDay}>
-          {todayDate}
-        </Col>
-        <Col
-          sm={12}
-          md={6}
-          lg={6}
-          className={"mt-1 d-flex justify-content-end align-items-bottom"}
-        >
-          <CustomButton
-            value={"Export to PDF"}
-            applyClass="exportToPDF"
-            onClick={handleExportPDF}
-            // loading={clearRatesLoading}
-          />
-        </Col>
-      </Row>
-      <div ref={screenRef}>
-        <Row className="mt-3">
-          <Col sm={12} md={8} lg={8}>
-            <Suspense fallback={<SectionLoader />}>
-              <SpotTTRates />
-            </Suspense>
-          </Col>
-          <Col sm={12} md={4} lg={4}>
-            <div>
-              <Suspense fallback={<SectionLoader />}>
-                <RatesForCurrencyNotes />
-              </Suspense>
-            </div>
 
-            <div className="mt-3">
+  return (
+    <>
+      {showLoader && <Loader />}
+      <div className={styles.mainRateSheetContianer}>
+        <Row className='d-flex justify-space-between'>
+          <Col sm={12} md={6} lg={6} className={styles.dateDay}>
+            {todayDate}
+          </Col>
+          <Col
+            sm={12}
+            md={6}
+            lg={6}
+            className={"mt-1 d-flex justify-content-end align-items-bottom"}>
+            <CustomButton
+              value={"Export to PDF"}
+              applyClass='exportToPDF'
+              onClick={handleExportPDF}
+              // loading={clearRatesLoading}
+            />
+          </Col>
+        </Row>
+        <div ref={screenRef}>
+          <Row className='mt-3'>
+            <Col sm={12} md={8} lg={8}>
               <Suspense fallback={<SectionLoader />}>
-                <SbpConversionRates />
+                <SpotTTRates />
               </Suspense>
-            </div>
-          </Col>
-        </Row>
-        <Row className="mt-3">
-          <Col sm={12} md={12} lg={12}>
-            <IndicativeFBPRates />
-          </Col>
-        </Row>
-        <Row className="mt-3">
-          <Col sm={12} md={6} lg={6}>
-            <Sofr />
-          </Col>
-          <Col sm={12} md={6} lg={6}>
-            <Kibor />
-          </Col>
-        </Row>
-        <Row className="mt-3 mb-3">
-          <Col sm={12} md={12} lg={12} className={styles.importantNote}>
-            <div className="fw-bold text-decoration-underline">
-              IMPORTANT NOTE:
-            </div>
-            <ul className="color-red">
-              <li>
-                THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE
-                WITHOUT PRIOR NOTICE.
-              </li>
-              <li>
-                FX TRANSACTIONS CUT OFF TIME FOR REPORTING IS 15:30 HOURS
-                (MON-THU) AND 14:30 HOURS (FRIDAY).
-              </li>
-              <li>
-                PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN
-                USD.5,000/=
-              </li>
-              <li>
-                SONERI CAPTURES ABOVE FOREIGN EXCHANGE RATES FROM SOURCES
-                BELIEVED TO BE RELIABLE AND DOES NOT ACCEPT ANY LIABILITY FOR
-                CONSEQUENCES THAT MAY ARISE USING THESE RATES.
-              </li>
-            </ul>
-          </Col>
-        </Row>
+            </Col>
+            <Col sm={12} md={4} lg={4}>
+              <div>
+                <Suspense fallback={<SectionLoader />}>
+                  <RatesForCurrencyNotes />
+                </Suspense>
+              </div>
+
+              <div className='mt-3'>
+                <Suspense fallback={<SectionLoader />}>
+                  <SbpConversionRates />
+                </Suspense>
+              </div>
+            </Col>
+          </Row>
+          <Row className='mt-3'>
+            <Col sm={12} md={12} lg={12}>
+              <IndicativeFBPRates />
+            </Col>
+          </Row>
+          <Row className='mt-3'>
+            <Col sm={12} md={6} lg={6}>
+              <Sofr />
+            </Col>
+            <Col sm={12} md={6} lg={6}>
+              <Kibor />
+            </Col>
+          </Row>
+          <Row className='mt-3 mb-2'>
+            <Col sm={12} md={12} lg={12} className={styles.importantNote}>
+              <div className='fw-bold text-decoration-underline'>
+                IMPORTANT NOTE:
+              </div>
+              <ul className='color-red'>
+                <li>
+                  THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE
+                  WITHOUT PRIOR NOTICE.
+                </li>
+                <li>
+                  FX TRANSACTIONS CUT OFF TIME FOR REPORTING IS 15:30 HOURS
+                  (MON-THU) AND 14:30 HOURS (FRIDAY).
+                </li>
+                <li>
+                  PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN
+                  USD.5,000/=
+                </li>
+              </ul>
+            </Col>
+          </Row>
+          <Row className='mb-2'>
+            <Col sm={12} md={12} lg={12}>
+              <p>
+                {" "}
+                Treasury Sales Desk - Central Office PNSC Building, M.T. Khan
+                Road, Karachi Direct Lines: 021-38900145. Email:
+                treasury.sales@soneribank.com PABX +92 21 32444401-05, Exts:
+                2301, 2514, 2184, 2186 & 2144
+              </p>
+            </Col>
+          </Row>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
