@@ -5,7 +5,7 @@
    from the row count, so every row is visible with no internal scrollbar. */
 .rsAgGrid {
   width: 100%;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .rsAgGrid.ag-theme-alpine {

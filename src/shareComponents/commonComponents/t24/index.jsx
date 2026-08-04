@@ -8,11 +8,7 @@ import { Col, Row } from "react-bootstrap";
 import AgGridTable from "../elements/globalAgGridTable";
 import "./t24AgGrid.css";
 
-const dashIfEmpty = ({ value }) =>
-  value === 0 || value === null || value === undefined || value === ""
-    ? "-"
-    : value;
-
+const dashIfEmpty = ({ value }) => (value === 0 || !value ? "-" : value);
 const T24 = () => {
   const [processedData, setProcessedData] = useState([]);
 
@@ -181,65 +177,64 @@ const T24 = () => {
     setProcessedData(tableData);
   }, []);
 
+  // Columns
   const columnDefs = useMemo(
     () => [
       {
         headerName: "UPLOAD.COMPANY",
         field: "uploadCompany",
-        minWidth: 160,
         cellClass: "rs-first-col",
       },
       {
         headerName: "ID/CURRENCY.CODE",
         field: "currencyCode",
-        minWidth: 175,
       },
       {
         headerName: "CURRENCY.MARKET",
         field: "currencyMarket",
-        minWidth: 170,
+
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "BUY RATE CM.2",
         field: "buyRateCM2",
-        minWidth: 160,
+
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "SELL RATE CM.2",
         field: "sellRateCM2",
-        minWidth: 160,
+
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "BUY RATE CM.1",
         field: "buyRateCM1",
-        minWidth: 160,
+
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "SELL RATE CM.1",
         field: "sellRateCM1",
-        minWidth: 160,
+
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "Seperator",
         field: "separator",
-        minWidth: 120,
-        valueFormatter: ({ value }) => value || "::",
+
+        valueFormatter: "::",
       },
       {
         headerName: "BUY.RATE",
         field: "buyRate",
-        minWidth: 130,
+
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "SELL.RATE",
         field: "sellRate",
-        minWidth: 130,
+
         valueFormatter: dashIfEmpty,
       },
     ],
@@ -251,58 +246,51 @@ const T24 = () => {
       resizable: false,
       sortable: false,
       suppressMovable: true,
-      cellClass: "t24-cell",
-      headerClass: "t24-header",
+      minWidth: 90,
     }),
     [],
   );
-
   return (
-    <section className="px-2 py-2">
-      <Row className="d-flex justify-content-between">
+    <section className='px-3 py-2'>
+      <Row className='d-flex justify-space-between'>
         <Col sm={12} md={6} lg={6} className={styles.dateDay}>
           {todayDate}
         </Col>
-
         <Col
           sm={12}
           md={6}
           lg={6}
-          className="mt-2 d-flex justify-content-end align-items-center gap-3"
-        >
-          <Tooltip title="Export Excel" arrow={false} placement="top">
+          className={
+            "mt-2 d-flex justify-content-end align-items-center gap-3 "
+          }>
+          <Tooltip title='Export Excel' arrow={false} placement='top'>
             <img
-              className="cursor-pointer"
+              className='cursor-pointer'
               src={ExportExl}
+              // onClick={handleClickExcel}
               width={25}
-              alt="Export Excel"
             />
           </Tooltip>
-
-          <Tooltip title="Export PDF" arrow={false} placement="top">
+          <Tooltip title='Export PDF' arrow={false} placement='top'>
             <img
-              className="cursor-pointer"
+              className='cursor-pointer'
               src={ExportPdf}
               width={25}
-              alt="Export PDF"
+              // onClick={handleExportPDF}
             />
           </Tooltip>
         </Col>
       </Row>
-
       <Row>
-        <Col sm={12} md={12} lg={12} className="mt-2">
+        <Col sm={12} md={12} lg={12} className='mt-2'>
           <AgGridTable
-            className="t24AgGrid"
-            style={{
-              height: 34 + Math.max(processedData.length, 1) * 32,
-              width: "100%",
-            }}
+            className='t24AgGrid'
+            style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
             rowData={processedData}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
-            getRowId={({ data }) => String(data.id)}
-            suppressColumnVirtualisation
+            getRowId={(p) => String(p.data.instrumentID)}
+            suppressColumnVirtualisation={true}
             animateRows={false}
           />
         </Col>
