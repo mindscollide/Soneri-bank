@@ -267,9 +267,6 @@ const RealtimeActionsSlice = createSlice({
     clearTreasuryForwardRates: (state) => {
       state.TreasuryForwardRates = [];
     },
-    clearCurrencyCrossesForManagmentFeed: (state) => {
-      state.currencyCrossesForManagmentFeed = [];
-    },
   },
 });
 

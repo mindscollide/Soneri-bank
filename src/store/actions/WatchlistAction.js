@@ -33,6 +33,7 @@ import {
   GetNewsDetailsByID,
   GetNewsHeadlines,
   GetRatesForCurrencyNotesForRateSheet,
+  GetRateSheetExcelExportReportRM,
   GetRefreshIconTenors,
   GetRevalRatesForTreasury,
   GetSBPConversionRatesForRateSheet,
@@ -58,6 +59,7 @@ import {
   setNewsByNewsIdViewModal,
   setNewsLoadingSpinner,
 } from "../slicers/watchListSlicer/WatchListSlicer";
+import { downloadBase64File } from "../../utils/converts";
 
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const getAllTreasuryInstrumentsApi = createAsyncThunk(
@@ -3003,6 +3005,66 @@ export const GetCalculateTenorSwapAndForwardRateApi = createAsyncThunk(
               )
           ) {
             return rejectWithValue("Something went wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+
+export const GetRateSheetExcelExportReportApi = createAsyncThunk(
+  "watchlist/GetRateSheetExcelExportReport",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let GetRateSheetExcelExportReport = createPostAPI(
+        watchListApi,
+        GetRateSheetExcelExportReportRM.RequestMethod,
+      );
+
+      const response = await GetRateSheetExcelExportReport();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, fileBase64, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRateSheetExcelExportReport_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(
+              fileBase64,
+              fileName?.endsWith(".xlsx")
+                ? fileName
+                : `${fileName || "RateSheet"}.xlsx`,
+            );
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetRateSheetExcelExportReport_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");

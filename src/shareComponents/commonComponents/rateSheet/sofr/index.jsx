@@ -6,7 +6,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../RateSheet.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
+import "../rateSheetAgGrid.css";
+import AgGridTable from "../../elements/globalAgGridTable";
 import { useSelector } from "react-redux";
 
 const GetSOFRDataForRateSheet = (state) =>
@@ -25,16 +26,26 @@ const SOFR = () => {
 
   const sofrList = useSelector(GetSOFRDataForRateSheet);
 
-  const columns = useMemo(() => {
+  const columnDefs = useMemo(() => {
     if (!sofrList || sofrList.length === 0) return [];
 
-    return sofrList.map((item) => ({
-      title: item.tenor,
-      dataIndex: item.tenor,
-      key: item.tenor,
-      align: "center",
+    return sofrList.map((item, index) => ({
+      headerName: item.tenor,
+      field: item.tenor,
+          flex: 1,
+      cellClass: index === 0 ? "rs-first-col" : undefined,
     }));
   }, [sofrList]);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      minWidth: 90,
+    }),
+    []
+  );
 
   useEffect(() => {
     if (sofrList && sofrList.length > 0) {
@@ -44,7 +55,7 @@ const SOFR = () => {
         row[item.tenor] = Number(item.rate).toFixed(4);
       });
 
-      const tableData = [{ key: sofrList[sofrList.length + 1], ...row }];
+      const tableData = [{ key: "row-0", ...row }];
 
       dataRef.current = tableData;
       setProcessedData(tableData);
@@ -132,16 +143,15 @@ const SOFR = () => {
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>SOFR</span>
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0
-            ? "RateSheetSoftAndKIBOR"
-            : "rateSheetTable_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
+      <AgGridTable
+        className="rsAgGrid rsAgGrid--bold"
+        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        rowData={processedData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={(p) => String(p.data.key)}
+        suppressColumnVirtualisation={true}
+        animateRows={false}
       />
     </>
   );

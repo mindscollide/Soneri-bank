@@ -98,6 +98,9 @@ const FwdCalculator = () => {
   }, [tenor]);
 
   const handleCalculateRate = () => {
+    if (!currency || !transactionType) {
+      return;
+    }
     let Data = {
       IsBuySide: transactionType.value === 1 ? true : false,
       TenorDays: Number(tenor),

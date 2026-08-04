@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "../RateSheet.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
+import "../rateSheetAgGrid.css";
+import AgGridTable from "../../elements/globalAgGridTable";
 import { useSelector } from "react-redux";
 
 const GetIndicativeFBPRates = (state) =>
@@ -27,28 +28,25 @@ const IndicativeFBPRates = () => {
     });
 
     return Array.from(tenorMap.values()).sort(
-      (a, b) => a.displayOrderPriority - b.displayOrderPriority
+      (a, b) => a.displayOrderPriority - b.displayOrderPriority,
     );
   };
 
   const generateColumns = (tenors) => {
     const baseColumn = [
       {
-        title: "Currency",
-        dataIndex: "currencyName",
-        key: "currencyName",
-        align: "center",
-        width: 120,
+        headerName: "Currency",
+        field: "currencyName",
+        cellClass: "rs-first-col",
+        width: 150,
       },
     ];
 
     const tenorColumns = tenors.map((tenor) => ({
-      title: tenor.tenorName.toUpperCase(),
-      dataIndex: `tenorId_${tenor.tenorId}_value`,
-      key: `tenor_${tenor.tenorId}`,
-      align: "center",
-      width: 110,
-      render: (value) => (value ? Number(value).toFixed(2) : "-"),
+      headerName: tenor.tenorName.toUpperCase(),
+      field: `tenorId_${tenor.tenorId}_value`,
+      flex: 1,
+      valueFormatter: ({ value }) => (value ? Number(value).toFixed(2) : "-"),
     }));
     return [...baseColumn, ...tenorColumns];
   };
@@ -57,9 +55,18 @@ const IndicativeFBPRates = () => {
     return getUniqueTenors(fbpRates.fbpRates);
   }, [fbpRates]);
 
-  const columns = useMemo(() => {
+  const columnDefs = useMemo(() => {
     return generateColumns(tenors);
   }, [tenors]);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (fbpRates?.fbpRates) {
@@ -80,7 +87,7 @@ const IndicativeFBPRates = () => {
             acc[currency][`tenorId_${tenorId}_value`] = value;
 
             return acc;
-          }, {})
+          }, {}),
         );
         setProcessedData(grouped);
       } catch (error) {
@@ -105,7 +112,7 @@ const IndicativeFBPRates = () => {
             };
           }
           return row;
-        })
+        }),
       );
     }
   }, [fullFeed]);
@@ -113,14 +120,15 @@ const IndicativeFBPRates = () => {
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>Indicative FBP Rates</span>
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0 ? "rateSheetTable" : "rateSheetTable_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
+      <AgGridTable
+        className='rsAgGrid'
+        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        rowData={processedData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={(p) => String(p.data.currencyName)}
+        suppressColumnVirtualisation={true}
+        animateRows={false}
       />
     </>
   );

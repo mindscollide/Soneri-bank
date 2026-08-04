@@ -6,7 +6,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../RateSheet.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
+import "../rateSheetAgGrid.css";
+import AgGridTable from "../../elements/globalAgGridTable";
 import { useSelector } from "react-redux";
 
 const GetSBPConversionRatesForRateSheet = (state) =>
@@ -33,24 +34,32 @@ const SBPConversionRates = () => {
     }
   }, [SBPConversionRates]);
 
-  const columns = useMemo(
+  const columnDefs = useMemo(
     () => [
       {
-        title: "Currency",
-        dataIndex: "currencyCode",
+        headerName: "Currency",
+        field: "currencyCode",
         width: 150,
-        align: "center",
+        cellClass: "rs-first-col",
       },
       {
-        title: "Rate",
-        dataIndex: "rate",
-        className: "bidCol",
-        width: 120,
-        align: "center",
+        headerName: "Rate",
+        field: "rate",
+        flex: 1,
       },
     ],
-    []
+    [],
   );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+    }),
+    [],
+  );
+
   // MQTT Work
   // ✅ Batch update function
   const processUpdateQueue = useCallback(() => {
@@ -90,7 +99,7 @@ const SBPConversionRates = () => {
       });
 
       hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
+        (newItem, index) => newItem !== prevData[index],
       );
 
       return hasChanges ? updatedData : prevData;
@@ -114,7 +123,7 @@ const SBPConversionRates = () => {
         animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
       }
     },
-    [processUpdateQueue]
+    [processUpdateQueue],
   );
   // ✅ Feed update effect
   useEffect(() => {
@@ -136,14 +145,15 @@ const SBPConversionRates = () => {
       <span className={styles.tableheaderbar}>
         SBP Conversion Rates for FCY Deposits
       </span>
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0 ? "rateSheetTable" : "rateSheetTable_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
+      <AgGridTable
+        className='rsAgGrid'
+        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        rowData={processedData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={(p) => String(p.data.currencyCode)}
+        suppressColumnVirtualisation={true}
+        animateRows={false}
       />
     </>
   );

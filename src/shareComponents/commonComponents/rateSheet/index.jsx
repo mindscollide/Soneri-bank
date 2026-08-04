@@ -9,11 +9,14 @@ import {
   GetIndicativeFBPRatesApi,
   GetKiborDataForRateSheetApi,
   GetRatesForCurrencyNotesForRateSheetApi,
+  GetRateSheetExcelExportReportApi,
   GetSBPConversionRatesForRateSheetApi,
   GetSOFRDataForRateSheetApi,
   GetSpotTTRatesForRateSheetApi,
 } from "../../../store/actions/WatchlistAction";
 import { useNavigate } from "react-router-dom";
+import ExportPdf from "@/assets/img/export-pdf.svg";
+import ExportExl from "@/assets/img/export-excel.svg";
 
 import logo from "../../../assets/img/logo.png";
 import SoneriLogo from "../../../assets/newSoneriLogo.jpg";
@@ -30,8 +33,8 @@ import jsPDF from "jspdf";
 import { formatTodayForRateSheet } from "../../../utils/timeFunction";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
-import { setMainLoader } from "../../../store/slicers/authSlicer/authSlicer";
 import Loader from "../../elements/soneriLoader/Loader";
+import { Tooltip } from "antd";
 
 const RateSheet = () => {
   useMqttTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
@@ -172,7 +175,7 @@ const RateSheet = () => {
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
 
-      pdf.addImage(logoBase64, "PNG", 0, 0, pageWidth, 20, undefined, "FAST");
+      pdf.addImage(logoBase64, "PNG", 0, 0, pageWidth, 25, undefined, "FAST");
 
       // Header
       pdf.setFont("helvetica", "bold");
@@ -186,7 +189,7 @@ const RateSheet = () => {
 
       // Date & Time
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(9);
+      pdf.setFontSize(10);
 
       pdf.text(todayDate, pageWidth - 10, 42, {
         align: "right",
@@ -234,7 +237,9 @@ const RateSheet = () => {
       setShowLoader(false);
     }
   };
-
+  const handleClickExcel = () => {
+    dispatch(GetRateSheetExcelExportReportApi({ navigate }));
+  };
   return (
     <>
       {showLoader && <Loader />}
@@ -247,13 +252,25 @@ const RateSheet = () => {
             sm={12}
             md={6}
             lg={6}
-            className={"mt-1 d-flex justify-content-end align-items-bottom"}>
-            <CustomButton
-              value={"Export to PDF"}
-              applyClass='exportToPDF'
-              onClick={handleExportPDF}
-              // loading={clearRatesLoading}
-            />
+            className={
+              "mt-2 d-flex justify-content-end align-items-center gap-3 "
+            }>
+            <Tooltip title='Export Excel' arrow={false} placement='top'>
+              <img
+                className='cursor-pointer'
+                src={ExportExl}
+                onClick={handleClickExcel}
+                width={25}
+              />
+            </Tooltip>
+            <Tooltip title='Export PDF' arrow={false} placement='top'>
+              <img
+                className='cursor-pointer'
+                src={ExportPdf}
+                width={25}
+                onClick={handleExportPDF}
+              />
+            </Tooltip>
           </Col>
         </Row>
         <div ref={screenRef}>
@@ -312,13 +329,15 @@ const RateSheet = () => {
             </Col>
           </Row>
           <Row className='mb-2'>
-            <Col sm={12} md={12} lg={12}>
-              <p>
+            <Col sm={12} md={12} lg={12} className='text-center fs-6'>
+              <p className='m-0'>
                 {" "}
                 Treasury Sales Desk - Central Office PNSC Building, M.T. Khan
-                Road, Karachi Direct Lines: 021-38900145. Email:
-                treasury.sales@soneribank.com PABX +92 21 32444401-05, Exts:
-                2301, 2514, 2184, 2186 & 2144
+                Road, Karachi
+              </p>
+              <p className='m-0'>
+                Direct Lines: 021-38900145. Email: treasury.sales@soneribank.com
+                PABX +92 21 32444401-05, Exts: 2301, 2514, 2184, 2186 & 2144
               </p>
             </Col>
           </Row>

@@ -1,4 +1,4 @@
-import React, { useTransition } from "react";
+import React from "react";
 import SoneriLogo from "../../../assets/logo.png";
 import { Col, Nav, Navbar, Row } from "react-bootstrap";
 import styles from "./header.module.css";
@@ -24,12 +24,9 @@ const MainHeader = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // const { unsubscribeAll } = useMqtt();
-  const [isPending, startTransition] = useTransition();
   const handleNavigate = (e, to) => {
     e.preventDefault(); // Stop the default Link behavior
-    startTransition(() => {
-      navigate(to);
-    });
+    navigate(to);
   };
 
   const handleClickCalculator = (e) => {

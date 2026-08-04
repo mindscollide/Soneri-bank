@@ -22,6 +22,7 @@ import { setActiveTab } from "../../store/slicers/watchListSlicer/WatchListSlice
 import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../hook/useMqttTopics";
+import T24 from "../../shareComponents/commonComponents/t24";
 const LiveRates = lazy(() =>
   import("../../shareComponents/commonComponents/liveRates/index")
 );
@@ -113,6 +114,15 @@ const Treasury = () => {
       children: (
         <Suspense fallback={<SectionLoader />}>
           <RateSheet />
+        </Suspense>
+      ),
+    },
+        {
+      label: `T24`,
+      key: "5",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <T24 />
         </Suspense>
       ),
     },

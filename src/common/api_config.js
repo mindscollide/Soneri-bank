@@ -182,3 +182,7 @@ export const GetRefreshIconTenors = {
 export const CalculateTenorSwapAndForwardRateRM = {
   RequestMethod: "ServiceManager.CalculateTenorSwapAndForwardRate"
 }
+
+export const GetRateSheetExcelExportReportRM = {
+  RequestMethod: "ServiceManager.GetRateSheetExcelExportReport"
+}

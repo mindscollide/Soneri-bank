@@ -1,0 +1,47 @@
+.t24AgGrid {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.t24AgGrid .ag-root-wrapper {
+  border: none;
+}
+
+.t24AgGrid .ag-header {
+  background-color: #000;
+  border-bottom: none;
+}
+
+.t24AgGrid .ag-header-cell {
+  background-color: #000;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  border-right: none;
+}
+
+.t24AgGrid .ag-header-cell-label {
+  justify-content: center;
+}
+
+.t24AgGrid .ag-row {
+  border-bottom: 1px solid #9b9687;
+}
+
+.t24AgGrid .ag-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border-right: none;
+}
+
+.t24AgGrid .rs-first-col {
+  background-color: #e8e1db;
+  font-weight: 700;
+}
+
+.t24AgGrid .ag-body-horizontal-scroll {
+  min-height: 12px;
+}

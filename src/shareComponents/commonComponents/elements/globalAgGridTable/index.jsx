@@ -29,7 +29,10 @@ const AgGridTable = forwardRef((props, ref) => {
   }));
 
   return (
-    <div className={`ag-theme-alpine ${props.className || ""}`}>
+    <div
+      className={`ag-theme-alpine ${props.className || ""}`}
+      style={props.style}
+    >
       <AgGridReact
         {...props}
         headerHeight={32}

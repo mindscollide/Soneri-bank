@@ -6,7 +6,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../RateSheet.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
+import "../rateSheetAgGrid.css";
+import AgGridTable from "../../elements/globalAgGridTable";
 import { useSelector } from "react-redux";
 
 const GetKiborDataForRateSheet = (state) =>
@@ -25,16 +26,26 @@ const KIBOR = () => {
 
   const kiborList = useSelector(GetKiborDataForRateSheet);
 
-  const columns = useMemo(() => {
+  const columnDefs = useMemo(() => {
     if (!kiborList || kiborList.length === 0) return [];
 
-    return kiborList.map((item) => ({
-      title: item.tenor,
-      dataIndex: item.tenor,
-      key: item.tenor,
-      align: "center",
+    return kiborList.map((item, index) => ({
+      headerName: item.tenor,
+      field: item.tenor,
+      flex: 1,
+      cellClass: index === 0 ? "rs-first-col" : undefined,
     }));
   }, [kiborList]);
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+      minWidth: 90,
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (kiborList && kiborList.length > 0) {
@@ -44,7 +55,7 @@ const KIBOR = () => {
         row[item.tenor] = Number(item.ask).toFixed(2);
       });
 
-      const tableData = [{ key: kiborList[kiborList.length + 1], ...row }];
+      const tableData = [{ key: "row-0", ...row }];
 
       dataRef.current = tableData;
       setProcessedData(tableData);
@@ -92,7 +103,7 @@ const KIBOR = () => {
       });
 
       hasChanges = updatedData.some(
-        (newItem, index) => newItem !== prevData[index]
+        (newItem, index) => newItem !== prevData[index],
       );
 
       return hasChanges ? updatedData : prevData;
@@ -116,7 +127,7 @@ const KIBOR = () => {
         animationFrameRef.current = requestAnimationFrame(processUpdateQueue);
       }
     },
-    [processUpdateQueue]
+    [processUpdateQueue],
   );
   // ✅ Feed update effect
   useEffect(() => {
@@ -132,20 +143,18 @@ const KIBOR = () => {
       }
     };
   }, []);
-
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>KIBOR</span>
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        prefixCls={
-          processedData.length > 0
-            ? "RateSheetSoftAndKIBOR"
-            : "rateSheetTable_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
+      <AgGridTable
+        className='rsAgGrid rsAgGrid--bold'
+        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        rowData={processedData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={(p) => String(p.data.key)}
+        suppressColumnVirtualisation={true}
+        animateRows={false}
       />
     </>
   );

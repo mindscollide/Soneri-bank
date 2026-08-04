@@ -6,7 +6,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../RateSheet.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
+import "../rateSheetAgGrid.css";
+import AgGridTable from "../../elements/globalAgGridTable";
 import { useDispatch, useSelector } from "react-redux";
 import { clearTreasuryRateSheetCurrencyNotes } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
@@ -19,6 +20,8 @@ const GetAllInstrumentForTreasury = (state) =>
 
 const treasuryRateSheetCurrencyNotes = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetCurrencyNotes;
+
+const toFixedOrDash = ({ value }) => (value ? Number(value).toFixed(2) : "-");
 
 const RatesForCurrencyNotes = () => {
   const dispatch = useDispatch();
@@ -48,7 +51,7 @@ const RatesForCurrencyNotes = () => {
 
     const enriched = currencyNotes.map((item) => {
       const matchedInstrument = instruments.find(
-        (inst) => inst.instrumentID === item.instrumentID
+        (inst) => inst.instrumentID === item.instrumentID,
       );
 
       return {
@@ -86,6 +89,7 @@ const RatesForCurrencyNotes = () => {
     // 🔥 O(1) lookup map
     const updateMap = new Map(flatUpdates.map((u) => [u.instrumentID, u]));
 
+    let changed = false;
     const updated = dataRef.current.map((row) => {
       const update = updateMap.get(row.instrumentID);
       if (!update) return row;
@@ -97,6 +101,7 @@ const RatesForCurrencyNotes = () => {
         return row;
       }
 
+      changed = true;
       return {
         ...row,
         buying: update.bid,
@@ -105,7 +110,9 @@ const RatesForCurrencyNotes = () => {
       };
     });
 
-    applyRows(updated);
+    if (changed) {
+      applyRows(updated);
+    }
 
     // ✅ Clear redux queue
     dispatch(clearTreasuryRateSheetCurrencyNotes());
@@ -134,45 +141,52 @@ const RatesForCurrencyNotes = () => {
   }, []);
 
   // Columns
-  const columns = useMemo(
+  const columnDefs = useMemo(
     () => [
       {
-        title: "Currency",
-        dataIndex: "instrumentName",
+        headerName: "Currency",
+        field: "instrumentName",
         width: 150,
-        align: "center",
+        cellClass: "rs-first-col",
       },
       {
-        title: "Buying",
-        dataIndex: "buying",
-        className: "bidCol",
-        width: 120,
-        render: (val) => (val ? Number(val).toFixed(2) : "-"),
+        headerName: "Buying",
+        field: "buying",
+        flex: 1,
+        valueFormatter: toFixedOrDash,
       },
       {
-        title: "Selling",
-        dataIndex: "selling",
-        className: "offerCol",
-        width: 120,
-        render: (val) => (val ? Number(val).toFixed(2) : "-"),
+        headerName: "Selling",
+        field: "selling",
+        flex: 1,
+        valueFormatter: toFixedOrDash,
       },
     ],
-    []
+    [],
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+    }),
+    [],
   );
 
   return (
     <>
       <span className={styles.tableheaderbar}>Rates For Currency Notes</span>
 
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        rowKey={(record) => `${record.instrumentID}-${record.version}`}
-        prefixCls={
-          processedData.length > 0 ? "rateSheetTable" : "rateSheetTable_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 225, x: "max-content" }}
+      <AgGridTable
+        className='rsAgGrid'
+        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        rowData={processedData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={(p) => String(p.data.instrumentID)}
+        suppressColumnVirtualisation={true}
+        animateRows={false}
       />
     </>
   );

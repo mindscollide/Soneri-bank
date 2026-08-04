@@ -1,0 +1,73 @@
+/* Shared AG Grid theme overrides so the rate sheet grids match the
+   look of the old AntD "rateSheetTable" / "RateSheetSoftAndKIBOR" tables. */
+
+/* Height is set per-instance via an inline `style={{ height }}` computed
+   from the row count, so every row is visible with no internal scrollbar. */
+.rsAgGrid {
+  width: 100%;
+  overflow: visible;
+}
+
+.rsAgGrid.ag-theme-alpine {
+  --ag-header-background-color: #000;
+  --ag-header-foreground-color: #fff;
+  --ag-border-color: #837c66;
+  --ag-row-border-color: #837c66;
+  --ag-font-family: "Helvetica", sans-serif;
+  --ag-row-height: 32px;
+  --ag-header-height: 32px;
+  --ag-cell-horizontal-padding: 10px;
+  --ag-odd-row-background-color: #fff;
+  --ag-row-hover-color: transparent;
+  font-size: 14px;
+}
+
+.rsAgGrid .ag-root-wrapper {
+  border-radius: 0 !important;
+  border-color: #837c66;
+}
+
+.rsAgGrid .ag-header {
+  background-color: #000 !important;
+  border-radius: 0 !important;
+}
+
+.rsAgGrid .ag-header-cell {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+.rsAgGrid .ag-header-cell-label {
+  justify-content: center;
+  color: #fff !important;
+}
+
+.rsAgGrid .ag-header-cell-text {
+  color: #fff !important;
+  font-family: "Helvetica-Bold", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.rsAgGrid .ag-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Helvetica", sans-serif;
+  font-size: 14px;
+  line-height: 1.5em;
+}
+
+/* First column highlight — matches .rateSheetTable first column */
+.rsAgGrid .rs-first-col {
+  background: var(--color-Yorange-gray);
+  font-family: "Helvetica-Bold", sans-serif;
+  font-weight: 700;
+  justify-content: flex-start !important;
+}
+
+/* Bold-only first column — matches .RateSheetSoftAndKIBOR first column */
+.rsAgGrid.rsAgGrid--bold .rs-first-col {
+  background: transparent;
+  justify-content: center !important;
+}

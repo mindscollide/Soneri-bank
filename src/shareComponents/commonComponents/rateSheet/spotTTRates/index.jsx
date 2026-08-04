@@ -6,7 +6,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../RateSheet.module.css";
-import GlobalTable from "../../elements/table/GlobalTable";
+import "../rateSheetAgGrid.css";
+import AgGridTable from "../../elements/globalAgGridTable";
 import { useDispatch, useSelector } from "react-redux";
 import { clearTreasuryRateSheetSpotTTRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
@@ -16,6 +17,8 @@ const GetSpotTTRatesForRateSheet = (state) =>
 
 const treasuryRateSheetSpotTTRatesFeed = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetSpotTTRates;
+
+const dashIfEmpty = ({ value }) => (value === 0 || !value ? "-" : value);
 
 const SpotTTRates = () => {
   const dispatch = useDispatch();
@@ -72,6 +75,7 @@ const SpotTTRates = () => {
     // 🔥 O(1) lookup map
     const updateMap = new Map(flatUpdates.map((u) => [u.instrumentID, u]));
 
+    let changed = false;
     const updated = dataRef.current.map((row) => {
       const update = updateMap.get(row.instrumentID);
       if (!update) return row;
@@ -85,6 +89,7 @@ const SpotTTRates = () => {
         return row;
       }
 
+      changed = true;
       return {
         ...row,
         currencyName: update.currencyName,
@@ -95,7 +100,9 @@ const SpotTTRates = () => {
       };
     });
 
-    applyRows(updated);
+    if (changed) {
+      applyRows(updated);
+    }
 
     // ✅ clear redux queue (IMPORTANT)
     dispatch(clearTreasuryRateSheetSpotTTRates());
@@ -124,37 +131,44 @@ const SpotTTRates = () => {
   }, []);
 
   // Columns
-  const columns = useMemo(
+  const columnDefs = useMemo(
     () => [
       {
-        title: "Currency",
-        dataIndex: "currencyName",
-        width: 150,
-        align: "center",
+        headerName: "Currency",
+        field: "currencyName",
+        flex: 1,
+        cellClass: "rs-first-col",
       },
       {
-        title: "Symbol",
-        dataIndex: "currencyCode",
-        width: 70,
-        align: "center",
+        headerName: "Symbol",
+        field: "currencyCode",
+        flex: 1,
+
       },
       {
-        title: "Buying",
-        dataIndex: "bid",
-        className: "bidCol",
-        width: 70,
-        // Update: Check for 0 or missing values
-        render: (value) => (value === 0 || !value ? "-" : value),
+        headerName: "Buying",
+        field: "bid",
+         flex: 1,
+
+        valueFormatter: dashIfEmpty,
       },
       {
-        title: "Selling",
-        dataIndex: "offer",
-        className: "offerCol",
-        width: 70,
-        // Update: Check for 0 or missing values
-        render: (value) => (value === 0 || !value ? "-" : value),
+        headerName: "Selling",
+        field: "offer",
+        flex: 1,
+
+        valueFormatter: dashIfEmpty,
       },
     ],
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: false,
+      sortable: false,
+      suppressMovable: true,
+    }),
     []
   );
 
@@ -162,15 +176,15 @@ const SpotTTRates = () => {
     <>
       <span className={styles.tableheaderbar}>Spot TT Rates</span>
 
-      <GlobalTable
-        columns={columns}
-        dataSource={processedData}
-        rowKey={(record) => `${record.instrumentID}-${record.version}`}
-        prefixCls={
-          processedData.length > 0 ? "rateSheetTable" : "rateSheetTable_Empty"
-        }
-        pagination={false}
-        scroll={{ y: 450, x: "max-content" }}
+      <AgGridTable
+        className="rsAgGrid"
+        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        rowData={processedData}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        getRowId={(p) => String(p.data.instrumentID)}
+        suppressColumnVirtualisation={true}
+        animateRows={false}
       />
     </>
   );
