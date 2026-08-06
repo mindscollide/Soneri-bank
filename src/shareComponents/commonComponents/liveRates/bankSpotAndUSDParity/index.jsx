@@ -137,52 +137,31 @@ const BankSpotAndUSDParity = memo(() => {
   }, []);
 
   // ─────────────────────────────
-  const processQueue = useCallback(() => {
+ const processQueue = useCallback(() => {
     if (
       !isMountedRef.current ||
       isProcessingRef.current ||
-      !gridApiRef.current
+      !gridApiRef.current ||
+      pendingUpdates.current.size === 0
     ) {
       rafRef.current = null;
       return;
     }
 
-    const now = Date.now();
-    const timeSinceLastProcess = now - lastProcessTime.current;
-
-    if (timeSinceLastProcess < 50) {
-      rafRef.current = requestAnimationFrame(processQueue);
-      return;
-    }
-
-    if (pendingUpdates.current.size === 0) {
-      rafRef.current = null;
-      return;
-    }
-
     isProcessingRef.current = true;
-    lastProcessTime.current = now;
 
     try {
-      let batchCount = 0;
-      const MAX_BATCH_SIZE = 15;
-
-      for (const [key, update] of pendingUpdates.current.entries()) {
-        if (batchCount >= MAX_BATCH_SIZE) break;
-
+      for (const [key, update] of pendingUpdates.current) {
         if (update.type === "cross") {
           const node = rowNodeMap.current.get(key);
-          if (!node) {
-            pendingUpdates.current.delete(key);
-            continue;
-          }
+          if (!node) continue;
 
           const data = node.data;
           const cross = update.data;
 
           if (
-            data.worldCrossBid !== cross.bid ||
-            data.worldCrossOffer !== cross.ask ||
+            (data.worldCrossBid !== cross.bid ||
+              data.worldCrossOffer !== cross.ask) &&
             data.currencyTime !== cross.updateDateTime
           ) {
             node.setDataValue("worldCrossBid", cross.bid);
@@ -193,44 +172,33 @@ const BankSpotAndUSDParity = memo(() => {
           if (data.instrumentID === 21) {
             node.setDataValue("worldCurBid", cross.bid);
             node.setDataValue("worldCurOffer", cross.ask);
-            node.setDataValue("worldCrossBid", cross.bid);
-            node.setDataValue("worldCrossOffer", cross.ask);
             node.setDataValue("currencyTime", cross.updateDateTime);
             node.setDataValue("crossTime", cross.updateDateTime);
           }
-
-          pendingUpdates.current.delete(key);
-          batchCount++;
         } else if (update.type === "parity") {
           const parity = update.data;
           const instrumentID = update.instrumentID;
 
           for (const node of rowNodeMap.current.values()) {
-            const data = node.data;
-
-            if (data.instrumentID === instrumentID && instrumentID !== 21) {
+            if (
+              node.data.instrumentID === instrumentID &&
+              instrumentID !== 21
+            ) {
               node.setDataValue("worldCurBid", parity.bid);
               node.setDataValue("worldCurOffer", parity.ask);
               node.setDataValue("crossTime", parity.updateDateTime);
             }
           }
-
-          pendingUpdates.current.delete(key);
-          batchCount++;
         }
       }
 
-      if (pendingUpdates.current.size > 0) {
-        rafRef.current = requestAnimationFrame(processQueue);
-      } else {
-        rafRef.current = null;
-      }
+      pendingUpdates.current.clear();
     } catch (error) {
       console.error("Error processing queue:", error);
       pendingUpdates.current.clear();
-      rafRef.current = null;
     } finally {
       isProcessingRef.current = false;
+      rafRef.current = null;
     }
   }, []);
 
