@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import styles from "../RateSheet.module.css";
 import "../rateSheetAgGrid.css";
 import AgGridTable from "../../elements/globalAgGridTable";
@@ -9,7 +9,7 @@ const GetIndicativeFBPRates = (state) =>
 const treasuryRateSheetIndicativeFBPRates = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetIndicativeFBPRates;
 
-const IndicativeFBPRates = () => {
+const IndicativeFBPRates = memo(() => {
   const [processedData, setProcessedData] = useState([]);
   const fbpRates = useSelector(GetIndicativeFBPRates);
   const fullFeed = useSelector(treasuryRateSheetIndicativeFBPRates);
@@ -132,6 +132,8 @@ const IndicativeFBPRates = () => {
       />
     </>
   );
-};
+});
+
+IndicativeFBPRates.displayName = "IndicativeFBPRates";
 
 export default IndicativeFBPRates;

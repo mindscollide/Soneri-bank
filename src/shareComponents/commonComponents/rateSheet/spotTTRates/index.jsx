@@ -1,136 +1,180 @@
 import React, {
+  memo,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import styles from "../RateSheet.module.css";
 import "../rateSheetAgGrid.css";
 import AgGridTable from "../../elements/globalAgGridTable";
-import { useDispatch, useSelector } from "react-redux";
-import { clearTreasuryRateSheetSpotTTRates } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+
+import { clearTreasuryRateSheetSpotTTRates } from
+  "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+
+const PROCESS_THROTTLE_MS = 200;
 
 // Selectors
-const GetSpotTTRatesForRateSheet = (state) =>
+const selectSpotTTRates = (state) =>
   state.WatchListReducer.GetSpotTTRatesForRateSheet;
 
-const treasuryRateSheetSpotTTRatesFeed = (state) =>
+const selectSpotTTRatesFeed = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetSpotTTRates;
 
-const dashIfEmpty = ({ value }) => (value === 0 || !value ? "-" : value);
+const dashIfEmpty = ({ value }) =>
+  value === 0 || value === null || value === undefined || value === ""
+    ? "-"
+    : value;
 
-const SpotTTRates = () => {
+const SpotTTRates = memo(() => {
   const dispatch = useDispatch();
+  const tableRef = useRef(null);
 
-  // State
-  const [processedData, setProcessedData] = useState([]);
+  /*
+   * React state is used only for:
+   * 1. Initial grid data
+   * 2. Calculating the grid height
+   *
+   * Live updates go directly to AG Grid through transactions.
+   */
+  const [initialRows, setInitialRows] = useState([]);
 
-  // Refs (same pattern as forwards)
-  const dataRef = useRef([]);
-  const pendingUpdatesRef = useRef([]);
-  const animationFrameRef = useRef(null);
-  const isInitializedRef = useRef(false);
+  const pendingUpdatesRef = useRef(new Map());
+  const processTimerRef = useRef(null);
+  const isGridReadyRef = useRef(false);
+  const isBaseDataReadyRef = useRef(false);
 
-  const spotTTRatesData = useSelector(GetSpotTTRatesForRateSheet);
-  const fullFeed = useSelector(treasuryRateSheetSpotTTRatesFeed);
+  const spotTTRatesData = useSelector(selectSpotTTRates);
+  const fullFeed = useSelector(selectSpotTTRatesFeed);
 
-  // ✅ Sync helper
-  const applyRows = useCallback((rows) => {
-    dataRef.current = rows;
-    setProcessedData(rows);
+  const getRowId = useCallback(
+    (params) => String(params.data.instrumentID),
+    [],
+  );
+
+  const handleGridReady = useCallback(() => {
+    isGridReadyRef.current = true;
   }, []);
 
-  // ✅ Initialize base data
-  useEffect(() => {
-    if (!spotTTRatesData?.spotTTRates) return;
+  /*
+   * Process queued updates.
+   *
+   * pendingUpdatesRef is a Map:
+   * instrumentID -> latest update
+   *
+   * Therefore, if one currency updates 20 times during the throttle
+   * window, only its most recent value is sent to AG Grid.
+   */
+  const processPendingUpdates = useCallback(() => {
+    processTimerRef.current = null;
 
-    const base = spotTTRatesData.spotTTRates.map((item) => ({
+    if (
+      !isGridReadyRef.current ||
+      !isBaseDataReadyRef.current ||
+      pendingUpdatesRef.current.size === 0
+    ) {
+      return;
+    }
+
+    const changedRows = Array.from(
+      pendingUpdatesRef.current.values(),
+    );
+
+    pendingUpdatesRef.current.clear();
+
+    tableRef.current?.updateRows(changedRows);
+
+    dispatch(clearTreasuryRateSheetSpotTTRates());
+  }, [dispatch]);
+
+  const scheduleUpdateProcessing = useCallback(() => {
+    if (processTimerRef.current !== null) return;
+
+    processTimerRef.current = window.setTimeout(
+      processPendingUpdates,
+      PROCESS_THROTTLE_MS,
+    );
+  }, [processPendingUpdates]);
+
+  /*
+   * Initialize or completely replace the base dataset.
+   *
+   * A normal rowData update is appropriate here because this is a
+   * complete server snapshot, not a live price update.
+   */
+  useEffect(() => {
+    const rows = spotTTRatesData?.spotTTRates;
+
+    if (!Array.isArray(rows)) return;
+
+    const normalizedRows = rows.map((item) => ({
       ...item,
-      version: 0,
+      instrumentID: item.instrumentID,
     }));
 
-    applyRows(base);
-    isInitializedRef.current = true;
-  }, [spotTTRatesData, applyRows]);
+    pendingUpdatesRef.current.clear();
+    setInitialRows(normalizedRows);
 
-  // ✅ RAF batch processor
-  const processQueue = useCallback(() => {
-    const updates = pendingUpdatesRef.current;
-    if (!updates.length) {
-      animationFrameRef.current = null;
+    isBaseDataReadyRef.current = true;
+  }, [spotTTRatesData]);
+
+  /*
+   * Collect incoming feed updates.
+   *
+   * Multiple updates for the same instrumentID are automatically
+   * collapsed into one latest update.
+   */
+  useEffect(() => {
+    if (!Array.isArray(fullFeed) || fullFeed.length === 0) {
       return;
     }
 
-    pendingUpdatesRef.current = [];
-
-    // 🔥 Flatten updates
-    const flatUpdates = updates.map((u) => u?.spotTTRates).filter(Boolean);
-
-    if (!flatUpdates.length) {
-      animationFrameRef.current = requestAnimationFrame(processQueue);
-      return;
-    }
-
-    // 🔥 O(1) lookup map
-    const updateMap = new Map(flatUpdates.map((u) => [u.instrumentID, u]));
-
-    let changed = false;
-    const updated = dataRef.current.map((row) => {
-      const update = updateMap.get(row.instrumentID);
-      if (!update) return row;
+    fullFeed.forEach((feedItem) => {
+      const update = feedItem?.spotTTRates;
 
       if (
-        Number(row.bid) === Number(update.bid) &&
-        Number(row.offer) === Number(update.offer) &&
-        row.currencyName === update.currencyName &&
-        row.currencyCode === update.currencyCode
+        !update ||
+        update.instrumentID === null ||
+        update.instrumentID === undefined
       ) {
-        return row;
+        return;
       }
 
-      changed = true;
-      return {
-        ...row,
-        currencyName: update.currencyName,
-        currencyCode: update.currencyCode,
-        bid: update.bid,
-        offer: update.offer,
-        version: (row.version || 0) + 1,
-      };
+      const rowId = String(update.instrumentID);
+
+      /*
+       * Merge with the current row data so the transaction contains
+       * a complete row object, not only bid and offer.
+       */
+      const existingRow =
+        tableRef.current?.getRowNode(rowId)?.data;
+
+      pendingUpdatesRef.current.set(rowId, {
+        ...existingRow,
+        ...update,
+        instrumentID: update.instrumentID,
+      });
     });
 
-    if (changed) {
-      applyRows(updated);
-    }
+    scheduleUpdateProcessing();
+  }, [fullFeed, scheduleUpdateProcessing]);
 
-    // ✅ clear redux queue (IMPORTANT)
-    dispatch(clearTreasuryRateSheetSpotTTRates());
-
-    animationFrameRef.current = requestAnimationFrame(processQueue);
-  }, [applyRows, dispatch]);
-
-  // ✅ enqueue updates
-  useEffect(() => {
-    if (!fullFeed?.length) return;
-
-    pendingUpdatesRef.current = fullFeed;
-
-    if (!animationFrameRef.current) {
-      animationFrameRef.current = requestAnimationFrame(processQueue);
-    }
-  }, [fullFeed, processQueue]);
-
-  // cleanup
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      isGridReadyRef.current = false;
+      isBaseDataReadyRef.current = false;
+      pendingUpdatesRef.current.clear();
+
+      if (processTimerRef.current !== null) {
+        window.clearTimeout(processTimerRef.current);
+        processTimerRef.current = null;
       }
     };
   }, []);
 
-  // Columns
   const columnDefs = useMemo(
     () => [
       {
@@ -143,24 +187,21 @@ const SpotTTRates = () => {
         headerName: "Symbol",
         field: "currencyCode",
         flex: 1,
-
       },
       {
         headerName: "Buying",
         field: "bid",
-         flex: 1,
-
+        flex: 1,
         valueFormatter: dashIfEmpty,
       },
       {
         headerName: "Selling",
         field: "offer",
         flex: 1,
-
         valueFormatter: dashIfEmpty,
       },
     ],
-    []
+    [],
   );
 
   const defaultColDef = useMemo(
@@ -169,25 +210,38 @@ const SpotTTRates = () => {
       sortable: false,
       suppressMovable: true,
     }),
-    []
+    [],
+  );
+
+  const gridStyle = useMemo(
+    () => ({
+      height: 32 + Math.max(initialRows.length, 1) * 32,
+    }),
+    [initialRows.length],
   );
 
   return (
     <>
-      <span className={styles.tableheaderbar}>Spot TT Rates</span>
+      <span className={styles.tableheaderbar}>
+        Spot TT Rates
+      </span>
 
       <AgGridTable
+        ref={tableRef}
         className="rsAgGrid"
-        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
-        rowData={processedData}
+        style={gridStyle}
+        rowData={initialRows}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
-        getRowId={(p) => String(p.data.instrumentID)}
-        suppressColumnVirtualisation={true}
+        getRowId={getRowId}
+        onGridReady={handleGridReady}
         animateRows={false}
+        asyncTransactionWaitMillis={50}
       />
     </>
   );
-};
+});
+
+SpotTTRates.displayName = "SpotTTRates";
 
 export default SpotTTRates;

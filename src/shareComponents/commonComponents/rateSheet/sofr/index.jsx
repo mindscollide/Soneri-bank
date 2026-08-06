@@ -1,4 +1,5 @@
 import React, {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -16,7 +17,7 @@ const GetSOFRDataForRateSheet = (state) =>
 const treasuryRateSheetSofr = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetSofr;
 
-const SOFR = () => {
+const SOFR = memo(() => {
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
@@ -115,7 +116,7 @@ const SOFR = () => {
       if (!feed) return;
 
       const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
+      if (now - lastUpdateRef.current < 200) return; // rate sheet only needs a few updates/sec
       lastUpdateRef.current = now;
 
       updateQueueRef.current.push(feed);
@@ -155,6 +156,8 @@ const SOFR = () => {
       />
     </>
   );
-};
+});
+
+SOFR.displayName = "SOFR";
 
 export default SOFR;

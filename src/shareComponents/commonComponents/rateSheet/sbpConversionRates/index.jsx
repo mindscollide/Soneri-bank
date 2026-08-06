@@ -1,4 +1,5 @@
 import React, {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -16,7 +17,7 @@ const GetSBPConversionRatesForRateSheet = (state) =>
 const treasuryRateSheetConversionRate = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetConversionRate;
 
-const SBPConversionRates = () => {
+const SBPConversionRates = memo(() => {
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
@@ -114,7 +115,7 @@ const SBPConversionRates = () => {
       if (!feed) return;
 
       const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return; // ~60fps
+      if (now - lastUpdateRef.current < 200) return; // rate sheet only needs a few updates/sec
       lastUpdateRef.current = now;
 
       updateQueueRef.current.push(feed);
@@ -157,6 +158,8 @@ const SBPConversionRates = () => {
       />
     </>
   );
-};
+});
+
+SBPConversionRates.displayName = "SBPConversionRates";
 
 export default SBPConversionRates;

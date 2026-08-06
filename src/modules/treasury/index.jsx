@@ -23,15 +23,15 @@ import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../hook/useMqttTopics";
 import T24 from "../../shareComponents/commonComponents/t24";
-const LiveRates = lazy(() =>
-  import("../../shareComponents/commonComponents/liveRates/index")
+const LiveRates = lazy(
+  () => import("../../shareComponents/commonComponents/liveRates/index"),
 );
 const Forwards = lazy(() => import("./forwards/index"));
 const TreasuryDiscounting = lazy(() => import("./discounting/index"));
 
 const News = lazy(() => import("../../shareComponents/commonComponents/news"));
-const RateSheet = lazy(() =>
-  import("../../shareComponents/commonComponents/rateSheet")
+const RateSheet = lazy(
+  () => import("../../shareComponents/commonComponents/rateSheet"),
 );
 const Treasury = () => {
   const dispatch = useDispatch();
@@ -53,7 +53,7 @@ const Treasury = () => {
   // unless the activeTabId actually changes.
   const currentTopics = useMemo(
     () => topicMap[activeTabId] || [],
-    [activeTabId]
+    [activeTabId],
   );
 
   // 4. Call the hook at the TOP LEVEL
@@ -117,15 +117,15 @@ const Treasury = () => {
         </Suspense>
       ),
     },
-        {
-      label: `T24`,
-      key: "5",
-      children: (
-        <Suspense fallback={<SectionLoader />}>
-          <T24 />
-        </Suspense>
-      ),
-    },
+    //     {
+    //   label: `T24`,
+    //   key: "5",
+    //   children: (
+    //     <Suspense fallback={<SectionLoader />}>
+    //       <T24 />
+    //     </Suspense>
+    //   ),
+    // },
   ];
   const hasFetched = useRef(false);
   useEffect(() => {

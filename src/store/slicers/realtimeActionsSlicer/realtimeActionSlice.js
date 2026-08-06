@@ -243,17 +243,32 @@ const RealtimeActionsSlice = createSlice({
     setTreasuryRateSheetConversionRate: (state, { payload }) => {
       state.treasuryRateSheetConversionRate = payload;
     },
+    clearTreasuryRateSheetConversionRate: (state) => {
+      state.treasuryRateSheetConversionRate = null;
+    },
     setTreasuryRateSheetKibor: (state, { payload }) => {
       state.treasuryRateSheetKibor = payload;
+    },
+    clearTreasuryRateSheetKibor: (state) => {
+      state.treasuryRateSheetKibor = null;
     },
     setTreasuryRateSheetSofr: (state, { payload }) => {
       state.treasuryRateSheetSofr = payload;
     },
+    clearTreasuryRateSheetSofr: (state) => {
+      state.treasuryRateSheetSofr = null;
+    },
     setTreasuryRateSheetIndicativeFBPRates: (state, { payload }) => {
       state.treasuryRateSheetIndicativeFBPRates = payload;
     },
+    clearTreasuryRateSheetIndicativeFBPRates: (state) => {
+      state.treasuryRateSheetIndicativeFBPRates = null;
+    },
     setCurrentRateSheetRatesPublished: (state, { payload }) => {
       state.currentRateSheetRatesPublished = payload;
+    },
+    clearCurrentRateSheetRatesPublished: (state) => {
+      state.currentRateSheetRatesPublished = null;
     },
     setRealTimeNewsFeed: (state, { payload }) => {
       state.realTimeNewsFeed = payload;
@@ -266,6 +281,9 @@ const RealtimeActionsSlice = createSlice({
     },
     clearTreasuryForwardRates: (state) => {
       state.TreasuryForwardRates = [];
+    },
+       clearCurrencyCrossesForManagmentFeed: (state) => {
+      state.currencyCrossesForManagmentFeed = [];
     },
   },
 });
@@ -323,6 +341,11 @@ export const {
   clearDealerSpotRatesFeed,
   clearTreasuryRateSheetSpotTTRates,
   clearTreasuryRateSheetCurrencyNotes,
+  clearTreasuryRateSheetConversionRate,
+  clearTreasuryRateSheetKibor,
+  clearTreasuryRateSheetSofr,
+  clearTreasuryRateSheetIndicativeFBPRates,
+  clearCurrentRateSheetRatesPublished,
   clearSwapsinUSDForManagementFeed,
   clearSbpFXRevalRatesForManagmentFeed,
   clearSofrForManagmentFeed,

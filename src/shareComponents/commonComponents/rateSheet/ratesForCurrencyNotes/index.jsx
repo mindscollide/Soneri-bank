@@ -1,4 +1,5 @@
 import React, {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -22,8 +23,9 @@ const treasuryRateSheetCurrencyNotes = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetCurrencyNotes;
 
 const toFixedOrDash = ({ value }) => (value ? Number(value).toFixed(2) : "-");
+const PROCESS_THROTTLE_MS = 200;
 
-const RatesForCurrencyNotes = () => {
+const RatesForCurrencyNotes = memo(() => {
   const dispatch = useDispatch();
 
   // State
@@ -34,6 +36,7 @@ const RatesForCurrencyNotes = () => {
   const pendingUpdatesRef = useRef([]);
   const animationFrameRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const lastProcessRef = useRef(0);
 
   const fullFeed = useSelector(treasuryRateSheetCurrencyNotes);
   const currencyNotes = useSelector(GetRatesForCurrencyNotesForRateSheet);
@@ -67,7 +70,8 @@ const RatesForCurrencyNotes = () => {
     isInitializedRef.current = true;
   }, [currencyNotes, instruments, applyRows]);
 
-  // ✅ RAF batch processor
+  // ✅ RAF batch processor (throttled — a rate sheet only needs to
+  // repaint a few times a second, not on every animation frame)
   const processQueue = useCallback(() => {
     const updates = pendingUpdatesRef.current;
 
@@ -75,6 +79,13 @@ const RatesForCurrencyNotes = () => {
       animationFrameRef.current = null;
       return;
     }
+
+    const now = Date.now();
+    if (now - lastProcessRef.current < PROCESS_THROTTLE_MS) {
+      animationFrameRef.current = requestAnimationFrame(processQueue);
+      return;
+    }
+    lastProcessRef.current = now;
 
     pendingUpdatesRef.current = [];
 
@@ -190,6 +201,8 @@ const RatesForCurrencyNotes = () => {
       />
     </>
   );
-};
+});
+
+RatesForCurrencyNotes.displayName = "RatesForCurrencyNotes";
 
 export default RatesForCurrencyNotes;

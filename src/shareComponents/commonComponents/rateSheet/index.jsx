@@ -35,6 +35,15 @@ import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
 import Loader from "../../elements/soneriLoader/Loader";
 import { Tooltip } from "antd";
+import {
+  clearTreasuryRateSheetSpotTTRates,
+  clearTreasuryRateSheetCurrencyNotes,
+  clearTreasuryRateSheetConversionRate,
+  clearTreasuryRateSheetKibor,
+  clearTreasuryRateSheetSofr,
+  clearTreasuryRateSheetIndicativeFBPRates,
+  clearCurrentRateSheetRatesPublished,
+} from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 const RateSheet = () => {
   useMqttTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
@@ -53,6 +62,22 @@ const RateSheet = () => {
     dispatch(GetIndicativeFBPRatesApi({ navigate }));
     dispatch(GetSBPConversionRatesForRateSheetApi({ navigate }));
   }, []);
+
+  // Reset the rate sheet's real-time slice on unmount so stale data
+  // doesn't linger in the store (or briefly flash) next time this
+  // screen mounts.
+  useEffect(() => {
+    return () => {
+      dispatch(clearTreasuryRateSheetSpotTTRates());
+      dispatch(clearTreasuryRateSheetCurrencyNotes());
+      dispatch(clearTreasuryRateSheetConversionRate());
+      dispatch(clearTreasuryRateSheetKibor());
+      dispatch(clearTreasuryRateSheetSofr());
+      dispatch(clearTreasuryRateSheetIndicativeFBPRates());
+      dispatch(clearCurrentRateSheetRatesPublished());
+    };
+  }, [dispatch]);
+
   const todayDate = formatTodayForRateSheet();
 
   const waitForRender = () =>

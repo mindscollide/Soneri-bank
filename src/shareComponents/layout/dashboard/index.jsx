@@ -362,21 +362,26 @@ const Dashboard = () => {
     activeTopics, // Set<string> — maintained inside useMqttClient
   } = useMqttClient(mqttConfig);
 
-  // // ─── Keep unsubscribe fn in a ref so unsubscribeAll never goes stale ──────────
-  // const unsubscribeRef = useRef(unsubscribeFromTopics);
-  // useEffect(() => {
-  //   unsubscribeRef.current = unsubscribeFromTopics;
-  // }, [unsubscribeFromTopics]);
+  // ─── Keep unsubscribe fn in a ref so unsubscribeAll never goes stale ──────────
+  const unsubscribeRef = useRef(unsubscribeFromTopics);
+  useEffect(() => {
+    unsubscribeRef.current = unsubscribeFromTopics;
+  }, [unsubscribeFromTopics]);
 
-  // // ─── unsubscribeAll — called by MainHeader on navigation clicks ───────────────
-  // // Clears every currently active topic instantly without waiting for
-  // // component unmount. Components will re-subscribe when they mount.
-  // const unsubscribeAll = useCallback(() => {
-  //   if (!activeTopics || activeTopics.size === 0) return;
-  //   const all = [...activeTopics];
-  //   unsubscribeRef.current(all);
-  //   console.log("[Dashboard] unsubscribeAll:", all);
-  // }, [activeTopics]);
+  // ─── unsubscribeAll — called by MainHeader on navigation clicks ───────────────
+  // Clears every currently active PAGE-specific topic instantly without
+  // waiting for component unmount (which can be delayed while the main
+  // thread is busy processing the outgoing page's own high-frequency
+  // feed). Components will re-subscribe when they mount on the new route.
+  // The persistent base subscription (subscribeID — market status, tenor
+  // updates etc., subscribed once at init) is excluded since nothing
+  // ever re-subscribes it after the initial connect.
+  const unsubscribeAll = useCallback(() => {
+    if (!activeTopics || activeTopics.size === 0) return;
+    const all = [...activeTopics].filter((topic) => topic !== subscribeID);
+    if (all.length === 0) return;
+    unsubscribeRef.current(all);
+  }, [activeTopics, subscribeID]);
 
   // ─── One-time init: connect MQTT + fetch market status ───────────────────────
   const hasFetched = useRef(false);
@@ -398,7 +403,7 @@ const Dashboard = () => {
         unsubscribe: unsubscribeFromTopics,
         isConnected,
         activeTopics, // components read this inside useMqttTopics hook
-        // unsubscribeAll, // MainHeader uses this
+        unsubscribeAll, // MainHeader uses this on nav clicks
       }}
     >
       <Layout style={layoutStyle}>

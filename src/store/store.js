@@ -17,6 +17,9 @@ export const store = configureStore({
       serializableCheck: false,
       immutableCheck: false,
     }),
-  // 👇 Enable Redux DevTools
-  devTools: true,
+  // DevTools records every dispatched action + resulting state tree in memory
+  // for time-travel debugging — with this app's high-frequency MQTT-driven
+  // dispatches, leaving it on in production causes unbounded memory growth
+  // the longer a tab stays open. Only enable it in local dev.
+  devTools: import.meta.env.DEV,
 });

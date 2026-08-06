@@ -19,13 +19,15 @@ import {
   clearGetUSDParityForTreasury,
 } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import CustomButton from "../../commonComponents/elements/globalButton/button";
+import { useMqttContext } from "../../../context/MqttContext";
 const MainHeader = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const { unsubscribeAll } = useMqtt();
+  const { unsubscribeAll } = useMqttContext();
   const handleNavigate = (e, to) => {
     e.preventDefault(); // Stop the default Link behavior
+    unsubscribeAll(); // stop the outgoing page's MQTT feed instantly, before the route change
     navigate(to);
   };
 
