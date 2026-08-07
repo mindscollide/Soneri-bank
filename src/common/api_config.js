@@ -190,3 +190,7 @@ export const GetRateSheetExcelExportReportRM = {
 export const GetT24RatesRM = {
   RequestMethod: "ServiceManager.GetT24Rates"
 }
+
+export const GetT24RatesExcelRM = {
+  RequestMethod: "ServiceManager.GetT24RatesExcel"
+}

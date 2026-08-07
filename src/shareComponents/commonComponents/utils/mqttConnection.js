@@ -95,7 +95,7 @@ export const useMqttClient = ({
         console.error("Failed to parse message:", err);
       }
     },
-    [onMessageArrivedCallback]
+    [onMessageArrivedCallback],
   );
 
   const onConnectionLost = useCallback(
@@ -106,7 +106,7 @@ export const useMqttClient = ({
       topicCounts.current = {};
       setActiveTopics(new Set());
     },
-    [onConnectionLostCallback]
+    [onConnectionLostCallback],
   );
 
   const connectToMqtt = useCallback(
@@ -115,7 +115,7 @@ export const useMqttClient = ({
         console.warn(
           "Already connected or missing subscribeID",
           clientRef.current?.isConnected(),
-          subscribeID
+          subscribeID,
         );
         return;
       }
@@ -123,7 +123,7 @@ export const useMqttClient = ({
       clientRef.current = new Paho.Client(
         import.meta.env.VITE_MQTT_HOST,
         Number(import.meta.env.VITE_MQTT_PORT),
-        randomString
+        randomString,
       );
 
       clientRef.current.onConnectionLost = onConnectionLost;
@@ -146,12 +146,10 @@ export const useMqttClient = ({
         password: import.meta.env.VITE_MQTT_PASSWORD,
         cleanSession: false,
         // useSSL: false,
-        useSSL:
-          import.meta.env.VITE_MQTT_PORT === "8883" &&
-          import.meta.env.VITE_MQTT_HOST === "ttrade.soneribank.com",
+        useSSL: import.meta.env.VITE_MQTT_PORT === "8883",
       });
     },
-    [onMessageArrived, onConnectionLost, subscribeToTopics, randomString]
+    [onMessageArrived, onConnectionLost, subscribeToTopics, randomString],
   );
 
   return {

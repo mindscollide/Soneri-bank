@@ -102,7 +102,7 @@ const FwdCalculator = () => {
       return;
     }
     let Data = {
-      IsBuySide: transactionType.value === 1 ? true : false,
+      IsBuySide: transactionType.value === 2 ? true : false,
       TenorDays: Number(tenor),
       InstrumentName: currency.label.slice(0, -3),
       InstrumentID: currency.value,

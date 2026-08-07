@@ -48,7 +48,7 @@ const RealtimeActionsSlice = createSlice({
     treasuryRateSheetIndicativeFBPRates: null,
     currentRateSheetRatesPublished: null,
     realTimeNewsFeed: null,
-    t24TreasuryRates: null,
+    t24TreasuryRates: [],
   },
   reducers: {
     clearDealerSpotClearRates: (state) => {
@@ -320,10 +320,13 @@ const RealtimeActionsSlice = createSlice({
       state.currencyCrossesForManagmentFeed = [];
     },
     setTreasuryT24Rates: (state, { payload }) => {
-      state.t24TreasuryRates = payload;
+      state.t24TreasuryRates = [
+        ...(state.t24TreasuryRates ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     clearTreasuryT24Rates: (state) => {
-      state.t24TreasuryRates = null;
+      state.t24TreasuryRates = [];
     },
   },
 });

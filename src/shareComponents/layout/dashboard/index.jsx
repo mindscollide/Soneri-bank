@@ -84,7 +84,8 @@ const Dashboard = () => {
   const userID = localStorage.getItem("userID");
 
   // ─── MQTT message handler ─────────────────────────────────────────────────────
-  const handleMqttMessage = useCallback(
+  // Processes a single already-parsed message and dispatches its action(s).
+  const processMqttMessage = useCallback(
     (data) => {
       const type = data?.payload?.message;
       const payload = data?.payload;
@@ -286,6 +287,7 @@ const Dashboard = () => {
             break;
 
           case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
+
             startTransition(() => {
               dispatch(setSwapsinUSDForManagementFeed(payload));
             });
@@ -347,6 +349,47 @@ const Dashboard = () => {
     },
     [dispatch],
   );
+
+  // ─── MQTT message batching ────────────────────────────────────────────────────
+  // Treasury's live feed can deliver many messages per second across dozens of
+  // message types. Dispatching (and re-rendering) per message keeps the main
+  // thread busy continuously while any Treasury-family page is open, which
+  // delays route changes away from it. Instead, queue incoming messages and
+  // flush them in short batches — every message still gets dispatched (no data
+  // loss), but React only commits once per flush instead of once per message.
+  const MQTT_FLUSH_INTERVAL_MS = 120;
+  const messageQueueRef = useRef([]);
+  const flushTimerRef = useRef(null);
+
+  const flushMqttQueue = useCallback(() => {
+    flushTimerRef.current = null;
+    const queue = messageQueueRef.current;
+    if (!queue.length) return;
+    messageQueueRef.current = [];
+    queue.forEach(processMqttMessage);
+  }, [processMqttMessage]);
+
+  const handleMqttMessage = useCallback(
+    (data) => {
+      messageQueueRef.current.push(data);
+      if (!flushTimerRef.current) {
+        flushTimerRef.current = setTimeout(
+          flushMqttQueue,
+          MQTT_FLUSH_INTERVAL_MS,
+        );
+      }
+    },
+    [flushMqttQueue],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (flushTimerRef.current) {
+        clearTimeout(flushTimerRef.current);
+      }
+      messageQueueRef.current = [];
+    };
+  }, []);
 
   // ─── MQTT client setup ────────────────────────────────────────────────────────
   const mqttConfig = useMemo(

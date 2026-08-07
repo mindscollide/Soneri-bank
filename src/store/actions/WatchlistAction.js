@@ -42,6 +42,7 @@ import {
   GetSOFRDataForTreasury,
   GetSpotTTRatesForRateSheet,
   GetSwapsInUSDForTreasury,
+  GetT24RatesExcelRM,
   GetT24RatesRM,
   GetUSDParityForTreasury,
   marketOnOffRM,
@@ -3116,6 +3117,60 @@ export const GetT24RatesApi = createAsyncThunk(
               .toLowerCase()
               .includes(
                 "WatchList_WatchListServiceManager_GetT24Rates_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetT24RatesExcelReportApi = createAsyncThunk(
+  "watchlist/GetT24RatesExcelExportReport",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let GetRateSheetExcelExportReport = createPostAPI(
+        watchListApi,
+        GetT24RatesExcelRM.RequestMethod,
+      );
+
+      const response = await GetRateSheetExcelExportReport();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64File, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetT24RatesExcel_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64File, `T24.pdf`);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetT24RatesExcel_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something-went-wrong");

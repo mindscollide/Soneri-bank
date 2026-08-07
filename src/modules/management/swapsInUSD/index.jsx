@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "../management.module.css";
 import { clearSwapsinUSDForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
@@ -14,6 +14,7 @@ const swapsinUSDForManagementFeed = (state) =>
   state.RealtimeActionsSlice.swapsinUSDForManagementFeed;
 
 const SwapsInUSD = memo(() => {
+
   const dispatch = useDispatch();
 
   const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
@@ -25,22 +26,28 @@ const SwapsInUSD = memo(() => {
   const isMountedRef = useRef(true);
   const lastProcessTime = useRef(0);
 
-  const [latestDate, setLatestDate] = useState("");
-  const [currencyList, setCurrencyList] = useState([]);
+  const pairMappingRef = useRef({}); // currencyPair (short code) → currencyPairFull
 
   const swapsinUSDList = useSelector(GetSwapsInUSDForTreasury, shallowEqual);
   const fullFeed = useSelector(swapsinUSDForManagementFeed, shallowEqual);
+  const latestDate = swapsinUSDList?.datetime ?? "";
 
   // ─────────────────────────────
-  // Build row data from API
-  const buildRowData = useCallback(() => {
-    if (!swapsinUSDList?.swapsinUSDList) return [];
+  // Derive currency list + row data together, synchronously, in the same
+  // render pass — this is what columnDefs and rowData below are built from,
+  // so they can never go out of sync with each other (previously currencyList
+  // was set as a side effect from inside an effect/onGridReady callback,
+  // which meant rowData could be pushed into the grid via setGridOption
+  // BEFORE columnDefs had a chance to recompute for the new currencies —
+  // AG Grid would render once with mismatched columns, then do a full,
+  // expensive column-group rebuild once state caught up on the next render).
+  const { currencyList, rowData, pairMapping } = useMemo(() => {
+    const data = swapsinUSDList?.swapsinUSDList;
+    if (!Array.isArray(data) || data.length === 0) {
+      return { currencyList: [], rowData: [], pairMapping: {} };
+    }
 
     try {
-      setLatestDate(swapsinUSDList?.datetime);
-
-      const data = swapsinUSDList.swapsinUSDList;
-
       // 🔹 Build currencyPair → currencyPairFull mapping
       const pairMapping = {};
       data.forEach((item) => {
@@ -59,12 +66,8 @@ const SwapsInUSD = memo(() => {
         if (full) currencySet.add(full);
       });
 
-      const currencies = Array.from(currencySet);
-      setCurrencyList(currencies);
-
       // 🔹 Group by Tenor (row-wise)
       const grouped = {};
-
       data.forEach((item) => {
         const tenor = item.tenor;
         const full = item.currencyPairFull || pairMapping[item.currencyPair];
@@ -79,80 +82,49 @@ const SwapsInUSD = memo(() => {
         grouped[tenor][`${full}_ask`] = item.ask;
       });
 
-      return Object.values(grouped);
+      return {
+        currencyList: Array.from(currencySet),
+        rowData: Object.values(grouped),
+        pairMapping,
+      };
     } catch (error) {
       console.error("Error building row data:", error);
-      return [];
+      return { currencyList: [], rowData: [], pairMapping: {} };
     }
   }, [swapsinUSDList]);
 
-  // ─────────────────────────────
-  // ✅ FIX: Sync data into grid — show loader until rowData is fully set
+  // Keep the ref in sync so queueUpdate (a stable useCallback) can always
+  // resolve the live feed's short currencyPair code to the same full name
+  // the initial columns were built with.
   useEffect(() => {
-    if (!gridApiRef.current) return;
-    if (!swapsinUSDList?.swapsinUSDList?.length) return;
+    pairMappingRef.current = pairMapping;
+  }, [pairMapping]);
 
-    // 🔑 Show loader BEFORE mapping starts (data arrived but not yet rendered)
-    gridApiRef.current.showLoadingOverlay();
-
-    const rowData = buildRowData();
+  // ─────────────────────────────
+  // Rebuild rowNodeMap + overlay whenever rowData actually changes
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) return;
 
     if (rowData.length === 0) {
-      gridApiRef.current.showNoRowsOverlay();
-      return;
+      api.showNoRowsOverlay();
+    } else {
+      api.hideOverlay();
     }
 
-    gridApiRef.current.setGridOption("rowData", rowData);
-
-    // 🔑 Hide loader AFTER rowData is set in the grid
-    gridApiRef.current.hideOverlay();
-
-    // Rebuild rowNodeMap so live feed updates can target correct nodes
     rowNodeMap.current.clear();
-    gridApiRef.current.forEachNode((node) => {
+    api.forEachNode((node) => {
       if (node.data?.tenorName) {
         rowNodeMap.current.set(node.data.tenorName, node);
       }
     });
-  }, [swapsinUSDList, buildRowData]);
+  }, [rowData]);
 
   // ─────────────────────────────
-  // Handle null/empty API response (e.g. error or no data)
-  useEffect(() => {
-    if (!gridApiRef.current) return;
-
-    if (!swapsinUSDList) {
-      // API returned null — show no rows
-      gridApiRef.current.setGridOption("rowData", []);
-      gridApiRef.current.showNoRowsOverlay();
-    }
-    // ❌ Removed: hideOverlay() was being called here too early,
-    //    before buildRowData() finished mapping in the effect above.
-  }, [swapsinUSDList]);
-
-  // ─────────────────────────────
-  const onGridReady = useCallback(
-    (params) => {
-      if (!isMountedRef.current) return;
-
-      gridApiRef.current = params.api;
-
-      if (!swapsinUSDList?.swapsinUSDList?.length) {
-        // 🔑 Data not yet arrived — keep the loading overlay on
-        params.api.showLoadingOverlay();
-      } else {
-        // Data already in Redux (e.g. fast load / cached) — map immediately
-        const rowData = buildRowData();
-        if (rowData.length > 0) {
-          params.api.setGridOption("rowData", rowData);
-          params.api.hideOverlay();
-        } else {
-          params.api.showNoRowsOverlay();
-        }
-      }
-    },
-    [buildRowData, swapsinUSDList]
-  );
+  const onGridReady = useCallback((params) => {
+    if (!isMountedRef.current) return;
+    gridApiRef.current = params.api;
+  }, []);
 
   // ─────────────────────────────
   const onFirstDataRendered = useCallback((params) => {
@@ -241,9 +213,15 @@ const SwapsInUSD = memo(() => {
     (feed) => {
       if (!feed?.swaapsInUSD || !isMountedRef.current) return;
 
-      const { currencyPair, tenor, bid, ask } = feed.swaapsInUSD;
-      const bidKey = `${currencyPair}_bid`;
-      const askKey = `${currencyPair}_ask`;
+      const { currencyPair, currencyPairFull, tenor, bid, ask } =
+        feed.swaapsInUSD;
+      // Live feed messages almost always carry currencyPairFull as null —
+      // resolve the short code through the same mapping the columns were
+      // built from, so the key actually matches an existing column field.
+      const full =
+        currencyPairFull || pairMappingRef.current[currencyPair] || currencyPair;
+      const bidKey = `${full}_bid`;
+      const askKey = `${full}_ask`;
 
       const existing = pendingUpdates.current.get(tenor) || {
         pairs: {},
@@ -367,6 +345,7 @@ const SwapsInUSD = memo(() => {
       <div style={{ height: "300px", width: "100%" }}>
         <AgGridTable
           ref={agGridComponentRef}
+          rowData={rowData}
           columnDefs={columnDefs}
           className="swapsInUSDManagement-grid"
           getRowId={getRowId}
