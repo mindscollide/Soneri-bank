@@ -44,6 +44,7 @@ import {
   clearTreasuryRateSheetIndicativeFBPRates,
   clearCurrentRateSheetRatesPublished,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import { getCurrentDate } from "../../../utils/formatters";
 
 const RateSheet = () => {
   useMqttTopics(["SBL_REAL_TIME_RATE_SHEET_FEED_TREASURY"]);
@@ -150,11 +151,14 @@ const RateSheet = () => {
   const drawTable = (pdf, title, tableRef, x, y, width) => {
     const exportData = tableRef.current?.getExportData?.();
 
-    if (!exportData || !exportData.rows.length) return y;
-
+    // Always print the section heading, even if there's nothing to
+    // tabulate yet (e.g. SOFR/KIBOR derive their columns from tenor data
+    // that hasn't loaded) — so the section is never silently missing.
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
     pdf.text(title, x, y);
+
+    if (!exportData || !exportData.headers?.length) return y + 6;
 
     autoTable(pdf, {
       head: [exportData.headers],
@@ -311,10 +315,20 @@ const RateSheet = () => {
         "SONERI CAPTURES ABOVE FOREIGN EXCHANGE RATES FROM SOURCES BELIEVED TO BE RELIABLE AND DOES NOT ACCEPT ANY LIABILITY FOR CONSEQUENCES THAT MAY ARISE USING THESE RATES. ",
       ];
 
+      const bulletIndent = 4;
+
       notes.forEach((note) => {
-        const lines = pdf.splitTextToSize(`• ${note}`, pageWidth - 20);
-        pdf.text(lines, 10, cursorY);
-        cursorY += 4;
+        // Wrap the note text alone (without the bullet) to the indented
+        // width, then draw the bullet once at the margin and every line
+        // (including wrapped continuation lines) starting at the same
+        // indented x — so wrapped text aligns under the text, not the dot.
+        const lines = pdf.splitTextToSize(
+          note,
+          pageWidth - 20 - bulletIndent,
+        );
+        pdf.text("•", 10, cursorY);
+        pdf.text(lines, 10 + bulletIndent, cursorY);
+        cursorY += lines.length * 4 + 1;
       });
 
       pdf.setTextColor(0, 0, 0);
@@ -344,7 +358,7 @@ const RateSheet = () => {
         { align: "center", maxWidth: pageWidth - 20 },
       );
 
-      pdf.save("RateSheet.pdf");
+      pdf.save(`SBL RateSheet - ${getCurrentDate()} .pdf`);
     } catch (error) {
       console.error("PDF export failed:", error);
     } finally {
@@ -438,6 +452,11 @@ const RateSheet = () => {
                 <li>
                   PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN
                   USD.5,000/=
+                </li>
+                <li>
+                  SONERI CAPTURES ABOVE FOREIGN EXCHANGE RATES FROM SOURCES
+                  BELIEVED TO BE RELIABLE AND DOES NOT ACCEPT ANY LIABILITY FOR
+                  CONSEQUENCES THAT MAY ARISE USING THESE RATES.
                 </li>
               </ul>
             </Col>
