@@ -37,6 +37,7 @@ import {
   GetSOFRDataForTreasuryApi,
   GetSpotTTRatesForRateSheetApi,
   GetSwapsInUSDForTreasuryApi,
+  GetT24RatesApi,
   GetUSDParityForTreasuryApi,
   marketOnOffAction,
   PublishCurrentUSDRateSheetAction,
@@ -98,6 +99,7 @@ const WatchListSlice = createSlice({
     GetNewsDetailsByIDLoading: false,
     GetRefreshIconTenorsLoading: false,
     GetCalculateTenorSwapAndForwardRateLoading: false,
+    GetT24RatesLoading: false,
     // data states
     GetAllInstrumentForTreasury: null,
     GetBankSpotForTreasury: null,
@@ -149,6 +151,7 @@ const WatchListSlice = createSlice({
     GetNewsHeadlines: null,
     GetRefreshIconTenors: null,
     GetCalculateTenorSwapAndForwardRate: null,
+    GetT24RatesData: null,
 
     // About Newa
     NewsByNewsIdViewModal: false,
@@ -982,11 +985,24 @@ const WatchListSlice = createSlice({
           state.GetCalculateTenorSwapAndForwardRate = null;
           state.responseMessage = payload;
         },
-      );
+      )
+      .addCase(GetT24RatesApi.pending, (state) => {
+        state.GetT24RatesLoading = true;
+      })
+      .addCase(GetT24RatesApi.fulfilled, (state, { payload }) => {
+        state.GetT24RatesLoading = false;
+        state.GetT24RatesData = payload.response;
+        state.responseMessage = payload.message;
+      })
+      .addCase(GetT24RatesApi.rejected, (state, { payload }) => {
+        state.GetT24RatesLoading = false;
 
-    builder.addCase(setActiveTab, (state, action) => {
-      state.activeTab = action.payload;
-    });
+        state.GetT24RatesData = null;
+        state.responseMessage = payload;
+      })
+      .addCase(setActiveTab, (state, action) => {
+        state.activeTab = action.payload;
+      });
   },
 });
 

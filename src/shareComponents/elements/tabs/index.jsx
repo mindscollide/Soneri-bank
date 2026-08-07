@@ -35,7 +35,13 @@ const GlobalTabs = ({ items = [], tabBarExtraContent, onChange }) => {
       centered
       items={items}
       tabBarExtraContent={tabBarExtraContent}
-      destroyOnHidden={false}
+      // Unmount inactive panes instead of leaving them running hidden —
+      // each pane (Live Rates, Forwards, Rate Sheet, T24, etc.) holds a
+      // live MQTT subscription + real-time update loop, and keeping every
+      // previously-visited tab alive in the background compounds CPU/
+      // dispatch load the longer a session runs. Every pane already
+      // re-fetches its own data on mount, so this is safe.
+      destroyOnHidden={true}
       activeKey={activeKey}
       onChange={handleChange} // ✅ always use internal handler
     />

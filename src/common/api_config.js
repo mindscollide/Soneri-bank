@@ -186,3 +186,7 @@ export const CalculateTenorSwapAndForwardRateRM = {
 export const GetRateSheetExcelExportReportRM = {
   RequestMethod: "ServiceManager.GetRateSheetExcelExportReport"
 }
+
+export const GetT24RatesRM = {
+  RequestMethod: "ServiceManager.GetT24Rates"
+}

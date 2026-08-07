@@ -48,6 +48,7 @@ const RealtimeActionsSlice = createSlice({
     treasuryRateSheetIndicativeFBPRates: null,
     currentRateSheetRatesPublished: null,
     realTimeNewsFeed: null,
+    t24TreasuryRates: null,
   },
   reducers: {
     clearDealerSpotClearRates: (state) => {
@@ -72,35 +73,53 @@ const RealtimeActionsSlice = createSlice({
     },
 
     setTreasuryFeDiscounting: (state, { payload }) => {
-      state.TreasuryFeDiscounting = [...(state.TreasuryFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasuryFeDiscounting = [
+        ...(state.TreasuryFeDiscounting ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
 
     clearTreasuryFeDiscounting: (state) => {
       state.TreasuryFeDiscounting = [];
     },
     setTreasuryNonFeDiscounting: (state, { payload }) => {
-      state.TreasuryNonFeDiscounting = [...(state.TreasuryNonFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasuryNonFeDiscounting = [
+        ...(state.TreasuryNonFeDiscounting ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     clearTreasuryNonFeDiscounting: (state) => {
       state.TreasuryNonFeDiscounting = [];
     },
     setTreasuryForwardRates: (state, { payload }) => {
-      state.TreasuryForwardRates = [...(state.TreasuryForwardRates ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasuryForwardRates = [
+        ...(state.TreasuryForwardRates ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
 
     setTreasuryDealerForwardRates: (state, { payload }) => {
-      state.TreasuryDealerForwardRates = [...(state.TreasuryDealerForwardRates ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasuryDealerForwardRates = [
+        ...(state.TreasuryDealerForwardRates ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
 
     setTreasurySpotRatesFeed: (state, { payload }) => {
-      state.TreasurySpotRatesFeed = [...(state.TreasurySpotRatesFeed ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasurySpotRatesFeed = [
+        ...(state.TreasurySpotRatesFeed ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
 
     clearTreasurySpotRatesFeed: (state) => {
       state.TreasurySpotRatesFeed = [];
     },
     setDealerSpotRatesFeed: (state, { payload }) => {
-      state.DealerSpotRatesFeed = [...(state.DealerSpotRatesFeed ?? []), payload].slice(-MAX_BUFFER);
+      state.DealerSpotRatesFeed = [
+        ...(state.DealerSpotRatesFeed ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
 
     clearDealerSpotRatesFeed: (state) => {
@@ -137,14 +156,20 @@ const RealtimeActionsSlice = createSlice({
       }
     },
     setTreasuryDealerFeDiscounting: (state, { payload }) => {
-      state.TreasuryDealerFeDiscounting = [...(state.TreasuryDealerFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasuryDealerFeDiscounting = [
+        ...(state.TreasuryDealerFeDiscounting ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     // 3. Add a clear action (CRITICAL)
     clearTreasuryDealerFeDiscounting: (state) => {
       state.TreasuryDealerFeDiscounting = [];
     },
     setTreasuryDealerNonFeDiscounting: (state, { payload }) => {
-      state.TreasuryDealerNonFeDiscounting = [...(state.TreasuryDealerNonFeDiscounting ?? []), payload].slice(-MAX_BUFFER);
+      state.TreasuryDealerNonFeDiscounting = [
+        ...(state.TreasuryDealerNonFeDiscounting ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     clearTreasuryDealerNonFeDiscounting: (state) => {
       state.TreasuryDealerNonFeDiscounting = [];
@@ -164,7 +189,10 @@ const RealtimeActionsSlice = createSlice({
       state.usdParityForManagmentFeed = null;
     },
     setCurrencyCrossesForManagementFeed: (state, { payload }) => {
-      state.currencyCrossesForManagmentFeed = [...(state.currencyCrossesForManagmentFeed ?? []), payload].slice(-MAX_BUFFER);
+      state.currencyCrossesForManagmentFeed = [
+        ...(state.currencyCrossesForManagmentFeed ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     clearCurrencyCrossesForManagementFeed: (state) => {
       state.currencyCrossesForManagmentFeed = [];
@@ -228,14 +256,20 @@ const RealtimeActionsSlice = createSlice({
       state.swapsinUSDForManagementFeed = null;
     },
     setTreasuryRateSheetSpotTTRates: (state, { payload }) => {
-      state.treasuryRateSheetSpotTTRates = [...(state.treasuryRateSheetSpotTTRates ?? []), payload].slice(-MAX_BUFFER);
+      state.treasuryRateSheetSpotTTRates = [
+        ...(state.treasuryRateSheetSpotTTRates ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     clearTreasuryRateSheetSpotTTRates: (state) => {
       state.treasuryRateSheetSpotTTRates = [];
     },
 
     setTreasuryRateSheetCurrencyNotes: (state, { payload }) => {
-      state.treasuryRateSheetCurrencyNotes = [...(state.treasuryRateSheetCurrencyNotes ?? []), payload].slice(-MAX_BUFFER);
+      state.treasuryRateSheetCurrencyNotes = [
+        ...(state.treasuryRateSheetCurrencyNotes ?? []),
+        payload,
+      ].slice(-MAX_BUFFER);
     },
     clearTreasuryRateSheetCurrencyNotes: (state) => {
       state.treasuryRateSheetCurrencyNotes = [];
@@ -282,13 +316,21 @@ const RealtimeActionsSlice = createSlice({
     clearTreasuryForwardRates: (state) => {
       state.TreasuryForwardRates = [];
     },
-       clearCurrencyCrossesForManagmentFeed: (state) => {
+    clearCurrencyCrossesForManagmentFeed: (state) => {
       state.currencyCrossesForManagmentFeed = [];
+    },
+    setTreasuryT24Rates: (state, { payload }) => {
+      state.t24TreasuryRates = payload;
+    },
+    clearTreasuryT24Rates: (state) => {
+      state.t24TreasuryRates = null;
     },
   },
 });
 
 export const {
+  setTreasuryT24Rates,
+  clearTreasuryT24Rates,
   setTreasuryFowardsTenorsChanges,
   setClearRates,
   setTreasuryFeDiscounting,

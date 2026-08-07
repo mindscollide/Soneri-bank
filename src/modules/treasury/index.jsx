@@ -117,15 +117,15 @@ const Treasury = () => {
         </Suspense>
       ),
     },
-    //     {
-    //   label: `T24`,
-    //   key: "5",
-    //   children: (
-    //     <Suspense fallback={<SectionLoader />}>
-    //       <T24 />
-    //     </Suspense>
-    //   ),
-    // },
+        {
+      label: `T24`,
+      key: "5",
+      children: (
+        <Suspense fallback={<SectionLoader />}>
+          <T24 />
+        </Suspense>
+      ),
+    },
   ];
   const hasFetched = useRef(false);
   useEffect(() => {

@@ -43,6 +43,7 @@ import {
   setTreasuryRateSheetSofr,
   setTreasuryRateSheetSpotTTRates,
   setTreasurySpotRatesFeed,
+  setTreasuryT24Rates,
   setUSDParityForManagementFeed,
   tenorWiseFowardsRatesPublishedActions,
 } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
@@ -75,10 +76,10 @@ const Dashboard = () => {
   const subscribeID = IsManagement
     ? "SBL_MANAGEMENT"
     : isTreasury
-    ? "SBL_TREASURY"
-    : isDealer
-    ? "SBL_DEALER"
-    : null;
+      ? "SBL_TREASURY"
+      : isDealer
+        ? "SBL_DEALER"
+        : null;
 
   const userID = localStorage.getItem("userID");
 
@@ -327,9 +328,13 @@ const Dashboard = () => {
             break;
 
           case "REAL_TIME_NEWS_FEED":
-            console.log("Received REAL_TIME_NEWS_FEED:", payload);
             startTransition(() => {
               dispatch(setRealTimeNewsFeed(payload));
+            });
+            break;
+          case "TREASURY_T24_RATES":
+            startTransition(() => {
+              dispatch(setTreasuryT24Rates(payload));
             });
             break;
 
@@ -340,7 +345,7 @@ const Dashboard = () => {
         console.error("MQTT message handler error:", error);
       }
     },
-    [dispatch]
+    [dispatch],
   );
 
   // ─── MQTT client setup ────────────────────────────────────────────────────────
@@ -351,7 +356,7 @@ const Dashboard = () => {
         console.warn("MQTT connection lost");
       },
     }),
-    [handleMqttMessage]
+    [handleMqttMessage],
   );
 
   const {
@@ -404,13 +409,12 @@ const Dashboard = () => {
         isConnected,
         activeTopics, // components read this inside useMqttTopics hook
         unsubscribeAll, // MainHeader uses this on nav clicks
-      }}
-    >
+      }}>
       <Layout style={layoutStyle}>
-        <Header prefixCls="mainHeader">
+        <Header prefixCls='mainHeader'>
           <MainHeader />
         </Header>
-        <Content className="my-2">
+        <Content className='my-2'>
           <Outlet />
         </Content>
       </Layout>
