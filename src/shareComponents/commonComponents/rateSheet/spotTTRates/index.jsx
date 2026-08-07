@@ -1,7 +1,9 @@
 import React, {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -29,7 +31,7 @@ const dashIfEmpty = ({ value }) =>
     ? "-"
     : value;
 
-const SpotTTRates = memo(() => {
+const SpotTTRates = memo(forwardRef((_props, ref) => {
   const dispatch = useDispatch();
   const tableRef = useRef(null);
 
@@ -220,6 +222,31 @@ const SpotTTRates = memo(() => {
     [initialRows.length],
   );
 
+  // Export data must be read live from the grid's own row model (via the
+  // AgGridTable ref's .api), not from `initialRows` state — live price
+  // updates are applied directly to AG Grid through transactions and
+  // never get written back into `initialRows`.
+  useImperativeHandle(
+    ref,
+    () => ({
+      getExportData: () => {
+        const rows = [];
+        tableRef.current?.api?.forEachNode((node) => rows.push(node.data));
+        return {
+          headers: columnDefs.map((col) => col.headerName),
+          rows: rows.map((row) =>
+            columnDefs.map((col) =>
+              col.valueFormatter
+                ? col.valueFormatter({ value: row[col.field] })
+                : (row[col.field] ?? "-"),
+            ),
+          ),
+        };
+      },
+    }),
+    [columnDefs],
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar}>
@@ -240,7 +267,7 @@ const SpotTTRates = memo(() => {
       />
     </>
   );
-});
+}));
 
 SpotTTRates.displayName = "SpotTTRates";
 

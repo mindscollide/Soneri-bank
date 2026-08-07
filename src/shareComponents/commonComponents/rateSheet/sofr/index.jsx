@@ -1,7 +1,9 @@
 import React, {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -17,7 +19,7 @@ const GetSOFRDataForRateSheet = (state) =>
 const treasuryRateSheetSofr = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetSofr;
 
-const SOFR = memo(() => {
+const SOFR = memo(forwardRef((_props, ref) => {
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
@@ -141,6 +143,24 @@ const SOFR = memo(() => {
       }
     };
   }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getExportData: () => ({
+        headers: columnDefs.map((col) => col.headerName),
+        rows: processedData.map((row) =>
+          columnDefs.map((col) =>
+            col.valueFormatter
+              ? col.valueFormatter({ value: row[col.field] })
+              : (row[col.field] ?? "-"),
+          ),
+        ),
+      }),
+    }),
+    [columnDefs, processedData],
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>SOFR</span>
@@ -156,7 +176,7 @@ const SOFR = memo(() => {
       />
     </>
   );
-});
+}));
 
 SOFR.displayName = "SOFR";
 

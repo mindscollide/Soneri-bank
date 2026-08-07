@@ -1,7 +1,9 @@
 import React, {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -17,7 +19,7 @@ const GetKiborDataForRateSheet = (state) =>
 const treasuryRateSheetKibor = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetKibor;
 
-const KIBOR = memo(() => {
+const KIBOR = memo(forwardRef((_props, ref) => {
   const dataRef = useRef([]);
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
@@ -144,6 +146,24 @@ const KIBOR = memo(() => {
       }
     };
   }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getExportData: () => ({
+        headers: columnDefs.map((col) => col.headerName),
+        rows: processedData.map((row) =>
+          columnDefs.map((col) =>
+            col.valueFormatter
+              ? col.valueFormatter({ value: row[col.field] })
+              : (row[col.field] ?? "-"),
+          ),
+        ),
+      }),
+    }),
+    [columnDefs, processedData],
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>KIBOR</span>
@@ -159,7 +179,7 @@ const KIBOR = memo(() => {
       />
     </>
   );
-});
+}));
 
 KIBOR.displayName = "KIBOR";
 

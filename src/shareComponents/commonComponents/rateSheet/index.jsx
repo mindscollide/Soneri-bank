@@ -28,8 +28,8 @@ const SbpConversionRates = lazy(() => import("./sbpConversionRates/index"));
 const IndicativeFBPRates = lazy(() => import("./indicativeFBPRates/index"));
 const Sofr = lazy(() => import("./sofr/index"));
 const Kibor = lazy(() => import("./kibor/index"));
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { formatTodayForRateSheet } from "../../../utils/timeFunction";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
@@ -50,7 +50,13 @@ const RateSheet = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showLoader, setShowLoader] = useState(false);
-  const screenRef = useRef(null);
+
+  const spotTTRatesRef = useRef(null);
+  const ratesForCurrencyNotesRef = useRef(null);
+  const sbpConversionRatesRef = useRef(null);
+  const indicativeFBPRatesRef = useRef(null);
+  const sofrRef = useRef(null);
+  const kiborRef = useRef(null);
 
   useEffect(() => {
     dispatch(getAllTreasuryInstrumentsApi({ navigate }));
@@ -79,13 +85,6 @@ const RateSheet = () => {
   }, [dispatch]);
 
   const todayDate = formatTodayForRateSheet();
-
-  const waitForRender = () =>
-    new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
-    });
 
   const getBase64Image = (imgUrl) => {
     return new Promise((resolve, reject) => {
@@ -141,54 +140,46 @@ const RateSheet = () => {
     });
   };
 
-  const waitForBrowserPaint = () =>
-    new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
-      });
+  // Draws a section heading + a data table (via autoTable) at an explicit
+  // x position and width, so tables can be placed side-by-side to mirror
+  // the on-screen layout. Returns the Y position just below this table.
+  // Rate sheet tables are small, bounded lists (currencies/tenors), so
+  // they reliably fit within a single page — that's what makes side-by-
+  // side placement safe here (autoTable can't keep two independent tables
+  // aligned once either one spans multiple pages).
+  const drawTable = (pdf, title, tableRef, x, y, width) => {
+    const exportData = tableRef.current?.getExportData?.();
+
+    if (!exportData || !exportData.rows.length) return y;
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10);
+    pdf.text(title, x, y);
+
+    autoTable(pdf, {
+      head: [exportData.headers],
+      body: exportData.rows,
+      startY: y + 2,
+      theme: "grid",
+      styles: { fontSize: 8, halign: "center", cellPadding: 1.5 },
+      headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: "bold" },
+      columnStyles: { 0: { halign: "left", fillColor: [232, 225, 219] } },
+      margin: { left: x },
+      tableWidth: width,
     });
 
+    return pdf.lastAutoTable.finalY;
+  };
+
   const handleExportPDF = async () => {
-    const element = screenRef.current;
-
-    if (!element) {
-      console.error("Rate sheet element was not found.");
-      return;
-    }
-
     setShowLoader(true);
 
     try {
-      // Let React display the loader before heavy processing starts.
-      await waitForBrowserPaint();
-
-      const canvasPromise = withTimeout(
-        html2canvas(element, {
-          scale: 1,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          logging: false,
-          width: element.scrollWidth,
-          height: element.scrollHeight,
-          ignoreElements: (node) => node.classList?.contains("pdf-ignore"),
-        }),
-        45000,
-        "Rate sheet capture timed out.",
-      );
-
-      const logoPromise = withTimeout(
+      const logoBase64 = await withTimeout(
         getBase64Image(SoneriLogo),
         10000,
         "Logo loading timed out.",
       );
-
-      const [canvas, logoBase64] = await Promise.all([
-        canvasPromise,
-        logoPromise,
-      ]);
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.75);
 
       const pdf = new jsPDF({
         orientation: "p",
@@ -219,40 +210,124 @@ const RateSheet = () => {
       pdf.text(todayDate, pageWidth - 10, 42, {
         align: "right",
       });
-      const imageX = 10;
-      const imageY = 48;
-      const imageWidth = pageWidth - 20;
-      const footerSpace = 15;
 
-      const availableImageHeight = pageHeight - imageY - footerSpace - 10;
+      const margin = 10;
+      const contentWidth = pageWidth - margin * 2;
+      const gap = 5;
 
-      const calculatedImageHeight = (canvas.height * imageWidth) / canvas.width;
+      // Mirrors the on-screen Bootstrap grid: Spot TT (md=8) beside
+      // Currency Notes + SBP stacked (md=4).
+      const leftColWidth = (contentWidth - gap) * (8 / 12);
+      const rightColWidth = contentWidth - gap - leftColWidth;
+      const rightColX = margin + leftColWidth + gap;
 
-      const imageHeight = Math.min(calculatedImageHeight, availableImageHeight);
+      // Sofr (md=6) beside Kibor (md=6).
+      const halfWidth = (contentWidth - gap) / 2;
+      const rightHalfX = margin + halfWidth + gap;
 
-      pdf.addImage(
-        imgData,
-        "JPEG",
-        imageX,
-        imageY,
-        imageWidth,
-        imageHeight,
-        undefined,
-        "FAST",
+      let cursorY = 50;
+
+      const leftBottomY = drawTable(
+        pdf,
+        "SPOT TT RATES",
+        spotTTRatesRef,
+        margin,
+        cursorY,
+        leftColWidth,
       );
 
-      const footerY = imageY + imageHeight + 7;
+      let rightY = drawTable(
+        pdf,
+        "RATES FOR CURRENCY NOTES",
+        ratesForCurrencyNotesRef,
+        rightColX,
+        cursorY,
+        rightColWidth,
+      );
+      rightY = drawTable(
+        pdf,
+        "SBP CONVERSION RATES FOR FCY DEPOSITS",
+        sbpConversionRatesRef,
+        rightColX,
+        rightY + 8,
+        rightColWidth,
+      );
 
+      cursorY = Math.max(leftBottomY, rightY) + 8;
+
+      cursorY =
+        drawTable(
+          pdf,
+          "INDICATIVE FBP RATES",
+          indicativeFBPRatesRef,
+          margin,
+          cursorY,
+          contentWidth,
+        ) + 8;
+
+      const sofrBottomY = drawTable(
+        pdf,
+        "SOFR",
+        sofrRef,
+        margin,
+        cursorY,
+        halfWidth,
+      );
+      const kiborBottomY = drawTable(
+        pdf,
+        "KIBOR",
+        kiborRef,
+        rightHalfX,
+        cursorY,
+        halfWidth,
+      );
+
+      cursorY = Math.max(sofrBottomY, kiborBottomY) + 8;
+
+      if (cursorY > pageHeight - 40) {
+        pdf.addPage();
+        cursorY = 15;
+      }
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text("IMPORTANT NOTE:", 10, cursorY);
+      cursorY += 5;
+
+      pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
+      pdf.setTextColor(200, 0, 0);
 
+      const notes = [
+        "THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE WITHOUT PRIOR NOTICE.",
+        "FX TRANSACTIONS CUT OFF TIME FOR REPORTING IS 15:30 HOURS (MON-THU) AND 14:30 HOURS (FRIDAY).",
+        "PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN USD.5,000/=",
+      ];
+
+      notes.forEach((note) => {
+        const lines = pdf.splitTextToSize(`• ${note}`, pageWidth - 20);
+        pdf.text(lines, 10, cursorY);
+        cursorY += lines.length * 4 + 1;
+      });
+
+      pdf.setTextColor(0, 0, 0);
+      cursorY += 5;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
       pdf.text(
-        "THIS IS A COMPUTER GENERATED RATE SHEET AND DOES NOT REQUIRE ANY SIGNATURE",
+        "Treasury Sales Desk - Central Office PNSC Building, M.T. Khan Road, Karachi",
         pageWidth / 2,
-        footerY,
-        {
-          align: "center",
-          maxWidth: pageWidth - 20,
-        },
+        cursorY,
+        { align: "center" },
+      );
+      cursorY += 4;
+      pdf.text(
+        "Direct Lines: 021-38900145. Email: treasury.sales@soneribank.com PABX +92 21 32444401-05, Exts: 2301, 2514, 2184, 2186 & 2144",
+        pageWidth / 2,
+        cursorY,
+        { align: "center", maxWidth: pageWidth - 20 },
       );
 
       pdf.save("RateSheet.pdf");
@@ -298,38 +373,38 @@ const RateSheet = () => {
             </Tooltip>
           </Col>
         </Row>
-        <div ref={screenRef}>
+        <div>
           <Row className='mt-3'>
             <Col sm={12} md={8} lg={8}>
               <Suspense fallback={<SectionLoader />}>
-                <SpotTTRates />
+                <SpotTTRates ref={spotTTRatesRef} />
               </Suspense>
             </Col>
             <Col sm={12} md={4} lg={4}>
               <div>
                 <Suspense fallback={<SectionLoader />}>
-                  <RatesForCurrencyNotes />
+                  <RatesForCurrencyNotes ref={ratesForCurrencyNotesRef} />
                 </Suspense>
               </div>
 
               <div className='mt-3'>
                 <Suspense fallback={<SectionLoader />}>
-                  <SbpConversionRates />
+                  <SbpConversionRates ref={sbpConversionRatesRef} />
                 </Suspense>
               </div>
             </Col>
           </Row>
           <Row className='mt-3'>
             <Col sm={12} md={12} lg={12}>
-              <IndicativeFBPRates />
+              <IndicativeFBPRates ref={indicativeFBPRatesRef} />
             </Col>
           </Row>
           <Row className='mt-3'>
             <Col sm={12} md={6} lg={6}>
-              <Sofr />
+              <Sofr ref={sofrRef} />
             </Col>
             <Col sm={12} md={6} lg={6}>
-              <Kibor />
+              <Kibor ref={kiborRef} />
             </Col>
           </Row>
           <Row className='mt-3 mb-2'>

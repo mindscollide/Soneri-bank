@@ -1,7 +1,9 @@
 import React, {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -17,7 +19,7 @@ const GetSBPConversionRatesForRateSheet = (state) =>
 const treasuryRateSheetConversionRate = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetConversionRate;
 
-const SBPConversionRates = memo(() => {
+const SBPConversionRates = memo(forwardRef((_props, ref) => {
   const lastUpdateRef = useRef(0);
   const updateQueueRef = useRef([]);
   const animationFrameRef = useRef(null);
@@ -141,6 +143,23 @@ const SBPConversionRates = memo(() => {
     };
   }, []);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      getExportData: () => ({
+        headers: columnDefs.map((col) => col.headerName),
+        rows: processedData.map((row) =>
+          columnDefs.map((col) =>
+            col.valueFormatter
+              ? col.valueFormatter({ value: row[col.field] })
+              : (row[col.field] ?? "-"),
+          ),
+        ),
+      }),
+    }),
+    [columnDefs, processedData],
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar}>
@@ -158,7 +177,7 @@ const SBPConversionRates = memo(() => {
       />
     </>
   );
-});
+}));
 
 SBPConversionRates.displayName = "SBPConversionRates";
 

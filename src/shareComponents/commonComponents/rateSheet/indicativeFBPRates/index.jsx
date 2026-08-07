@@ -1,4 +1,11 @@
-import React, { memo, useEffect, useMemo, useState } from "react";
+import React, {
+  forwardRef,
+  memo,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import styles from "../RateSheet.module.css";
 import "../rateSheetAgGrid.css";
 import AgGridTable from "../../elements/globalAgGridTable";
@@ -9,7 +16,7 @@ const GetIndicativeFBPRates = (state) =>
 const treasuryRateSheetIndicativeFBPRates = (state) =>
   state.RealtimeActionsSlice.treasuryRateSheetIndicativeFBPRates;
 
-const IndicativeFBPRates = memo(() => {
+const IndicativeFBPRates = memo(forwardRef((_props, ref) => {
   const [processedData, setProcessedData] = useState([]);
   const fbpRates = useSelector(GetIndicativeFBPRates);
   const fullFeed = useSelector(treasuryRateSheetIndicativeFBPRates);
@@ -117,6 +124,23 @@ const IndicativeFBPRates = memo(() => {
     }
   }, [fullFeed]);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      getExportData: () => ({
+        headers: columnDefs.map((col) => col.headerName),
+        rows: processedData.map((row) =>
+          columnDefs.map((col) =>
+            col.valueFormatter
+              ? col.valueFormatter({ value: row[col.field] })
+              : (row[col.field] ?? "-"),
+          ),
+        ),
+      }),
+    }),
+    [columnDefs, processedData],
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar_SOFR}>Indicative FBP Rates</span>
@@ -132,7 +156,7 @@ const IndicativeFBPRates = memo(() => {
       />
     </>
   );
-});
+}));
 
 IndicativeFBPRates.displayName = "IndicativeFBPRates";
 

@@ -1,7 +1,9 @@
 import React, {
+  forwardRef,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -25,7 +27,7 @@ const treasuryRateSheetCurrencyNotes = (state) =>
 const toFixedOrDash = ({ value }) => (value ? Number(value).toFixed(2) : "-");
 const PROCESS_THROTTLE_MS = 200;
 
-const RatesForCurrencyNotes = memo(() => {
+const RatesForCurrencyNotes = memo(forwardRef((_props, ref) => {
   const dispatch = useDispatch();
 
   // State
@@ -185,6 +187,23 @@ const RatesForCurrencyNotes = memo(() => {
     [],
   );
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      getExportData: () => ({
+        headers: columnDefs.map((col) => col.headerName),
+        rows: processedData.map((row) =>
+          columnDefs.map((col) =>
+            col.valueFormatter
+              ? col.valueFormatter({ value: row[col.field] })
+              : (row[col.field] ?? "-"),
+          ),
+        ),
+      }),
+    }),
+    [columnDefs, processedData],
+  );
+
   return (
     <>
       <span className={styles.tableheaderbar}>Rates For Currency Notes</span>
@@ -201,7 +220,7 @@ const RatesForCurrencyNotes = memo(() => {
       />
     </>
   );
-});
+}));
 
 RatesForCurrencyNotes.displayName = "RatesForCurrencyNotes";
 
