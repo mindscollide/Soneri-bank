@@ -32,6 +32,7 @@ import {
 import { clearTreasuryT24Rates } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
 import { useMqttTopics } from "../../../hook/useMqttTopics";
+import { getCurrentDate } from "../../../utils/formatters";
 
 const dashIfEmpty = ({ value }) =>
   value === 0 || value === null || value === undefined || value === ""
@@ -158,43 +159,43 @@ const T24 = () => {
         headerName: "BUY RATE CM.2",
         field: "buyRateCM2",
         valueFormatter: dashIfEmpty,
-        width: 140,
+        flex: 1,
       },
       {
         headerName: "SELL RATE CM.2",
         field: "sellRateCM2",
         valueFormatter: dashIfEmpty,
-        width: 140,
+        flex: 1,
       },
       {
         headerName: "BUY RATE CM.1",
         field: "buyRateCM1",
         valueFormatter: dashIfEmpty,
-        width: 140,
+        flex: 1,
       },
       {
         headerName: "SELL RATE CM.1",
         field: "sellRateCM1",
         valueFormatter: dashIfEmpty,
-        width: 140,
+        flex: 1,
       },
       {
         headerName: "Seperator",
         field: "separator",
         valueFormatter: () => "::",
-        width: 100,
+        flex: 1,
       },
       {
         headerName: "BUY.RATE",
         field: "buyRate",
         valueFormatter: dashIfEmpty,
-        width: 140,
+        flex: 1,
       },
       {
         headerName: "SELL.RATE",
         field: "sellRate",
         valueFormatter: dashIfEmpty,
-        width: 140,
+        flex: 1,
       },
     ],
     [],
@@ -327,7 +328,7 @@ const T24 = () => {
         columnStyles: { 0: { halign: "left", fillColor: [232, 225, 219] } },
       });
 
-      pdf.save("T24Rates.pdf");
+      pdf.save(`SBL Rates T24 ${getCurrentDate()}.pdf`);
     } catch (error) {
       console.error("PDF export failed:", error);
     } finally {

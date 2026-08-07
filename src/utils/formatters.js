@@ -344,3 +344,14 @@ export const formatDateAndTimeFromString = (date) => {
     date.slice(12, 14);
   return new Date(dateString);
 };
+
+
+export const getCurrentDate = () => {
+  const date = new Date(Date.now());
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+};

@@ -153,7 +153,7 @@ const RateSheet = () => {
     if (!exportData || !exportData.rows.length) return y;
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(10);
+    pdf.setFontSize(8);
     pdf.text(title, x, y);
 
     autoTable(pdf, {
@@ -162,7 +162,12 @@ const RateSheet = () => {
       startY: y + 2,
       theme: "grid",
       styles: { fontSize: 8, halign: "center", cellPadding: 1.5 },
-      headStyles: { fillColor: [0, 0, 0], textColor: 255, fontStyle: "bold" },
+      headStyles: {
+        fillColor: [0, 0, 0],
+        textColor: 255,
+        fontStyle: "bold",
+        fontSize: 10,
+      },
       columnStyles: { 0: { halign: "left", fillColor: [232, 225, 219] } },
       margin: { left: x },
       tableWidth: width,
@@ -303,16 +308,17 @@ const RateSheet = () => {
         "THE ABOVE RATES ARE ONLY INDICATIVE AND SUBJECT TO CHANGE WITHOUT PRIOR NOTICE.",
         "FX TRANSACTIONS CUT OFF TIME FOR REPORTING IS 15:30 HOURS (MON-THU) AND 14:30 HOURS (FRIDAY).",
         "PLEASE CALL DEALING ROOM FOR AMOUNT EQUIVALENT OR MORE THAN USD.5,000/=",
+        "SONERI CAPTURES ABOVE FOREIGN EXCHANGE RATES FROM SOURCES BELIEVED TO BE RELIABLE AND DOES NOT ACCEPT ANY LIABILITY FOR CONSEQUENCES THAT MAY ARISE USING THESE RATES. ",
       ];
 
       notes.forEach((note) => {
         const lines = pdf.splitTextToSize(`• ${note}`, pageWidth - 20);
         pdf.text(lines, 10, cursorY);
-        cursorY += lines.length * 4 + 1;
+        cursorY += 4;
       });
 
       pdf.setTextColor(0, 0, 0);
-      cursorY += 5;
+      cursorY += 7;
 
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
@@ -325,6 +331,14 @@ const RateSheet = () => {
       cursorY += 4;
       pdf.text(
         "Direct Lines: 021-38900145. Email: treasury.sales@soneribank.com PABX +92 21 32444401-05, Exts: 2301, 2514, 2184, 2186 & 2144",
+        pageWidth / 2,
+        cursorY,
+        { align: "center", maxWidth: pageWidth - 20 },
+      );
+
+      cursorY += 15;
+      pdf.text(
+        "THIS IS A COMPUTER GENERATED RATE SHEET AND DOES NOT REQUIRE ANY SIGNATURE",
         pageWidth / 2,
         cursorY,
         { align: "center", maxWidth: pageWidth - 20 },
