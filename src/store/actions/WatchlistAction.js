@@ -62,6 +62,7 @@ import {
   setNewsLoadingSpinner,
 } from "../slicers/watchListSlicer/WatchListSlicer";
 import { downloadBase64File } from "../../utils/converts";
+import { getCurrentDate } from "../../utils/formatters";
 
 // Define the GetAllFowardsAndDiscountsRates async thunk
 export const getAllTreasuryInstrumentsApi = createAsyncThunk(
@@ -3051,9 +3052,7 @@ export const GetRateSheetExcelExportReportApi = createAsyncThunk(
           ) {
             downloadBase64File(
               fileBase64,
-              fileName?.endsWith(".xlsx")
-                ? fileName
-                : `${fileName || "RateSheet"}.xlsx`,
+              `SBL Ratesheet - ${getCurrentDate()}.xlsx`,
             );
             return {
               response: response.data.responseResult,
@@ -3161,7 +3160,10 @@ export const GetT24RatesExcelReportApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetT24RatesExcel_01".toLowerCase(),
               )
           ) {
-            downloadBase64File(base64File, `T24.pdf`);
+            downloadBase64File(
+              base64File,
+              `SBL T24 - ${getCurrentDate()}.xlsx`,
+            );
             return {
               response: response.data.responseResult,
               message: "",
