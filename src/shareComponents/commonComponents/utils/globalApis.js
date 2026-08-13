@@ -48,7 +48,6 @@ export const getAllInstrumentsApi = createAsyncThunk(
             return rejectWithValue("Something went wrong");
           }
         } else {
-          console.log("", response.data);
           return rejectWithValue("Something went wrong");
         }
       } else {
@@ -56,7 +55,6 @@ export const getAllInstrumentsApi = createAsyncThunk(
       }
     } catch (error) {
       // Reject with error message
-      console.log("", error);
       return rejectWithValue("Something went wrong");
     }
   }

@@ -110,7 +110,6 @@ const Dashboard = () => {
             break;
 
           case "NONFE_DISCOUNTING_RATES_PUBLISHED":
-            console.log("NONFE_DISCOUNTING_RATES_PUBLISHED", payload);
             startTransition(() => {
               dispatch(NonFeDiscountingPublishedAction(payload));
             });
@@ -142,29 +141,7 @@ const Dashboard = () => {
             break;
 
           case "DISPATCHER_DEALER_SPOT_RATES":
-            // {
-            //   payload.instrumentCrossRate.instrumentID === 21 &&
-            //     console.log("DISPATCHER_DEALER_SPOT_RATES", payload);
-            // }
-
-            // console.log(
-            //   payload.instrumentCrossRate.instrumentID,
-            //   payload.instrumentParitySpot.instrumentID,
-            //   "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
-            // );
-            // if (payload?.instrumentCrossRate?.instrumentID === 21) {
-            //   console.log(
-            //     payload,
-            //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
-            //   );
-            // }
-            // if (payload?.instrumentParitySpot?.instrumentID === 21) {
-            //   console.log(
-            //     payload,
-            //     "TREASURY_SPOT_RATES_FEEDTREASURY_SPOT_RATES_FEED"
-            //   );
-            // }
-
+    
             startTransition(() => {
               dispatch(setDealerSpotRatesFeed(payload));
             });
@@ -289,7 +266,7 @@ const Dashboard = () => {
           case "TREASURY_MANAGEMENT_SWAPS_IN_USD":
 
             startTransition(() => {
-              dispatch(setSwapsinUSDForManagementFeed(payload));
+              dispatch(setSwapsinUSDForManagementFeed(data));
             });
             break;
 

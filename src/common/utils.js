@@ -1,5 +1,8 @@
 // utils/secureFormData.js
 import CryptoJS from "crypto-js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
 // Function to set custom headers
 // Function to set custom headers
@@ -82,7 +85,7 @@ export const xorEncryptDecrypt = (input, key) => {
   let out = "";
   for (let i = 0; i < input.length; i++) {
     out += String.fromCharCode(
-      input.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+      input.charCodeAt(i) ^ key.charCodeAt(i % key.length),
     );
   }
   return out;
@@ -183,4 +186,13 @@ export const calculateDates = (tenorDays, optionDays) => {
 export const isWeekend = (date) => {
   const day = date.getDay(); // 0 = Sunday, 6 = Saturday
   return day === 0 || day === 6;
+};
+
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
+
+export const convertUTCToLocal = (dateTime) => {
+  if (!dateTime) return "";
+
+  return dayjs.utc(dateTime, "YYYYMMDDHHmmss").local().format("YYYYMMDDHHmmss");
 };

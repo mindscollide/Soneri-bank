@@ -1,10 +1,11 @@
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import styles from "../management.module.css";
 import { clearSwapsinUSDForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import dayjs from "dayjs";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import { convertUTCToLocal } from "../../../common/utils";
 
 // Selectors
 const GetSwapsInUSDForTreasury = (state) =>
@@ -14,7 +15,6 @@ const swapsinUSDForManagementFeed = (state) =>
   state.RealtimeActionsSlice.swapsinUSDForManagementFeed;
 
 const SwapsInUSD = memo(() => {
-
   const dispatch = useDispatch();
 
   const agGridComponentRef = useRef(null); // ✅ for ref={} prop on AgGridTable
@@ -30,8 +30,18 @@ const SwapsInUSD = memo(() => {
 
   const swapsinUSDList = useSelector(GetSwapsInUSDForTreasury, shallowEqual);
   const fullFeed = useSelector(swapsinUSDForManagementFeed, shallowEqual);
-  const latestDate = swapsinUSDList?.datetime ?? "";
 
+  const initialLatestDate = swapsinUSDList?.datetime ?? "";
+
+  const [latestDate, setLatestDate] = useState(initialLatestDate);
+  const latestDateRef = useRef(initialLatestDate);
+
+  useEffect(() => {
+    if (initialLatestDate && initialLatestDate !== latestDateRef.current) {
+      latestDateRef.current = initialLatestDate;
+      setLatestDate(initialLatestDate);
+    }
+  }, [initialLatestDate]);
   // ─────────────────────────────
   // Derive currency list + row data together, synchronously, in the same
   // render pass — this is what columnDefs and rowData below are built from,
@@ -211,15 +221,23 @@ const SwapsInUSD = memo(() => {
   // ✅ Queue with deduplication
   const queueUpdate = useCallback(
     (feed) => {
-      if (!feed?.swaapsInUSD || !isMountedRef.current) return;
-
+      if (!feed?.payload?.swaapsInUSD || !isMountedRef.current) return;
+      const { dateTime, payload } = feed;
       const { currencyPair, currencyPairFull, tenor, bid, ask } =
-        feed.swaapsInUSD;
+        payload.swaapsInUSD;
+
+      let converDateTime = convertUTCToLocal(dateTime)
+      if (converDateTime && converDateTime !== latestDateRef.current) {
+        latestDateRef.current = converDateTime;
+        setLatestDate(converDateTime);
+      }
       // Live feed messages almost always carry currencyPairFull as null —
       // resolve the short code through the same mapping the columns were
       // built from, so the key actually matches an existing column field.
       const full =
-        currencyPairFull || pairMappingRef.current[currencyPair] || currencyPair;
+        currencyPairFull ||
+        pairMappingRef.current[currencyPair] ||
+        currencyPair;
       const bidKey = `${full}_bid`;
       const askKey = `${full}_ask`;
 
@@ -236,7 +254,7 @@ const SwapsInUSD = memo(() => {
         rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processQueue]
+    [processQueue],
   );
 
   // ─────────────────────────────
@@ -329,13 +347,12 @@ const SwapsInUSD = memo(() => {
       suppressMovable: true,
       editable: false,
     }),
-    []
+    [],
   );
   return (
     <>
       <span
-        className={`${styles.tableheaderbar} d-flex justify-content-between`}
-      >
+        className={`${styles.tableheaderbar} d-flex justify-content-between`}>
         <span>Swaps in USD</span>
         <span className={styles.management_date}>
           {latestDate && dayjs(latestDate).format("DD-MMM-YYYY h:mm A")}
@@ -347,12 +364,12 @@ const SwapsInUSD = memo(() => {
           ref={agGridComponentRef}
           rowData={rowData}
           columnDefs={columnDefs}
-          className="swapsInUSDManagement-grid"
+          className='swapsInUSDManagement-grid'
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
-          domLayout="normal"
-          theme="legacy"
+          domLayout='normal'
+          theme='legacy'
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
