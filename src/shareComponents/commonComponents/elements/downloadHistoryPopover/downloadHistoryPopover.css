@@ -1,6 +1,5 @@
 .downloadHistoryPopover {
   position: fixed;
-  z-index: 2000;
   background: #fff;
   border: 1px solid #837c66;
   border-radius: 4px;

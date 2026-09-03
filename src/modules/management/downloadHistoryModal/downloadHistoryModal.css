@@ -1,3 +1,61 @@
-.downloadHistoryModal_backdrop.show{
-    background: rgba(255, 255, 255, 0.2)!important;
+.downloadHistoryModal_backdrop.show {
+  background: rgba(255, 255, 255, 0.2) !important;
 }
+
+.downloadHistoryModal-optionsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.downloadHistoryModal-radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.downloadHistoryModal-rangeRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.downloadHistoryModal-dateRange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.downloadHistoryModal-toLabel {
+  font-weight: 600;
+}
+
+.downloadHistoryModal-datePicker {
+  flex: 1;
+}
+
+.downloadHistoryModal-dateRange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.downloadHistoryModal-dateRange .rmdp-container {
+  width: 150px;
+}
+
+.downloadHistoryModal-dateRange .rmdp-input {
+  width: 100%;
+  height: 28px;
+  padding: 4px 8px;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  font-size: 13px;
+}
+

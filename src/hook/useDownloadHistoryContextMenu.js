@@ -9,7 +9,7 @@ import {
 // right-clicking that column's cell shows a small "Download History"
 // popover at the cursor; clicking it hides the popover and opens the
 // shared DownloadHistoryModal with the clicked row's data.
-export const useDownloadHistoryContextMenu = (firstColumnField) => {
+export const useDownloadHistoryContextMenu = (firstColumnField, path) => {
   const dispatch = useDispatch();
   const [popover, setPopover] = useState(null); // { x, y, rowData } | null
 
@@ -31,7 +31,11 @@ export const useDownloadHistoryContextMenu = (firstColumnField) => {
   const closePopover = useCallback(() => setPopover(null), []);
 
   const handleDownloadHistoryClick = useCallback(() => {
-    dispatch(setDownloadHistoryData(popover?.rowData ?? null));
+    dispatch(
+      setDownloadHistoryData(
+        { routePath: path, data: popover?.rowData } ?? null,
+      ),
+    );
     dispatch(setDownloadHistoryModal(true));
     setPopover(null);
   }, [dispatch, popover]);

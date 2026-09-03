@@ -278,7 +278,7 @@ const SOFR = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("tenor");
+  } = useDownloadHistoryContextMenu("tenor", "SOFR");
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (

@@ -44,7 +44,7 @@ const USDParity = memo(() => {
 
     return crossInstruments.map((instrument) => {
       const matched = worldCrosses?.find(
-        (wc) => Number(wc.instrumentID) === Number(instrument.instrumentID)
+        (wc) => Number(wc.instrumentID) === Number(instrument.instrumentID),
       );
 
       return {
@@ -90,7 +90,7 @@ const USDParity = memo(() => {
         params.api.setGridOption("rowData", rowData);
       }
     },
-    [buildRowData]
+    [buildRowData],
   );
 
   // ── onFirstDataRendered ────────────────────────────────────────────────
@@ -234,7 +234,7 @@ const USDParity = memo(() => {
         rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processQueue]
+    [processQueue],
   );
 
   // ── Consume MQTT feed ──────────────────────────────────────────────────
@@ -295,8 +295,8 @@ const USDParity = memo(() => {
       value < 0
         ? "color-red justify-center"
         : value > 0
-        ? "color-green justify-center"
-        : "color-blue justify-center";
+          ? "color-green justify-center"
+          : "color-blue justify-center";
     return <IndexCell value={value} CellClassName={cellClassName} />;
   }, []);
 
@@ -365,12 +365,12 @@ const USDParity = memo(() => {
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
     ],
-    [PercentChangeCellRenderer]
+    [PercentChangeCellRenderer],
   );
 
   const getRowId = useCallback(
     (params) => String(params.data.instrumentID),
-    []
+    [],
   );
 
   const defaultColDef = useMemo(
@@ -380,7 +380,7 @@ const USDParity = memo(() => {
       suppressMovable: true,
       editable: false,
     }),
-    []
+    [],
   );
 
   const {
@@ -388,7 +388,7 @@ const USDParity = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("instrumentName");
+  } = useDownloadHistoryContextMenu("instrumentName", "USDParity");
 
   return (
     <>
@@ -396,18 +396,17 @@ const USDParity = memo(() => {
 
       <div
         style={{ width: "98%", height: "300px" }}
-        onContextMenu={(e) => e.preventDefault()}
-      >
+        onContextMenu={(e) => e.preventDefault()}>
         <AgGridTable
           ref={agGridComponentRef} // ✅ separate ref for the component instance
           columnDefs={columnDefs}
-          className="usdParityManagement-grid"
+          className='usdParityManagement-grid'
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
           onCellContextMenu={onCellContextMenu}
-          domLayout="normal"
-          theme="legacy"
+          domLayout='normal'
+          theme='legacy'
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}

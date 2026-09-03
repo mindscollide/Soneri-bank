@@ -92,6 +92,8 @@ const SwapsInUSD = memo(() => {
 
         grouped[tenor][`${full}_bid`] = item.bid;
         grouped[tenor][`${full}_ask`] = item.ask;
+        grouped[tenor][`${full}_currencyPair`] = item.currencyPair;
+        grouped[tenor][`${full}_currencyPairFull`] = item.currencyPairFull;
       });
 
       return {
@@ -228,7 +230,7 @@ const SwapsInUSD = memo(() => {
       const { currencyPair, currencyPairFull, tenor, bid, ask } =
         payload.swaapsInUSD;
 
-      let converDateTime = convertUTCToLocal(dateTime)
+      let converDateTime = convertUTCToLocal(dateTime);
       if (converDateTime && converDateTime !== latestDateRef.current) {
         latestDateRef.current = converDateTime;
         setLatestDate(converDateTime);
@@ -356,7 +358,7 @@ const SwapsInUSD = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("tenorName");
+  } = useDownloadHistoryContextMenu("tenorName", "SwapsInUSD");
 
   return (
     <>
@@ -370,8 +372,7 @@ const SwapsInUSD = memo(() => {
 
       <div
         style={{ height: "300px", width: "100%" }}
-        onContextMenu={(e) => e.preventDefault()}
-      >
+        onContextMenu={(e) => e.preventDefault()}>
         <AgGridTable
           ref={agGridComponentRef}
           rowData={rowData}

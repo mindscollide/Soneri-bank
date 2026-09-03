@@ -43,7 +43,7 @@ const Commodities = memo(() => {
     try {
       return otherInstruments.map((instrument) => {
         const matchedCross = commodityList?.find(
-          (wc) => Number(wc.instrumentId) === instrument.instrumentId
+          (wc) => Number(wc.instrumentId) === instrument.instrumentId,
         );
 
         return {
@@ -96,7 +96,7 @@ const Commodities = memo(() => {
       }
       // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
-    [buildRowData]
+    [buildRowData],
   );
 
   // ─────────────────────────────
@@ -210,7 +210,7 @@ const Commodities = memo(() => {
         rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processQueue]
+    [processQueue],
   );
 
   // ─────────────────────────────
@@ -329,12 +329,12 @@ const Commodities = memo(() => {
           p.value ? convertUTCTimeToLocalTime(p.value) : "--:--:--",
       },
     ],
-    [PercentageCellRenderer]
+    [PercentageCellRenderer],
   );
 
   const getRowId = useCallback(
     (params) => String(params.data.instrumentID),
-    []
+    [],
   );
 
   const defaultColDef = useMemo(
@@ -344,7 +344,7 @@ const Commodities = memo(() => {
       suppressMovable: true,
       editable: false,
     }),
-    []
+    [],
   );
 
   const {
@@ -352,7 +352,7 @@ const Commodities = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("instrumentName");
+  } = useDownloadHistoryContextMenu("instrumentName", "Commodities");
 
   return (
     <>
@@ -360,18 +360,17 @@ const Commodities = memo(() => {
 
       <div
         style={{ height: "235px", width: "100%" }}
-        onContextMenu={(e) => e.preventDefault()}
-      >
+        onContextMenu={(e) => e.preventDefault()}>
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
-          className="usdParityManagement-grid"
+          className='usdParityManagement-grid'
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
           onCellContextMenu={onCellContextMenu}
-          domLayout="normal"
-          theme="legacy"
+          domLayout='normal'
+          theme='legacy'
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}

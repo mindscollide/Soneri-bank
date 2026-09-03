@@ -180,17 +180,48 @@ export const GetRefreshIconTenors = {
 };
 
 export const CalculateTenorSwapAndForwardRateRM = {
-  RequestMethod: "ServiceManager.CalculateTenorSwapAndForwardRate"
-}
+  RequestMethod: "ServiceManager.CalculateTenorSwapAndForwardRate",
+};
 
 export const GetRateSheetExcelExportReportRM = {
-  RequestMethod: "ServiceManager.GetRateSheetExcelExportReport"
-}
+  RequestMethod: "ServiceManager.GetRateSheetExcelExportReport",
+};
 
 export const GetT24RatesRM = {
-  RequestMethod: "ServiceManager.GetT24Rates"
-}
+  RequestMethod: "ServiceManager.GetT24Rates",
+};
 
 export const GetT24RatesExcelRM = {
-  RequestMethod: "ServiceManager.GetT24RatesExcel"
-}
+  RequestMethod: "ServiceManager.GetT24RatesExcel",
+};
+
+export const GetWorldCurrencyHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetWorldCurrencyHistoricalData",
+};
+export const GetCurrencyCrossesHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetCurrencyCrossesHistoricalData",
+};
+
+export const GetCommodityHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetCommodityHistoricalData",
+};
+
+export const GetWorldIndicesHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetWorldIndicesHistoricalData ",
+};
+
+export const GetKiborHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetKiborHistoricalData",
+};
+
+export const GetSOFRHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetSOFRHistoricalData ",
+};
+
+export const GetCurrencySwapsHistoricalDataRM = {
+  RequestMethod: "ServiceManager.GetCurrencySwapsHistoricalData ",
+};
+
+export const GetSBPFXRatesHistoryRM = {
+  RequestMethod: "ServiceManager.GetSBPFXRatesHistory",
+};

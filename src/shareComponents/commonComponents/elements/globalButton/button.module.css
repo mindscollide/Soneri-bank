@@ -609,12 +609,12 @@
   padding: 0.375rem 0.75rem;
 }
 .createTenorModalFooterBtn:is(
-    :hover,
-    :focus,
-    :focus-visible,
-    :visited,
-    :active
-  ) {
+  :hover,
+  :focus,
+  :focus-visible,
+  :visited,
+  :active
+) {
   background: #0d6efd !important;
   color: #fff !important;
   outline: none;
@@ -630,12 +630,12 @@
   padding: 0.375rem 0.75rem;
 }
 .cancelTenorModalFooterBtn:is(
-    :hover,
-    :focus,
-    :focus-visible,
-    :visited,
-    :active
-  ) {
+  :hover,
+  :focus,
+  :focus-visible,
+  :visited,
+  :active
+) {
   color: #fff !important;
   background: #dc3545 !important;
   outline: none;
@@ -826,13 +826,13 @@
 
 .tabsButton_active,
 .tabsButton_active:is(
-    :hover,
-    :focus,
-    :focus-visible,
-    :active,
-    :active,
-    :visited
-  ) {
+  :hover,
+  :focus,
+  :focus-visible,
+  :active,
+  :active,
+  :visited
+) {
   border-radius: 2px !important;
   padding: 2px 8px !important;
   font-size: 13px !important;
@@ -1104,4 +1104,49 @@
   color: #fff !important;
 
   filter: grayscale(1);
+}
+
+.DownloadHistoryExport_btn {
+  padding: 18px 30px;
+  background: #fff !important;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  min-width: 120px;
+  color: #0d6efd;
+  border: 1px solid #0d6efd;
+}
+.DownloadHistoryExport_btn:is(:hover) {
+  padding: 18px 30px;
+  background: #0d6efd !important;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  min-width: 120px;
+  color: #0d6efd;
+  border: 1px solid #0d6efd;
+}
+.DownloadHistoryCancel_btn {
+  padding: 18px 30px;
+  border: 1px solid rgb(220, 53, 69);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  min-width: 120px;
+  color: rgb(220, 53, 69) !important;
+  background: #fff !important;
+}
+.DownloadHistoryCancel_btn:is(:hover) {
+  padding: 18px 30px;
+  background: rgb(220, 53, 69) !important;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  min-width: 120px;
+  color: #fff !important;
+  border: 1px solid #dc3545 !important;
 }

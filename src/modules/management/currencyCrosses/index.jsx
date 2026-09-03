@@ -344,7 +344,7 @@ const CurrencyCrosses = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("instrumentName");
+  } = useDownloadHistoryContextMenu("instrumentName","CurrencyCrosses");
 
   return (
     <>

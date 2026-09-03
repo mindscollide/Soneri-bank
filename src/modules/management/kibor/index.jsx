@@ -75,7 +75,7 @@ const KIBOR = memo(() => {
         params.api.setGridOption("rowData", rowData);
       }
     },
-    [buildRowData]
+    [buildRowData],
   );
 
   // ── onFirstDataRendered ────────────────────────────────────────────────────
@@ -172,7 +172,7 @@ const KIBOR = memo(() => {
         rafRef.current = requestAnimationFrame(processQueue);
       }
     },
-    [processQueue]
+    [processQueue],
   );
 
   // ── Consume MQTT feed ──────────────────────────────────────────────────────
@@ -248,7 +248,7 @@ const KIBOR = memo(() => {
         cellClass: "percentage-cell",
       },
     ],
-    []
+    [],
   );
 
   const getRowId = useCallback((params) => params.data.displayName, []);
@@ -260,7 +260,7 @@ const KIBOR = memo(() => {
       suppressMovable: true,
       editable: false,
     }),
-    []
+    [],
   );
 
   const {
@@ -268,7 +268,7 @@ const KIBOR = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("displayName");
+  } = useDownloadHistoryContextMenu("displayName", "KIBOR");
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -277,18 +277,17 @@ const KIBOR = memo(() => {
 
       <div
         style={{ width: "100%", height: "257px" }}
-        onContextMenu={(e) => e.preventDefault()}
-      >
+        onContextMenu={(e) => e.preventDefault()}>
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
-          className="usdParityManagement-grid"
+          className='usdParityManagement-grid'
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
           onCellContextMenu={onCellContextMenu}
-          domLayout="normal"
-          theme="legacy"
+          domLayout='normal'
+          theme='legacy'
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}

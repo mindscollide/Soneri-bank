@@ -21,13 +21,17 @@ import {
   GetBankForwardForTreasuryDealer,
   GetBankSpotForDealer,
   GetCommoditiesForTreasury,
+  GetCommodityHistoricalDataRM,
   GetCurrencyCrosses,
+  GetCurrencyCrossesHistoricalDataRM,
+  GetCurrencySwapsHistoricalDataRM,
   getDealerDasboardDataRM,
   GetDiscountingRatesForDealer,
   GetIndicativeFBPRates,
   GetIndicesForTreasury,
   GetKiborDataForRateSheet,
   GetKiborDataForTreasury,
+  GetKiborHistoricalDataRM,
   GetLastAndCurrentPublishUSDRateSheet,
   getLastAndCurrentUSDRatesRM,
   GetNewsDetailsByID,
@@ -37,14 +41,18 @@ import {
   GetRefreshIconTenors,
   GetRevalRatesForTreasury,
   GetSBPConversionRatesForRateSheet,
+  GetSBPFXRatesHistoryRM,
   GetSingleDealersSpread,
   GetSOFRDataForRateSheet,
   GetSOFRDataForTreasury,
+  GetSOFRHistoricalDataRM,
   GetSpotTTRatesForRateSheet,
   GetSwapsInUSDForTreasury,
   GetT24RatesExcelRM,
   GetT24RatesRM,
   GetUSDParityForTreasury,
+  GetWorldCurrencyHistoricalDataRM,
+  GetWorldIndicesHistoricalDataRM,
   marketOnOffRM,
   PublishCurrentUSDRateSheet,
   publishCurrentUSDRatesRM,
@@ -3173,6 +3181,439 @@ export const GetT24RatesExcelReportApi = createAsyncThunk(
               .toLowerCase()
               .includes(
                 "WatchList_WatchListServiceManager_GetT24RatesExcel_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+
+export const GetWorldCurrencyHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetWorldCurrencyHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getWorldCurrencyHistoricalData = createPostAPI(
+        watchListApi,
+        GetWorldCurrencyHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getWorldCurrencyHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetWorldCurrencyHistoricalData_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetWorldCurrencyHistoricalData_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetCurrencyCrossesHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetCurrencyCrossesHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getCurrencyCrossesHistoricalData = createPostAPI(
+        watchListApi,
+        GetCurrencyCrossesHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getCurrencyCrossesHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCurrencyCrossesHistoricalData_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCurrencyCrossesHistoricalData_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetCommodityHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetCommodityHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getCommodityHistoricalData = createPostAPI(
+        watchListApi,
+        GetCommodityHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getCommodityHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCommodityHistoricalData_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCommodityHistoricalData_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetWorldIndicesHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetWorldIndicesHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getWorldIndicesHistoricalData = createPostAPI(
+        watchListApi,
+        GetWorldIndicesHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getWorldIndicesHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetWorldIndicesHistoricalData_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetWorldIndicesHistoricalData_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetKiborHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetKiborHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getKiborHistoricalData = createPostAPI(
+        watchListApi,
+        GetKiborHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getKiborHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetKiborHistoricalData_01 ".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetKiborHistoricalData_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetSOFRHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetSOFRHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getSOFRHistoricalData = createPostAPI(
+        watchListApi,
+        GetSOFRHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getSOFRHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSOFRHistoricalData_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSOFRHistoricalData_04".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetCurrencySwapsHistoricalDataApi = createAsyncThunk(
+  "watchlist/GetCurrencySwapsHistoricalData",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getCurrencySwapsHistoricalData = createPostAPI(
+        watchListApi,
+        GetCurrencySwapsHistoricalDataRM.RequestMethod,
+      );
+
+      const response = await getCurrencySwapsHistoricalData();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCurrencySwapsHistoricalData_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetCurrencySwapsHistoricalData_04 ".toLowerCase(),
+              )
+          ) {
+            return rejectWithValue("Something-went-wrong");
+          } else {
+            console.log("", response.data);
+            return rejectWithValue("Something went wrong");
+          }
+        } else {
+          console.log("", response.data);
+          return rejectWithValue("Something went wrong");
+        }
+      } else {
+        console.log("", response.data);
+        return rejectWithValue("Something went wrong");
+      }
+    } catch (error) {
+      // Reject with error message
+      console.log("", error);
+      return rejectWithValue("Something went wrong");
+    }
+  },
+);
+export const GetSBPFXRatesHistoryApi = createAsyncThunk(
+  "watchlist/GetSBPFXRatesHistory",
+  async ({}, { rejectWithValue }) => {
+    try {
+      let getSBPFXRatesHistory = createPostAPI(
+        watchListApi,
+        GetSBPFXRatesHistoryRM.RequestMethod,
+      );
+
+      const response = await getSBPFXRatesHistory();
+
+      if (response.data.responseCode === 200) {
+        const { isExecuted, responseMessage, base64Excel, fileName } =
+          response.data.responseResult;
+        if (isExecuted) {
+          if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSBPFXRatesHistory_01".toLowerCase(),
+              )
+          ) {
+            downloadBase64File(base64Excel, fileName);
+            return {
+              response: response.data.responseResult,
+              message: "",
+            };
+          } else if (
+            responseMessage
+              .toLowerCase()
+              .includes(
+                "WatchList_WatchListServiceManager_GetSBPFXRatesHistory_04".toLowerCase(),
               )
           ) {
             return rejectWithValue("Something-went-wrong");

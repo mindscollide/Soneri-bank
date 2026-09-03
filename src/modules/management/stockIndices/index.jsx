@@ -369,7 +369,7 @@ const StockIndices = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("instrumentName");
+  } = useDownloadHistoryContextMenu("instrumentName", "StockIndices");
 
   return (
     <>

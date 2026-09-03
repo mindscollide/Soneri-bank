@@ -45,6 +45,14 @@ import {
   PublishNewRatesAction,
   PublishNonFEDiscountingTableApi,
   PublishTenorWiseForwardsAction,
+  GetWorldCurrencyHistoricalDataApi,
+  GetCurrencyCrossesHistoricalDataApi,
+  GetCommodityHistoricalDataApi,
+  GetWorldIndicesHistoricalDataApi,
+  GetKiborHistoricalDataApi,
+  GetSOFRHistoricalDataApi,
+  GetCurrencySwapsHistoricalDataApi,
+  GetSBPFXRatesHistoryApi,
 } from "../../actions/WatchlistAction";
 
 const WatchListSlice = createSlice({
@@ -100,6 +108,14 @@ const WatchListSlice = createSlice({
     GetRefreshIconTenorsLoading: false,
     GetCalculateTenorSwapAndForwardRateLoading: false,
     GetT24RatesLoading: false,
+    WorldCurrencyHistoricalDataLoading: null,
+    CurrencyCrossesHistoricalDataLoading: null,
+    CommodityHistoricalDataLoading: null,
+    WorldIndicesHistoricalDataLoading: null,
+    KiborHistoricalDataLoading: null,
+    SOFRHistoricalDataLoading: null,
+    CurrencySwapsHistoricalDataLoading: null,
+    SBPFXRatesHistoryLoading: null,
     // data states
     GetAllInstrumentForTreasury: null,
     GetBankSpotForTreasury: null,
@@ -161,6 +177,14 @@ const WatchListSlice = createSlice({
     // for Management
     showDownloadHistoryModal: false,
     DownloadHistoryData: null,
+    WorldCurrencyHistoricalData: null,
+    CurrencyCrossesHistoricalData: null,
+    CommodityHistoricalData: null,
+    WorldIndicesHistoricalData: null,
+    KiborHistoricalData: null,
+    SOFRHistoricalData: null,
+    CurrencySwapsHistoricalData: null,
+    SBPFXRatesHistory: null,
   },
   reducers: {
     setNewsLoadingSpinner: (state, { payload }) => {
@@ -1012,6 +1036,172 @@ const WatchListSlice = createSlice({
       })
       .addCase(setActiveTab, (state, action) => {
         state.activeTab = action.payload;
+      })
+      // ============================================================
+      // Historical Data APIs
+      // ============================================================
+
+      // ------------------ World Currency Historical Data ------------------
+      .addCase(GetWorldCurrencyHistoricalDataApi.pending, (state) => {
+        state.WorldCurrencyHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        GetWorldCurrencyHistoricalDataApi.fulfilled,
+        (state, { payload }) => {
+          state.WorldCurrencyHistoricalDataLoading = false;
+          state.WorldCurrencyHistoricalData = payload?.response;
+          state.responseMessage = payload?.message ?? "";
+        },
+      )
+      .addCase(
+        GetWorldCurrencyHistoricalDataApi.rejected,
+        (state, { payload }) => {
+          state.WorldCurrencyHistoricalDataLoading = false;
+          state.WorldCurrencyHistoricalData = null;
+          state.error = payload;
+          state.responseMessage = payload ?? "";
+        },
+      )
+
+      // ------------------ Currency Crosses Historical Data ------------------
+      .addCase(GetCurrencyCrossesHistoricalDataApi.pending, (state) => {
+        state.CurrencyCrossesHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        GetCurrencyCrossesHistoricalDataApi.fulfilled,
+        (state, { payload }) => {
+          state.CurrencyCrossesHistoricalDataLoading = false;
+          state.CurrencyCrossesHistoricalData = payload?.response;
+          state.responseMessage = payload?.message ?? "";
+        },
+      )
+      .addCase(
+        GetCurrencyCrossesHistoricalDataApi.rejected,
+        (state, { payload }) => {
+          state.CurrencyCrossesHistoricalDataLoading = false;
+          state.CurrencyCrossesHistoricalData = null;
+          state.error = payload;
+          state.responseMessage = payload ?? "";
+        },
+      )
+
+      // ------------------ Commodity Historical Data ------------------
+      .addCase(GetCommodityHistoricalDataApi.pending, (state) => {
+        state.CommodityHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        GetCommodityHistoricalDataApi.fulfilled,
+        (state, { payload }) => {
+          state.CommodityHistoricalDataLoading = false;
+          state.CommodityHistoricalData = payload?.response;
+          state.responseMessage = payload?.message ?? "";
+        },
+      )
+      .addCase(GetCommodityHistoricalDataApi.rejected, (state, { payload }) => {
+        state.CommodityHistoricalDataLoading = false;
+        state.CommodityHistoricalData = null;
+        state.error = payload;
+        state.responseMessage = payload ?? "";
+      })
+
+      // ------------------ World Indices Historical Data ------------------
+      .addCase(GetWorldIndicesHistoricalDataApi.pending, (state) => {
+        state.WorldIndicesHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        GetWorldIndicesHistoricalDataApi.fulfilled,
+        (state, { payload }) => {
+          state.WorldIndicesHistoricalDataLoading = false;
+          state.WorldIndicesHistoricalData = payload?.response;
+          state.responseMessage = payload?.message ?? "";
+        },
+      )
+      .addCase(
+        GetWorldIndicesHistoricalDataApi.rejected,
+        (state, { payload }) => {
+          state.WorldIndicesHistoricalDataLoading = false;
+          state.WorldIndicesHistoricalData = null;
+          state.error = payload;
+          state.responseMessage = payload ?? "";
+        },
+      )
+
+      // ------------------ KIBOR Historical Data ------------------
+      .addCase(GetKiborHistoricalDataApi.pending, (state) => {
+        state.KiborHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(GetKiborHistoricalDataApi.fulfilled, (state, { payload }) => {
+        state.KiborHistoricalDataLoading = false;
+        state.KiborHistoricalData = payload?.response;
+        state.responseMessage = payload?.message ?? "";
+      })
+      .addCase(GetKiborHistoricalDataApi.rejected, (state, { payload }) => {
+        state.KiborHistoricalDataLoading = false;
+        state.KiborHistoricalData = null;
+        state.error = payload;
+        state.responseMessage = payload ?? "";
+      })
+
+      // ------------------ SOFR Historical Data ------------------
+      .addCase(GetSOFRHistoricalDataApi.pending, (state) => {
+        state.SOFRHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(GetSOFRHistoricalDataApi.fulfilled, (state, { payload }) => {
+        state.SOFRHistoricalDataLoading = false;
+        state.SOFRHistoricalData = payload?.response;
+        state.responseMessage = payload?.message ?? "";
+      })
+      .addCase(GetSOFRHistoricalDataApi.rejected, (state, { payload }) => {
+        state.SOFRHistoricalDataLoading = false;
+        state.SOFRHistoricalData = null;
+        state.error = payload;
+        state.responseMessage = payload ?? "";
+      })
+
+      // ------------------ Currency Swaps Historical Data ------------------
+      .addCase(GetCurrencySwapsHistoricalDataApi.pending, (state) => {
+        state.CurrencySwapsHistoricalDataLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        GetCurrencySwapsHistoricalDataApi.fulfilled,
+        (state, { payload }) => {
+          state.CurrencySwapsHistoricalDataLoading = false;
+          state.CurrencySwapsHistoricalData = payload?.response;
+          state.responseMessage = payload?.message ?? "";
+        },
+      )
+      .addCase(
+        GetCurrencySwapsHistoricalDataApi.rejected,
+        (state, { payload }) => {
+          state.CurrencySwapsHistoricalDataLoading = false;
+          state.CurrencySwapsHistoricalData = null;
+          state.error = payload;
+          state.responseMessage = payload ?? "";
+        },
+      )
+
+      // ------------------ SBP FX Rates History ------------------
+      .addCase(GetSBPFXRatesHistoryApi.pending, (state) => {
+        state.SBPFXRatesHistoryLoading = true;
+        state.error = null;
+      })
+      .addCase(GetSBPFXRatesHistoryApi.fulfilled, (state, { payload }) => {
+        state.SBPFXRatesHistoryLoading = false;
+        state.SBPFXRatesHistory = payload?.response;
+        state.responseMessage = payload?.message ?? "";
+      })
+      .addCase(GetSBPFXRatesHistoryApi.rejected, (state, { payload }) => {
+        state.SBPFXRatesHistoryLoading = false;
+        state.SBPFXRatesHistory = null;
+        state.error = payload;
+        state.responseMessage = payload ?? "";
       });
   },
 });
@@ -1059,6 +1249,6 @@ export const {
   setNewsByNewsIdViewModal,
   setNewsLoadingSpinner,
   setDownloadHistoryData,
-  setDownloadHistoryModal
+  setDownloadHistoryModal,
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;

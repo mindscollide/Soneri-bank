@@ -44,7 +44,7 @@ const SBPFXRevalRates = memo(() => {
       }
     });
     return Array.from(tenorMap.values()).sort(
-      (a, b) => a.displayOrderPriority - b.displayOrderPriority
+      (a, b) => a.displayOrderPriority - b.displayOrderPriority,
     );
   }, []);
 
@@ -72,7 +72,7 @@ const SBPFXRevalRates = memo(() => {
           }
           acc[currency][`tenorId_${tenorId}_value`] = value;
           return acc;
-        }, {})
+        }, {}),
       );
 
       return grouped;
@@ -111,7 +111,7 @@ const SBPFXRevalRates = memo(() => {
       const rowData = buildRowData();
       params.api.setGridOption("rowData", rowData || []);
     },
-    [buildRowData]
+    [buildRowData],
   );
 
   // ─────────────────────────────
@@ -134,7 +134,7 @@ const SBPFXRevalRates = memo(() => {
         params.api.showNoRowsOverlay();
       }
     },
-    [rebuildRowNodeMap]
+    [rebuildRowNodeMap],
   );
 
   // ─────────────────────────────
@@ -204,7 +204,7 @@ const SBPFXRevalRates = memo(() => {
       headerName: tenor.tenorName,
       field: `tenorId_${tenor.tenorId}_value`,
       cellClass: "value-cell",
-              flex: 1,
+      flex: 1,
 
       valueFormatter: (p) => {
         <IndexCell value={p.value} />;
@@ -222,9 +222,9 @@ const SBPFXRevalRates = memo(() => {
       sortable: false,
       suppressMovable: true,
       editable: false,
-        minWidth: 90,
+      minWidth: 90,
     }),
-    []
+    [],
   );
 
   const {
@@ -232,13 +232,12 @@ const SBPFXRevalRates = memo(() => {
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("currencyName");
+  } = useDownloadHistoryContextMenu("currencyName", "SBPFXRevalRates");
 
   return (
     <>
       <span
-        className={`${styles.tableheaderbar} d-flex justify-content-between`}
-      >
+        className={`${styles.tableheaderbar} d-flex justify-content-between`}>
         <span>SBP FX Reval Rates</span>
         <span className={styles.management_date}>
           {formatCompactDate(latestDate)}
@@ -247,19 +246,18 @@ const SBPFXRevalRates = memo(() => {
 
       <div
         style={{ height: "300px", width: "100%" }}
-        onContextMenu={(e) => e.preventDefault()}
-      >
+        onContextMenu={(e) => e.preventDefault()}>
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
-          className="usdParityManagement-grid"
+          className='usdParityManagement-grid'
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
           onRowDataUpdated={onRowDataUpdated}
           onCellContextMenu={onCellContextMenu}
-          domLayout="normal"
-          theme="legacy"
+          domLayout='normal'
+          theme='legacy'
           defaultColDef={defaultColDef}
           suppressScrollOnNewData={true}
           suppressAnimationFrame={false}
