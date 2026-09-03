@@ -3073,7 +3073,7 @@ export const GetRateSheetExcelExportReportApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetRateSheetExcelExportReport_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3126,7 +3126,7 @@ export const GetT24RatesApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetT24Rates_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3183,7 +3183,7 @@ export const GetT24RatesExcelReportApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetT24RatesExcel_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3206,14 +3206,14 @@ export const GetT24RatesExcelReportApi = createAsyncThunk(
 
 export const GetWorldCurrencyHistoricalDataApi = createAsyncThunk(
   "watchlist/GetWorldCurrencyHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataUSDParity}, { rejectWithValue }) => {
     try {
       let getWorldCurrencyHistoricalData = createPostAPI(
         watchListApi,
         GetWorldCurrencyHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getWorldCurrencyHistoricalData();
+      const response = await getWorldCurrencyHistoricalData(DataUSDParity);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3238,7 +3238,7 @@ export const GetWorldCurrencyHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetWorldCurrencyHistoricalData_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3260,14 +3260,14 @@ export const GetWorldCurrencyHistoricalDataApi = createAsyncThunk(
 );
 export const GetCurrencyCrossesHistoricalDataApi = createAsyncThunk(
   "watchlist/GetCurrencyCrossesHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataCurrencyCrosses}, { rejectWithValue }) => {
     try {
       let getCurrencyCrossesHistoricalData = createPostAPI(
         watchListApi,
         GetCurrencyCrossesHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getCurrencyCrossesHistoricalData();
+      const response = await getCurrencyCrossesHistoricalData(DataCurrencyCrosses);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3292,7 +3292,7 @@ export const GetCurrencyCrossesHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetCurrencyCrossesHistoricalData_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3314,14 +3314,14 @@ export const GetCurrencyCrossesHistoricalDataApi = createAsyncThunk(
 );
 export const GetCommodityHistoricalDataApi = createAsyncThunk(
   "watchlist/GetCommodityHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataCommodities}, { rejectWithValue }) => {
     try {
       let getCommodityHistoricalData = createPostAPI(
         watchListApi,
         GetCommodityHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getCommodityHistoricalData();
+      const response = await getCommodityHistoricalData(DataCommodities);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3346,7 +3346,7 @@ export const GetCommodityHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetCommodityHistoricalData_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3368,14 +3368,14 @@ export const GetCommodityHistoricalDataApi = createAsyncThunk(
 );
 export const GetWorldIndicesHistoricalDataApi = createAsyncThunk(
   "watchlist/GetWorldIndicesHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataStockIndices}, { rejectWithValue }) => {
     try {
       let getWorldIndicesHistoricalData = createPostAPI(
         watchListApi,
         GetWorldIndicesHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getWorldIndicesHistoricalData();
+      const response = await getWorldIndicesHistoricalData(DataStockIndices);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3400,7 +3400,7 @@ export const GetWorldIndicesHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetWorldIndicesHistoricalData_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3422,14 +3422,14 @@ export const GetWorldIndicesHistoricalDataApi = createAsyncThunk(
 );
 export const GetKiborHistoricalDataApi = createAsyncThunk(
   "watchlist/GetKiborHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataKIBOR}, { rejectWithValue }) => {
     try {
       let getKiborHistoricalData = createPostAPI(
         watchListApi,
         GetKiborHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getKiborHistoricalData();
+      const response = await getKiborHistoricalData(DataKIBOR);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3439,7 +3439,7 @@ export const GetKiborHistoricalDataApi = createAsyncThunk(
             responseMessage
               .toLowerCase()
               .includes(
-                "WatchList_WatchListServiceManager_GetKiborHistoricalData_01 ".toLowerCase(),
+                "WatchList_WatchListServiceManager_GetKiborHistoricalData_01".toLowerCase(),
               )
           ) {
             downloadBase64File(base64Excel, fileName);
@@ -3454,7 +3454,7 @@ export const GetKiborHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetKiborHistoricalData_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3476,14 +3476,14 @@ export const GetKiborHistoricalDataApi = createAsyncThunk(
 );
 export const GetSOFRHistoricalDataApi = createAsyncThunk(
   "watchlist/GetSOFRHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataSOFR}, { rejectWithValue }) => {
     try {
       let getSOFRHistoricalData = createPostAPI(
         watchListApi,
         GetSOFRHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getSOFRHistoricalData();
+      const response = await getSOFRHistoricalData(DataSOFR);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3508,7 +3508,7 @@ export const GetSOFRHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetSOFRHistoricalData_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3530,14 +3530,14 @@ export const GetSOFRHistoricalDataApi = createAsyncThunk(
 );
 export const GetCurrencySwapsHistoricalDataApi = createAsyncThunk(
   "watchlist/GetCurrencySwapsHistoricalData",
-  async ({}, { rejectWithValue }) => {
+  async ({DataSwapsInUSD}, { rejectWithValue }) => {
     try {
       let getCurrencySwapsHistoricalData = createPostAPI(
         watchListApi,
         GetCurrencySwapsHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getCurrencySwapsHistoricalData();
+      const response = await getCurrencySwapsHistoricalData(DataSwapsInUSD);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3562,7 +3562,7 @@ export const GetCurrencySwapsHistoricalDataApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetCurrencySwapsHistoricalData_04 ".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");
@@ -3584,14 +3584,14 @@ export const GetCurrencySwapsHistoricalDataApi = createAsyncThunk(
 );
 export const GetSBPFXRatesHistoryApi = createAsyncThunk(
   "watchlist/GetSBPFXRatesHistory",
-  async ({}, { rejectWithValue }) => {
+  async ({DataSBPFXRevalRates}, { rejectWithValue }) => {
     try {
       let getSBPFXRatesHistory = createPostAPI(
         watchListApi,
         GetSBPFXRatesHistoryRM.RequestMethod,
       );
 
-      const response = await getSBPFXRatesHistory();
+      const response = await getSBPFXRatesHistory(DataSBPFXRevalRates);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3616,7 +3616,7 @@ export const GetSBPFXRatesHistoryApi = createAsyncThunk(
                 "WatchList_WatchListServiceManager_GetSBPFXRatesHistory_04".toLowerCase(),
               )
           ) {
-            return rejectWithValue("Something-went-wrong");
+            return rejectWithValue("Something went wrong");
           } else {
             console.log("", response.data);
             return rejectWithValue("Something went wrong");

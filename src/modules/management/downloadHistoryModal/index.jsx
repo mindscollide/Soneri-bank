@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setDownloadHistoryModal } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import CustomButton from "../../../shareComponents/commonComponents/elements/globalButton/button";
 import DatePickerModule from "react-multi-date-picker";
-import { GetWorldCurrencyHistoricalDataApi } from "../../../store/actions/WatchlistAction";
+import { GetCommodityHistoricalDataApi, GetCurrencyCrossesHistoricalDataApi, GetCurrencySwapsHistoricalDataApi, GetKiborHistoricalDataApi, GetSBPFXRatesHistoryApi, GetSOFRHistoricalDataApi, GetWorldCurrencyHistoricalDataApi, GetWorldIndicesHistoricalDataApi } from "../../../store/actions/WatchlistAction";
 
 const DatePicker = DatePickerModule.default || DatePickerModule;
 
@@ -46,13 +46,13 @@ const DownloadHistoryModal = () => {
     const { routePath, data } = downloadHistoryData;
     switch (routePath) {
       case "USDParity":
-        const Data = {
+        const DataUSDParity = {
           CurrencyID: data.instrumentID,
           DateFrom: "",
           DateTo: "",
         };
 
-        dispatch(GetWorldCurrencyHistoricalDataApi({ Data }));
+        dispatch(GetWorldCurrencyHistoricalDataApi({ DataUSDParity }));
         break;
       case "CurrencyCrosses":
         const DataCurrencyCrosses = {
@@ -60,6 +60,8 @@ const DownloadHistoryModal = () => {
           DateFrom: "",
           DateTo: "",
         };
+
+        dispatch(GetCurrencyCrossesHistoricalDataApi({ DataCurrencyCrosses }));
         break;
       case "Commodities":
         const DataCommodities = {
@@ -67,6 +69,7 @@ const DownloadHistoryModal = () => {
           DateFrom: "",
           DateTo: "",
         };
+        dispatch(GetCommodityHistoricalDataApi({ DataCommodities }));
         break;
       case "StockIndices":
         const DataStockIndices = {
@@ -74,12 +77,15 @@ const DownloadHistoryModal = () => {
           DateFrom: "",
           DateTo: "",
         };
+        dispatch(GetWorldIndicesHistoricalDataApi({ DataStockIndices }));
         break;
       case "KIBOR":
         const DataKIBOR = { DateFrom: "", DateTo: "" };
+        dispatch(GetKiborHistoricalDataApi({ DataKIBOR }));
         break;
       case "SOFR":
         const DataSOFR = { DateFrom: "", DateTo: "" };
+        dispatch(GetSOFRHistoricalDataApi({ DataSOFR }));
         break;
       case "SwapsInUSD":
         const DataSwapsInUSD = {
@@ -88,6 +94,7 @@ const DownloadHistoryModal = () => {
           DateFrom: "",
           DateTo: "",
         };
+        dispatch(GetCurrencySwapsHistoricalDataApi({ DataSwapsInUSD }));
         break;
       case "SBPFXRevalRates":
         const DataSBPFXRevalRates = {
@@ -95,6 +102,7 @@ const DownloadHistoryModal = () => {
           DateFrom: "",
           DateTo: "",
         };
+        dispatch(GetSBPFXRatesHistoryApi({ DataSBPFXRevalRates }));
         break;
       default:
         break;

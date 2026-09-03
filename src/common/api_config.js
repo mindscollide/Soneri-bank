@@ -207,7 +207,7 @@ export const GetCommodityHistoricalDataRM = {
 };
 
 export const GetWorldIndicesHistoricalDataRM = {
-  RequestMethod: "ServiceManager.GetWorldIndicesHistoricalData ",
+  RequestMethod: "ServiceManager.GetWorldIndicesHistoricalData",
 };
 
 export const GetKiborHistoricalDataRM = {
@@ -215,11 +215,11 @@ export const GetKiborHistoricalDataRM = {
 };
 
 export const GetSOFRHistoricalDataRM = {
-  RequestMethod: "ServiceManager.GetSOFRHistoricalData ",
+  RequestMethod: "ServiceManager.GetSOFRHistoricalData",
 };
 
 export const GetCurrencySwapsHistoricalDataRM = {
-  RequestMethod: "ServiceManager.GetCurrencySwapsHistoricalData ",
+  RequestMethod: "ServiceManager.GetCurrencySwapsHistoricalData",
 };
 
 export const GetSBPFXRatesHistoryRM = {
