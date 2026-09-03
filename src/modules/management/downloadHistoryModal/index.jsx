@@ -6,7 +6,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { setDownloadHistoryModal } from "../../../store/slicers/watchListSlicer/WatchListSlicer";
 import CustomButton from "../../../shareComponents/commonComponents/elements/globalButton/button";
 import DatePickerModule from "react-multi-date-picker";
-import { GetCommodityHistoricalDataApi, GetCurrencyCrossesHistoricalDataApi, GetCurrencySwapsHistoricalDataApi, GetKiborHistoricalDataApi, GetSBPFXRatesHistoryApi, GetSOFRHistoricalDataApi, GetWorldCurrencyHistoricalDataApi, GetWorldIndicesHistoricalDataApi } from "../../../store/actions/WatchlistAction";
+import {
+  GetCommodityHistoricalDataApi,
+  GetCurrencyCrossesHistoricalDataApi,
+  GetCurrencySwapsHistoricalDataApi,
+  GetKiborHistoricalDataApi,
+  GetSBPFXRatesHistoryApi,
+  GetSOFRHistoricalDataApi,
+  GetWorldCurrencyHistoricalDataApi,
+  GetWorldIndicesHistoricalDataApi,
+} from "../../../store/actions/WatchlistAction";
 
 const DatePicker = DatePickerModule.default || DatePickerModule;
 
@@ -39,86 +48,152 @@ const DownloadHistoryModal = () => {
 
   // Select All never needs dates. Date Range needs BOTH dates picked —
   // no date, or only one of the two, blocks export.
-  const isExportDisabled = exportMode === "range" && (!fromDate || !toDate);
+
+  const isInvalidDateRange =
+    fromDate && toDate && toDate.toDate() < fromDate.toDate();
+
+  const isExportDisabled =
+    exportMode === "range" && (!fromDate || !toDate || isInvalidDateRange);
 
   const handleExport = () => {
-    if (isExportDisabled) return;
+    if (exportMode === "range" && (!fromDate || !toDate)) {
+      return;
+    }
+
     const { routePath, data } = downloadHistoryData;
+
+    const DateFrom = exportMode === "all" ? "" : fromDate.format("YYYYMMDD");
+
+    const DateTo = exportMode === "all" ? "" : toDate.format("YYYYMMDD");
+
     switch (routePath) {
-      case "USDParity":
+      case "USDParity": {
         const DataUSDParity = {
           CurrencyID: data.instrumentID,
-          DateFrom: "",
-          DateTo: "",
+          DateFrom,
+          DateTo,
         };
 
         dispatch(GetWorldCurrencyHistoricalDataApi({ DataUSDParity }));
         break;
-      case "CurrencyCrosses":
+      }
+
+      case "CurrencyCrosses": {
         const DataCurrencyCrosses = {
           CurrencyCrossesID: data.instrumentID,
-          DateFrom: "",
-          DateTo: "",
+          DateFrom,
+          DateTo,
         };
 
-        dispatch(GetCurrencyCrossesHistoricalDataApi({ DataCurrencyCrosses }));
+        dispatch(
+          GetCurrencyCrossesHistoricalDataApi({
+            DataCurrencyCrosses,
+          }),
+        );
+
         break;
-      case "Commodities":
+      }
+
+      case "Commodities": {
         const DataCommodities = {
           CommodityID: data.instrumentID,
-          DateFrom: "",
-          DateTo: "",
+          DateFrom,
+          DateTo,
         };
-        dispatch(GetCommodityHistoricalDataApi({ DataCommodities }));
+
+        dispatch(
+          GetCommodityHistoricalDataApi({
+            DataCommodities,
+          }),
+        );
+
         break;
-      case "StockIndices":
+      }
+
+      case "StockIndices": {
         const DataStockIndices = {
           WorldIndicesID: data.instrumentID,
-          DateFrom: "",
-          DateTo: "",
+          DateFrom,
+          DateTo,
         };
-        dispatch(GetWorldIndicesHistoricalDataApi({ DataStockIndices }));
+
+        dispatch(
+          GetWorldIndicesHistoricalDataApi({
+            DataStockIndices,
+          }),
+        );
+
         break;
-      case "KIBOR":
-        const DataKIBOR = { DateFrom: "", DateTo: "" };
+      }
+
+      case "KIBOR": {
+        const DataKIBOR = {
+          DateFrom,
+          DateTo,
+        };
+
         dispatch(GetKiborHistoricalDataApi({ DataKIBOR }));
         break;
-      case "SOFR":
-        const DataSOFR = { DateFrom: "", DateTo: "" };
+      }
+
+      case "SOFR": {
+        const DataSOFR = {
+          DateFrom,
+          DateTo,
+        };
+
         dispatch(GetSOFRHistoricalDataApi({ DataSOFR }));
         break;
-      case "SwapsInUSD":
+      }
+
+      case "SwapsInUSD": {
         const DataSwapsInUSD = {
-          SwapCurrencyPair: "",
-          TenureID: 0,
-          DateFrom: "",
-          DateTo: "",
+          SwapCurrencyPair: data.currencyPairFull,
+          TenureID: data.tenorId,
+          DateFrom,
+          DateTo,
         };
-        dispatch(GetCurrencySwapsHistoricalDataApi({ DataSwapsInUSD }));
+
+        dispatch(
+          GetCurrencySwapsHistoricalDataApi({
+            DataSwapsInUSD,
+          }),
+        );
+
         break;
-      case "SBPFXRevalRates":
+      }
+
+      case "SBPFXRevalRates": {
         const DataSBPFXRevalRates = {
           CurrencyCode: data.currencyName,
-          DateFrom: "",
-          DateTo: "",
+          DateFrom,
+          DateTo,
         };
-        dispatch(GetSBPFXRatesHistoryApi({ DataSBPFXRevalRates }));
+
+        dispatch(
+          GetSBPFXRatesHistoryApi({
+            DataSBPFXRevalRates,
+          }),
+        );
+
         break;
+      }
+
       default:
-        break;
+        return;
     }
-    // TODO: wire to the actual export API once available — payload shape
-    // for now: { instrument: downloadHistoryData, exportMode, fromDate, toDate }
-    console.log("Export download history:", {
-      instrument: downloadHistoryData,
-      exportMode,
-      fromDate,
-      toDate,
-    });
 
     handleClose();
   };
 
+  const handleExportModeChange = (mode) => {
+    setExportMode(mode);
+
+    if (mode === "all") {
+      setFromDate(null);
+      setToDate(null);
+    }
+  };
   return (
     <Modal
       show={downloadHistoryModal}
@@ -137,7 +212,7 @@ const DownloadHistoryModal = () => {
               type='radio'
               name='downloadHistoryExportMode'
               checked={exportMode === "all"}
-              onChange={() => setExportMode("all")}
+              onChange={() => handleExportModeChange("all")}
             />
             Select All
           </label>
@@ -148,7 +223,7 @@ const DownloadHistoryModal = () => {
                 type='radio'
                 name='downloadHistoryExportMode'
                 checked={exportMode === "range"}
-                onChange={() => setExportMode("range")}
+                onChange={() => handleExportModeChange("range")}
               />
               Date Range
             </label>

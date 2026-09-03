@@ -87,6 +87,7 @@ const SwapsInUSD = memo(() => {
         if (!grouped[tenor]) {
           grouped[tenor] = {
             tenorName: tenor,
+            tenorId: item.tenorID,
           };
         }
 
@@ -94,6 +95,8 @@ const SwapsInUSD = memo(() => {
         grouped[tenor][`${full}_ask`] = item.ask;
         grouped[tenor][`${full}_currencyPair`] = item.currencyPair;
         grouped[tenor][`${full}_currencyPairFull`] = item.currencyPairFull;
+        grouped[tenor][`${full}_instrumentID`] = item.instrumentID;
+
       });
 
       return {
@@ -353,12 +356,41 @@ const SwapsInUSD = memo(() => {
     }),
     [],
   );
+  // Right-click on ANY cell (not just the Tenor column) needs to resolve
+  // that specific instrument's id + the row's tenor id — a Bid/Offer cell
+  // belongs to a currency-pair column (e.g. "USD/PKR_bid"), so pull the
+  // currency prefix back out of the column id and read the matching
+  // hidden id fields captured alongside bid/ask when the rows were built.
+  const resolveSwapsInUSDData = useCallback((event) => {
+    const colId = event.column?.getColId?.();
+    const row = event.data ?? {};
+
+    const currency = colId.replace(/_(bid|ask)$/, "");
+    console.log(row, currency, colId, "resolveSwapsInUSDData");
+    return {
+      tenorName: row.tenorName,
+      tenorId: row.tenorId,
+      currencyPair: row[`${currency}_currencyPair`],
+      currencyPairFull: row[`${currency}_currencyPairFull`],
+    };
+  }, []);
+
+  // Any value cell (Bid/Offer), but explicitly NOT the Tenor column.
+  const matchValueColumn = useCallback(
+    (colId) => Boolean(colId) && colId !== "tenorName",
+    [],
+  );
+
   const {
     popover,
     onCellContextMenu,
     closePopover,
     handleDownloadHistoryClick,
-  } = useDownloadHistoryContextMenu("tenorName", "SwapsInUSD");
+  } = useDownloadHistoryContextMenu(
+    matchValueColumn,
+    "SwapsInUSD",
+    resolveSwapsInUSDData,
+  );
 
   return (
     <>

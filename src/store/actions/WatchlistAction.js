@@ -3206,7 +3206,7 @@ export const GetT24RatesExcelReportApi = createAsyncThunk(
 
 export const GetWorldCurrencyHistoricalDataApi = createAsyncThunk(
   "watchlist/GetWorldCurrencyHistoricalData",
-  async ({DataUSDParity}, { rejectWithValue }) => {
+  async ({ DataUSDParity }, { rejectWithValue }) => {
     try {
       let getWorldCurrencyHistoricalData = createPostAPI(
         watchListApi,
@@ -3260,14 +3260,15 @@ export const GetWorldCurrencyHistoricalDataApi = createAsyncThunk(
 );
 export const GetCurrencyCrossesHistoricalDataApi = createAsyncThunk(
   "watchlist/GetCurrencyCrossesHistoricalData",
-  async ({DataCurrencyCrosses}, { rejectWithValue }) => {
+  async ({ DataCurrencyCrosses }, { rejectWithValue }) => {
     try {
       let getCurrencyCrossesHistoricalData = createPostAPI(
         watchListApi,
         GetCurrencyCrossesHistoricalDataRM.RequestMethod,
       );
 
-      const response = await getCurrencyCrossesHistoricalData(DataCurrencyCrosses);
+      const response =
+        await getCurrencyCrossesHistoricalData(DataCurrencyCrosses);
 
       if (response.data.responseCode === 200) {
         const { isExecuted, responseMessage, base64Excel, fileName } =
@@ -3314,7 +3315,7 @@ export const GetCurrencyCrossesHistoricalDataApi = createAsyncThunk(
 );
 export const GetCommodityHistoricalDataApi = createAsyncThunk(
   "watchlist/GetCommodityHistoricalData",
-  async ({DataCommodities}, { rejectWithValue }) => {
+  async ({ DataCommodities }, { rejectWithValue }) => {
     try {
       let getCommodityHistoricalData = createPostAPI(
         watchListApi,
@@ -3368,7 +3369,7 @@ export const GetCommodityHistoricalDataApi = createAsyncThunk(
 );
 export const GetWorldIndicesHistoricalDataApi = createAsyncThunk(
   "watchlist/GetWorldIndicesHistoricalData",
-  async ({DataStockIndices}, { rejectWithValue }) => {
+  async ({ DataStockIndices }, { rejectWithValue }) => {
     try {
       let getWorldIndicesHistoricalData = createPostAPI(
         watchListApi,
@@ -3422,7 +3423,7 @@ export const GetWorldIndicesHistoricalDataApi = createAsyncThunk(
 );
 export const GetKiborHistoricalDataApi = createAsyncThunk(
   "watchlist/GetKiborHistoricalData",
-  async ({DataKIBOR}, { rejectWithValue }) => {
+  async ({ DataKIBOR }, { rejectWithValue }) => {
     try {
       let getKiborHistoricalData = createPostAPI(
         watchListApi,
@@ -3476,7 +3477,7 @@ export const GetKiborHistoricalDataApi = createAsyncThunk(
 );
 export const GetSOFRHistoricalDataApi = createAsyncThunk(
   "watchlist/GetSOFRHistoricalData",
-  async ({DataSOFR}, { rejectWithValue }) => {
+  async ({ DataSOFR }, { rejectWithValue }) => {
     try {
       let getSOFRHistoricalData = createPostAPI(
         watchListApi,
@@ -3530,7 +3531,7 @@ export const GetSOFRHistoricalDataApi = createAsyncThunk(
 );
 export const GetCurrencySwapsHistoricalDataApi = createAsyncThunk(
   "watchlist/GetCurrencySwapsHistoricalData",
-  async ({DataSwapsInUSD}, { rejectWithValue }) => {
+  async ({ DataSwapsInUSD }, { rejectWithValue }) => {
     try {
       let getCurrencySwapsHistoricalData = createPostAPI(
         watchListApi,
@@ -3584,7 +3585,7 @@ export const GetCurrencySwapsHistoricalDataApi = createAsyncThunk(
 );
 export const GetSBPFXRatesHistoryApi = createAsyncThunk(
   "watchlist/GetSBPFXRatesHistory",
-  async ({DataSBPFXRevalRates}, { rejectWithValue }) => {
+  async ({ DataSBPFXRevalRates }, { rejectWithValue }) => {
     try {
       let getSBPFXRatesHistory = createPostAPI(
         watchListApi,
