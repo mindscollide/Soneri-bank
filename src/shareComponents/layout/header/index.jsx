@@ -34,31 +34,35 @@ const MainHeader = () => {
   const handleClickCalculator = (e) => {
     e.preventDefault();
     window.open("/SONERI/calculator", "_blank");
-  }
+  };
 
   return (
     <Row>
       <Col sm={12} md={12} lg={12}>
         <>
-          <Navbar className={styles.mainNavbar} expand="lg">
+          <Navbar className={styles.mainNavbar} expand='lg'>
             <Navbar.Brand>
-              <img src={SoneriLogo} width="195" alt="" />
+              <img src={SoneriLogo} width='195' alt='' />
             </Navbar.Brand>
-            <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-            <Nav className="ms-auto align-items-center justify-content-end">
+            <Navbar.Toggle aria-controls='responsive-navbar-nav' />
+            <Nav className='ms-auto align-items-center justify-content-end'>
               {location.pathname
                 .toLowerCase()
                 .includes("allnews") ? null : import.meta.env
                   .VITE_APP_INCLUDE_TREASURY === "true" ? (
                 <>
-                <CustomButton value={"Calculator"} onClick={handleClickCalculator} className={styles.CalculatorBtn} />
+                  <CustomButton
+                    value={"Calculator"}
+                    onClick={handleClickCalculator}
+                    className={styles.CalculatorBtn}
+                  />
                   <Nav.Link
                     className={
                       location.pathname.toLowerCase().includes("interbank")
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to="interbank"
+                    to='interbank'
                     as={Link}
                     onClick={(e) => handleNavigate(e, "interbank")}
                     // onClick={handleClickInterbank}
@@ -72,10 +76,9 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to="dealer"
+                    to='dealer'
                     as={Link}
-                    onClick={(e) => handleNavigate(e, "dealer")}
-                  >
+                    onClick={(e) => handleNavigate(e, "dealer")}>
                     Dealer
                   </Nav.Link>
 
@@ -85,10 +88,9 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to="Management"
+                    to='Management'
                     as={Link}
-                    onClick={(e) => handleNavigate(e, "Management")}
-                  >
+                    onClick={(e) => handleNavigate(e, "Management")}>
                     Management
                   </Nav.Link>
 
@@ -98,15 +100,21 @@ const MainHeader = () => {
                         ? styles.navItemAcitve
                         : styles.navItem
                     }
-                    to="treasury"
+                    to='treasury'
                     as={Link}
-                    onClick={(e) => handleNavigate(e, "treasury")}
-                  >
+                    onClick={(e) => handleNavigate(e, "treasury")}>
                     Treasury
                   </Nav.Link>
                 </>
               ) : import.meta.env.VITE_APP_INCLUDE_DEALER === "true" ? (
-                <PublshDealerSpreads />
+                <div className='d-flex justify-content-end  align-items-center gap-3'>
+                  <CustomButton
+                    value={"Calculator"}
+                    onClick={handleClickCalculator}
+                    className={styles.DealerCalculatorBtn}
+                  />
+                  <PublshDealerSpreads />
+                </div>
               ) : null}
 
               <ProfileDropdown />

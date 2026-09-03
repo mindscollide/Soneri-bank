@@ -34,3 +34,17 @@
   color: #000 !important;
   font-weight: 500;
 }
+.DealerCalculatorBtn {
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+  color: #fff !important;
+  font-weight: 500;
+  margin-top: 15px;
+}
+.DealerCalculatorBtn:is(:hover, :focus) {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #000 !important;
+  font-weight: 500;
+    margin-top: 15px;
+}

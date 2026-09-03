@@ -9,7 +9,6 @@ import {
   ErrorFallback,
   logErrors,
 } from "../shareComponents/elements/errorBoundary/ErrorBoundary";
-import AllNews from "../modules/allNews";
 
 const withErrorBoundary = (element) => (
   <ErrorBoundary FallbackComponent={ErrorFallback} onError={logErrors}>
@@ -30,6 +29,7 @@ const loadRoutes = async () => {
     const Treasury = (await import("../modules/treasury")).default;
     const Management = (await import("../modules/management")).default;
     const Calculator = (await import("../modules/calculator")).default;
+    const AllNews = (await import("../modules/allNews")).default;
     dashboardRoute.children.push({
       path: "calculator",
       element: withErrorBoundary(<PrivateRoute element={<Calculator />} />),
@@ -65,6 +65,8 @@ const loadRoutes = async () => {
 
   if (import.meta.env.VITE_APP_INCLUDE_DEALER === "true") {
     const Dealer = (await import("../modules/dealer")).default;
+    const Calculator = (await import("../modules/calculator")).default;
+    const AllNews = (await import("../modules/allNews")).default;
 
     dashboardRoute.children.push({
       path: "dealer",
@@ -73,6 +75,10 @@ const loadRoutes = async () => {
     dashboardRoute.children.push({
       path: "allnews",
       element: withErrorBoundary(<PrivateRoute element={<AllNews />} />),
+    });
+    dashboardRoute.children.push({
+      path: "calculator",
+      element: withErrorBoundary(<PrivateRoute element={<Calculator />} />),
     });
   }
 
