@@ -1,4 +1,11 @@
-import React, { lazy, Suspense, useEffect, useMemo, useRef } from "react";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import styles from "./management.module.css";
 import { Col, Row } from "react-bootstrap";
 import { useDispatch } from "react-redux";
@@ -48,6 +55,7 @@ const SOFR = lazy(() => import("./sofr/index"));
 const StockIndices = lazy(() => import("./stockIndices/index"));
 const SwapsInUSD = lazy(() => import("./swapsInUSD/index"));
 const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+const DownloadHistoryModal = lazy(() => import("./downloadHistoryModal/index"));
 
 const Management = () => {
   useMqttTopics([
@@ -57,6 +65,9 @@ const Management = () => {
   ]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [downloadHistoryModalOpen, setDownloadHistoryModalOpen] =
+    useState(true);
   // Inital UseEffect as soon as user Clicks on Management Tab
   const hasFetched = useRef(false);
   useEffect(() => {
@@ -97,8 +108,12 @@ const Management = () => {
   const layout = useMemo(
     () => (
       <div className={styles.managementWrapper}>
+        <Suspense fallback={<SectionLoader />}>
+          <DownloadHistoryModal />
+        </Suspense>
+
         <Row>
-          <Col sm={12} md={6} lg={6} className="pe-0">
+          <Col sm={12} md={6} lg={6} className='pe-0'>
             <IsolatedBlock>
               <Suspense fallback={<SectionLoader />}>
                 <USDParityComponent />
@@ -113,7 +128,7 @@ const Management = () => {
             </IsolatedBlock>
           </Col>
         </Row>
-        <Row className="mt-3">
+        <Row className='mt-3'>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
               <Suspense fallback={<SectionLoader />}>
@@ -129,7 +144,7 @@ const Management = () => {
             </IsolatedBlock>
           </Col>
         </Row>
-        <Row className="mt-3">
+        <Row className='mt-3'>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
               <Suspense fallback={<SectionLoader />}>
@@ -145,7 +160,7 @@ const Management = () => {
             </IsolatedBlock>
           </Col>
         </Row>
-        <Row className="mt-3">
+        <Row className='mt-3'>
           <Col sm={12} md={6} lg={6}>
             <IsolatedBlock>
               {/* <Suspense fallback={<SectionLoader />}> */}
@@ -161,7 +176,7 @@ const Management = () => {
             </IsolatedBlock>
           </Col>
         </Row>
-        <Row className="mt-2">
+        <Row className='mt-2'>
           <Col sm={12} md={12} lg={12}>
             <IsolatedBlock>
               <Suspense fallback={<SectionLoader />}>
@@ -172,7 +187,7 @@ const Management = () => {
         </Row>
       </div>
     ),
-    []
+    [],
   );
   return layout;
 };

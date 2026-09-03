@@ -157,6 +157,10 @@ const WatchListSlice = createSlice({
     NewsByNewsIdViewModal: false,
     GetNewsDetailsByID: null,
     NewsLoadingSpinner: false,
+
+    // for Management
+    showDownloadHistoryModal: false,
+    DownloadHistoryData: null,
   },
   reducers: {
     setNewsLoadingSpinner: (state, { payload }) => {
@@ -216,7 +220,12 @@ const WatchListSlice = createSlice({
         return tenor; // unchanged
       });
     },
-
+    setDownloadHistoryModal: (state, { payload }) => {
+      state.showDownloadHistoryModal = payload;
+    },
+    setDownloadHistoryData: (state, { payload }) => {
+      state.DownloadHistoryData = payload;
+    },
     UpdatetDealerSpotRates: (state, { payload }) => {
       state.GetBankSpotForDealer = payload;
     },
@@ -237,6 +246,7 @@ const WatchListSlice = createSlice({
     clearGetBankForwardForTreasuryDealer: (state) => {
       state.GetBankForwardForTreasuryDealer = null;
     },
+
     clearGetDiscountingRatesForDealer: (state) => {
       state.GetDiscountingRatesForDealer = null;
     },
@@ -1048,5 +1058,7 @@ export const {
   // News Modal
   setNewsByNewsIdViewModal,
   setNewsLoadingSpinner,
+  setDownloadHistoryData,
+  setDownloadHistoryModal
 } = WatchListSlice.actions;
 export default WatchListSlice.reducer;
