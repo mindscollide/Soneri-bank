@@ -7,6 +7,8 @@ import SectionLoader from "../../../shareComponents/elements/soneriLoader/Sectio
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { formatCompactDate } from "../../../utils/timeFunction";
 import { clearSofrForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // ── Selectors ──────────────────────────────────────────────────────────────────
 const selectSofrList = (state) =>
@@ -271,6 +273,13 @@ const SOFR = memo(() => {
     []
   );
 
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("tenor");
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
@@ -283,7 +292,10 @@ const SOFR = memo(() => {
         </span>
       </span>
 
-      <div style={{ width: "100%", height: "257px" }}>
+      <div
+        style={{ width: "100%", height: "257px" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
@@ -291,6 +303,7 @@ const SOFR = memo(() => {
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onCellContextMenu={onCellContextMenu}
           domLayout="normal"
           theme="legacy"
           defaultColDef={defaultColDef}
@@ -300,6 +313,12 @@ const SOFR = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });

@@ -6,6 +6,8 @@ import styles from "../management.module.css";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { clearStockIndicesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // Selectors
 const stockIndicesForManagementFeed = (state) =>
@@ -362,11 +364,21 @@ const StockIndices = memo(() => {
     [],
   );
 
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("instrumentName");
+
   return (
     <>
       <span className={styles.tableheaderbar}>Stock Indices</span>
 
-      <div style={{ height: "235px", width: "100%" }}>
+      <div
+        style={{ height: "235px", width: "100%" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
@@ -374,6 +386,7 @@ const StockIndices = memo(() => {
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onCellContextMenu={onCellContextMenu}
           domLayout='normal'
           theme='legacy'
           defaultColDef={defaultColDef}
@@ -383,6 +396,12 @@ const StockIndices = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });

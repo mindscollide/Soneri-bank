@@ -312,13 +312,16 @@
      ============================================== */
 
 .usdParityManagement-grid .ag-cell {
-  pointer-events: none !important; /* Disable all click events */
+  /* Not pointer-events: none — that blocked ALL mouse events including
+     right-click (needed for the Download History popover). Editing/
+     selection/dragging are already disabled via grid options
+     (editable: false, suppressCellFocus, suppressMovable, no
+     rowSelection configured), so this CSS block isn't needed for that. */
   cursor: default !important;
   padding: 0 !important;
 }
 
 .usdParityManagement-grid .ag-row {
-  pointer-events: none !important;
   cursor: default !important;
 }
 
@@ -503,14 +506,11 @@
      ============================================== */
 
 .swapsInUSDManagement-grid .ag-cell {
-  pointer-events: none !important; /* Disable all click events */
+  /* See note on .usdParityManagement-grid .ag-cell above — pointer-events:
+     none blocked right-click (Download History popover) along with
+     everything else, and isn't needed to keep the grid non-editable. */
   cursor: default !important;
   padding: 0 !important;
-}
-
-.usdParityManagement-grid .ag-row {
-  pointer-events: none !important;
-  cursor: default !important;
 }
 
 /* Keep header interactive if needed */

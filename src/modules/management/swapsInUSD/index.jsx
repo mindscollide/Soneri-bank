@@ -6,6 +6,8 @@ import AgGridTable from "../../../shareComponents/commonComponents/elements/glob
 import dayjs from "dayjs";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 import { convertUTCToLocal } from "../../../common/utils";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // Selectors
 const GetSwapsInUSDForTreasury = (state) =>
@@ -349,6 +351,13 @@ const SwapsInUSD = memo(() => {
     }),
     [],
   );
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("tenorName");
+
   return (
     <>
       <span
@@ -359,7 +368,10 @@ const SwapsInUSD = memo(() => {
         </span>
       </span>
 
-      <div style={{ height: "300px", width: "100%" }}>
+      <div
+        style={{ height: "300px", width: "100%" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef}
           rowData={rowData}
@@ -368,6 +380,7 @@ const SwapsInUSD = memo(() => {
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onCellContextMenu={onCellContextMenu}
           domLayout='normal'
           theme='legacy'
           defaultColDef={defaultColDef}
@@ -377,6 +390,12 @@ const SwapsInUSD = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });

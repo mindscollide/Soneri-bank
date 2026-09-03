@@ -6,6 +6,8 @@ import AgGridTable from "../../../shareComponents/commonComponents/elements/glob
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { clearKiborForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // ── Selectors ──────────────────────────────────────────────────────────────────
 const selectKiborList = (state) =>
@@ -261,12 +263,22 @@ const KIBOR = memo(() => {
     []
   );
 
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("displayName");
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
       <span className={styles.tableheaderbar}>KIBOR</span>
 
-      <div style={{ width: "100%", height: "257px" }}>
+      <div
+        style={{ width: "100%", height: "257px" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
@@ -274,6 +286,7 @@ const KIBOR = memo(() => {
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onCellContextMenu={onCellContextMenu}
           domLayout="normal"
           theme="legacy"
           defaultColDef={defaultColDef}
@@ -283,6 +296,12 @@ const KIBOR = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });

@@ -7,6 +7,8 @@ import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 import { clearUSDParityForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // Selectors
 const selectUSDParity = (state) =>
@@ -381,11 +383,21 @@ const USDParity = memo(() => {
     []
   );
 
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("instrumentName");
+
   return (
     <>
       <span className={styles.tableheaderbarForUSDParity}>USD Parity</span>
 
-      <div style={{ width: "98%", height: "300px" }}>
+      <div
+        style={{ width: "98%", height: "300px" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef} // ✅ separate ref for the component instance
           columnDefs={columnDefs}
@@ -393,6 +405,7 @@ const USDParity = memo(() => {
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onCellContextMenu={onCellContextMenu}
           domLayout="normal"
           theme="legacy"
           defaultColDef={defaultColDef}
@@ -402,6 +415,12 @@ const USDParity = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });

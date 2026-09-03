@@ -6,6 +6,8 @@ import styles from "../management.module.css";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // Selectors
 const currencyCrossesForManagementFeed = (state) =>
@@ -337,11 +339,21 @@ const CurrencyCrosses = memo(() => {
     []
   );
 
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("instrumentName");
+
   return (
     <>
       <span className={styles.tableheaderbar}>Currency Crosses</span>
 
-      <div style={{ height: "300px", width: "100%" }}>
+      <div
+        style={{ height: "300px", width: "100%" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef} // ✅ separate ref for the component instance
           columnDefs={columnDefs}
@@ -349,6 +361,7 @@ const CurrencyCrosses = memo(() => {
           getRowId={getRowId}
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
+          onCellContextMenu={onCellContextMenu}
           domLayout="normal"
           theme="legacy"
           defaultColDef={defaultColDef}
@@ -358,6 +371,12 @@ const CurrencyCrosses = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });

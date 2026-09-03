@@ -6,6 +6,8 @@ import { clearSbpFXRevalRatesForManagmentFeed } from "../../../store/slicers/rea
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
+import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
+import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
 // Selectors
 const GetRevalRatesForTreasury = (state) =>
@@ -90,7 +92,6 @@ const SBPFXRevalRates = memo(() => {
         rowNodeMap.current.set(node.data.currencyName, node);
       }
     });
-    console.log("🗺️ rowNodeMap rebuilt, keys:", [...rowNodeMap.current.keys()]);
   }, []);
 
   // ─────────────────────────────
@@ -226,6 +227,13 @@ const SBPFXRevalRates = memo(() => {
     []
   );
 
+  const {
+    popover,
+    onCellContextMenu,
+    closePopover,
+    handleDownloadHistoryClick,
+  } = useDownloadHistoryContextMenu("currencyName");
+
   return (
     <>
       <span
@@ -237,7 +245,10 @@ const SBPFXRevalRates = memo(() => {
         </span>
       </span>
 
-      <div style={{ height: "300px", width: "100%" }}>
+      <div
+        style={{ height: "300px", width: "100%" }}
+        onContextMenu={(e) => e.preventDefault()}
+      >
         <AgGridTable
           ref={agGridComponentRef}
           columnDefs={columnDefs}
@@ -246,6 +257,7 @@ const SBPFXRevalRates = memo(() => {
           onGridReady={onGridReady}
           onFirstDataRendered={onFirstDataRendered}
           onRowDataUpdated={onRowDataUpdated}
+          onCellContextMenu={onCellContextMenu}
           domLayout="normal"
           theme="legacy"
           defaultColDef={defaultColDef}
@@ -255,6 +267,12 @@ const SBPFXRevalRates = memo(() => {
           loadingOverlayComponent={SectionLoader}
         />
       </div>
+
+      <DownloadHistoryPopover
+        popover={popover}
+        onDownload={handleDownloadHistoryClick}
+        onClose={closePopover}
+      />
     </>
   );
 });
