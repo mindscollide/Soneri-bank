@@ -21,7 +21,6 @@ const Loader = () => {
   const isLoading = [WatchListReducerLoader, AuthLoader, NewsLoader].some(
     Boolean
   );
-  console.log(isLoading, "isLoadingisLoading");
   useEffect(() => {
     let timeout;
 
