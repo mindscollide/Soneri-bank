@@ -4,18 +4,27 @@
   border: 1px solid #837c66;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  padding: 4px;
+  z-index: 9999;
 }
 
 .downloadHistoryPopover-btn {
   background: #fff;
   color: #000;
   border: none;
-  padding: 2px 8px;
+  padding: 6px 10px;
   font-size: 12px;
   font-weight: 500;
   border-radius: 3px;
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
+.downloadHistoryPopover-btn:hover,
+.downloadHistoryPopover-btn:focus {
+  color: #fff;
+  background: var(--color-secondary);
+  outline: none;
+}

@@ -84,7 +84,6 @@ const SwapsInUSD = memo(() => {
       data.forEach((item) => {
         const tenor = item.tenor;
         const full = item.currencyPairFull || pairMapping[item.currencyPair];
-
         if (!grouped[tenor]) {
           grouped[tenor] = {
             tenorName: tenor,
@@ -95,9 +94,7 @@ const SwapsInUSD = memo(() => {
         grouped[tenor][`${full}_bid`] = item.bid;
         grouped[tenor][`${full}_ask`] = item.ask;
         grouped[tenor][`${full}_currencyPair`] = item.currencyPair;
-        grouped[tenor][`${full}_currencyPairFull`] = item.currencyPairFull;
-        grouped[tenor][`${full}_instrumentID`] = item.instrumentID;
-
+        grouped[tenor][`${full}_currencyPairFull`] = full;
       });
 
       return {
