@@ -4,6 +4,7 @@ import styles from "../management.module.css";
 
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { clearKiborForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
@@ -304,6 +305,7 @@ const KIBOR = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
+          noRowsOverlayComponent={NoDataOverlay}
         />
       </div>
 

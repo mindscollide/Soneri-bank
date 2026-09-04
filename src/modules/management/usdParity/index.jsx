@@ -6,6 +6,7 @@ import { IndexCell } from "../../../shareComponents/commonComponents/elements/in
 import { convertUTCTimeToLocalTime } from "../../../utils/timeFunction";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 import { clearUSDParityForManagementFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
 import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
@@ -423,6 +424,7 @@ const USDParity = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
+          noRowsOverlayComponent={NoDataOverlay}
         />
       </div>
 

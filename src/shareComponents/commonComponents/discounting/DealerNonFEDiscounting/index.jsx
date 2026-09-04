@@ -12,6 +12,7 @@ import { IndexCell } from "../../elements/inputField/IndexCell";
 import { buildDiscountingAgGridTable } from "../../utils/generateColumnsData";
 import AgGridTable from "../../elements/globalAgGridTable";
 import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 
 // ─────────────────────────────────────────────
 const THROTTLE_INTERVAL_MS = 50; // ~20fps
@@ -346,6 +347,7 @@ const DealerNonFeDiscountingTable = memo(() => {
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
         loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </div>
   );

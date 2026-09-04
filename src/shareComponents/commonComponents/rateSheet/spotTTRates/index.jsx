@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import styles from "../RateSheet.module.css";
 import "../rateSheetAgGrid.css";
 import AgGridTable from "../../elements/globalAgGridTable";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
 
 import { clearTreasuryRateSheetSpotTTRates } from
   "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
@@ -217,7 +219,12 @@ const SpotTTRates = memo(forwardRef((_props, ref) => {
 
   const gridStyle = useMemo(
     () => ({
-      height: 32 + Math.max(initialRows.length, 1) * 32,
+      // Reserve room for the "No Data Found" overlay ONLY when truly
+      // empty — a single real row's height (32px) is too cramped for the
+      // icon+text, but Math.max(len, 4) would also force that extra
+      // space when there ARE 1-3 real rows, reintroducing dead space
+      // below them. So only expand when length is exactly 0.
+      height: 32 + (initialRows.length === 0 ? 4 : initialRows.length) * 32,
     }),
     [initialRows.length],
   );
@@ -264,6 +271,8 @@ const SpotTTRates = memo(forwardRef((_props, ref) => {
         onGridReady={handleGridReady}
         animateRows={false}
         asyncTransactionWaitMillis={50}
+        loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </>
   );

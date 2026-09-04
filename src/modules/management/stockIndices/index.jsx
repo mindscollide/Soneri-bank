@@ -6,6 +6,7 @@ import styles from "../management.module.css";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { clearStockIndicesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
 import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
@@ -405,6 +406,7 @@ const StockIndices = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
+          noRowsOverlayComponent={NoDataOverlay}
         />
       </div>
 

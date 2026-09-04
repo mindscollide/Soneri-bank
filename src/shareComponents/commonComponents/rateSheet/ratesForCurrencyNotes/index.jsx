@@ -11,6 +11,8 @@ import React, {
 import styles from "../RateSheet.module.css";
 import "../rateSheetAgGrid.css";
 import AgGridTable from "../../elements/globalAgGridTable";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
 import { useDispatch, useSelector } from "react-redux";
 import { clearTreasuryRateSheetCurrencyNotes } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 
@@ -210,13 +212,18 @@ const RatesForCurrencyNotes = memo(forwardRef((_props, ref) => {
 
       <AgGridTable
         className='rsAgGrid'
-        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        style={{
+          height:
+            32 + (processedData.length === 0 ? 4 : processedData.length) * 32,
+        }}
         rowData={processedData}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         getRowId={(p) => String(p.data.instrumentID)}
         suppressColumnVirtualisation={true}
         animateRows={false}
+        loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </>
   );

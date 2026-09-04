@@ -6,6 +6,7 @@ import { IndexCell } from "../../../../shareComponents/commonComponents/elements
 import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
 
 // Selectors
 const selectCrossInstruments = (state) =>
@@ -91,14 +92,21 @@ const BankSpotAndUSDParity = memo(() => {
   }, [crossInstruments, crossMap, currencyMap]);
 
   // ─────────────────────────────
-  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  // Sync data into grid whenever API data arrives — always sets rowData
+  // (even when empty, e.g. the API failed/returned nothing), so the grid
+  // never gets stuck showing its initial "no rowData yet" loading overlay
+  // forever with no data and no error to explain why.
   useEffect(() => {
-    if (!gridApiRef.current || !crossInstruments?.length) return;
+    if (!gridApiRef.current) return;
 
     const rowData = buildRowData();
-    if (rowData.length === 0) return;
-
     gridApiRef.current.setGridOption("rowData", rowData);
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+    } else {
+      gridApiRef.current.hideOverlay();
+    }
 
     // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
     rowNodeMap.current.clear();
@@ -106,7 +114,7 @@ const BankSpotAndUSDParity = memo(() => {
       const key = `${node.data.instrumentID}_${node.data.secondaryInstrumentID}`;
       rowNodeMap.current.set(key, node);
     });
-  }, [crossInstruments, worldCrosses, worldCurrencies]);
+  }, [crossInstruments, worldCrosses, worldCurrencies, buildRowData]);
 
   // ─────────────────────────────
   const onGridReady = useCallback(
@@ -117,8 +125,12 @@ const BankSpotAndUSDParity = memo(() => {
 
       // Attempt immediate load (works if API already resolved before grid init)
       const rowData = buildRowData();
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
+      params.api.setGridOption("rowData", rowData);
+
+      if (rowData.length === 0) {
+        params.api.showNoRowsOverlay();
+      } else {
+        params.api.hideOverlay();
       }
       // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
@@ -381,6 +393,7 @@ const BankSpotAndUSDParity = memo(() => {
         suppressAnimationFrame={false}
         suppressCellFocus={true}
         loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </div>
   );

@@ -12,6 +12,7 @@ import { buildForwardsAgGridTable } from "../../../shareComponents/commonCompone
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import { useMqttTopics } from "../../../hook/useMqttTopics";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 
 const Forwards = memo(() => {
   useMqttTopics([`SBL_REAL_TIME_FEED_TREASURY`]);
@@ -426,6 +427,7 @@ const Forwards = memo(() => {
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
         loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </div>
   );

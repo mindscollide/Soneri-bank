@@ -1,0 +1,21 @@
+.noDataOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  width: 100%;
+  color: #9ca3af;
+}
+
+.noDataOverlay-icon {
+  color: #b0b0b0;
+}
+
+.noDataOverlay-text {
+  font-family: "Helvetica-Bold", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}

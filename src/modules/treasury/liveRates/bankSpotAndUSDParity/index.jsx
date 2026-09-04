@@ -7,6 +7,7 @@ import { IndexCell } from "../../../../shareComponents/commonComponents/elements
 import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 
 const selectCrossInstruments = (state) =>
   state.WatchListReducer.GetAllInstrumentForTreasury?.crossInstruments;
@@ -79,14 +80,21 @@ const BankSpotAndUSDParity = memo(() => {
   }, [crossInstruments, crossMap, currencyMap]);
 
   // ─────────────────────────────
-  // Sync grid when REST API data arrives (handles race with grid init)
+  // Sync data into grid whenever API data arrives — always sets rowData
+  // (even when empty, e.g. the API failed/returned nothing), so the grid
+  // never gets stuck showing its initial "no rowData yet" loading overlay
+  // forever with no data and no error to explain why.
   useEffect(() => {
-    if (!gridApiRef.current || !crossInstruments?.length) return;
+    if (!gridApiRef.current) return;
 
     const rowData = buildRowData();
-    if (!rowData.length) return;
-
     gridApiRef.current.setGridOption("rowData", rowData);
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+    } else {
+      gridApiRef.current.hideOverlay();
+    }
 
     rowNodeMap.current.clear();
     gridApiRef.current.forEachNode((node) => {
@@ -95,7 +103,7 @@ const BankSpotAndUSDParity = memo(() => {
         node
       );
     });
-  }, [crossInstruments, worldCrosses, worldCurrencies]);
+  }, [crossInstruments, worldCrosses, worldCurrencies, buildRowData]);
 
   // ─────────────────────────────
   const onGridReady = useCallback(
@@ -104,8 +112,12 @@ const BankSpotAndUSDParity = memo(() => {
       gridApiRef.current = params.api;
 
       const rowData = buildRowData();
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
+      params.api.setGridOption("rowData", rowData);
+
+      if (rowData.length === 0) {
+        params.api.showNoRowsOverlay();
+      } else {
+        params.api.hideOverlay();
       }
     },
     [buildRowData]
@@ -362,6 +374,7 @@ const BankSpotAndUSDParity = memo(() => {
         suppressAnimationFrame={true}
         suppressCellFocus={true}
         loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </div>
   );

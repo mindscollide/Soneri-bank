@@ -5,6 +5,7 @@ import { convertUTCTimeToLocalTime } from "../../../../utils/timeFunction";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../elements/globalAgGridTable";
 import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
 
 // ─── Selectors ───────────────────────────────
 const selectFeed = (state) =>
@@ -52,14 +53,21 @@ const CurrencyCrosses = memo(() => {
   }, [otherInstruments, currencyCrosses]);
 
   // ─────────────────────────────
-  // ✅ FIX: Sync data into grid whenever API data arrives (handles race condition)
+  // Sync data into grid whenever API data arrives — always sets rowData
+  // (even when empty, e.g. the API failed/returned nothing), so the grid
+  // never gets stuck showing its initial "no rowData yet" loading overlay
+  // forever with no data and no error to explain why.
   useEffect(() => {
-    if (!gridApiRef.current || !otherInstruments?.length) return;
+    if (!gridApiRef.current) return;
 
     const rowData = buildRowData();
-    if (rowData.length === 0) return;
-
     gridApiRef.current.setGridOption("rowData", rowData);
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+    } else {
+      gridApiRef.current.hideOverlay();
+    }
 
     // Rebuild rowNodeMap so live MQTT updates can target the correct nodes
     rowNodeMap.current.clear();
@@ -68,7 +76,7 @@ const CurrencyCrosses = memo(() => {
         rowNodeMap.current.set(String(node.data.instrumentID), node);
       }
     });
-  }, [otherInstruments, currencyCrosses]);
+  }, [otherInstruments, currencyCrosses, buildRowData]);
 
   // ─────────────────────────────
   const onGridReady = useCallback(
@@ -79,8 +87,12 @@ const CurrencyCrosses = memo(() => {
 
       // Attempt immediate load (works if API already resolved before grid init)
       const rowData = buildRowData();
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
+      params.api.setGridOption("rowData", rowData);
+
+      if (rowData.length === 0) {
+        params.api.showNoRowsOverlay();
+      } else {
+        params.api.hideOverlay();
       }
       // If data isn't ready yet, the useEffect above will handle it when it arrives
     },
@@ -297,6 +309,7 @@ const CurrencyCrosses = memo(() => {
         suppressColumnVirtualisation={false}
         suppressRowVirtualisation={false}
         loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </div>
   );

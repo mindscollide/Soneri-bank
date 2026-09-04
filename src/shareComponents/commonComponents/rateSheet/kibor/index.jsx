@@ -11,6 +11,8 @@ import React, {
 import styles from "../RateSheet.module.css";
 import "../rateSheetAgGrid.css";
 import AgGridTable from "../../elements/globalAgGridTable";
+import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
 import { useSelector } from "react-redux";
 
 const GetKiborDataForRateSheet = (state) =>
@@ -169,13 +171,18 @@ const KIBOR = memo(forwardRef((_props, ref) => {
       <span className={styles.tableheaderbar_SOFR}>KIBOR</span>
       <AgGridTable
         className='rsAgGrid rsAgGrid--bold'
-        style={{ height: 32 + Math.max(processedData.length, 1) * 32 }}
+        style={{
+          height:
+            32 + (processedData.length === 0 ? 4 : processedData.length) * 32,
+        }}
         rowData={processedData}
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
         getRowId={(p) => String(p.data.key)}
         suppressColumnVirtualisation={true}
         animateRows={false}
+        loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </>
   );

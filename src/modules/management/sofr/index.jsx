@@ -4,6 +4,7 @@ import styles from "../management.module.css";
 
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 import { IndexCell } from "../../../shareComponents/commonComponents/elements/inputField/IndexCell";
 import { formatCompactDate } from "../../../utils/timeFunction";
 import { clearSofrForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
@@ -322,6 +323,7 @@ const SOFR = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
+          noRowsOverlayComponent={NoDataOverlay}
         />
       </div>
 

@@ -8,6 +8,7 @@ import { IndexCell } from "../../../../shareComponents/commonComponents/elements
 import { buildDiscountingAgGridTable } from "../../../../shareComponents/commonComponents/utils/generateColumnsData";
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 
 // ─────────────────────────────────────────────
 const THROTTLE_INTERVAL_MS = 50; // ~20fps
@@ -308,6 +309,7 @@ const TreasuryNonFeDiscountingTable = memo(() => {
         suppressScrollOnNewData={true}
         suppressAnimationFrame={false}
         loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </div>
   );

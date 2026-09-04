@@ -5,6 +5,7 @@ import { clearSwapsinUSDForManagementFeed } from "../../../store/slicers/realtim
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import dayjs from "dayjs";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 import { convertUTCToLocal } from "../../../common/utils";
 import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
 import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
@@ -421,6 +422,7 @@ const SwapsInUSD = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
+          noRowsOverlayComponent={NoDataOverlay}
         />
       </div>
 

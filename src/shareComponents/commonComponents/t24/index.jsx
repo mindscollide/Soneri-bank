@@ -20,6 +20,8 @@ import { Col, Row } from "react-bootstrap";
 
 import AgGridTable from "../elements/globalAgGridTable";
 import Loader from "@/shareComponents/elements/soneriLoader/Loader";
+import SectionLoader from "@/shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "@/shareComponents/elements/soneriLoader/NoDataOverlay";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -220,7 +222,10 @@ const T24 = () => {
   // ----------------------------------------
 
   const gridHeight = useMemo(() => {
-    return 32 + Math.max(processedData.length, 1) * 32;
+    // Reserve room for the "No Data Found" overlay ONLY when truly empty —
+    // Math.max(len, N) would also force that extra height when there ARE
+    // 1..N-1 real rows, reintroducing dead space below them.
+    return 32 + (processedData.length === 0 ? 4 : processedData.length) * 32;
   }, [processedData.length]);
 
   const handleClickExcelExport = () => {
@@ -383,6 +388,8 @@ const T24 = () => {
         onGridReady={handleGridReady}
         suppressColumnVirtualisation={true}
         animateRows={false}
+        loadingOverlayComponent={SectionLoader}
+        noRowsOverlayComponent={NoDataOverlay}
       />
     </section>
   );

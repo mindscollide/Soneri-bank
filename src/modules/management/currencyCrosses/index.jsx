@@ -6,6 +6,7 @@ import styles from "../management.module.css";
 import { clearCurrencyCrossesForManagmentFeed } from "../../../store/slicers/realtimeActionsSlicer/realtimeActionSlice";
 import AgGridTable from "../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../shareComponents/elements/soneriLoader/SectionLoader";
+import NoDataOverlay from "../../../shareComponents/elements/soneriLoader/NoDataOverlay";
 import DownloadHistoryPopover from "../../../shareComponents/commonComponents/elements/downloadHistoryPopover";
 import { useDownloadHistoryContextMenu } from "../../../hook/useDownloadHistoryContextMenu";
 
@@ -380,6 +381,7 @@ const CurrencyCrosses = memo(() => {
           suppressAnimationFrame={false}
           suppressCellFocus={true}
           loadingOverlayComponent={SectionLoader}
+          noRowsOverlayComponent={NoDataOverlay}
         />
       </div>
 
