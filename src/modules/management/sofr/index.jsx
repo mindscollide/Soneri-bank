@@ -50,17 +50,24 @@ const SOFR = memo(() => {
     }));
   }, [sofrList]);
 
-  // ── Sync initial data after grid ready (REST → grid race) ─────────────────
+  // Sync data into grid whenever API data arrives — always sets rowData
+  // (even when empty, e.g. the API failed/returned nothing), so the grid
+  // never gets stuck showing its initial "no rowData yet" loading overlay
+  // forever with no data and no error to explain why.
   useEffect(() => {
-    if (!gridApiRef.current || !sofrList?.length) return;
+    if (!gridApiRef.current) return;
 
     const rowData = buildRowData();
-    if (!rowData.length) return;
-
     gridApiRef.current.setGridOption("rowData", rowData);
 
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+    } else {
+      gridApiRef.current.hideOverlay();
+    }
+
     // Seed date header
-    if (sofrList[0]?.lastModifiedDate) {
+    if (sofrList?.[0]?.lastModifiedDate) {
       setLatestDate(sofrList[0].lastModifiedDate);
     }
 
@@ -80,8 +87,12 @@ const SOFR = memo(() => {
       gridApiRef.current = params.api;
 
       const rowData = buildRowData();
-      if (rowData.length) {
-        params.api.setGridOption("rowData", rowData);
+      params.api.setGridOption("rowData", rowData);
+
+      if (rowData.length === 0) {
+        params.api.showNoRowsOverlay();
+      } else {
+        params.api.hideOverlay();
       }
     },
     [buildRowData]

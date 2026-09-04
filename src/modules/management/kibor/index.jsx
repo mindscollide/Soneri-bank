@@ -46,14 +46,21 @@ const KIBOR = memo(() => {
     }));
   }, [kiborList]);
 
-  // ── Sync initial data after grid is ready (handles REST → grid race) ───────
+  // Sync data into grid whenever API data arrives — always sets rowData
+  // (even when empty, e.g. the API failed/returned nothing), so the grid
+  // never gets stuck showing its initial "no rowData yet" loading overlay
+  // forever with no data and no error to explain why.
   useEffect(() => {
-    if (!gridApiRef.current || !kiborList?.length) return;
+    if (!gridApiRef.current) return;
 
     const rowData = buildRowData();
-    if (rowData.length === 0) return;
-
     gridApiRef.current.setGridOption("rowData", rowData);
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+    } else {
+      gridApiRef.current.hideOverlay();
+    }
 
     // Rebuild rowNodeMap so live updates can target nodes by displayName
     rowNodeMap.current.clear();
@@ -71,8 +78,12 @@ const KIBOR = memo(() => {
       gridApiRef.current = params.api;
 
       const rowData = buildRowData();
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
+      params.api.setGridOption("rowData", rowData);
+
+      if (rowData.length === 0) {
+        params.api.showNoRowsOverlay();
+      } else {
+        params.api.hideOverlay();
       }
     },
     [buildRowData],

@@ -60,14 +60,21 @@ const USDParity = memo(() => {
     });
   }, [crossInstruments, worldCrosses]);
 
-  // ── Sync initial data AFTER grid is ready (handles race condition) ──
+  // Sync data into grid whenever API data arrives — always sets rowData
+  // (even when empty, e.g. the API failed/returned nothing), so the grid
+  // never gets stuck showing its initial "no rowData yet" loading overlay
+  // forever with no data and no error to explain why.
   useEffect(() => {
-    if (!gridApiRef.current || !crossInstruments?.length) return;
+    if (!gridApiRef.current) return;
 
     const rowData = buildRowData();
-    if (rowData.length === 0) return;
-
     gridApiRef.current.setGridOption("rowData", rowData);
+
+    if (rowData.length === 0) {
+      gridApiRef.current.showNoRowsOverlay();
+    } else {
+      gridApiRef.current.hideOverlay();
+    }
 
     // Rebuild the rowNodeMap so live updates can target nodes
     rowNodeMap.current.clear();
@@ -76,7 +83,7 @@ const USDParity = memo(() => {
         rowNodeMap.current.set(String(node.data.instrumentID), node);
       }
     });
-  }, [crossInstruments, worldCrosses]); // re-runs when API data arrives
+  }, [crossInstruments, worldCrosses, buildRowData]); // re-runs when API data arrives
 
   // ── onGridReady ────────────────────────────────────────────────────────
   const onGridReady = useCallback(
@@ -86,8 +93,12 @@ const USDParity = memo(() => {
       gridApiRef.current = params.api; // ✅ stores actual AG Grid API
 
       const rowData = buildRowData();
-      if (rowData.length > 0) {
-        params.api.setGridOption("rowData", rowData);
+      params.api.setGridOption("rowData", rowData);
+
+      if (rowData.length === 0) {
+        params.api.showNoRowsOverlay();
+      } else {
+        params.api.hideOverlay();
       }
     },
     [buildRowData],
