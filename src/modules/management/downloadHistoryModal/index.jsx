@@ -29,7 +29,6 @@ const DownloadHistoryModal = () => {
     (state) => state.WatchListReducer.DownloadHistoryData,
   );
 
-  console.log("downloadHistoryData", downloadHistoryData);
   // "all" = Select All (no dates needed), "range" = Date Range (both dates required)
   const [exportMode, setExportMode] = useState("all");
   const [fromDate, setFromDate] = useState(null);

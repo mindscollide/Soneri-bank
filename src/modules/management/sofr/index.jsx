@@ -256,7 +256,7 @@ const SOFR = memo(() => {
         cellClass: "bid-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} isSofr={true} />
           ) : null,
       },
       {
@@ -266,7 +266,7 @@ const SOFR = memo(() => {
         cellClass: "offer-cell",
         cellRenderer: (p) =>
           p.value != null && p.value !== "-" ? (
-            <IndexCell value={Number(p.value).toFixed(4)} />
+            <IndexCell value={Number(p.value)} isSofr={true} />
           ) : null,
       },
     ],
