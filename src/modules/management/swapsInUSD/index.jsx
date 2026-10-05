@@ -364,7 +364,6 @@ const SwapsInUSD = memo(() => {
     const row = event.data ?? {};
 
     const currency = colId.replace(/_(bid|ask)$/, "");
-    console.log(row, currency, colId, "resolveSwapsInUSDData");
     return {
       tenorName: row.tenorName,
       tenorId: row.tenorId,
