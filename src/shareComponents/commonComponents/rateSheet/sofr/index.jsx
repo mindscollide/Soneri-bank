@@ -37,8 +37,8 @@ const SOFR = memo(forwardRef((_props, ref) => {
     return sofrList.map((item, index) => ({
       headerName: item.tenor,
       field: item.tenor,
-          flex: 1,
-      cellClass: index === 0 ? "rs-first-col" : undefined,
+      flex: 1,
+      // cellClass: index === 0 ? "rs-first-col" : undefined,
     }));
   }, [sofrList]);
 

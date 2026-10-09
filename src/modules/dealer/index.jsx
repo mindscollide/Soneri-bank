@@ -234,6 +234,7 @@ const Dealer = () => {
     <div>
       <GlobalTabs
         items={tabs}
+      
         onChange={handleTabChange} // ✅ was missing
         tabBarExtraContent={
           !isDealer && (

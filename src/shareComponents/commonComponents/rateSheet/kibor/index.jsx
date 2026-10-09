@@ -38,7 +38,7 @@ const KIBOR = memo(forwardRef((_props, ref) => {
       headerName: item.tenor,
       field: item.tenor,
       flex: 1,
-      cellClass: index === 0 ? "rs-first-col" : undefined,
+      // cellClass: index === 0 ? "rs-first-col" : undefined,
     }));
   }, [kiborList]);
 
