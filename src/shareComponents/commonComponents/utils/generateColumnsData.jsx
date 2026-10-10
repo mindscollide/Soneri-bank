@@ -514,6 +514,7 @@ export const buildForwardsAgGridTable = (
             width: 170,
             suppressMovable: false,
             cellClass: "instrument-cell",
+               pinned: "left",
           },
         ],
       },
@@ -526,7 +527,7 @@ export const buildForwardsAgGridTable = (
             flex: 1,
             // width: 100,
             cellClass: "bid-cell",
-            cellRenderer: (params) => <IndexCell value={params.value} />,
+            cellRenderer: (params) => <IndexCell CellClassName="bid-cell" value={params.value} />,
           },
           {
             headerName: "Ask",

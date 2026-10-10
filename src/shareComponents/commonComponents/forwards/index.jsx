@@ -14,6 +14,11 @@ import { useMqttTopics } from "../../../hook/useMqttTopics";
 import SectionLoader from "../../elements/soneriLoader/SectionLoader";
 import NoDataOverlay from "../../elements/soneriLoader/NoDataOverlay";
 
+// Latest live (MQTT) values per dealer, kept outside the component so they
+// survive tab switches / remounts (the Redux REST snapshot is never patched).
+const liveRatesCache = new Map(); // `${dealerId}|${tenorID}|${instrument}` -> { bid, ask }
+const liveRatesCacheMeta = { snapshot: null };
+
 const Forwards = memo(({ dealerIdForMQTT }) => {
   const dispatch = useDispatch();
 
@@ -58,14 +63,38 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
   // ─────────────────────────────
   // INITIAL TABLE BUILD (STABLE)
   const { rowData, columnDefs } = useMemo(() => {
-    return buildForwardsAgGridTable(
+    const result = buildForwardsAgGridTable(
       3,
       GetBankForwardForTreasuryDealer?.forwardRates || [],
       { tenors: getAllTenorsRecords?.tenors || [] },
       { instruments: allInstrumentForTreasuryData?.forwardInstruments || [] },
       IndexCell
     );
+
+    // A new snapshot (fetch / dealer change) supersedes cached live values
+    if (liveRatesCacheMeta.snapshot !== GetBankForwardForTreasuryDealer) {
+      liveRatesCache.clear();
+      liveRatesCacheMeta.snapshot = GetBankForwardForTreasuryDealer;
+    }
+    if (liveRatesCache.size > 0) {
+      result.rowData.forEach((row) => {
+        Object.keys(row).forEach((k) => {
+          if (!k.startsWith("bid_")) return;
+          const name = k.slice(4);
+          const cached = liveRatesCache.get(
+            `${dealerIdForMQTT}|${row.tenorID}|${name}`
+          );
+          if (cached) {
+            row[k] = cached.bid;
+            row[`ask_${name}`] = cached.ask;
+          }
+        });
+      });
+    }
+
+    return result;
   }, [
+    dealerIdForMQTT,
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
     GetBankForwardForTreasuryDealer,
@@ -160,10 +189,12 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
         if (inst) {
           const key = `${String(rate.tenorID)}|${inst.instrumentName}`;
 
-          pendingUpdates.current.set(key, {
+          const value = {
             bid: rate.bidWithSpread,
             ask: rate.askWithSpread,
-          });
+          };
+          pendingUpdates.current.set(key, value);
+          liveRatesCache.set(`${dealerIdForMQTT}|${key}`, value);
         }
       });
     });
@@ -182,6 +213,7 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
   }, [
     TreasuryDealerForwardRates,
     allInstrumentForTreasuryData,
+    dealerIdForMQTT,
     dispatch,
     processQueue,
   ]);

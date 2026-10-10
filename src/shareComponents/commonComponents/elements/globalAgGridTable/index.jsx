@@ -135,6 +135,7 @@ const AgGridTable = forwardRef(
         style={style}
       >
         <AgGridReact
+          theme="legacy"
           {...gridProps}
           getRowId={getRowId}
           headerHeight={headerHeight}

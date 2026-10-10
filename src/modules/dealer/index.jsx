@@ -83,9 +83,15 @@ const Dealer = () => {
   const [dealerOptions, setDealerOptions] = useState([]);
   const [selectedDealer, setSelectedDealer] = useState(null);
 
+  const mountedRef = useRef(true);
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      localStorage.removeItem("globalTabsActiveKey");
+      mountedRef.current = false;
+      // Deferred so a StrictMode remount does not wipe the saved tab
+      setTimeout(() => {
+        if (!mountedRef.current) localStorage.removeItem("globalTabsActiveKey");
+      }, 0);
     };
   }, []);
 

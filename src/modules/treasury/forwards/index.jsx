@@ -147,8 +147,7 @@ const Forwards = memo(() => {
 
     if (updatedCount > 0) {
       console.log(
-        `✓ Updated ${updatedCount} cells${
-          notFoundCount > 0 ? `, ${notFoundCount} not found` : ""
+        `✓ Updated ${updatedCount} cells${notFoundCount > 0 ? `, ${notFoundCount} not found` : ""
         }`
       );
     }
@@ -393,9 +392,10 @@ const Forwards = memo(() => {
   const defaultColDef = useMemo(
     () => ({
       resizable: false,
+      resizable: false,
       sortable: false,
       suppressMovable: true,
-      editable: false,
+      minWidth: 120,
     }),
     []
   );

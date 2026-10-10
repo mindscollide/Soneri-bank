@@ -6,12 +6,27 @@ const GlobalTabs = ({ items = [], tabBarExtraContent, onChange }) => {
   // ✅ accept onChange prop
   const storageKey = "globalTabsActiveKey";
 
-  const [activeKey, setActiveKey] = useState(0);
+  const readSaved = () => {
+    try {
+      return localStorage.getItem(storageKey);
+    } catch {
+      return null;
+    }
+  };
+
+  // Restore the saved tab immediately (refresh keeps the user on the same tab)
+  const [activeKey, setActiveKey] = useState(() => {
+    const savedKey = readSaved();
+    return items.find((tab) => tab.key === savedKey) ? savedKey : items[0]?.key ?? 0;
+  });
+
+  // Only re-validate when the set of tabs changes, not on every render
+  const itemKeys = items.map((tab) => tab.key).join(",");
 
   // Set initial tab when items load
   useEffect(() => {
     if (items.length > 0) {
-      const savedKey = localStorage.getItem(storageKey);
+      const savedKey = readSaved();
 
       const validKey = items.find((tab) => tab.key === savedKey)
         ? savedKey
@@ -20,7 +35,7 @@ const GlobalTabs = ({ items = [], tabBarExtraContent, onChange }) => {
       setActiveKey(validKey);
       onChange?.(validKey); // ✅ sync parent on initial load too
     }
-  }, [items]);
+  }, [itemKeys]);
 
   const handleChange = (key) => {
     setActiveKey(key);

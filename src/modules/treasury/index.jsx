@@ -59,9 +59,15 @@ const Treasury = () => {
   // 4. Call the hook at the TOP LEVEL
   useMqttTopics(currentTopics);
 
+  const mountedRef = useRef(true);
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      localStorage.removeItem("globalTabsActiveKey");
+      mountedRef.current = false;
+      // Deferred so a StrictMode remount does not wipe the saved tab
+      setTimeout(() => {
+        if (!mountedRef.current) localStorage.removeItem("globalTabsActiveKey");
+      }, 0);
     };
   }, []);
 

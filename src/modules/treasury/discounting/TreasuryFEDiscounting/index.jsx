@@ -283,6 +283,7 @@ const TreasuryFeDiscountingTable = memo(() => {
 
       <AgGridTable
         ref={gridRef}
+         theme="legacy"
         columnDefs={columnDefs}
         className="fe-discounting-grid"
         rowData={rowData}
