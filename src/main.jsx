@@ -11,9 +11,9 @@ import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 if (import.meta.env.VITE_ENV !== "DEV" && import.meta.env.VITE_ENV !== "UAT") {
-  // console.log = () => { };
-  // console.warn = () => { };
-  // console.debug = () => { };
+  console.log = () => { };
+  console.warn = () => { };
+  console.debug = () => { };
 
   // console.error = () => { };
 }

@@ -119,7 +119,6 @@ const Forwards = memo(() => {
       const [tenorID, instrumentName] = key.split("_");
       const node = rowNodeMap.current.get(String(tenorID));
 
-      console.log(update, node, key, "updateupdateupdate");
 
       if (node && node.data) {
         try {
@@ -279,7 +278,6 @@ const Forwards = memo(() => {
         // ---------------- ADD ----------------
         const referenceRow = existingRows[0] || null;
 
-        console.log(referenceRow, "referenceRowreferenceRow");
 
         const toAdd = [];
 
@@ -299,7 +297,6 @@ const Forwards = memo(() => {
             tenorName: fullTenor.tenorName,
             tenorDays: fullTenor.tenorDays,
           };
-          console.log(referenceRow, newRow, "referenceRowreferenceRow");
 
           // Copy instrument columns from reference row
           if (referenceRow) {
