@@ -597,8 +597,8 @@
 .fe-discounting-grid .ag-header-group-cell {
   background-color: #ffffff !important;
   color: #000000 !important;
-  font-weight: 600;
-  font-size: 13px !important;
+  /* font-weight: 600; */
+  /* font-size: 13px !important; */
   text-align: center;
   border-right: 1px solid #d0cdc8 !important;
   border-bottom: 1px solid #d0cdc8 !important;
@@ -625,7 +625,7 @@
   justify-content: center;
   font-weight: bold;
   color: #fff !important;
-  font-size: 13px !important;
+  /* font-size: 13px !important; */
 }
 
 /* "Tenor" child header — white text, not yellow */
@@ -643,7 +643,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 14px;
+  /* font-size: 13px; */
   pointer-events: none !important;
   cursor: default !important;
   border-right: 1px solid #d0cdc8 !important;
@@ -652,7 +652,7 @@
 /* Value cells — transparent so alternating row color shows through */
 .fe-discounting-grid .ag-cell.value-cell {
   background-color: transparent !important;
-  color: #000000 !important;
+  /* color: #000000 !important; */
 }
 
 /* Remove focused cell outline */

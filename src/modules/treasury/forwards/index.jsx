@@ -410,6 +410,8 @@ const Forwards = memo(() => {
         ref={gridRef}
         columnDefs={columnDefs}
         className="liveRates-grid"
+        style={{ height: "auto" }}
+        domLayout="autoHeight"
         rowData={rowData}
         getRowId={(params) => String(params.data.tenorID)}
         onGridReady={onGridReady}

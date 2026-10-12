@@ -252,6 +252,8 @@ const Forwards = memo(({ dealerIdForMQTT }) => {
           ref={gridRef}
           rowData={rowData}
           className="liveRates-grid"
+          style={{ height: "auto" }}
+          domLayout="autoHeight"
           columnDefs={columnDefs}
           getRowId={(p) => String(p.data.tenorID)}
           onGridReady={onGridReady}
