@@ -73,6 +73,8 @@ export const loginInApi = createAsyncThunk(
                 isFEEnabled,
                 isNonFEEnabled,
               } = response.data.responseResult.user;
+              // Fresh login always lands on the first tab (Live Rates)
+              localStorage.removeItem("globalTabsActiveKey");
               localStorage.setItem("token", token);
               localStorage.setItem("refreshToken", refreshToken);
               localStorage.setItem("name", firstName);
