@@ -9,6 +9,10 @@ import { buildDiscountingAgGridTable } from "../../../../shareComponents/commonC
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
 import NoDataOverlay from "../../../../shareComponents/elements/soneriLoader/NoDataOverlay";
+import { createLiveRowCache } from "../../../../shareComponents/commonComponents/utils/liveRowCache";
+
+// Survives tab switches / remounts (see liveRowCache.js)
+const liveRowCache = createLiveRowCache();
 
 // ─────────────────────────────────────────────
 const THROTTLE_INTERVAL_MS = 50; // ~20fps
@@ -50,7 +54,7 @@ const TreasuryFeDiscountingTable = memo(() => {
   const { rowData, columnDefs } = useMemo(() => {
     const { feDiscountingRates = [] } = GetDiscountingRatesForTreasury || {};
 
-    return buildDiscountingAgGridTable(
+    const result = buildDiscountingAgGridTable(
       3,
       feDiscountingRates,
       { tenors: getAllTenorsRecords?.tenors || [] },
@@ -59,6 +63,13 @@ const TreasuryFeDiscountingTable = memo(() => {
       },
       IndexCell
     );
+
+    result.rowData = liveRowCache.apply(
+      result.rowData,
+      (row) => String(row.TenorID),
+      GetDiscountingRatesForTreasury
+    );
+    return result;
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
@@ -114,6 +125,9 @@ const TreasuryFeDiscountingTable = memo(() => {
       if (node && node.data) {
         try {
           node.setDataValue(`rate_${instrumentName}`, rate);
+          liveRowCache.remember(String(tenorID), {
+            [`rate_${instrumentName}`]: rate,
+          });
           updatedCount++;
         } catch (error) {
           console.error("FE Discounting: setDataValue error:", error, {
@@ -224,7 +238,10 @@ const TreasuryFeDiscountingTable = memo(() => {
       api.forEachNode((node) => {
         if (!node.data) return;
         Object.keys(node.data).forEach((key) => {
-          if (key.startsWith("rate_")) node.setDataValue(key, 0);
+          if (key.startsWith("rate_")) {
+            node.setDataValue(key, 0);
+            liveRowCache.remember(String(node.data.TenorID), { [key]: 0 });
+          }
         });
       });
       console.log("📴 FE Discounting: Market closed — rates zeroed");

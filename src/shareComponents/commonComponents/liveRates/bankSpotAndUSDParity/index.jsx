@@ -7,6 +7,19 @@ import { clearTreasurySpotRatesFeed } from "../../../../store/slicers/realtimeAc
 import AgGridTable from "../../../../shareComponents/commonComponents/elements/globalAgGridTable";
 import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
 import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
+import { createLiveRowCache } from "../../utils/liveRowCache";
+
+// Survives tab switches / remounts (see liveRowCache.js)
+const liveRowCache = createLiveRowCache();
+const rowKeyOf = (row) => `${row.instrumentID}_${row.secondaryInstrumentID}`;
+const LIVE_FIELDS = [
+  "worldCrossBid",
+  "worldCrossOffer",
+  "worldCurBid",
+  "worldCurOffer",
+  "crossTime",
+  "currencyTime",
+];
 
 // Selectors
 const selectCrossInstruments = (state) =>
@@ -66,7 +79,7 @@ const BankSpotAndUSDParity = memo(() => {
   const buildRowData = useCallback(() => {
     if (!crossInstruments?.length) return [];
 
-    return crossInstruments.map((inst) => {
+    const rows = crossInstruments.map((inst) => {
       const cross = crossMap.get(
         `${inst.instrumentID}_${inst.secondaryInstrumentID}`,
       );
@@ -91,7 +104,13 @@ const BankSpotAndUSDParity = memo(() => {
             : (currency?.offer ?? 0),
       };
     });
-  }, [crossInstruments, crossMap, currencyMap]);
+
+    return liveRowCache.apply(rows, rowKeyOf, [
+      crossInstruments,
+      worldCrosses,
+      worldCurrencies,
+    ]);
+  }, [crossInstruments, crossMap, currencyMap, worldCrosses, worldCurrencies]);
 
   // ─────────────────────────────
   // Sync data into grid whenever API data arrives — always sets rowData
@@ -163,6 +182,7 @@ const BankSpotAndUSDParity = memo(() => {
     }
 
     isProcessingRef.current = true;
+    const touchedNodes = new Set();
 
     try {
       for (const [key, update] of pendingUpdates.current) {
@@ -172,6 +192,7 @@ const BankSpotAndUSDParity = memo(() => {
 
           const data = node.data;
           const cross = update.data;
+          touchedNodes.add(node);
 
           if (
             (data.worldCrossBid !== cross.bid ||
@@ -204,6 +225,7 @@ const BankSpotAndUSDParity = memo(() => {
               node.data.instrumentID === instrumentID &&
               instrumentID !== 21
             ) {
+              touchedNodes.add(node);
               node.setDataValue("worldCurBid", parity.bid);
               node.setDataValue("worldCurOffer", parity.ask);
               node.setDataValue("crossTime", parity.updateDateTime);
@@ -211,6 +233,14 @@ const BankSpotAndUSDParity = memo(() => {
           }
         }
       }
+
+      touchedNodes.forEach((node) => {
+        const fields = {};
+        LIVE_FIELDS.forEach((f) => {
+          fields[f] = node.data[f];
+        });
+        liveRowCache.remember(rowKeyOf(node.data), fields);
+      });
 
       pendingUpdates.current.clear();
     } catch (error) {

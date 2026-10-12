@@ -6,6 +6,10 @@ import { clearCurrencyCrossesForManagmentFeed } from "../../../../store/slicers/
 import AgGridTable from "../../elements/globalAgGridTable";
 import SectionLoader from "../../../elements/soneriLoader/SectionLoader";
 import NoDataOverlay from "../../../elements/soneriLoader/NoDataOverlay";
+import { createLiveRowCache } from "../../utils/liveRowCache";
+
+// Survives tab switches / remounts (see liveRowCache.js)
+const liveRowCache = createLiveRowCache();
 
 // ─── Selectors ───────────────────────────────
 const selectFeed = (state) =>
@@ -37,7 +41,7 @@ const CurrencyCrosses = memo(() => {
   const buildRowData = useCallback(() => {
     if (!otherInstruments?.length) return [];
 
-    return otherInstruments.map((instrument) => {
+    const rows = otherInstruments.map((instrument) => {
       const match = currencyCrosses?.find(
         (wc) => Number(wc.instrumentId) === instrument.instrumentId
       );
@@ -50,6 +54,12 @@ const CurrencyCrosses = memo(() => {
         ask: match?.ask != null ? Number(match.ask) : null,
       };
     });
+
+    return liveRowCache.apply(
+      rows,
+      (row) => String(row.instrumentID),
+      [otherInstruments, currencyCrosses]
+    );
   }, [otherInstruments, currencyCrosses]);
 
   // ─────────────────────────────
@@ -161,6 +171,11 @@ const CurrencyCrosses = memo(() => {
           node.setDataValue("bid", update.bid);
           node.setDataValue("ask", update.ask);
           node.setDataValue("time", update.time);
+          liveRowCache.remember(key, {
+            bid: update.bid,
+            ask: update.ask,
+            time: update.time,
+          });
         }
 
         pendingUpdates.current.delete(key);

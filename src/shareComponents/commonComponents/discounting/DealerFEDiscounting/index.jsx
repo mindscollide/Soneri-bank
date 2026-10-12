@@ -13,6 +13,10 @@ import { buildDiscountingAgGridTable } from "../../utils/generateColumnsData";
 import AgGridTable from "../../elements/globalAgGridTable";
 import SectionLoader from "../../../../shareComponents/elements/soneriLoader/SectionLoader";
 import NoDataOverlay from "../../../../shareComponents/elements/soneriLoader/NoDataOverlay";
+import { createLiveRowCache } from "../../utils/liveRowCache";
+
+// Survives tab switches / remounts (see liveRowCache.js)
+const liveRowCache = createLiveRowCache();
 
 // ─────────────────────────────────────────────
 const THROTTLE_INTERVAL_MS = 50; // ~20fps
@@ -58,7 +62,7 @@ const DealerFeDiscountingTable = memo(() => {
   const { rowData, columnDefs } = useMemo(() => {
     const { feDiscountingRates = [] } = GetDiscountingRatesForDealer || {};
 
-    return buildDiscountingAgGridTable(
+    const result = buildDiscountingAgGridTable(
       3,
       feDiscountingRates,
       { tenors: getAllTenorsRecords?.tenors || [] },
@@ -67,6 +71,13 @@ const DealerFeDiscountingTable = memo(() => {
       },
       IndexCell
     );
+
+    result.rowData = liveRowCache.apply(
+      result.rowData,
+      (row) => String(row.TenorID),
+      GetDiscountingRatesForDealer
+    );
+    return result;
   }, [
     getAllTenorsRecords,
     allInstrumentForTreasuryData,
@@ -122,6 +133,9 @@ const DealerFeDiscountingTable = memo(() => {
       if (node && node.data) {
         try {
           node.setDataValue(`rate_${instrumentName}`, rate);
+          liveRowCache.remember(String(tenorID), {
+            [`rate_${instrumentName}`]: rate,
+          });
           updatedCount++;
         } catch (error) {
           console.error("Dealer FE Discounting: setDataValue error:", error, {
@@ -230,7 +244,10 @@ const DealerFeDiscountingTable = memo(() => {
       api.forEachNode((node) => {
         if (!node.data) return;
         Object.keys(node.data).forEach((key) => {
-          if (key.startsWith("rate_")) node.setDataValue(key, 0);
+          if (key.startsWith("rate_")) {
+            node.setDataValue(key, 0);
+            liveRowCache.remember(String(node.data.TenorID), { [key]: 0 });
+          }
         });
       });
       console.log("📴 Dealer FE Discounting: Market closed — rates zeroed");
@@ -263,7 +280,10 @@ const DealerFeDiscountingTable = memo(() => {
         api.forEachNode((node) => {
           if (!node.data) return;
           Object.keys(node.data).forEach((key) => {
-            if (key.startsWith("rate_")) node.setDataValue(key, 0);
+            if (key.startsWith("rate_")) {
+              node.setDataValue(key, 0);
+              liveRowCache.remember(String(node.data.TenorID), { [key]: 0 });
+            }
           });
         });
       }
