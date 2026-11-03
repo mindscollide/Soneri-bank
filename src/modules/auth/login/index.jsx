@@ -105,7 +105,7 @@ const Login = () => {
       {/* Body Content wrapper Begin */}
       <div className="body-content-wrapper d-flex align-items-center justify-content-center">
         <div className="form-wrapper">
-          <div className="form-horizontal d-flex align-items-top flex-wrap">
+          <form onSubmit={handleLogin} className="form-horizontal d-flex align-items-top flex-wrap">
             <div className="col-12 form-heading-wrap">
               <div className="form-heading text-center">Login</div>
             </div>
@@ -173,7 +173,6 @@ const Login = () => {
                 <button
                   type="submit"
                   className="btn btn-secondary btn-lg px-4"
-                  onClick={handleLogin}
                 >
                   Login
                 </button>
@@ -183,7 +182,7 @@ const Login = () => {
                 Forgot Password?
               </a> */}
             </div>
-          </div>
+          </form>
         </div>
       </div>
       {/* Body Content wrapper End /// */}
