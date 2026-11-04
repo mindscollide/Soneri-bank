@@ -12,3 +12,23 @@
   height: calc(100%) !important;
   overflow: auto !important;
 }
+
+/* Smooth appearance; the short delay avoids a flash when content loads instantly */
+@keyframes sectionLoaderFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.loader {
+  animation: sectionLoaderFadeIn 0.3s ease 0.15s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader {
+    animation: none;
+  }
+}

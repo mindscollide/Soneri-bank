@@ -54,3 +54,17 @@
 .pass-input-wrapper input {
   border-right: 0px;
 }
+
+/* Password is a plain text input; mask it with CSS so browsers do not treat it
+   as a password field (no "save password" prompt) */
+.password-masked {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
+/* No eye icon next to the login password, so keep the right border/radius */
+.pass-input-wrapper input.password-masked {
+  border-right: 1px solid #ced4da;
+  border-top-right-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}

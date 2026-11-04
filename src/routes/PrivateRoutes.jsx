@@ -16,7 +16,12 @@ const PrivateRoute = ({ element }) => {
   //   document.cookie = `token=${token}; path=/; secure; samesite=strict; expires=${expirationDate.toUTCString()}`;
   // }
   // If authenticated, render the protected route's component
-  return token ? element : <Navigate to={"/"} />;
+  if (!token) return <Navigate to={"/"} />;
+  // First-login users cannot use the app until they have created a password
+  if (localStorage.getItem("mustResetPassword") === "true") {
+    return <Navigate to={"/reset-password"} />;
+  }
+  return element;
 };
 
 export default PrivateRoute;

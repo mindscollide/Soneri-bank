@@ -1,9 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import {
+  emailTokenVerifyApi,
+  forgotPasswordApi,
   getAllInstrumentsApi,
   loginInApi,
   LogoutApi,
+  resetPasswordApi,
 } from "../../actions/authAction";
 
 const authSlice = createSlice({
@@ -75,6 +78,24 @@ const authSlice = createSlice({
         state.getAllInstruments = null;
         state.responseMessage = payload;
       });
+
+    // Forgot / verify-link / reset password share the same loader + toast message
+    [forgotPasswordApi, emailTokenVerifyApi, resetPasswordApi].forEach(
+      (thunk) => {
+        builder
+          .addCase(thunk.pending, (state) => {
+            state.Loader = true;
+          })
+          .addCase(thunk.fulfilled, (state, { payload }) => {
+            state.Loader = false;
+            state.responseMessage = payload?.message;
+          })
+          .addCase(thunk.rejected, (state, { payload }) => {
+            state.Loader = false;
+            state.responseMessage = payload;
+          });
+      },
+    );
   },
 });
 export const { clearAuthResponseMessage, setMainLoader } = authSlice.actions;

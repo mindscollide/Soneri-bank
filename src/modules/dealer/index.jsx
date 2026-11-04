@@ -34,18 +34,29 @@ import {
 import { setActiveDealerTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../hook/useMqttTopics";
+import { runAfterUiReady } from "../../utils/runAfterUiReady";
 // import { setActiveDealerTab } from "../../store/slicers/tabSlice/tabSlice"; // ✅ new
 
-const LiveRates = lazy(() =>
-  import("../../shareComponents/commonComponents/liveRates/index")
-);
-const Forwards = lazy(() =>
-  import("../../shareComponents/commonComponents/forwards/index")
-);
-const Discounting = lazy(() =>
-  import("../../shareComponents/commonComponents/discounting/index")
-);
-const News = lazy(() => import("../../shareComponents/commonComponents/news"));
+// Loaders are kept separate so the active tab can be preloaded before the APIs fire
+const loadLiveRates = () =>
+  import("../../shareComponents/commonComponents/liveRates/index");
+const loadForwards = () =>
+  import("../../shareComponents/commonComponents/forwards/index");
+const loadDiscounting = () =>
+  import("../../shareComponents/commonComponents/discounting/index");
+const loadNews = () => import("../../shareComponents/commonComponents/news");
+
+const TAB_LOADERS = {
+  0: loadLiveRates,
+  1: loadForwards,
+  2: loadDiscounting,
+  3: loadNews,
+};
+
+const LiveRates = lazy(loadLiveRates);
+const Forwards = lazy(loadForwards);
+const Discounting = lazy(loadDiscounting);
+const News = lazy(loadNews);
 
 const isTreasury = import.meta.env.VITE_APP_INCLUDE_TREASURY === "true";
 const isDealer = import.meta.env.VITE_APP_INCLUDE_DEALER === "true";
@@ -160,6 +171,13 @@ const Dealer = () => {
   // ✅ guard against double-fetch
   const hasFetched = useRef(false);
   useEffect(() => {
+    // APIs start only after the tab the user lands on has loaded; until then
+    // the Suspense fallback (SectionLoader) is shown.
+    const activeLoader =
+      TAB_LOADERS[localStorage.getItem("globalTabsActiveKey") ?? 0] ||
+      loadLiveRates;
+
+    const cancelPending = runAfterUiReady([activeLoader], () => {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
@@ -186,8 +204,11 @@ const Dealer = () => {
       dispatch(GetDiscountingRatesForDealerApi({ navigate, Data }));
     }
 
+    });
+
     // ✅ CLEANUP ON UNMOUNT
     return () => {
+      cancelPending();
       let defaultData = {
         value: 0,
         label: "",

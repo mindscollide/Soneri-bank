@@ -1,3 +1,4 @@
+@import "./shareComponents/elements/pageTransition/pageTransition.css";
 :root {
   --color-black: #000000;
   --color-light-gray: #ecebe8;

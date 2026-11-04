@@ -8,7 +8,8 @@ import React, {
 } from "react";
 import MainHeader from "../header";
 import "./dashboard.css";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import PageTransition from "../../elements/pageTransition/PageTransition";
 import { useDispatch } from "react-redux";
 import {
   currentRatePublishedAction,
@@ -435,7 +436,7 @@ const Dashboard = () => {
           <MainHeader />
         </Header>
         <Content className='my-2'>
-          <Outlet />
+          <PageTransition />
         </Content>
       </Layout>
     </MqttContext.Provider>

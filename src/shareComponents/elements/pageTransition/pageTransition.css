@@ -1,0 +1,36 @@
+@keyframes soneriFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes soneriFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reusable: add className="fade-in" to anything that should fade in on mount */
+.fade-in,
+.page-transition--in {
+  animation: soneriFadeIn 0.3s ease both;
+}
+
+.page-transition--out {
+  animation: soneriFadeOut 0.12s ease both;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .page-transition--in,
+  .page-transition--out {
+    animation: none;
+  }
+}

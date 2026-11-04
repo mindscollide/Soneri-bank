@@ -2,6 +2,11 @@ import { Navigate } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 
 import Login from "../modules/auth/login";
+import ForgotPassword from "../modules/auth/forgotPassword";
+import ResendReset from "../modules/auth/resendReset";
+import ResetPassword from "../modules/auth/resetPassword";
+import Redirected from "../modules/auth/redirected";
+import PasswordSuccess from "../modules/auth/passwordSuccess";
 import DashboardLayout from "../shareComponents/layout/dashboard";
 import PrivateRoute from "../routes/PrivateRoutes";
 
@@ -9,6 +14,8 @@ import {
   ErrorFallback,
   logErrors,
 } from "../shareComponents/elements/errorBoundary/ErrorBoundary";
+import EmailSent from "../modules/auth/emailSent";
+import LinkExpired from "../modules/auth/linkExpired";
 
 const withErrorBoundary = (element) => (
   <ErrorBoundary FallbackComponent={ErrorFallback} onError={logErrors}>
@@ -86,6 +93,34 @@ const loadRoutes = async () => {
     {
       path: "/",
       element: withErrorBoundary(<Login />),
+    },
+    {
+      path: "/forgot-password",
+      element: withErrorBoundary(<ForgotPassword />),
+    },
+    {
+      path: "/resend-reset-password",
+      element: withErrorBoundary(<ResendReset />),
+    },
+    {
+      path: "/redirected",
+      element: withErrorBoundary(<Redirected />),
+    },
+    {
+      path: "/reset-password",
+      element: withErrorBoundary(<ResetPassword />),
+    },
+    {
+      path: "/password-success",
+      element: withErrorBoundary(<PasswordSuccess />),
+    },
+      {
+      path: "/link-expired",
+      element: withErrorBoundary(<LinkExpired />),
+      },
+      {
+      path: "/email-sent",
+      element: withErrorBoundary(<EmailSent />),
     },
     dashboardRoute,
     {

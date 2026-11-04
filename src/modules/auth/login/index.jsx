@@ -4,8 +4,10 @@ import soneriLogo from "../../../assets/logo.png";
 import "./login.css";
 import { Form } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginInApi } from "../../../store/actions/authAction";
+import { validateEmail } from "../../../utils/emailValidation";
+import { encryptField } from "../../../utils/encryption";
 
 const shouldIsManagement =
   import.meta.env.VITE_APP_INCLUDE_MANAGEMENT === "true";
@@ -16,76 +18,73 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const SubmitRef = useRef(null);
 
   useEffect(() => {
+    // Reaching the sign-in page always starts from a clean session
+    localStorage.clear();
     emailRef.current?.focus();
   }, []);
 
-  // const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("login clicked");
-    let newErrors = { email: "", password: "" };
-
-    // if (!emailPattern.test(email)) {
-    //   newErrors.email = "Enter a valid email address";
-    // }
+    const newErrors = {
+      email: validateEmail(email),
+      password: password ? "" : "Enter password",
+    };
 
     setErrors(newErrors);
 
     if (!newErrors.email && !newErrors.password) {
-      let Data = {
-        UserName: email,
-        Password: password,
-        DeviceID: "1",
-        Device: "Browser",
-        RoleID: shouldIsManagement
-          ? 10
-          : shouldIsDealer
-          ? 7
-          : shouldIsTreasury
-          ? 8
-          : 0,
-      };
-      dispatch(loginInApi({ Data, navigate }));
-      console.log("Login successful!");
+      let encEmail, encPassword;
+      try {
+        let encryptedEmail = await encryptField(email.trim());
+        let encryptedPassword = await encryptField(password);
+        console.log("Encrypted Email:", encEmail);
+        console.log("Encrypted Password:", encPassword);
+
+        let Data = {
+          Email: encryptedEmail,
+          Password: encryptedPassword,
+          DeviceID: "1",
+          Device: "Browser",
+          RoleID: shouldIsManagement
+            ? 10
+            : shouldIsDealer
+              ? 7
+              : shouldIsTreasury
+                ? 8
+                : 0,
+        };
+        dispatch(loginInApi({ Data, navigate }));
+
+        return;
+      } catch {
+
+      }
+      // TEMP: print encrypted values for backend verification — remove before release
+
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  // Enter on the email field: validate, then move to the password field
   const handleKeyDown = (e) => {
     if (e.key !== "Enter") return;
+    e.preventDefault();
 
-    let newErrors = { email: "", password: "" };
-
-    // if (e.target.name === "Email") {
-    //   if (!email || !emailPattern.test(email)) {
-    //     newErrors.email = "Enter a valid email address";
-    //     setErrors((prev) => ({ ...prev, ...newErrors }));
-    //   } else {
-    //     passwordRef.current?.focus();
-    //   }
-    // }
-
-    if (e.target.name === "Password") {
-      if (!password) {
-        newErrors.password = "Enter password";
-        setErrors((prev) => ({ ...prev, ...newErrors }));
-      } else {
-        SubmitRef.current?.focus();
-      }
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setErrors((prev) => ({ ...prev, email: emailError }));
+    } else {
+      passwordRef.current?.focus();
     }
   };
 
   return (
-    <div className="login-screen" style={{ display: "block" }}>
+    <div className="login-screen fade-in" style={{ display: "block" }}>
       {/* Side header begin */}
       <div className="site-header p-0 bg-transparent p-relative">
         <div className="container-fluid page-gutter">
@@ -119,6 +118,8 @@ const Login = () => {
                   ref={emailRef}
                   type="text"
                   name="Email"
+                  autoComplete="off"
+                  inputMode="email"
                   placeholder="Email ID"
                   className={`form-control ${errors.email ? "error" : ""}`}
                   value={email}
@@ -143,23 +144,24 @@ const Login = () => {
                 </label>
                 <input
                   ref={passwordRef}
-                  type={showPassword ? "text" : "password"}
+                  // Plain text input masked with CSS (no type="password"), so the
+                  // browser does not show its "save password" prompt
+                  type="text"
                   name="password"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
                   placeholder="Password"
-                  className={`form-control ${errors.password ? "error" : ""}`}
+                  className={`form-control password-masked ${errors.password ? "error" : ""}`}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (errors.password) setErrors({ ...errors, password: "" });
                   }}
                 />
-                <span
-                  className="view-pass input-group-text"
-                  onClick={togglePasswordVisibility}
-                  style={{ cursor: "pointer" }}
-                >
-                  <i className={`icon-eye${showPassword ? "-slash" : ""}`}></i>
-                </span>
               </div>
               {errors.password && (
                 <span className="fs-sm color-red error-mess">
@@ -178,9 +180,12 @@ const Login = () => {
                 </button>
               </div>
 
-              {/* <a className="d-block text-center color-black mt-2 text-decoration-underline" href="forgotpassword.html">
+              <Link
+                className="d-block text-center color-black mt-2 text-decoration-underline"
+                to="/forgot-password"
+              >
                 Forgot Password?
-              </a> */}
+              </Link>
             </div>
           </form>
         </div>

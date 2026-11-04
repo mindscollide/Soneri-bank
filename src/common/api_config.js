@@ -225,3 +225,13 @@ export const GetCurrencySwapsHistoricalDataRM = {
 export const GetSBPFXRatesHistoryRM = {
   RequestMethod: "ServiceManager.GetSBPFXRatesHistory",
 };
+
+export const ForgetPasswordRM = {
+  RequestMethod: "ServiceManager.ForgetPassword",
+};
+export const ResetPasswordRM = {
+  RequestMethod: "ServiceManager.ResetPassword",
+};
+export const EmailTokenVerifyRM = {
+  RequestMethod: "ServiceManager.EmailTokenVerify",
+};

@@ -23,16 +23,31 @@ import { setActiveTreasuryTab } from "../../store/slicers/tabSlicer/tabSlicer";
 import SectionLoader from "../../shareComponents/elements/soneriLoader/SectionLoader";
 import { useMqttTopics } from "../../hook/useMqttTopics";
 import T24 from "../../shareComponents/commonComponents/t24";
-const LiveRates = lazy(
-  () => import("../../shareComponents/commonComponents/liveRates/index"),
-);
-const Forwards = lazy(() => import("./forwards/index"));
-const TreasuryDiscounting = lazy(() => import("./discounting/index"));
+import { runAfterUiReady } from "../../utils/runAfterUiReady";
 
-const News = lazy(() => import("../../shareComponents/commonComponents/news"));
-const RateSheet = lazy(
-  () => import("../../shareComponents/commonComponents/rateSheet"),
-);
+// Loaders are kept separate so the active tab can be preloaded before the APIs fire
+const loadLiveRates = () =>
+  import("../../shareComponents/commonComponents/liveRates/index");
+const loadForwards = () => import("./forwards/index");
+const loadDiscounting = () => import("./discounting/index");
+const loadNews = () => import("../../shareComponents/commonComponents/news");
+const loadRateSheet = () =>
+  import("../../shareComponents/commonComponents/rateSheet");
+
+// tab key -> chunk (T24 is imported statically, so it needs no preload)
+const TAB_LOADERS = {
+  0: loadLiveRates,
+  1: loadForwards,
+  2: loadDiscounting,
+  3: loadNews,
+  4: loadRateSheet,
+};
+
+const LiveRates = lazy(loadLiveRates);
+const Forwards = lazy(loadForwards);
+const TreasuryDiscounting = lazy(loadDiscounting);
+const News = lazy(loadNews);
+const RateSheet = lazy(loadRateSheet);
 const Treasury = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -135,15 +150,23 @@ const Treasury = () => {
   ];
   const hasFetched = useRef(false);
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-    dispatch(getAllTreasuryInstrumentsApi({ navigate }));
-    dispatch(getAllTenorsAction({ navigate }));
-    dispatch(GetAllOtherInstrumentsApi({ navigate }));
-    dispatch(GetBankSpotForTreasuryApi({ navigate }));
-    dispatch(GetCurrencyCrossesApi({ navigate }));
-    dispatch(GetBankForwardForTreasuryApi({ navigate }));
-    dispatch(GetDiscountingRatesForTreasuryApi({ navigate }));
+    // APIs start only after the tab the user lands on has loaded; until then
+    // the Suspense fallback (SectionLoader) is shown.
+    const activeLoader =
+      TAB_LOADERS[localStorage.getItem("globalTabsActiveKey") ?? 0] ||
+      loadLiveRates;
+
+    return runAfterUiReady([activeLoader], () => {
+      if (hasFetched.current) return;
+      hasFetched.current = true;
+      dispatch(getAllTreasuryInstrumentsApi({ navigate }));
+      dispatch(getAllTenorsAction({ navigate }));
+      dispatch(GetAllOtherInstrumentsApi({ navigate }));
+      dispatch(GetBankSpotForTreasuryApi({ navigate }));
+      dispatch(GetCurrencyCrossesApi({ navigate }));
+      dispatch(GetBankForwardForTreasuryApi({ navigate }));
+      dispatch(GetDiscountingRatesForTreasuryApi({ navigate }));
+    });
   }, []);
 
   return (

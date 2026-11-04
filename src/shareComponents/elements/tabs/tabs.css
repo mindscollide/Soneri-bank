@@ -50,3 +50,14 @@
   border-radius: 10px !important;
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.2);
 }
+
+/* Fade the tab content in when switching tabs */
+.tabsContent-tabpane-active {
+  animation: soneriFadeIn 0.3s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabsContent-tabpane-active {
+    animation: none;
+  }
+}
