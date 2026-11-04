@@ -21,9 +21,13 @@ const Redirected = () => {
   useEffect(() => {
     if (!resetToken || verifiedToken.current === resetToken) return;
     verifiedToken.current = resetToken;
-    dispatch(
-      emailTokenVerifyApi({ Data: { EncryptedString: resetToken }, navigate }),
-    );
+    try {
+      dispatch(
+        emailTokenVerifyApi({ Data: { EncryptedString: resetToken }, navigate }),
+      );
+    } catch (error) {
+      console.log("", error);
+    }
   }, [dispatch, navigate, resetToken]);
 
   if (!resetToken) return <Navigate to="/" replace />;

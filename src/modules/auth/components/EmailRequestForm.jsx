@@ -27,24 +27,29 @@ const EmailRequestForm = ({ title, subtitle, submitLabel, showBackLink }) => {
     }
     setError("");
     setLoading(true);
-    let encryptedEmail = await encryptField(email.trim());
-    // Failure message is shown by the global response toast
-    dispatch(
-      forgotPasswordApi({
-        Data: {
-          Email: encryptedEmail, RoleID: shouldIsManagement
-            ? 10
-            : shouldIsDealer
-              ? 7
-              : shouldIsTreasury
-                ? 8
-                : 0,
-        }
-        , navigate
-      }),
-    );
-    // if (forgotPasswordApi.fulfilled.match(result)) setSent(true);
-    setLoading(false);
+    try {
+      let encryptedEmail = await encryptField(email.trim());
+      // Failure message is shown by the global response toast
+      await dispatch(
+        forgotPasswordApi({
+          Data: {
+            Email: encryptedEmail,
+            RoleID: shouldIsManagement
+              ? 10
+              : shouldIsDealer
+                ? 7
+                : shouldIsTreasury
+                  ? 8
+                  : 0,
+          },
+          navigate,
+        }),
+      );
+    } catch (error) {
+      console.log("", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) {

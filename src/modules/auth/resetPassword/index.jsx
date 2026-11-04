@@ -11,7 +11,8 @@ const tryDecrypt = async (value) => {
   if (!value) return "";
   try {
     return await decryptField(value);
-  } catch {
+  } catch (error) {
+    console.log("", error);
     return value;
   }
 };
@@ -54,12 +55,16 @@ const ResetPassword = () => {
   }
 
   const handleSubmit = async (password) => {
-    await dispatch(
-      resetPasswordApi({
-        Data: { Email: encEmail, Password: password, EncryptedString: token },
-        navigate,
-      }),
-    );
+    try {
+      await dispatch(
+        resetPasswordApi({
+          Data: { Email: encEmail, Password: password, EncryptedString: token },
+          navigate,
+        }),
+      );
+    } catch (error) {
+      console.log("", error);
+    }
   };
 
   return (

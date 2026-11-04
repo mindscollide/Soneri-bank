@@ -59,8 +59,9 @@ const Login = () => {
         dispatch(loginInApi({ Data, navigate }));
 
         return;
-      } catch {
-
+      } catch (error) {
+        // console.error stays visible in release builds (console.log is silenced)
+        console.error("Login encryption failed:", error);
       }
     }
   };

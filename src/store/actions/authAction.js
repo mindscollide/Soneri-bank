@@ -23,7 +23,6 @@ export const loginInApi = createAsyncThunk(
 
       const response = await getAuthResponse(Data);
 
-      console.log(response, "loginInApiloginInApi");
       if (response.data.responseCode === 200) {
         const {
           isExecuted,
@@ -32,15 +31,16 @@ export const loginInApi = createAsyncThunk(
           refreshToken,
           isPasswordReset,
         } = response.data.responseResult;
-        console.log(isExecuted, "messageKeymessageKey");
 
         if (isExecuted) {
-          console.log(responseMessage, "responseMessage");
-
           switch (responseMessage.toLowerCase()) {
             case "ERM_AuthService_AuthManager_Login_01".toLowerCase():
+              return rejectWithValue("Something Went Wrong");
+
             case "ERM_AuthService_AuthManager_Login_02".toLowerCase():
+              return rejectWithValue("Something Went Wrong");
             case "ERM_AuthService_AuthManager_Login_04".toLowerCase():
+              return rejectWithValue("Wrong Password");
             case "ERM_AuthService_AuthManager_Login_05".toLowerCase():
               return rejectWithValue("User is Locked");
             case "ERM_AuthService_AuthManager_Login_06".toLowerCase():
@@ -56,17 +56,14 @@ export const loginInApi = createAsyncThunk(
             case "ERM_AuthService_AuthManager_Login_11".toLowerCase():
               return rejectWithValue("Someting went wrong");
             case "ERM_AuthService_AuthManager_Login_12".toLowerCase():
-              console.log("", response.data);
               return rejectWithValue("Not A valid role to login");
-
             case "ERM_AuthService_AuthManager_Login_13".toLowerCase():
-              console.log("", response.data);
               return rejectWithValue("Branch is InActive");
             case "ERM_AuthService_AuthManager_Login_14".toLowerCase():
               return rejectWithValue("Invalid Role");
+            case "ERM_AuthService_AuthManager_Login_15".toLowerCase():
+              return rejectWithValue("Invalid Role");
             case "ERM_AuthService_AuthManager_Login_03".toLowerCase(): {
-              try {
-              } catch (error) {}
               const {
                 branch,
                 employeeID,
@@ -85,7 +82,13 @@ export const loginInApi = createAsyncThunk(
               // Fresh login always lands on the first tab (Live Rates)
 
               if (isPasswordReset === false) {
+                // Reset screen needs the session (token is sent with the request)
+                localStorage.setItem("token", token);
+                localStorage.setItem("refreshToken", refreshToken);
+                localStorage.setItem("name", firstName);
                 localStorage.setItem("email", email);
+                localStorage.setItem("roleId", userRoleID);
+                localStorage.setItem("userID", userID);
                 localStorage.setItem("mustResetPassword", "true");
                 navigate("/reset-password");
                 return {
@@ -128,17 +131,14 @@ export const loginInApi = createAsyncThunk(
               };
             }
             default:
-              console.log("", response.data);
               return rejectWithValue("Something went wrong");
           }
         } else {
-          console.log("", response.data);
           return rejectWithValue("Something went wrong");
         }
       }
     } catch (error) {
       // Reject with error message
-      console.log("", error);
       return rejectWithValue("Something went wrong");
     }
   },
@@ -181,6 +181,7 @@ export const LogoutApi = createAsyncThunk(
         return rejectWithValue("Something went wrong");
       }
     } catch (error) {
+      console.log("", error);
       return rejectWithValue("Something went wrong");
     } finally {
       // Logout always ends the session locally, whatever the API answered
@@ -279,8 +280,14 @@ export const forgotPasswordApi = createAsyncThunk(
                 "ERM_AuthService_AuthManager_SendEmailForForgetPasword_01".toLowerCase(),
               )
           ) {
-            navigate("/email-sent", { replace: true, state: { fromFlow: true } });
-            return { response: response.data.responseResult, message: "Email Sent Successfully" };
+            navigate("/email-sent", {
+              replace: true,
+              state: { fromFlow: true },
+            });
+            return {
+              response: response.data.responseResult,
+              message: "Email Sent Successfully",
+            };
           } else if (
             response.data.responseResult.responseMessage
               .toLowerCase()
@@ -371,7 +378,7 @@ export const emailTokenVerifyApi = createAsyncThunk(
             .toLowerCase()
             .includes("ERM_AuthService_AuthManager_EmailToken_03".toLowerCase())
         ) {
-               navigate("/link-expired", { replace: true });
+          navigate("/link-expired", { replace: true });
           return rejectWithValue("Something went wrong");
         }
       }

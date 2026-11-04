@@ -18,6 +18,16 @@ const ITERATIONS = 1000;
 const deriveKeyAndIv = async () => {
   const encryptionKey = import.meta.env.VITE_BOP_KEY;
 
+  // These two fail silently in a deployed build, so fail loudly with the reason
+  if (!encryptionKey) {
+    throw new Error("VITE_BOP_KEY is missing from this build");
+  }
+  if (!globalThis.crypto?.subtle) {
+    throw new Error(
+      "crypto.subtle is unavailable: serve the app over HTTPS (or localhost)",
+    );
+  }
+
   const passwordKey = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(encryptionKey),
@@ -50,44 +60,49 @@ const deriveKeyAndIv = async () => {
 // =========================
 
 export const encryptField = async (clearText) => {
-  // Same as C# Encoding.Unicode.GetBytes(clearText) (UTF-16LE).
-  // TextEncoder only gives UTF-8, so build the bytes manually.
-  const utf16Bytes = new Uint8Array(clearText.length * 2);
+  try {
+    // Same as C# Encoding.Unicode.GetBytes(clearText) (UTF-16LE).
+    // TextEncoder only gives UTF-8, so build the bytes manually.
+    const utf16Bytes = new Uint8Array(clearText.length * 2);
 
-  for (let i = 0; i < clearText.length; i++) {
-    const code = clearText.charCodeAt(i);
+    for (let i = 0; i < clearText.length; i++) {
+      const code = clearText.charCodeAt(i);
 
-    utf16Bytes[i * 2] = code & 0xff;
-    utf16Bytes[i * 2 + 1] = code >> 8;
+      utf16Bytes[i * 2] = code & 0xff;
+      utf16Bytes[i * 2 + 1] = code >> 8;
+    }
+
+    const { keyBytes, iv } = await deriveKeyAndIv();
+
+    const aesKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-CBC" },
+      false,
+      ["encrypt"],
+    );
+
+    // AES-CBC automatically applies PKCS#7-style padding
+    const encrypted = await crypto.subtle.encrypt(
+      { name: "AES-CBC", iv },
+      aesKey,
+      utf16Bytes,
+    );
+
+    // ArrayBuffer -> Base64
+    const encryptedBytes = new Uint8Array(encrypted);
+
+    let binary = "";
+
+    encryptedBytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+
+    return btoa(binary);
+  } catch (error) {
+    console.error("Encryption failed:", error);
+    throw error;
   }
-
-  const { keyBytes, iv } = await deriveKeyAndIv();
-
-  const aesKey = await crypto.subtle.importKey(
-    "raw",
-    keyBytes,
-    { name: "AES-CBC" },
-    false,
-    ["encrypt"],
-  );
-
-  // AES-CBC automatically applies PKCS#7-style padding
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-CBC", iv },
-    aesKey,
-    utf16Bytes,
-  );
-
-  // ArrayBuffer -> Base64
-  const encryptedBytes = new Uint8Array(encrypted);
-
-  let binary = "";
-
-  encryptedBytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  return btoa(binary);
 };
 
 // =========================
@@ -95,39 +110,44 @@ export const encryptField = async (clearText) => {
 // =========================
 
 export const decryptField = async (encryptedText) => {
-  const binaryString = atob(encryptedText);
+  try {
+    const binaryString = atob(encryptedText);
 
-  const encryptedBytes = new Uint8Array(binaryString.length);
+    const encryptedBytes = new Uint8Array(binaryString.length);
 
-  for (let i = 0; i < binaryString.length; i++) {
-    encryptedBytes[i] = binaryString.charCodeAt(i);
+    for (let i = 0; i < binaryString.length; i++) {
+      encryptedBytes[i] = binaryString.charCodeAt(i);
+    }
+
+    const { keyBytes, iv } = await deriveKeyAndIv();
+
+    const aesKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-CBC" },
+      false,
+      ["decrypt"],
+    );
+
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-CBC", iv },
+      aesKey,
+      encryptedBytes,
+    );
+
+    const decryptedBytes = new Uint8Array(decrypted);
+
+    let result = "";
+
+    for (let i = 0; i < decryptedBytes.length; i += 2) {
+      const charCode = decryptedBytes[i] | (decryptedBytes[i + 1] << 8);
+
+      result += String.fromCharCode(charCode);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Encryption failed:", error);
+    throw error;
   }
-
-  const { keyBytes, iv } = await deriveKeyAndIv();
-
-  const aesKey = await crypto.subtle.importKey(
-    "raw",
-    keyBytes,
-    { name: "AES-CBC" },
-    false,
-    ["decrypt"],
-  );
-
-  const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-CBC", iv },
-    aesKey,
-    encryptedBytes,
-  );
-
-  const decryptedBytes = new Uint8Array(decrypted);
-
-  let result = "";
-
-  for (let i = 0; i < decryptedBytes.length; i += 2) {
-    const charCode = decryptedBytes[i] | (decryptedBytes[i + 1] << 8);
-
-    result += String.fromCharCode(charCode);
-  }
-
-  return result;
 };

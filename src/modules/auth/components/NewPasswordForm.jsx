@@ -28,9 +28,14 @@ const NewPasswordForm = ({
     if (!allValid || loading) return;
     setError("");
     setLoading(true);
-    // onSubmit reports failures through the global response toast
-    await onSubmit(password);
-    setLoading(false);
+    try {
+      // onSubmit reports failures through the global response toast
+      await onSubmit(password);
+    } catch (error) {
+      console.log("", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
