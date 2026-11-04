@@ -279,7 +279,7 @@ export const forgotPasswordApi = createAsyncThunk(
                 "ERM_AuthService_AuthManager_SendEmailForForgetPasword_01".toLowerCase(),
               )
           ) {
-            navigate("/email-sent");
+            navigate("/email-sent", { replace: true, state: { fromFlow: true } });
             return { response: response.data.responseResult, message: "Email Sent Successfully" };
           } else if (
             response.data.responseResult.responseMessage
@@ -371,6 +371,7 @@ export const emailTokenVerifyApi = createAsyncThunk(
             .toLowerCase()
             .includes("ERM_AuthService_AuthManager_EmailToken_03".toLowerCase())
         ) {
+               navigate("/link-expired", { replace: true });
           return rejectWithValue("Something went wrong");
         }
       }

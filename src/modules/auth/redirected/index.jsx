@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
@@ -14,8 +14,13 @@ const Redirected = () => {
   const [params] = useSearchParams();
   const resetToken = params.get("resetPass_action");
 
+  // Token already sent for verification (StrictMode runs effects twice in dev,
+  // and the link may be single-use, so the second call could report "expired")
+  const verifiedToken = useRef(null);
+
   useEffect(() => {
-    if (!resetToken) return;
+    if (!resetToken || verifiedToken.current === resetToken) return;
+    verifiedToken.current = resetToken;
     dispatch(
       emailTokenVerifyApi({ Data: { EncryptedString: resetToken }, navigate }),
     );

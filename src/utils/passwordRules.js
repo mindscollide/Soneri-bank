@@ -40,6 +40,11 @@ export const PASSWORD_RULES = [
     test: (p) => p.length >= 8,
   },
   {
+    id: "uppercase",
+    label: "Contains at least one capital letter (A-Z)",
+    test: (p) => /[A-Z]/.test(p),
+  },
+  {
     id: "number",
     label: "Contains numbers (1-9)",
     test: (p) => /[1-9]/.test(p),

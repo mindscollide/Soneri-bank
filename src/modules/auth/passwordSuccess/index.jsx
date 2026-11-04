@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 
 const MESSAGES = {
@@ -13,7 +13,11 @@ const MESSAGES = {
 };
 
 const PasswordSuccess = () => {
+  const { state } = useLocation();
   const [params] = useSearchParams();
+  // Only reachable right after a successful reset (navigate passes router state)
+  if (!state?.fromFlow) return <Navigate to="/" replace />;
+
   const { title, text } = MESSAGES[params.get("type")] || MESSAGES.reset;
 
   return (

@@ -44,9 +44,13 @@ const ResetPassword = () => {
     };
   }, [token, isFirstTime, encEmail, encName]);
 
-  // Opened directly without a verified link or first-login session
-  if (!token && !isFirstTime) {
-    return <Navigate to="/resend-reset-password" replace />;
+  // Needs either a verified link (token + email in router state) or a complete
+  // first-login session (token + email in localStorage); otherwise back to login
+  const hasLinkData = !!token && !!encEmail;
+  const hasSession =
+    isFirstTime && !!localStorage.getItem("token") && !!encEmail;
+  if (!hasLinkData && !hasSession) {
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (password) => {

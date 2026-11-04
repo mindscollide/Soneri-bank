@@ -39,12 +39,9 @@ const Login = () => {
     setErrors(newErrors);
 
     if (!newErrors.email && !newErrors.password) {
-      let encEmail, encPassword;
       try {
         let encryptedEmail = await encryptField(email.trim());
         let encryptedPassword = await encryptField(password);
-        console.log("Encrypted Email:", encEmail);
-        console.log("Encrypted Password:", encPassword);
 
         let Data = {
           Email: encryptedEmail,
@@ -65,8 +62,6 @@ const Login = () => {
       } catch {
 
       }
-      // TEMP: print encrypted values for backend verification — remove before release
-
     }
   };
 
