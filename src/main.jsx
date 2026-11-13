@@ -10,13 +10,7 @@ import Loader from "./shareComponents/elements/soneriLoader/index.jsx";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
-if (import.meta.env.VITE_ENV !== "DEV" || import.meta.env.VITE_ENV !== "UAT") {
-  // console.log = () => { };
-  // console.warn = () => { };
-  // console.debug = () => { };
 
-  // console.error = () => { };
-}
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
