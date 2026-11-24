@@ -216,7 +216,7 @@ const FwdCalculator = () => {
                 applyClass={"CalculatorTextfield"}
                 customInput={InputField}
                 disabled={true}
-                value={swap}
+                value={Number(swap).toFixed(2)}
               />
             </div>
           </div>

@@ -1,16 +1,17 @@
+
 // src/hooks/useMqttClient.js
 import { useRef, useState, useCallback, useEffect } from "react";
 import Paho from "paho-mqtt";
 import { secureRandomString } from "../../../utils/formatters";
+import { decryptField } from "../../../utils/encryption";
 
-// Lifecycle logs (connect / reconnect / lost / failed / disconnect) with a
-// timestamp, so flapping connections are easy to read in the console.
-// NOTE: main.jsx silences console.* unless VITE_ENV is "DEV" or "UAT".
+// Lifecycle logs
 const mqttLog = (event, details) => {
   const t = new Date();
   const time = `${t.toLocaleTimeString("en-GB")}.${String(
     t.getMilliseconds(),
   ).padStart(3, "0")}`;
+
   console.log(`[MQTT ${time}] ${event}`, details ?? "");
 };
 
@@ -19,30 +20,34 @@ export const useMqttClient = ({
   onConnectionLostCallback,
 } = {}) => {
   const [isConnected, setIsConnected] = useState(false);
-
-  // Connection lifecycle bookkeeping (sirf logging ke liye)
-  const connectedAtRef = useRef(null); // last successful connect ka waqt
-  const reconnectCountRef = useRef(0);
   const [activeTopics, setActiveTopics] = useState(new Set());
 
-  // Source of truth for subscriptions, e.g. { "SBL_REAL_TIME_FEED_TREASURY": 2 }
-  // NOTE: ye connection lost par reset NAHI hota, taake reconnect ke baad
-  // saare topics dobara subscribe ho saken.
+  // Connection lifecycle bookkeeping
+  const connectedAtRef = useRef(null);
+  const reconnectCountRef = useRef(0);
+
+  // Subscription source of truth
   const topicCounts = useRef({});
 
   const clientRef = useRef(null);
 
-  // 1. ClientId sirf EK baar generate hota hai (har render par nahi)
-  const clientIdRef = useRef(null);
-  if (!clientIdRef.current) clientIdRef.current = secureRandomString();
+  // Prevent duplicate connection initialization
+  const isConnectingRef = useRef(false);
 
-  // 2. Latest callbacks ref mein, taake stale closure ka masla na ho
+  // ClientId generated only once
+  const clientIdRef = useRef(null);
+  if (!clientIdRef.current) {
+    clientIdRef.current = secureRandomString();
+  }
+
+  // Latest callbacks refs
   const messageCbRef = useRef(onMessageArrivedCallback);
   const connectionLostCbRef = useRef(onConnectionLostCallback);
+
   messageCbRef.current = onMessageArrivedCallback;
   connectionLostCbRef.current = onConnectionLostCallback;
 
-  // Base topic (subscribeID) jo connect ke waqt milta hai
+  // Base topic
   const baseTopicRef = useRef(null);
   const baseTopicRegisteredRef = useRef(false);
 
@@ -56,7 +61,7 @@ export const useMqttClient = ({
       return next;
     });
 
-  // Broker ko actual SUBSCRIBE request bhejta hai
+  // Actual broker subscribe request
   const sendSubscribe = useCallback((topic) => {
     const client = clientRef.current;
     if (!client || !client.isConnected()) return;
@@ -73,10 +78,12 @@ export const useMqttClient = ({
     });
   }, []);
 
-  // Reconnect ke baad saare tracked topics dobara subscribe karo
+  // Resubscribe all tracked topics after reconnect
   const resubscribeAll = useCallback(() => {
     Object.keys(topicCounts.current).forEach((topic) => {
-      if (topicCounts.current[topic] > 0) sendSubscribe(topic);
+      if (topicCounts.current[topic] > 0) {
+        sendSubscribe(topic);
+      }
     });
   }, [sendSubscribe]);
 
@@ -88,9 +95,6 @@ export const useMqttClient = ({
         const currentCount = topicCounts.current[topic] || 0;
         topicCounts.current[topic] = currentCount + 1;
 
-        // Network request sirf pehle component ke liye, aur sirf jab connected ho.
-        // Agar connected nahi hai to count save rehta hai aur onConnected
-        // mein resubscribeAll() isay subscribe kar dega.
         if (currentCount === 0 && client && client.isConnected()) {
           sendSubscribe(topic);
         }
@@ -134,7 +138,8 @@ export const useMqttClient = ({
   const onMessageArrived = useCallback((message) => {
     try {
       const parsed = JSON.parse(message.payloadString);
-      // Real-time feed mein har message par console.log NAHI karna (tab slow hota hai)
+
+      // No console logging for every real-time message
       messageCbRef.current?.(parsed);
     } catch (err) {
       console.error("Failed to parse message:", err);
@@ -145,134 +150,171 @@ export const useMqttClient = ({
     const upFor = connectedAtRef.current
       ? `${((Date.now() - connectedAtRef.current) / 1000).toFixed(1)}s`
       : "n/a";
+
     mqttLog("DISCONNECTED (connection lost)", {
       errorCode: resObj?.errorCode,
       errorMessage: resObj?.errorMessage,
       wasConnectedFor: upFor,
       willAutoReconnect: true,
     });
+
     connectedAtRef.current = null;
     setIsConnected(false);
-    // UI ke liye active topics clear, lekin topicCounts SAFE rakhe hain
-    // taake reconnect par resubscribeAll() kaam kar sake.
+
+    // Clear UI topics but preserve topicCounts for reconnect
     setActiveTopics(new Set());
+
     connectionLostCbRef.current?.(resObj);
   }, []);
 
+  // Connect to MQTT
   const connectToMqtt = useCallback(
-    ({ subscribeID } = {}) => {
+    async ({ subscribeID } = {}) => {
       if (!subscribeID) {
         console.warn("Missing subscribeID");
         return;
       }
 
-      // Client pehle se bana hua hai (connected ho ya Paho auto-reconnect kar raha ho)
-      // to naya client NAHI banana, warna duplicate connections ek doosre ko kick karte hain.
-      if (clientRef.current) {
-        console.warn("MQTT client already exists, skipping new connection");
+      // Prevent duplicate clients and concurrent initialization
+      if (clientRef.current || isConnectingRef.current) {
+        console.warn("MQTT client already exists or connecting, skipping");
         return;
       }
 
-      baseTopicRef.current = subscribeID;
+      // Lock immediately before async decryption
+      isConnectingRef.current = true;
 
-      mqttLog("CONNECTING", {
-        host: import.meta.env.VITE_MQTT_HOST,
-        port: Number(import.meta.env.VITE_MQTT_PORT),
-        clientId: clientIdRef.current,
-        baseTopic: subscribeID,
-      });
+      try {
+        // Decrypt MQTT credentials
+        const userName = await decryptField(
+          import.meta.env.VITE_MQTT_USERNAME,
+        );
 
-      const client = new Paho.Client(
-        import.meta.env.VITE_MQTT_HOST,
-        Number(import.meta.env.VITE_MQTT_PORT),
-        clientIdRef.current,
-      );
+        const password = await decryptField(
+          import.meta.env.VITE_MQTT_PASSWORD,
+        );
 
-      client.onConnectionLost = onConnectionLost;
-      client.onMessageArrived = onMessageArrived;
+        baseTopicRef.current = subscribeID;
 
-      // Ye har successful connect AUR har auto-reconnect par call hota hai
-      client.onConnected = (reconnect) => {
-        connectedAtRef.current = Date.now();
-        if (reconnect) reconnectCountRef.current += 1;
-        mqttLog(reconnect ? "RECONNECTED" : "CONNECTED", {
+        mqttLog("CONNECTING", {
+          host: import.meta.env.VITE_MQTT_HOST,
+          port: Number(import.meta.env.VITE_MQTT_PORT),
           clientId: clientIdRef.current,
-          reconnectCount: reconnectCountRef.current,
-          topicsToResubscribe: Object.keys(topicCounts.current),
+          baseTopic: subscribeID,
         });
-        setIsConnected(true);
 
-        // Base topic ko sirf ek baar count mein register karo
-        if (!baseTopicRegisteredRef.current && baseTopicRef.current) {
-          topicCounts.current[baseTopicRef.current] =
-            (topicCounts.current[baseTopicRef.current] || 0) + 1;
-          baseTopicRegisteredRef.current = true;
-        }
+        const client = new Paho.Client(
+          import.meta.env.VITE_MQTT_HOST,
+          Number(import.meta.env.VITE_MQTT_PORT),
+          clientIdRef.current,
+        );
 
-        // Har connect/reconnect par saare topics dobara subscribe
-        resubscribeAll();
-      };
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
 
-      clientRef.current = client;
+        // Called on every successful connect and auto-reconnect
+        client.onConnected = (reconnect) => {
+          isConnectingRef.current = false;
 
-      client.connect({
-        onFailure: (err) => {
-          mqttLog("CONNECT FAILED", {
-            errorCode: err?.errorCode,
-            errorMessage: err?.errorMessage,
-          });
-          setIsConnected(false);
-          // Pehli connect fail ho to Paho retry nahi karta,
-          // isliye client clear karo taake dobara connectToMqtt call ho sake.
-          try {
-            client.disconnect();
-          } catch {
-            // client abhi connected nahi tha — disconnect throw karna normal hai
+          connectedAtRef.current = Date.now();
+
+          if (reconnect) {
+            reconnectCountRef.current += 1;
           }
-          clientRef.current = null;
-        },
-        reconnect: true,
-        keepAliveInterval: 20, // load balancer/nginx idle timeout se chota
-        timeout: 10,
-        userName: import.meta.env.VITE_MQTT_USERNAME,
-        password: import.meta.env.VITE_MQTT_PASSWORD,
-        // Hum khud resubscribe karte hain, aur ClientId per-session hai,
-        // is liye cleanSession true rakhna behtar hai (broker par orphan sessions nahi bantay).
-        cleanSession: true,
-        useSSL: import.meta.env.VITE_MQTT_PORT === "8883",
-      });
+
+          mqttLog(reconnect ? "RECONNECTED" : "CONNECTED", {
+            clientId: clientIdRef.current,
+            reconnectCount: reconnectCountRef.current,
+            topicsToResubscribe: Object.keys(topicCounts.current),
+          });
+
+          setIsConnected(true);
+
+          // Register base topic only once
+          if (!baseTopicRegisteredRef.current && baseTopicRef.current) {
+            topicCounts.current[baseTopicRef.current] =
+              (topicCounts.current[baseTopicRef.current] || 0) + 1;
+
+            baseTopicRegisteredRef.current = true;
+          }
+
+          // Resubscribe all topics
+          resubscribeAll();
+        };
+
+        clientRef.current = client;
+
+        client.connect({
+          onFailure: (err) => {
+            isConnectingRef.current = false;
+
+            mqttLog("CONNECT FAILED", {
+              errorCode: err?.errorCode,
+              errorMessage: err?.errorMessage,
+            });
+
+            setIsConnected(false);
+
+            try {
+              client.disconnect();
+            } catch {
+              // Client may not be connected
+            }
+
+            if (clientRef.current === client) {
+              clientRef.current = null;
+            }
+          },
+
+          reconnect: true,
+          keepAliveInterval: 20,
+          timeout: 10,
+          userName,
+          password,
+          cleanSession: true,
+          useSSL: import.meta.env.VITE_MQTT_PORT === "8883",
+        });
+      } catch (error) {
+        isConnectingRef.current = false;
+
+        console.error("MQTT connection initialization failed:", error);
+
+        setIsConnected(false);
+        clientRef.current = null;
+      }
     },
     [onMessageArrived, onConnectionLost, resubscribeAll],
   );
 
+  // Manual disconnect
   const disconnectMqtt = useCallback(() => {
     const client = clientRef.current;
+
+    isConnectingRef.current = false;
+
     if (client) {
       mqttLog("DISCONNECTING (disconnectMqtt called)");
+
       try {
-        client.disconnect(); // is se auto-reconnect bhi band ho jata hai
+        client.disconnect();
       } catch {
-        // already disconnected
+        // Already disconnected
       }
     }
+
     clientRef.current = null;
     baseTopicRef.current = null;
     baseTopicRegisteredRef.current = false;
     topicCounts.current = {};
+
     setIsConnected(false);
     setActiveTopics(new Set());
   }, []);
 
-  // Component unmount par connection band karo.
-  // NOTE: StrictMode (dev) effects ko mount -> cleanup -> mount chalata hai.
-  // Agar cleanup foran disconnect + clientRef=null kar de, to connect abhi
-  // in-flight hota hai (disconnect throw karta hai), Dashboard ka hasFetched
-  // guard dobara connectToMqtt nahi chalata, aur jab connection complete hota
-  // hai to sendSubscribe/subscribeToTopics ko clientRef null milta hai —
-  // yani connected dikhta hai magar koi topic subscribe nahi hota.
-  // Isliye disconnect ek tick delay hota hai aur remount par cancel ho jata hai;
-  // asli unmount (logout etc.) par ye chal jata hai.
+  // Component unmount handling
+  // StrictMode cleanup delay preserved
   const disconnectTimerRef = useRef(null);
+
   useEffect(() => {
     if (disconnectTimerRef.current) {
       clearTimeout(disconnectTimerRef.current);
@@ -282,14 +324,20 @@ export const useMqttClient = ({
     return () => {
       disconnectTimerRef.current = setTimeout(() => {
         disconnectTimerRef.current = null;
+
         const client = clientRef.current;
+
+        isConnectingRef.current = false;
+
         if (client) {
           mqttLog("DISCONNECTING (component unmounted)");
+
           try {
             client.disconnect();
           } catch {
-            // already disconnected
+            // Already disconnected
           }
+
           clientRef.current = null;
         }
       }, 0);
